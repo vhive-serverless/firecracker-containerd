@@ -23,7 +23,8 @@ require (
 	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/gogo/googleapis v1.1.0 // indirect
 	github.com/gogo/protobuf v1.3.0
-	github.com/golang/protobuf v1.3.1
+	github.com/golang/lint v0.0.0-20180702182130-06c8688daad7 // indirect
+	github.com/golang/protobuf v1.3.3
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/imdario/mergo v0.3.8 // indirect
@@ -43,10 +44,12 @@ require (
 	github.com/urfave/cli v1.20.0 // indirect
 	github.com/vishvananda/netlink v0.0.0-20181108222139-023a6dafdcdf
 	go.etcd.io/bbolt v1.3.1-etcd.8 // indirect
-	golang.org/x/sync v0.0.0-20181108010431-42b317875d0f
-	golang.org/x/sys v0.0.0-20190616124812-15dcb6c0061f
-	google.golang.org/genproto v0.0.0-20181109154231-b5d43981345b // indirect
-	google.golang.org/grpc v1.21.0
+	golang.org/x/net v0.0.0-20200202094626-16171245cfb2 // indirect
+	golang.org/x/sync v0.0.0-20190423024810-112230192c58
+	golang.org/x/sys v0.0.0-20200202164722-d101bd2416d5
+	golang.org/x/text v0.3.2 // indirect
+	google.golang.org/genproto v0.0.0-20200210034751-acff78025515 // indirect
+	google.golang.org/grpc v1.27.1
 	gotest.tools v2.2.0+incompatible // indirect
 )
 
