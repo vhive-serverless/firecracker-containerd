@@ -14,6 +14,7 @@ service Orchestrator {
 // The request message containing the user's name.
 message StartVMReq {
     string image = 1;
+    string id = 2;
 }
 
 // The request message containing the user's name.
@@ -23,5 +24,5 @@ message StopVMsReq {
 
 // The response message containing the greetings
 message Status {
-    bool message = 1;
+    string message = 1;
 }

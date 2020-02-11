@@ -16,15 +16,15 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
+	_ "fmt"
 	_ "io/ioutil"
 	"log"
 	"net"
 	"syscall"
-	"time"
+	_ "time"
 
 	"github.com/containerd/containerd"
-	"github.com/containerd/containerd/cio"
+	_ "github.com/containerd/containerd/cio"
 	"github.com/containerd/containerd/namespaces"
 	"github.com/containerd/containerd/oci"
 	"github.com/pkg/errors"
@@ -35,7 +35,9 @@ import (
 
         "google.golang.org/grpc"
 	pb "github.com/firecracker-microvm/firecracker-containerd/proto_orch"
-	//pb "orchestrator"
+	"os"
+        "os/signal"
+        "sync"
 )
 
 const (
@@ -48,20 +50,50 @@ const (
 
 type VM struct {
     Ctx context.Context
+    Image containerd.Image
+    Container containerd.Container
     VMID string
 }
 
-//var active_vms = []VM
+var active_vms []VM
+var snapshotter *string
+var client *containerd.Client
+var fcClient *fcclient.Client
+var ctx context.Context
+var g_err error
+var mu = &sync.Mutex{}
 
 func main() {
-	var snapshotter = flag.String("ss", "devmapper", "snapshotter")
+    snapshotter = flag.String("ss", "devmapper", "snapshotter")
 
-	log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds)
-	flag.Parse()
+    log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds)
+    flag.Parse()
 
-	if err := taskWorkflow(*snapshotter); err != nil {
-		log.Fatal(err)
-	}
+    setupCloseHandler()
+    log.Println("Creating containerd client")
+    client, g_err = containerd.New(containerdAddress)
+    if g_err != nil {
+        log.Fatalf("Failed to start containerd client", g_err)
+    }
+    log.Println("Created containerd client")
+
+    ctx = namespaces.WithNamespace(context.Background(), namespaceName)
+
+    fcClient, g_err = fcclient.New(containerdTTRPCAddress)
+    if g_err != nil {
+        log.Fatalf("Failed to start firecracker client", g_err)
+    }
+
+    lis, err := net.Listen("tcp", port)
+    if err != nil {
+        log.Fatalf("failed to listen: %v", err)
+    }
+    s := grpc.NewServer()
+    pb.RegisterOrchestratorServer(s, &server{})
+    log.Println("Listening on port" + port)
+    if err := s.Serve(lis); err != nil {
+        log.Fatalf("failed to serve: %v", err)
+    }
 }
 
 type server struct {
@@ -69,47 +101,105 @@ type server struct {
 }
 
 func (s *server) StartVM(ctx context.Context, in *pb.StartVMReq) (*pb.Status, error) {
-	log.Printf("Received: %v", in.GetImage())
-	return &pb.Status{Message: true}, nil
+    log.Printf("Received: %v", in.GetImage())
+    //image, err := client.Pull(ctx, "docker.io/library/ustiugov/helloworld:runner_workload",
+    image, err := client.Pull(ctx, "docker.io/library/" + in.GetImage(),
+                              containerd.WithPullUnpack,
+                              containerd.WithPullSnapshotter(*snapshotter),
+                             )
+    if err != nil {
+        return &pb.Status{Message: "Starting VM failed"}, errors.Wrapf(err, "creating container")
+    }
+
+    vmID := in.GetId()
+    createVMRequest := &proto.CreateVMRequest{
+        VMID: vmID,
+        MachineCfg: &proto.FirecrackerMachineConfiguration{
+            VcpuCount:  1,
+            MemSizeMib: 512,
+        },
+        NetworkInterfaces: []*proto.FirecrackerNetworkInterface{{
+            CNIConfig: &proto.CNIConfiguration{
+                NetworkName: "fcnet",
+                InterfaceName: "veth0",
+            },
+        }},
+    }
+
+    _, err = fcClient.CreateVM(ctx, createVMRequest)
+    if err != nil {
+        return &pb.Status{Message: "Failed to start VM"}, errors.Wrap(err, "failed to create the VM")
+    }
+    container, err := client.NewContainer(
+                                          ctx,
+                                          in.GetId(),
+                                          containerd.WithSnapshotter(*snapshotter),
+                                          containerd.WithNewSnapshot(in.GetId(), image),
+                                          containerd.WithNewSpec(
+                                                                 oci.WithImageConfig(image),
+                                                                 firecrackeroci.WithVMID(vmID),
+                                                                 firecrackeroci.WithVMNetwork,
+                                                                 //oci.WithProcessArgs("head", "/proc/meminfo"),
+                                                                ),
+                                          containerd.WithRuntime("aws.firecracker", nil),
+                                         )
+    if err != nil {
+        return &pb.Status{Message: "Failed to start container for the VM" + in.GetId() }, err
+    }
+
+    mu.Lock()
+    active_vms = append(active_vms, VM{Ctx: ctx, Image: image, Container: container, VMID: in.GetId()})
+    mu.Unlock()
+    //TODO: set up port forwarding to a private IP
+
+    return &pb.Status{Message: "started VM " + in.GetId() }, nil
 }
 
-func taskWorkflow(snapshotter string) (err error) {
-	log.Println("Creating containerd client")
-	client, err := containerd.New(containerdAddress)
-	if err != nil {
-		return errors.Wrapf(err, "creating client")
-	}
+func (s *server) StopVMs(ctx context.Context, in *pb.StopVMsReq) (*pb.Status, error) {
+    log.Printf("Received StopVMs request")
+    err := stopActiveVMs()
+    if err != nil {
+        log.Printf("Failed to stop VMs, err: %v\n", err)
+        return &pb.Status{Message: "Failed to stop VMs"}, err
+    }
+    os.Exit(0)
+    return &pb.Status{Message: "Stopped VMs"}, nil
+}
 
-	defer client.Close()
-	log.Println("Created containerd client")
+func stopActiveVMs() error {
+    mu.Lock()
+    for _, vm := range active_vms {
+        log.Println("Deleting container for the VM" + vm.VMID)
+        vm.Container.Delete(vm.Ctx, containerd.WithSnapshotCleanup)
 
-	ctx := namespaces.WithNamespace(context.Background(), namespaceName)
-	//image, err := client.Pull(ctx, "docker.io/library/nginx:1.17-alpine",
-        image, err := client.Pull(ctx, "docker.io/library/alpine:latest",
-		containerd.WithPullUnpack,
-		containerd.WithPullSnapshotter(snapshotter),
-	)
-	if err != nil {
-		return errors.Wrapf(err, "creating container")
-	}
+        log.Println("Stopping VM" + vm.VMID)
+        _, err := fcClient.StopVM(vm.Ctx, &proto.StopVMRequest{VMID: vm.VMID})
+        if err != nil {
+            log.Printf("failed to stop VM, err: %v\n", err)
+            return err
+        }
+    }
+    log.Println("Closing fcClient")
+    fcClient.Close()
+    log.Println("Closing containerd client")
+    client.Close()
+    mu.Unlock()
+    return nil
+}
 
-	fcClient, err := fcclient.New(containerdTTRPCAddress)
-	if err != nil {
-		return err
-	}
+func setupCloseHandler() {
+    c := make(chan os.Signal, 2)
+    signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+    go func() {
+        <-c
+        log.Println("\r- Ctrl+C pressed in Terminal")
+        stopActiveVMs()
+        os.Exit(0)
+    }()
+}
 
-	defer fcClient.Close()
-
-        lis, err := net.Listen("tcp", port)
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-	s := grpc.NewServer()
-	pb.RegisterOrchestratorServer(s, &server{})
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
-
+/*
+func taskWorkflow() (err error) {
         id := "0"
 	vmID := "fc-example"+id
 	createVMRequest := &proto.CreateVMRequest{
@@ -142,11 +232,11 @@ func taskWorkflow(snapshotter string) (err error) {
 		}
 	}()
 
-	log.Printf("Successfully pulled %s image with %s\n", image.Name(), snapshotter)
+	log.Printf("Successfully pulled %s image with %s\n", image.Name(), *snapshotter)
 	container, err := client.NewContainer(
 		ctx,
 		"demo"+id,
-		containerd.WithSnapshotter(snapshotter),
+		containerd.WithSnapshotter(*snapshotter),
 		containerd.WithNewSnapshot("demo-snapshot"+id, image),
 		containerd.WithNewSpec(
 			oci.WithImageConfig(image),
@@ -161,12 +251,11 @@ func taskWorkflow(snapshotter string) (err error) {
 	}
 	defer container.Delete(ctx, containerd.WithSnapshotCleanup)
 
-        //*
         start := time.Now()
         for i := 0; i < 1; i++ {
             id := fmt.Sprintf("id-%d", i)
             container, err := client.NewContainer(ctx, id,
-	    containerd.WithSnapshotter(snapshotter),
+	    containerd.WithSnapshotter(*snapshotter),
             containerd.WithNewSnapshotView(id, image),
             containerd.WithNewSpec(oci.WithImageConfig(image)),
             )
@@ -181,7 +270,6 @@ func taskWorkflow(snapshotter string) (err error) {
         }
         elapsed := time.Since(start)
         log.Printf("Spanning VMs took %s", elapsed)
-        //*/
 
 	task, err := container.NewTask(ctx, cio.NewCreator(cio.WithStdio))
 	if err != nil {
@@ -216,6 +304,6 @@ func taskWorkflow(snapshotter string) (err error) {
 		return errors.Wrapf(err, "getting task's exit code")
 	}
 	log.Printf("task exited with status: %d\n", code)
-
         return
 }
+*/
