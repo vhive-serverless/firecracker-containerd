@@ -100,10 +100,10 @@ type server struct {
 	pb.UnimplementedOrchestratorServer
 }
 
-func (s *server) StartVM(ctx context.Context, in *pb.StartVMReq) (*pb.Status, error) {
+func (s *server) StartVM(ctx_ context.Context, in *pb.StartVMReq) (*pb.Status, error) {
     log.Printf("Received: %v", in.GetImage())
     //image, err := client.Pull(ctx, "docker.io/library/ustiugov/helloworld:runner_workload",
-    image, err := client.Pull(ctx, "docker.io/library/" + in.GetImage(),
+    image, err := client.Pull(ctx, "docker.io/" + in.GetImage(),
                               containerd.WithPullUnpack,
                               containerd.WithPullSnapshotter(*snapshotter),
                              )
@@ -155,7 +155,7 @@ func (s *server) StartVM(ctx context.Context, in *pb.StartVMReq) (*pb.Status, er
     return &pb.Status{Message: "started VM " + in.GetId() }, nil
 }
 
-func (s *server) StopVMs(ctx context.Context, in *pb.StopVMsReq) (*pb.Status, error) {
+func (s *server) StopVMs(ctx_ context.Context, in *pb.StopVMsReq) (*pb.Status, error) {
     log.Printf("Received StopVMs request")
     err := stopActiveVMs()
     if err != nil {
