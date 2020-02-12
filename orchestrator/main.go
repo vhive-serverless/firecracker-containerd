@@ -148,7 +148,7 @@ func (s *server) StartVM(ctx_ context.Context, in *pb.StartVMReq) (*pb.Status, e
     }
 
     mu.Lock()
-    active_vms = append(active_vms, VM{Ctx: ctx, Image: image, Container: container, VMID: in.GetId()})
+    active_vms = append(active_vms, VM{Ctx: ctx, Image: image, Container: container, VMID: vmID})
     mu.Unlock()
     //TODO: set up port forwarding to a private IP
 
@@ -170,12 +170,16 @@ func stopActiveVMs() error {
     mu.Lock()
     for _, vm := range active_vms {
         log.Println("Deleting container for the VM" + vm.VMID)
-        vm.Container.Delete(vm.Ctx, containerd.WithSnapshotCleanup)
-
-        log.Println("Stopping VM" + vm.VMID)
-        _, err := fcClient.StopVM(vm.Ctx, &proto.StopVMRequest{VMID: vm.VMID})
+        err := vm.Container.Delete(vm.Ctx, containerd.WithSnapshotCleanup)
         if err != nil {
-            log.Printf("failed to stop VM, err: %v\n", err)
+            log.Printf("failed to delete container for the VM, err: %v\n", err)
+            return err
+        }
+
+        log.Println("Stopping the VM" + vm.VMID)
+        _, err = fcClient.StopVM(vm.Ctx, &proto.StopVMRequest{VMID: vm.VMID})
+        if err != nil {
+            log.Printf("failed to stop the VM, err: %v\n", err)
             return err
         }
     }
