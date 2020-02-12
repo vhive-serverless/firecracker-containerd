@@ -24,7 +24,7 @@ import (
 	_ "time"
 
 	"github.com/containerd/containerd"
-	_ "github.com/containerd/containerd/cio"
+	"github.com/containerd/containerd/cio"
 	"github.com/containerd/containerd/namespaces"
 	"github.com/containerd/containerd/oci"
 	"github.com/pkg/errors"
@@ -52,6 +52,7 @@ type VM struct {
     Ctx context.Context
     Image containerd.Image
     Container containerd.Container
+    Task containerd.Task
     VMID string
 }
 
@@ -108,7 +109,7 @@ func (s *server) StartVM(ctx_ context.Context, in *pb.StartVMReq) (*pb.Status, e
                               containerd.WithPullSnapshotter(*snapshotter),
                              )
     if err != nil {
-        return &pb.Status{Message: "Starting VM failed"}, errors.Wrapf(err, "creating container")
+        return &pb.Status{Message: "Pulling a VM image failed"}, errors.Wrapf(err, "creating container")
     }
 
     vmID := in.GetId()
@@ -139,16 +140,51 @@ func (s *server) StartVM(ctx_ context.Context, in *pb.StartVMReq) (*pb.Status, e
                                                                  oci.WithImageConfig(image),
                                                                  firecrackeroci.WithVMID(vmID),
                                                                  firecrackeroci.WithVMNetwork,
-                                                                 //oci.WithProcessArgs("head", "/proc/meminfo"),
                                                                 ),
                                           containerd.WithRuntime("aws.firecracker", nil),
                                          )
     if err != nil {
         return &pb.Status{Message: "Failed to start container for the VM" + in.GetId() }, err
     }
+    task, err := container.NewTask(ctx, cio.NewCreator(cio.WithStdio))
+    if err != nil {
+        err1 := container.Delete(ctx, containerd.WithSnapshotCleanup)
+        if err1 != nil { log.Printf("Attempt to clean up failed...") }
+        _, err1 = fcClient.StopVM(ctx, &proto.StopVMRequest{VMID: vmID})
+        if err1 != nil { log.Printf("Attempt to clean up failed...") }
+        return &pb.Status{Message: "Failed to create the task for the VM" + in.GetId() }, err
+
+    }
+
+    log.Printf("Successfully created task: %s for the container\n", task.ID())
+    _, err = task.Wait(ctx)
+    if err != nil {
+        _, err1 := task.Delete(ctx)
+        if err1 != nil { log.Printf("Attempt to clean up failed...") }
+        err1 = container.Delete(ctx, containerd.WithSnapshotCleanup)
+        if err1 != nil { log.Printf("Attempt to clean up failed...") }
+        _, err1 = fcClient.StopVM(ctx, &proto.StopVMRequest{VMID: vmID})
+        if err1 != nil { log.Printf("Attempt to clean up failed...") }
+        return &pb.Status{Message: "Failed to wait for the task for the VM" + in.GetId() }, err
+
+    }
+
+    log.Println("Completed waiting for the container task")
+    if err := task.Start(ctx); err != nil {
+        _, err1 := task.Delete(ctx)
+        if err1 != nil { log.Printf("Attempt to clean up failed...") }
+        err1 = container.Delete(ctx, containerd.WithSnapshotCleanup)
+        if err1 != nil { log.Printf("Attempt to clean up failed...") }
+        _, err1 = fcClient.StopVM(ctx, &proto.StopVMRequest{VMID: vmID})
+        if err1 != nil { log.Printf("Attempt to clean up failed...") }
+        return &pb.Status{Message: "Failed to start the task for the VM" + in.GetId() }, err
+
+    }
+
+    log.Println("Successfully started the container task")
 
     mu.Lock()
-    active_vms = append(active_vms, VM{Ctx: ctx, Image: image, Container: container, VMID: vmID})
+    active_vms = append(active_vms, VM{Ctx: ctx, Image: image, Container: container, Task: task, VMID: vmID})
     mu.Unlock()
     //TODO: set up port forwarding to a private IP
 
@@ -169,10 +205,25 @@ func (s *server) StopVMs(ctx_ context.Context, in *pb.StopVMsReq) (*pb.Status, e
 func stopActiveVMs() error {
     mu.Lock()
     for _, vm := range active_vms {
-        log.Println("Deleting container for the VM" + vm.VMID)
-        err := vm.Container.Delete(vm.Ctx, containerd.WithSnapshotCleanup)
+        log.Println("Waiting for the killed task for the VM" + vm.VMID)
+        var err error
+
         if err != nil {
-            log.Printf("failed to delete container for the VM, err: %v\n", err)
+            return errors.Wrapf(err, "Waiting for the killed task")
+        }
+        log.Println("Killing the task for the VM" + vm.VMID)
+        if err = vm.Task.Kill(vm.Ctx, syscall.SIGKILL); err != nil {
+            return errors.Wrapf(err, "killing task")
+        }
+        log.Println("Deleting the task for the VM" + vm.VMID)
+        _, err = vm.Task.Delete(vm.Ctx)
+        if err != nil {
+            log.Printf("failed to delete the task of the VM, err: %v\n", err)
+            return err
+        }
+        err = vm.Container.Delete(vm.Ctx, containerd.WithSnapshotCleanup)
+        if err != nil {
+            log.Printf("failed to delete the container of the VM, err: %v\n", err)
             return err
         }
 
