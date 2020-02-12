@@ -203,42 +203,53 @@ func (s *server) StopVMs(ctx_ context.Context, in *pb.StopVMsReq) (*pb.Status, e
 }
 
 func stopActiveVMs() error {
-    mu.Lock()
+    var mux sync.Mutex
+    var vmGroup sync.WaitGroup
     for _, vm := range active_vms {
-        log.Println("Waiting for the killed task for the VM" + vm.VMID)
-        var err error
+        vmGroup.Add(1)
+        go func(vm VM) {
+            defer vmGroup.Done()
+            log.Println("Waiting for the killed task for the VM" + vm.VMID)
+            var err error
 
-        if err != nil {
-            return errors.Wrapf(err, "Waiting for the killed task")
-        }
-        log.Println("Killing the task for the VM" + vm.VMID)
-        if err = vm.Task.Kill(vm.Ctx, syscall.SIGKILL); err != nil {
-            return errors.Wrapf(err, "killing task")
-        }
-        log.Println("Deleting the task for the VM" + vm.VMID)
-        _, err = vm.Task.Delete(vm.Ctx)
-        if err != nil {
-            log.Printf("failed to delete the task of the VM, err: %v\n", err)
-            return err
-        }
-        err = vm.Container.Delete(vm.Ctx, containerd.WithSnapshotCleanup)
-        if err != nil {
-            log.Printf("failed to delete the container of the VM, err: %v\n", err)
-            return err
-        }
+            if err != nil {
+                //return errors.Wrapf(err, "Waiting for the killed task")
+            }
+            log.Println("Killing the task for the VM" + vm.VMID)
+            if err = vm.Task.Kill(vm.Ctx, syscall.SIGKILL); err != nil {
+                //return errors.Wrapf(err, "killing task")
+            }
+            log.Println("Deleting the task for the VM" + vm.VMID)
+            _, err = vm.Task.Delete(vm.Ctx)
+            if err != nil {
+                log.Printf("failed to delete the task of the VM, err: %v\n", err)
+                //return err
+            }
+            err = vm.Container.Delete(vm.Ctx, containerd.WithSnapshotCleanup)
+            if err != nil {
+                log.Printf("failed to delete the container of the VM, err: %v\n", err)
+                //return err
+            }
 
-        log.Println("Stopping the VM" + vm.VMID)
-        _, err = fcClient.StopVM(vm.Ctx, &proto.StopVMRequest{VMID: vm.VMID})
-        if err != nil {
-            log.Printf("failed to stop the VM, err: %v\n", err)
-            return err
-        }
+            mux.Lock()
+            log.Println("Stopping the VM" + vm.VMID)
+            _, err = fcClient.StopVM(vm.Ctx, &proto.StopVMRequest{VMID: vm.VMID})
+            if err != nil {
+                log.Printf("failed to stop the VM, err: %v\n", err)
+                //return err
+            }
+            mux.Unlock()
+            log.Println("unlocked mutex the VM")
+        }(vm)
     }
+    log.Println("waiting for goroutines")
+    vmGroup.Wait()
+    log.Println("waiting done")
+
     log.Println("Closing fcClient")
     fcClient.Close()
     log.Println("Closing containerd client")
     client.Close()
-    mu.Unlock()
     return nil
 }
 
