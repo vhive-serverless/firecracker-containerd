@@ -12,7 +12,7 @@
       "mtu": 1500,
       "ipam": {
         "type": "host-local",
-        "subnet": "192.128.1.0/10",
+        "subnet": "192.128.0.0/10",
         "resolvConf": "/etc/resolv.conf"
       }
     },
