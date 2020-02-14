@@ -1,0 +1,26 @@
+{
+  "cniVersion": "0.4.0",
+  "name": "fcnet1",
+  "plugins": [
+    {
+      "type": "bridge",
+      "bridge": "fc-br1",
+      "isDefaultGateway": true,
+      "forceAddress": false,
+      "ipMasq": true,
+      "hairpinMode": true,
+      "mtu": 1500,
+      "ipam": {
+        "type": "host-local",
+        "subnet": "194.128.0.0/10",
+        "resolvConf": "/etc/resolv.conf"
+      }
+    },
+    {
+      "type": "firewall"
+    },
+    {
+      "type": "tc-redirect-tap"
+    }
+  ]
+}
