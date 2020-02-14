@@ -255,10 +255,14 @@ install-cni-bins: cni-bins $(CNI_BIN_ROOT)
 install-test-cni-bins: test-cni-bins $(CNI_BIN_ROOT)
 	install -D -o root -g root -m755 -t $(CNI_BIN_ROOT) $(TEST_BRIDGED_TAP_BIN)
 
-FCNET_CONFIG?=/etc/cni/conf.d/fcnet.conflist
-$(FCNET_CONFIG):
-	mkdir -p $(dir $(FCNET_CONFIG))
-	install -o root -g root -m644 tools/demo/fcnet.conflist $(FCNET_CONFIG)
+FCNET1_CONFIG?=/etc/cni/conf.d/fcnet1.conflist
+$(FCNET1_CONFIG):
+	mkdir -p $(dir $(FCNET1_CONFIG))
+	install -o root -g root -m644 tools/demo/fcnet1.conflist $(FCNET1_CONFIG)
+FCNET2_CONFIG?=/etc/cni/conf.d/fcnet2.conflist
+$(FCNET2_CONFIG):
+	mkdir -p $(dir $(FCNET2_CONFIG))
+	install -o root -g root -m644 tools/demo/fcnet2.conflist $(FCNET2_CONFIG)
 
 FCNET_BRIDGE_CONFIG?=/etc/network/interfaces.d/fc-br0
 $(FCNET_BRIDGE_CONFIG):
@@ -266,7 +270,8 @@ $(FCNET_BRIDGE_CONFIG):
 	install -o root -g root -m644 tools/demo/fc-br0.interface $(FCNET_BRIDGE_CONFIG)
 
 .PHONY: demo-network
-demo-network: install-cni-bins $(FCNET_CONFIG)
+demo-network: install-cni-bins $(FCNET1_CONFIG) $(FCNET2_CONFIG)
+
 
 ##########################
 # Firecracker submodule
