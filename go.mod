@@ -1,4 +1,4 @@
-module github.com/firecracker-microvm/firecracker-containerd
+module github.com/ustiugov/firecracker-containerd
 
 require (
 	github.com/Microsoft/go-winio v0.4.14 // indirect
