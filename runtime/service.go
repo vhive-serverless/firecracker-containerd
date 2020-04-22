@@ -537,11 +537,16 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 		return errors.Wrapf(err, "failed to dial the VM over vsock")
 	}
 
+	s.logger.Info("Creating RPC client")
 	rpcClient := ttrpc.NewClient(conn, ttrpc.WithOnClose(func() { _ = conn.Close() }))
+	s.logger.Info("Creating task client")
 	s.agentClient = taskAPI.NewTaskClient(rpcClient)
+	s.logger.Info("Creating new getter client")
 	s.eventBridgeClient = eventbridge.NewGetterClient(rpcClient)
+	s.logger.Info("Creating new drive mounter client")
 	s.driveMountClient = drivemount.NewDriveMounterClient(rpcClient)
 	s.exitAfterAllTasksDeleted = request.ExitAfterAllTasksDeleted
+	s.logger.Info("Mounting drives")
 
 	err = s.mountDrives(requestCtx)
 	if err != nil {

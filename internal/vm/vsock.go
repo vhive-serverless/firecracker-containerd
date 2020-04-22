@@ -30,8 +30,8 @@ const (
 	vsockRetryTimeout      = 20 * time.Second
 	vsockRetryInterval     = 100 * time.Millisecond
 	unixDialTimeout        = 100 * time.Millisecond
-	vsockConnectMsgTimeout = 100 * time.Millisecond
-	vsockAckMsgTimeout     = 1 * time.Second
+	vsockConnectMsgTimeout = 10 * time.Millisecond
+	vsockAckMsgTimeout     = 100 * time.Millisecond
 )
 
 // VSockDial attempts to connect to the Firecracker host-side vsock at the provided unix
@@ -51,6 +51,7 @@ func VSockDial(reqCtx context.Context, logger *logrus.Entry, udsPath string, por
 		case <-ctx.Done():
 			return nil, ctx.Err()
 		case <-tickerCh:
+			logger.Info("VSockDial: Trying to connect...")
 			conn, err := tryConnect(logger, udsPath, port)
 			if isTemporaryNetErr(err) {
 				err = errors.Wrap(err, "temporary vsock dial failure")
