@@ -33,6 +33,7 @@ require (
 	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.6.1
+	github.com/tv42/httpunix v0.0.0-20191220191345-2ba4b9c3382c
 	github.com/vishvananda/netlink v1.1.1-0.20201029203352-d40f9887b852
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/net v0.0.0-20211005001312-d4b1ae081e3b // indirect
