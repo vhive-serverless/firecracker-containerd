@@ -6,11 +6,12 @@ package fccontrol
 import (
 	context "context"
 	fmt "fmt"
+	math "math"
+
 	github_com_containerd_ttrpc "github.com/containerd/ttrpc"
 	proto1 "github.com/firecracker-microvm/firecracker-containerd/proto"
 	proto "github.com/gogo/protobuf/proto"
 	empty "github.com/golang/protobuf/ptypes/empty"
-	math "math"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -58,6 +59,8 @@ type FirecrackerService interface {
 	SetVMMetadata(ctx context.Context, req *proto1.SetVMMetadataRequest) (*empty.Empty, error)
 	UpdateVMMetadata(ctx context.Context, req *proto1.UpdateVMMetadataRequest) (*empty.Empty, error)
 	GetVMMetadata(ctx context.Context, req *proto1.GetVMMetadataRequest) (*proto1.GetVMMetadataResponse, error)
+	PauseVM(ctx context.Context, req *proto1.PauseVMRequest) (*empty.Empty, error)
+	ResumeVM(ctx context.Context, req *proto1.ResumeVMRequest) (*empty.Empty, error)
 }
 
 func RegisterFirecrackerService(srv *github_com_containerd_ttrpc.Server, svc FirecrackerService) {
@@ -117,6 +120,20 @@ func RegisterFirecrackerService(srv *github_com_containerd_ttrpc.Server, svc Fir
 				return nil, err
 			}
 			return svc.GetVMMetadata(ctx, &req)
+		},
+		"PauseVM": func(ctx context.Context, unmarshal func(interface{}) error) (interface{}, error) {
+			var req proto1.PauseVMRequest
+			if err := unmarshal(&req); err != nil {
+				return nil, err
+			}
+			return svc.PauseVM(ctx, &req)
+		},
+		"ResumeVM": func(ctx context.Context, unmarshal func(interface{}) error) (interface{}, error) {
+			var req proto1.ResumeVMRequest
+			if err := unmarshal(&req); err != nil {
+				return nil, err
+			}
+			return svc.ResumeVM(ctx, &req)
 		},
 	})
 }
@@ -190,6 +207,22 @@ func (c *firecrackerClient) UpdateVMMetadata(ctx context.Context, req *proto1.Up
 func (c *firecrackerClient) GetVMMetadata(ctx context.Context, req *proto1.GetVMMetadataRequest) (*proto1.GetVMMetadataResponse, error) {
 	var resp proto1.GetVMMetadataResponse
 	if err := c.client.Call(ctx, "Firecracker", "GetVMMetadata", req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *firecrackerClient) PauseVM(ctx context.Context, req *proto1.PauseVMRequest) (*empty.Empty, error) {
+	var resp empty.Empty
+	if err := c.client.Call(ctx, "Firecracker", "PauseVM", req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *firecrackerClient) ResumeVM(ctx context.Context, req *proto1.ResumeVMRequest) (*empty.Empty, error) {
+	var resp empty.Empty
+	if err := c.client.Call(ctx, "Firecracker", "ResumeVM", req, &resp); err != nil {
 		return nil, err
 	}
 	return &resp, nil
