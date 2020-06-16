@@ -14,11 +14,13 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"math"
 	"net"
+	"net/http"
 	"os"
 	"runtime/debug"
 	"strconv"
@@ -61,6 +63,8 @@ import (
 	"github.com/firecracker-microvm/firecracker-containerd/proto"
 	drivemount "github.com/firecracker-microvm/firecracker-containerd/proto/service/drivemount/ttrpc"
 	fccontrolTtrpc "github.com/firecracker-microvm/firecracker-containerd/proto/service/fccontrol/ttrpc"
+
+	"github.com/tv42/httpunix"
 )
 
 func init() {
@@ -144,9 +148,14 @@ type service struct {
 	machineConfig    *firecracker.Config
 	vsockIOPortCount uint32
 	vsockPortMu      sync.Mutex
+
+	// httpControlClient is to send pause/resume/snapshot commands to the microVM
+	httpControlClient        *http.Client
+
 }
 
 func shimOpts(shimCtx context.Context) (*shim.Opts, error) {
+	//log.L.Warn("called shimOpts in runtime/service.go")
 	opts, ok := shimCtx.Value(shim.OptsKey{}).(shim.Opts)
 	if !ok {
 		return nil, errors.New("failed to parse containerd shim opts from context")
@@ -157,6 +166,7 @@ func shimOpts(shimCtx context.Context) (*shim.Opts, error) {
 
 // NewService creates new runtime shim.
 func NewService(shimCtx context.Context, id string, remotePublisher shim.Publisher, shimCancel func()) (shim.Shim, error) {
+	//log.L.Warn("called NewService in runtime/service.go")
 	cfg, err := config.LoadConfig("")
 	if err != nil {
 		return nil, err
@@ -223,6 +233,7 @@ func NewService(shimCtx context.Context, id string, remotePublisher shim.Publish
 }
 
 func (s *service) startEventForwarders(remotePublisher shim.Publisher) {
+	//log.L.Warn("called startEventForwarders in runtime/service.go")
 	ns, ok := namespaces.Namespace(s.shimCtx)
 	if !ok {
 		s.logger.Error("failed to fetch the namespace from the context")
@@ -260,6 +271,7 @@ func (s *service) startEventForwarders(remotePublisher shim.Publisher) {
 // This is likely addressable through some relatively small upstream contributions; the following is a stop-gap
 // solution until that time.
 func (s *service) serveFCControl() error {
+	//log.L.Warn("called serveFCControl in runtime/service.go")
 	// If the fccontrol socket was configured, setup the fccontrol server
 	fcSocketFDEnvVal := os.Getenv(internal.FCSocketFDEnvKey)
 	if fcSocketFDEnvVal == "" {
@@ -297,6 +309,8 @@ func (s *service) serveFCControl() error {
 }
 
 func (s *service) StartShim(shimCtx context.Context, containerID, containerdBinary, containerdAddress, containerdTTRPCAddress string) (string, error) {
+	//log.L.Warn("called StartShim in runtime/service.go")
+
 	// In the shim start routine, we can assume that containerd provided a "log" FIFO in the current working dir.
 	// We have to use that instead of stdout/stderr because containerd reads the stdio pipes of shim start to get
 	// either the shim address or the error returned here.
@@ -336,6 +350,7 @@ func (s *service) StartShim(shimCtx context.Context, containerID, containerdBina
 		if err != nil {
 			return "", errors.Wrap(err, "failed to generate UUID for VMID")
 		}
+
 		s.vmID = uuid.String()
 
 		// This request is handled by a short-lived shim process to find its control socket.
@@ -388,6 +403,7 @@ func logPanicAndDie(logger *logrus.Entry) {
 }
 
 func (s *service) generateExtraData(jsonBytes []byte, options *ptypes.Any) (*proto.ExtraData, error) {
+	log.L.Warn("called generateExtraData in runtime/service.go")
 	var opts *ptypes.Any
 	if options != nil {
 		// Copy values of existing options over
@@ -410,6 +426,7 @@ func (s *service) generateExtraData(jsonBytes []byte, options *ptypes.Any) (*pro
 
 // assumes caller has s.startVMMutex
 func (s *service) nextVSockPort() uint32 {
+	log.L.Warn("called nextVSockPort in runtime/service.go")
 	s.vsockPortMu.Lock()
 	defer s.vsockPortMu.Unlock()
 
@@ -426,6 +443,7 @@ func (s *service) nextVSockPort() uint32 {
 }
 
 func (s *service) waitVMReady() error {
+	log.L.Warn("called waitVMReady in runtime/service.go")
 	select {
 	case <-s.vmReady:
 		return nil
@@ -437,6 +455,7 @@ func (s *service) waitVMReady() error {
 // CreateVM will attempt to create the VM as specified in the provided request, but only on the first request
 // received. Any subsequent requests will be ignored and get an AlreadyExists error response.
 func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRequest) (*proto.CreateVMResponse, error) {
+	log.L.Warn("called CreateVM in runtime/service.go")
 	defer logPanicAndDie(s.logger)
 
 	timeout := defaultCreateVMTimeout
@@ -456,6 +475,7 @@ func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRe
 		err = s.createVM(ctxWithTimeout, request)
 		createRan = true
 	})
+
 	if !createRan {
 		return nil, status.Error(codes.AlreadyExists, "shim cannot create VM more than once")
 	}
@@ -483,14 +503,9 @@ func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRe
 	// let all the other methods know that the VM is ready for tasks
 	close(s.vmReady)
 
-	resp.VMID = s.vmID
-	resp.MetricsFifoPath = s.machineConfig.MetricsFifo
-	resp.LogFifoPath = s.machineConfig.LogFifo
-	resp.SocketPath = s.shimDir.FirecrackerSockPath()
 	if c, ok := s.jailer.(cgroupPather); ok {
 		resp.CgroupPath = c.CgroupPath()
 	}
-
 	return &resp, nil
 }
 
@@ -578,6 +593,8 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 	if err != nil {
 		return err
 	}
+
+	s.createHTTPControlClient()
 
 	s.logger.Info("successfully started the VM")
 	return nil
@@ -709,6 +726,83 @@ func (s *service) GetVMMetadata(requestCtx context.Context, request *proto.GetVM
 	}
 
 	return &proto.GetVMMetadataResponse{Metadata: string(metadata)}, nil
+}
+
+// PauseVM Pauses a VM
+func (s *service) PauseVM(ctx context.Context, req *proto.PauseVMRequest) (*proto.PauseVMResponse, error) {
+	log.L.Warn("Called PauseVM in runtime/service.go")
+	pauseReq, err := formPauseReq()
+	if err != nil {
+		s.logger.WithError(err).Error("Failed to create pause vm request")
+		return nil, err
+	}
+
+	err = s.waitVMReady()
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.httpControlClient.Do(pauseReq)
+	if err != nil {
+		s.logger.WithError(err).Error("Failed to send pause VM request")
+		return nil, err
+	}
+	s.logger.Warn(fmt.Sprintf("response from pausevm was %s", resp.Status))
+
+	return &proto.PauseVMResponse{VMID: req.VMID}, nil
+}
+
+// ResumeVM Resumes a VM
+func (s *service) ResumeVM(ctx context.Context, req *proto.ResumeVMRequest) (*proto.ResumeVMResponse, error) {
+	log.L.Warn("Called ResumeVM in runtime/service.go")
+	resumeReq, err := formResumeReq()
+	if err != nil {
+		s.logger.WithError(err).Error("Failed to create resume vm request")
+		return nil, err
+	}
+
+	resp, err := s.httpControlClient.Do(resumeReq)
+	if err != nil {
+		s.logger.WithError(err).Error("Failed to send resume VM request")
+		return nil, err
+	}
+	s.logger.Warn(fmt.Sprintf("response from resumevm was %s", resp.Status))
+
+	return &proto.ResumeVMResponse{VMID: req.VMID}, nil
+}
+
+// LoadSnapshot Loads a VM from a snapshot
+func (s *service) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotRequest) (*proto.LoadSnapshotResponse, error) {
+	log.L.Warn("Called LoadSnapshot in runtime/service.go")
+	loadSnapReq, err := formLoadSnapReq()
+	if err != nil {
+		s.logger.WithError(err).Error("Failed to create load snapshot request")
+		return nil, err
+	}
+
+	if _, err := s.httpControlClient.Do(loadSnapReq); err != nil {
+		s.logger.WithError(err).Error("Failed to send load snapshot request")
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+// MakeSnapshot Makes a snapshot of a VM
+func (s *service) MakeSnapshot(ctx context.Context, req *proto.MakeSnapshotRequest) (*proto.MakeSnapshotResponse, error) {
+	log.L.Warn("Called MakeSnapshot in runtime/service.go")
+	makeSnapReq, err := formMakeSnapReq()
+	if err != nil {
+		s.logger.WithError(err).Error("Failed to create make snapshot request")
+		return nil, err
+	}
+
+	if _, err := s.httpControlClient.Do(makeSnapReq); err != nil {
+		s.logger.WithError(err).Error("Failed to send make snapshot request")
+		return nil, err
+	}
+
+	return nil, nil
 }
 
 func (s *service) buildVMConfiguration(req *proto.CreateVMRequest) (*firecracker.Config, error) {
@@ -1349,4 +1443,117 @@ func (s *service) monitorVMExit() {
 	if err := s.cleanup(); err != nil {
 		s.logger.WithError(err).Error("failed to clean up the VM")
 	}
+}
+
+func (s *service) createHTTPControlClient() {
+	u := &httpunix.Transport{
+		DialTimeout:           100 * time.Millisecond,
+		RequestTimeout:        10 * time.Second,
+		ResponseHeaderTimeout: 10 * time.Second,
+	}
+	u.RegisterLocation("firecracker", s.shimDir.FirecrackerSockPath())
+
+	t := &http.Transport{}
+	t.RegisterProtocol(httpunix.Scheme, u)
+
+	var client = http.Client{
+		Transport: t,
+	}
+	
+	s.httpControlClient = &client
+}
+
+func formResumeReq() (*http.Request, error) {
+	var req *http.Request
+
+	data := map[string]string{
+		"state": "Resumed",
+	}
+	json, err := json.Marshal(data)
+	if err != nil {
+		logrus.WithError(err).Error("Failed to marshal json data")
+		return nil, err
+	}
+
+	req, err = http.NewRequest("PATCH", "http+unix://firecracker/vm", bytes.NewBuffer(json))
+	if err != nil {
+		logrus.WithError(err).Error("Failed to create new HTTP request in formResumeReq")
+		return nil, err
+	}
+	req.Header.Add("accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+
+	return req, nil
+}
+
+func formPauseReq() (*http.Request, error) {
+	var req *http.Request
+
+	data := map[string]string{
+		"state": "Paused",
+	}
+	json, err := json.Marshal(data)
+	if err != nil {
+		logrus.WithError(err).Error("Failed to marshal json data")
+		return nil, err
+	}
+
+	req, err = http.NewRequest("PATCH", "http+unix://firecracker/vm", bytes.NewBuffer(json))
+	if err != nil {
+		logrus.WithError(err).Error("Failed to create new HTTP request in formPauseReq")
+		return nil, err
+	}
+	req.Header.Add("accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+
+	return req, nil
+}
+
+func formLoadSnapReq() (*http.Request, error) {
+	var req *http.Request
+
+	data := map[string]string{
+		"snapshot_path": "/home/ustiugov/snapshot_file",
+		"mem_file_path": "/home/ustiugov/mem_file",
+	}
+	json, err := json.Marshal(data)
+	if err != nil {
+		logrus.WithError(err).Error("Failed to marshal json data")
+		return nil, err
+	}
+
+	req, err = http.NewRequest("PUT", "http+unix://firecracker/snapshot/load", bytes.NewBuffer(json))
+	if err != nil {
+		logrus.WithError(err).Error("Failed to create new HTTP request in formLoadSnapReq")
+		return nil, err
+	}
+	req.Header.Add("accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+
+	return req, nil
+}
+
+func formMakeSnapReq() (*http.Request, error) {
+	var req *http.Request
+
+	data := map[string]string{
+		"snapshot_type": "Full",
+		"snapshot_path": "/home/ustiugov/snapshot_file",
+		"mem_file_path": "/home/ustiugov/mem_file",
+	}
+	json, err := json.Marshal(data)
+	if err != nil {
+		logrus.WithError(err).Error("Failed to marshal json data")
+		return nil, err
+	}
+
+	req, err = http.NewRequest("PUT", "http+unix://firecracker/snapshot/create", bytes.NewBuffer(json))
+	if err != nil {
+		logrus.WithError(err).Error("Failed to create new HTTP request in formSnapCreateReq")
+		return nil, err
+	}
+	req.Header.Add("accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+
+	return req, nil
 }

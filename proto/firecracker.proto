@@ -81,6 +81,38 @@ message GetVMMetadataResponse {
     string Metadata = 1;
 }
 
+message PauseVMRequest {
+    string VMID = 1;
+}
+
+message PauseVMResponse {
+    string VMID = 1;
+}
+
+message ResumeVMRequest {
+    string VMID = 1;
+}
+
+message ResumeVMResponse {
+    string VMID = 1;
+}
+
+message MakeSnapshotRequest {
+    string VMID = 1;
+}
+
+message MakeSnapshotResponse {
+    string VMID = 1;
+}
+
+message LoadSnapshotRequest {
+    string VMID = 1;
+}
+
+message LoadSnapshotResponse {
+    string VMID = 1;
+}
+
 message JailerConfig {
     string NetNS = 1;
     // List of the physical numbers of the CPUs on which processes in that
@@ -111,4 +143,3 @@ message JailerConfig {
 	// the default value
     string CgroupPath = 6;
 }
-

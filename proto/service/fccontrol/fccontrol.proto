@@ -24,4 +24,16 @@ service Firecracker {
 
     // Get Vm's instance metadata
     rpc GetVMMetadata(GetVMMetadataRequest) returns (GetVMMetadataResponse);
+
+    // Pauses a VM
+    rpc PauseVM(PauseVMRequest) returns (PauseVMResponse);
+
+    // Resumes a VM
+    rpc ResumeVM(ResumeVMRequest) returns (ResumeVMResponse);
+
+    // Loads VM from snapshot
+    rpc LoadSnapshot(LoadSnapshotRequest) returns (LoadSnapshotResponse);
+
+    // Make a snapshot of a VM
+    rpc MakeSnapshot(MakeSnapshotRequest) returns (MakeSnapshotResponse);
 }

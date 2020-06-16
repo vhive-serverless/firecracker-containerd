@@ -68,31 +68,61 @@ func (s *service) RegisterTTRPC(server *ttrpc.Server) error {
 }
 
 func (s *service) CreateVM(ctx context.Context, req *proto.CreateVMRequest) (*proto.CreateVMResponse, error) {
+	log.L.Warn("Called CreateVM in firecracker-control/service.go")
 	log.G(ctx).Debugf("create VM request: %+v", req)
 	return s.local.CreateVM(ctx, req)
 }
 
 func (s *service) StopVM(ctx context.Context, req *proto.StopVMRequest) (*empty.Empty, error) {
+	log.L.Warn("Called StopVM in firecracker-control/service.go")
 	log.G(ctx).Debugf("stop VM: %+v", req)
 	return s.local.StopVM(ctx, req)
 }
 
 func (s *service) GetVMInfo(ctx context.Context, req *proto.GetVMInfoRequest) (*proto.GetVMInfoResponse, error) {
+	log.L.Warn("Called GetVMInfo in firecracker-control/service.go")
 	log.G(ctx).Debugf("get VM info: %+v", req)
 	return s.local.GetVMInfo(ctx, req)
 }
 
 func (s *service) SetVMMetadata(ctx context.Context, req *proto.SetVMMetadataRequest) (*empty.Empty, error) {
-	log.G(ctx).Debug("Setting vm metadata")
+	log.L.Warn("Called SetVMMetadata in firecracker-control/service.go")
+	log.G(ctx).Debugf("set vm metadata: %+v", req)
 	return s.local.SetVMMetadata(ctx, req)
 }
 
 func (s *service) UpdateVMMetadata(ctx context.Context, req *proto.UpdateVMMetadataRequest) (*empty.Empty, error) {
-	log.G(ctx).Debug("Updating vm metadata")
+	log.L.Warn("Called UpdateVMMetadata in firecracker-control/service.go")
+	log.G(ctx).Debugf("update vm metadata: %+v", req)
 	return s.local.UpdateVMMetadata(ctx, req)
 }
 
 func (s *service) GetVMMetadata(ctx context.Context, req *proto.GetVMMetadataRequest) (*proto.GetVMMetadataResponse, error) {
-	log.G(ctx).Debug("Getting vm metadata")
+	log.L.Warn("Called GetVMMetadata in firecracker-control/service.go")
+	log.G(ctx).Debugf("get vm metadata: %+v", req)
 	return s.local.GetVMMetadata(ctx, req)
+}
+
+func (s *service) PauseVM(ctx context.Context, req *proto.PauseVMRequest) (*proto.PauseVMResponse, error) {
+	log.L.Warn("Called PauseVM in firecracker-control/service.go")
+	log.G(ctx).Debugf("pause VM request: %+v", req)
+	return s.local.PauseVM(ctx, req)
+}
+
+func (s *service) ResumeVM(ctx context.Context, req *proto.ResumeVMRequest) (*proto.ResumeVMResponse, error) {
+	log.L.Warn("Called ResumeVM in firecracker-control/service.go")
+	log.G(ctx).Debugf("resume VM request: %+v", req)
+	return s.local.ResumeVM(ctx, req)
+}
+
+func (s *service) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotRequest) (*proto.LoadSnapshotResponse, error) {
+	log.L.Warn("Called LoadSnapshot in firecracker-control/service.go")
+	log.G(ctx).Debugf("load snapshot request: %+v", req)
+	return s.local.LoadSnapshot(ctx, req)
+}
+
+func (s *service) MakeSnapshot(ctx context.Context, req *proto.MakeSnapshotRequest) (*proto.MakeSnapshotResponse, error) {
+	log.L.Warn("Called MakeSnapshot in firecracker-control/service.go")
+	log.G(ctx).Debugf("make snapshot request: %+v", req)
+	return s.local.MakeSnapshot(ctx, req)
 }

@@ -21,9 +21,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
-	"sync"
 	"syscall"
-	"time"
 
 	"github.com/containerd/containerd/identifiers"
 	"github.com/containerd/containerd/log"
@@ -32,7 +30,6 @@ import (
 	"github.com/containerd/containerd/runtime/v2/shim"
 	"github.com/containerd/containerd/sys"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/hashicorp/go-multierror"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
@@ -50,7 +47,6 @@ import (
 var (
 	_               fccontrolTtrpc.FirecrackerService = (*local)(nil)
 	ttrpcAddressEnv                                   = "TTRPC_ADDRESS"
-	stopVMInterval                                    = 10 * time.Millisecond
 )
 
 func init() {
@@ -68,12 +64,10 @@ type local struct {
 	containerdAddress string
 	logger            *logrus.Entry
 	config            *config.Config
-
-	processesMu sync.Mutex
-	processes   map[string]int32
 }
 
 func newLocal(ic *plugin.InitContext) (*local, error) {
+	log.L.Warn("called newLocal in firecracker-control/local.go")
 	if err := os.MkdirAll(ic.Root, 0750); err != nil && !os.IsExist(err) {
 		return nil, errors.Wrapf(err, "failed to create root directory: %s", ic.Root)
 	}
@@ -87,7 +81,6 @@ func newLocal(ic *plugin.InitContext) (*local, error) {
 		containerdAddress: ic.Address,
 		logger:            log.G(ic.Context),
 		config:            cfg,
-		processes:         make(map[string]int32),
 	}, nil
 }
 
@@ -95,6 +88,7 @@ func newLocal(ic *plugin.InitContext) (*local, error) {
 // the CreateVM request to that shim. If there is already a VM created with the provided VMID, then
 // AlreadyExists is returned.
 func (s *local) CreateVM(requestCtx context.Context, req *proto.CreateVMRequest) (*proto.CreateVMResponse, error) {
+	log.L.Warn("called CreateVM in firecracker-control/local.go")
 	var err error
 
 	id := req.GetVMID()
@@ -124,7 +118,7 @@ func (s *local) CreateVM(requestCtx context.Context, req *proto.CreateVMRequest)
 
 	shimSocket, err := shim.NewSocket(shimSocketAddress)
 	if isEADDRINUSE(err) {
-		return nil, status.Errorf(codes.AlreadyExists, "VM with ID %q already exists (socket: %q)", id, shimSocketAddress)
+		return nil, status.Errorf(codes.AlreadyExists, "VM with ID %q already exists", id)
 	} else if err != nil {
 		err = errors.Wrapf(err, "failed to open shim socket at address %q", shimSocketAddress)
 		s.logger.WithError(err).Error()
@@ -139,6 +133,7 @@ func (s *local) CreateVM(requestCtx context.Context, req *proto.CreateVMRequest)
 	}
 
 	shimDir, err := vm.ShimDir(s.config.ShimBaseDir, ns, id)
+	fmt.Printf("SHIMDIR IS: %s", shimDir)
 	if err != nil {
 		err = errors.Wrapf(err, "failed to build shim path")
 		s.logger.WithError(err).Error()
@@ -207,18 +202,11 @@ func (s *local) CreateVM(requestCtx context.Context, req *proto.CreateVMRequest)
 		return nil, err
 	}
 
-	s.addShim(shimSocketAddress, cmd)
-
 	return resp, nil
 }
 
-func (s *local) addShim(address string, cmd *exec.Cmd) {
-	s.processesMu.Lock()
-	defer s.processesMu.Unlock()
-	s.processes[address] = int32(cmd.Process.Pid)
-}
-
 func (s *local) shimFirecrackerClient(requestCtx context.Context, vmID string) (*fcclient.Client, error) {
+	log.L.Warn("called shimFirecrackerClient in firecracker-control/local.go")
 	if err := identifiers.Validate(vmID); err != nil {
 		return nil, errors.Wrap(err, "invalid id")
 	}
@@ -236,42 +224,26 @@ func (s *local) shimFirecrackerClient(requestCtx context.Context, vmID string) (
 // StopVM stops running VM instance by VM ID. This stops the VM, all tasks within the VM and the runtime shim
 // managing the VM.
 func (s *local) StopVM(requestCtx context.Context, req *proto.StopVMRequest) (*empty.Empty, error) {
+	log.L.Warn("called StopVM in firecracker-control/local.go")
 	client, err := s.shimFirecrackerClient(requestCtx, req.VMID)
 	if err != nil {
 		return nil, err
 	}
+
 	defer client.Close()
 
-	resp, shimErr := client.StopVM(requestCtx, req)
-	waitErr := s.waitForShimToExit(requestCtx, req.VMID)
-
-	// Assuming the shim is returning containerd's error code, return the error as is if possible.
-	if waitErr == nil {
-		return resp, shimErr
-	}
-	return resp, multierror.Append(shimErr, waitErr).ErrorOrNil()
-}
-
-func (s *local) waitForShimToExit(ctx context.Context, vmID string) error {
-	socketAddr, err := fcShim.SocketAddress(ctx, vmID)
+	resp, err := client.StopVM(requestCtx, req)
 	if err != nil {
-		return err
+		s.logger.WithError(err).Error()
+		return nil, err
 	}
 
-	s.processesMu.Lock()
-	defer s.processesMu.Unlock()
-
-	pid, ok := s.processes[socketAddr]
-	if !ok {
-		return errors.Errorf("failed to find a shim process for %q", socketAddr)
-	}
-	defer delete(s.processes, socketAddr)
-
-	return internal.WaitForPidToExit(ctx, stopVMInterval, pid)
+	return resp, err
 }
 
 // GetVMInfo returns metadata for the VM with the given VMID.
 func (s *local) GetVMInfo(requestCtx context.Context, req *proto.GetVMInfoRequest) (*proto.GetVMInfoResponse, error) {
+	log.L.Warn("called GetVMInfo in firecracker-control/local.go")
 	client, err := s.shimFirecrackerClient(requestCtx, req.VMID)
 	if err != nil {
 		return nil, err
@@ -291,6 +263,7 @@ func (s *local) GetVMInfo(requestCtx context.Context, req *proto.GetVMInfoReques
 
 // SetVMMetadata sets Firecracker instance metadata for the VM with the given VMID.
 func (s *local) SetVMMetadata(requestCtx context.Context, req *proto.SetVMMetadataRequest) (*empty.Empty, error) {
+	log.L.Warn("called SetVMMetadata in firecracker-control/local.go")
 	client, err := s.shimFirecrackerClient(requestCtx, req.VMID)
 	if err != nil {
 		return nil, err
@@ -310,6 +283,7 @@ func (s *local) SetVMMetadata(requestCtx context.Context, req *proto.SetVMMetada
 
 // UpdateVMMetadata updates Firecracker instance metadata for the VM with the given VMID.
 func (s *local) UpdateVMMetadata(requestCtx context.Context, req *proto.UpdateVMMetadataRequest) (*empty.Empty, error) {
+	log.L.Warn("called UpdateVMMetadata in firecracker-control/local.go")
 	client, err := s.shimFirecrackerClient(requestCtx, req.VMID)
 	if err != nil {
 		return nil, err
@@ -329,6 +303,7 @@ func (s *local) UpdateVMMetadata(requestCtx context.Context, req *proto.UpdateVM
 
 // GetVMMetadata returns the Firecracker instance metadata for the VM with the given VMID.
 func (s *local) GetVMMetadata(requestCtx context.Context, req *proto.GetVMMetadataRequest) (*proto.GetVMMetadataResponse, error) {
+	log.L.Warn("called GetVMMetadata in firecracker-control/local.go")
 	client, err := s.shimFirecrackerClient(requestCtx, req.VMID)
 	if err != nil {
 		return nil, err
@@ -346,6 +321,7 @@ func (s *local) GetVMMetadata(requestCtx context.Context, req *proto.GetVMMetada
 }
 
 func (s *local) newShim(ns, vmID, containerdAddress string, shimSocket *net.UnixListener, fcSocket *net.UnixListener) (*exec.Cmd, error) {
+	log.L.Warn("called newShim in firecracker-control/local.go")
 	logger := s.logger.WithField("vmID", vmID)
 
 	args := []string{
@@ -421,15 +397,6 @@ func (s *local) newShim(ns, vmID, containerdAddress string, shimSocket *net.Unix
 				logger.WithError(err).Error("shim has been unexpectedly terminated")
 			}
 		}
-
-		// Close all Unix abstract sockets.
-		if err := shimSocketFile.Close(); err != nil {
-			logger.WithError(err).Errorf("failed to close %q", shimSocketFile.Name())
-		}
-		if err := fcSocketFile.Close(); err != nil {
-			logger.WithError(err).Errorf("failed to close %q", fcSocketFile.Name())
-		}
-
 		if err := os.RemoveAll(shimDir.RootPath()); err != nil {
 			logger.WithError(err).Errorf("failed to remove %q", shimDir.RootPath())
 		}
@@ -445,10 +412,12 @@ func (s *local) newShim(ns, vmID, containerdAddress string, shimSocket *net.Unix
 }
 
 func isEADDRINUSE(err error) bool {
+	log.L.Warn("called isEADDRINUSE in firecracker-control/local.go")
 	return err != nil && strings.Contains(err.Error(), "address already in use")
 }
 
 func setShimOOMScore(shimPid int) error {
+	log.L.Warn("called setShimOOMScore in firecracker-control/local.go")
 	containerdPid := os.Getpid()
 
 	score, err := sys.GetOOMScoreAdj(containerdPid)
@@ -462,4 +431,54 @@ func setShimOOMScore(shimPid int) error {
 	}
 
 	return nil
+}
+
+// PauseVM Pauses a VM
+func (s *local) PauseVM(ctx context.Context, req *proto.PauseVMRequest) (*proto.PauseVMResponse, error) {
+	log.L.Warn("Called PauseVM in firecracker-control/local.go")
+	client, err := s.shimFirecrackerClient(ctx, req.VMID)
+	if err != nil {
+		return nil, err
+	}
+
+	defer client.Close()
+
+	resp, err := client.PauseVM(ctx, req)
+	if err != nil {
+		s.logger.WithError(err).Error()
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+// ResumeVM Resumes a VM
+func (s *local) ResumeVM(ctx context.Context, req *proto.ResumeVMRequest) (*proto.ResumeVMResponse, error) {
+	log.L.Warn("Called ResumeVM in firecracker-control/local.go")
+	client, err := s.shimFirecrackerClient(ctx, req.VMID)
+	if err != nil {
+		return nil, err
+	}
+
+	defer client.Close()
+
+	resp, err := client.ResumeVM(ctx, req)
+	if err != nil {
+		s.logger.WithError(err).Error()
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+// LoadSnapshot Loads a VM from a snapshot
+func (s *local) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotRequest) (*proto.LoadSnapshotResponse, error) {
+	log.L.Warn("Called LoadSnapshot in firecracker-control/local.go")
+	return nil, nil
+}
+
+// MakeSnapshot Makes a snapshot of a VM
+func (s *local) MakeSnapshot(ctx context.Context, req *proto.MakeSnapshotRequest) (*proto.MakeSnapshotResponse, error) {
+	log.L.Warn("Called MakeSnapshot in firecracker-control/local.go")
+	return nil, nil
 }
