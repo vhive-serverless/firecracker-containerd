@@ -14,11 +14,13 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"math"
 	"net"
+	"net/http"
 	"os"
 	"runtime/debug"
 	"strconv"
@@ -64,6 +66,7 @@ import (
 	drivemount "github.com/firecracker-microvm/firecracker-containerd/proto/service/drivemount/ttrpc"
 	fccontrolTtrpc "github.com/firecracker-microvm/firecracker-containerd/proto/service/fccontrol/ttrpc"
 	ioproxy "github.com/firecracker-microvm/firecracker-containerd/proto/service/ioproxy/ttrpc"
+	"github.com/tv42/httpunix"
 )
 
 func init() {
@@ -157,6 +160,9 @@ type service struct {
 	// fifos have stdio FIFOs containerd passed to the shim. The key is [taskID][execID].
 	fifos   map[string]map[string]cio.Config
 	fifosMu sync.Mutex
+
+	// httpControlClient is to send pause/resume/snapshot commands to the microVM
+	httpControlClient *http.Client
 }
 
 func shimOpts(shimCtx context.Context) (*shim.Opts, error) {
@@ -620,6 +626,8 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 		return err
 	}
 
+	s.createHTTPControlClient()
+
 	s.logger.Info("successfully started the VM")
 	return nil
 }
@@ -654,42 +662,6 @@ func (s *service) StopVM(requestCtx context.Context, request *proto.StopVMReques
 	if err = s.shutdown(requestCtx, timeout, &taskAPI.ShutdownRequest{Now: true}); err != nil {
 		return nil, err
 	}
-	return &empty.Empty{}, nil
-}
-
-// ResumeVM resumes a VM
-func (s *service) ResumeVM(ctx context.Context, req *proto.ResumeVMRequest) (*empty.Empty, error) {
-	defer logPanicAndDie(s.logger)
-
-	err := s.waitVMReady()
-	if err != nil {
-		s.logger.WithError(err).Error()
-		return nil, err
-	}
-
-	if err := s.machine.ResumeVM(ctx); err != nil {
-		s.logger.WithError(err).Error()
-		return nil, err
-	}
-
-	return &empty.Empty{}, nil
-}
-
-// PauseVM pauses a VM
-func (s *service) PauseVM(ctx context.Context, req *proto.PauseVMRequest) (*empty.Empty, error) {
-	defer logPanicAndDie(s.logger)
-
-	err := s.waitVMReady()
-	if err != nil {
-		s.logger.WithError(err).Error()
-		return nil, err
-	}
-
-	if err := s.machine.PauseVM(ctx); err != nil {
-		s.logger.WithError(err).Error()
-		return nil, err
-	}
-
 	return &empty.Empty{}, nil
 }
 
@@ -1712,3 +1684,68 @@ func (s *service) monitorVMExit() {
 		s.logger.WithError(err).Error("failed to clean up the VM")
 	}
 }
+
+func (s *service) createHTTPControlClient() {
+	u := &httpunix.Transport{
+		DialTimeout:           100 * time.Millisecond,
+		RequestTimeout:        10 * time.Second,
+		ResponseHeaderTimeout: 10 * time.Second,
+	}
+	u.RegisterLocation("firecracker", s.shimDir.FirecrackerSockPath())
+
+	t := &http.Transport{}
+	t.RegisterProtocol(httpunix.Scheme, u)
+
+	var client = http.Client{
+		Transport: t,
+	}
+
+	s.httpControlClient = &client
+}
+
+func formResumeReq() (*http.Request, error) {
+	var req *http.Request
+
+	data := map[string]string{
+		"state": "Resumed",
+	}
+	json, err := json.Marshal(data)
+	if err != nil {
+		logrus.WithError(err).Error("Failed to marshal json data")
+		return nil, err
+	}
+
+	req, err = http.NewRequest("PATCH", "http+unix://firecracker/vm", bytes.NewBuffer(json))
+	if err != nil {
+		logrus.WithError(err).Error("Failed to create new HTTP request in formResumeReq")
+		return nil, err
+	}
+	req.Header.Add("accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+
+	return req, nil
+}
+
+func formPauseReq() (*http.Request, error) {
+	var req *http.Request
+
+	data := map[string]string{
+		"state": "Paused",
+	}
+	json, err := json.Marshal(data)
+	if err != nil {
+		logrus.WithError(err).Error("Failed to marshal json data")
+		return nil, err
+	}
+
+	req, err = http.NewRequest("PATCH", "http+unix://firecracker/vm", bytes.NewBuffer(json))
+	if err != nil {
+		logrus.WithError(err).Error("Failed to create new HTTP request in formPauseReq")
+		return nil, err
+	}
+	req.Header.Add("accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+
+	return req, nil
+}
+
