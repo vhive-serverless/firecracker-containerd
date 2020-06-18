@@ -61,6 +61,9 @@ type FirecrackerService interface {
 	GetVMMetadata(ctx context.Context, req *proto1.GetVMMetadataRequest) (*proto1.GetVMMetadataResponse, error)
 	PauseVM(ctx context.Context, req *proto1.PauseVMRequest) (*empty.Empty, error)
 	ResumeVM(ctx context.Context, req *proto1.ResumeVMRequest) (*empty.Empty, error)
+	LoadSnapshot(ctx context.Context, req *proto1.LoadSnapshotRequest) (*empty.Empty, error)
+	CreateSnapshot(ctx context.Context, req *proto1.CreateSnapshotRequest) (*empty.Empty, error)
+	Offload(ctx context.Context, req *proto1.OffloadRequest) (*empty.Empty, error)
 }
 
 func RegisterFirecrackerService(srv *github_com_containerd_ttrpc.Server, svc FirecrackerService) {
@@ -134,6 +137,27 @@ func RegisterFirecrackerService(srv *github_com_containerd_ttrpc.Server, svc Fir
 				return nil, err
 			}
 			return svc.ResumeVM(ctx, &req)
+		},
+		"LoadSnapshot": func(ctx context.Context, unmarshal func(interface{}) error) (interface{}, error) {
+			var req proto1.LoadSnapshotRequest
+			if err := unmarshal(&req); err != nil {
+				return nil, err
+			}
+			return svc.LoadSnapshot(ctx, &req)
+		},
+		"CreateSnapshot": func(ctx context.Context, unmarshal func(interface{}) error) (interface{}, error) {
+			var req proto1.CreateSnapshotRequest
+			if err := unmarshal(&req); err != nil {
+				return nil, err
+			}
+			return svc.CreateSnapshot(ctx, &req)
+		},
+		"Offload": func(ctx context.Context, unmarshal func(interface{}) error) (interface{}, error) {
+			var req proto1.OffloadRequest
+			if err := unmarshal(&req); err != nil {
+				return nil, err
+			}
+			return svc.Offload(ctx, &req)
 		},
 	})
 }
@@ -223,6 +247,30 @@ func (c *firecrackerClient) PauseVM(ctx context.Context, req *proto1.PauseVMRequ
 func (c *firecrackerClient) ResumeVM(ctx context.Context, req *proto1.ResumeVMRequest) (*empty.Empty, error) {
 	var resp empty.Empty
 	if err := c.client.Call(ctx, "Firecracker", "ResumeVM", req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *firecrackerClient) LoadSnapshot(ctx context.Context, req *proto1.LoadSnapshotRequest) (*empty.Empty, error) {
+	var resp empty.Empty
+	if err := c.client.Call(ctx, "Firecracker", "LoadSnapshot", req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *firecrackerClient) CreateSnapshot(ctx context.Context, req *proto1.CreateSnapshotRequest) (*empty.Empty, error) {
+	var resp empty.Empty
+	if err := c.client.Call(ctx, "Firecracker", "CreateSnapshot", req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *firecrackerClient) Offload(ctx context.Context, req *proto1.OffloadRequest) (*empty.Empty, error) {
+	var resp empty.Empty
+	if err := c.client.Call(ctx, "Firecracker", "Offload", req, &resp); err != nil {
 		return nil, err
 	}
 	return &resp, nil

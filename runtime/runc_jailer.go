@@ -154,7 +154,8 @@ func (j *runcJailer) BuildJailedMachine(cfg *config.Config, machineConfig *firec
 		debugSDK = level == logrus.DebugLevel
 	}
 	// Build a new client since BuildJailedRootHandler modifies the socket path value.
-	client := firecracker.NewClient(machineConfig.SocketPath, j.logger, debugSDK)
+	//client := firecracker.NewClient(machineConfig.SocketPath, j.logger, debugSDK)
+	client := firecracker.NewClient(machineConfig.SocketPath, j.logger, true)
 
 	if machineConfig.NetNS == "" {
 		if netns := getNetNS(j.configSpec); netns != "" {
