@@ -22,6 +22,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"os/exec"
 	"runtime/debug"
 	"strconv"
 	"strings"
@@ -163,6 +164,8 @@ type service struct {
 
 	// httpControlClient is to send pause/resume/snapshot commands to the microVM
 	httpControlClient *http.Client
+	firecrackerPid int
+	taskDrivePathOnHost string
 }
 
 func shimOpts(shimCtx context.Context) (*shim.Opts, error) {
@@ -500,7 +503,11 @@ func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRe
 		s.logger.WithError(err).Error("failed to publish start VM event")
 	}
 
-	go s.monitorVMExit()
+	// Commented out because its execution cancels the shim, and 
+	// it would get executed on Offload if we leave it, killing the shim,
+	// and making snapshots impossible.
+	//go s.monitorVMExit()
+
 	// let all the other methods know that the VM is ready for tasks
 	close(s.vmReady)
 
@@ -628,7 +635,14 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 
 	s.createHTTPControlClient()
 
+	if pid, err := s.machine.PID(); err != nil {
+		s.logger.WithError(err).Error("Failed to get PID of firecracker process")
+		return err
+	} else {
+		s.firecrackerPid = pid
+	}
 	s.logger.Info("successfully started the VM")
+
 	return nil
 }
 
@@ -1141,6 +1155,8 @@ func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTask
 		return nil, errors.Errorf("can only support rootfs with exactly one mount: %+v", request.Rootfs)
 	}
 	rootfsMnt := request.Rootfs[0]
+
+	s.taskDrivePathOnHost = rootfsMnt.Source
 
 	err = s.containerStubHandler.Reserve(requestCtx, request.ID,
 		rootfsMnt.Source, vmBundleDir.RootfsPath(), "ext4", nil, s.driveMountClient, s.machine)
@@ -1749,3 +1765,117 @@ func formPauseReq() (*http.Request, error) {
 	return req, nil
 }
 
+func formLoadSnapReq(snapshotPath, memPath string) (*http.Request, error) {
+	var req *http.Request
+
+	data := map[string]string{
+		"snapshot_path": snapshotPath,
+		"mem_file_path": memPath,
+	}
+	json, err := json.Marshal(data)
+	if err != nil {
+		logrus.WithError(err).Error("Failed to marshal json data")
+		return nil, err
+	}
+
+	req, err = http.NewRequest("PUT", "http+unix://firecracker/snapshot/load", bytes.NewBuffer(json))
+	if err != nil {
+		logrus.WithError(err).Error("Failed to create new HTTP request in formLoadSnapReq")
+		return nil, err
+	}
+	req.Header.Add("accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+
+	return req, nil
+}
+
+func formCreateSnapReq(snapshotPath, memPath string) (*http.Request, error) {
+	var req *http.Request
+
+	data := map[string]string{
+		"snapshot_type": "Full",
+		"snapshot_path": snapshotPath,
+		"mem_file_path": memPath,
+	}
+	json, err := json.Marshal(data)
+	if err != nil {
+		logrus.WithError(err).Error("Failed to marshal json data")
+		return nil, err
+	}
+
+	req, err = http.NewRequest("PUT", "http+unix://firecracker/snapshot/create", bytes.NewBuffer(json))
+	if err != nil {
+		logrus.WithError(err).Error("Failed to create new HTTP request in formCreateSnapReq")
+		return nil, err
+	}
+	req.Header.Add("accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+
+	return req, nil
+}
+
+func formPatchDriveReq(drive_id, path_on_host string) (*http.Request, error) {
+	var req *http.Request
+
+	data := map[string]string{
+		"drive_id": drive_id,
+		"path_on_host": path_on_host,
+	}
+	json, err := json.Marshal(data)
+	if err != nil {
+		logrus.WithError(err).Error("Failed to marshal json data")
+		return nil, err
+	}
+
+	req, err = http.NewRequest("PATCH", fmt.Sprintf("http+unix://firecracker/drives/%s", drive_id), bytes.NewBuffer(json))
+	if err != nil {
+		logrus.WithError(err).Error("Failed to create new HTTP request in formPauseReq")
+		return nil, err
+	}
+
+	req.Header.Add("accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+
+	return req, nil
+}
+
+func (s *service) startFirecrackerProcess() error {
+	firecPath, err := exec.LookPath("firecracker")
+	if err != nil {
+		logrus.WithError(err).Error("failed to look up firecracker binary")
+		return err
+	}
+
+
+	// TODO: Remove hardcoding and make a parameter
+	logFilePath := fmt.Sprintf("/tmp/log_%s_after.logs", s.vmID)
+	if err := os.RemoveAll(logFilePath); err != nil {
+		s.logger.WithError(err).Errorf("Failed to delete %s", logFilePath)
+		return err
+	}
+	if _, err := os.OpenFile(logFilePath, os.O_RDONLY|os.O_CREATE, 0666); err != nil {
+		s.logger.WithError(err).Errorf("Failed to create %s", logFilePath)
+		return err
+	}
+
+	args := []string{
+		"--api-sock", s.shimDir.FirecrackerSockPath(),
+		"--log-path", logFilePath,
+		"--level", s.config.DebugHelper.GetFirecrackerLogLevel(),
+		"--show-level",
+		"--show-log-origin",
+	}
+
+	firecrackerCmd := exec.Command(firecPath, args...)
+	firecrackerCmd.Dir = s.shimDir.RootPath()
+
+	if err := firecrackerCmd.Start(); err != nil {
+		logrus.WithError(err).Error("Failed to start firecracker process")
+	}
+
+	go firecrackerCmd.Wait()
+
+	s.firecrackerPid = firecrackerCmd.Process.Pid
+
+	return nil
+}
