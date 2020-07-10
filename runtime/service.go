@@ -163,8 +163,8 @@ type service struct {
 	fifosMu sync.Mutex
 
 	// httpControlClient is to send pause/resume/snapshot commands to the microVM
-	httpControlClient *http.Client
-	firecrackerPid int
+	httpControlClient   *http.Client
+	firecrackerPid      int
 	taskDrivePathOnHost string
 }
 
@@ -503,7 +503,7 @@ func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRe
 		s.logger.WithError(err).Error("failed to publish start VM event")
 	}
 
-	// Commented out because its execution cancels the shim, and 
+	// Commented out because its execution cancels the shim, and
 	// it would get executed on Offload if we leave it, killing the shim,
 	// and making snapshots impossible.
 	//go s.monitorVMExit()
@@ -635,12 +635,14 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 
 	s.createHTTPControlClient()
 
-	if pid, err := s.machine.PID(); err != nil {
+	pid, err := s.machine.PID()
+	if err != nil {
 		s.logger.WithError(err).Error("Failed to get PID of firecracker process")
 		return err
-	} else {
-		s.firecrackerPid = pid
 	}
+
+	s.firecrackerPid = pid
+
 	s.logger.Info("successfully started the VM")
 
 	return nil
@@ -1713,6 +1715,8 @@ func (s *service) cleanup() error {
 }
 
 // monitorVMExit watches the VM and cleanup resources when it terminates.
+// Comment out because unused
+/*
 func (s *service) monitorVMExit() {
 	// Block until the VM exits
 	if err := s.machine.Wait(s.shimCtx); err != nil && err != context.Canceled {
@@ -1723,6 +1727,7 @@ func (s *service) monitorVMExit() {
 		s.logger.WithError(err).Error("failed to clean up the VM")
 	}
 }
+*/
 
 func (s *service) createHTTPControlClient() {
 	u := &httpunix.Transport{
@@ -1837,12 +1842,12 @@ func formCreateSnapReq(snapshotPath, memPath string) (*http.Request, error) {
 	return req, nil
 }
 
-func formPatchDriveReq(drive_id, path_on_host string) (*http.Request, error) {
+func formPatchDriveReq(driveID, pathOnHost string) (*http.Request, error) {
 	var req *http.Request
 
 	data := map[string]string{
-		"drive_id": drive_id,
-		"path_on_host": path_on_host,
+		"drive_id":     driveID,
+		"path_on_host": pathOnHost,
 	}
 	json, err := json.Marshal(data)
 	if err != nil {
@@ -1850,7 +1855,7 @@ func formPatchDriveReq(drive_id, path_on_host string) (*http.Request, error) {
 		return nil, err
 	}
 
-	req, err = http.NewRequest("PATCH", fmt.Sprintf("http+unix://firecracker/drives/%s", drive_id), bytes.NewBuffer(json))
+	req, err = http.NewRequest("PATCH", fmt.Sprintf("http+unix://firecracker/drives/%s", driveID), bytes.NewBuffer(json))
 	if err != nil {
 		logrus.WithError(err).Error("Failed to create new HTTP request in formPauseReq")
 		return nil, err
@@ -1869,14 +1874,13 @@ func (s *service) startFirecrackerProcess() error {
 		return err
 	}
 
-
 	// TODO: Remove hardcoding and make a parameter
 	logFilePath := fmt.Sprintf("/tmp/log_%s_after.logs", s.vmID)
 	if err := os.RemoveAll(logFilePath); err != nil {
 		s.logger.WithError(err).Errorf("Failed to delete %s", logFilePath)
 		return err
 	}
-	if _, err := os.OpenFile(logFilePath, os.O_RDONLY|os.O_CREATE, 0666); err != nil {
+	if _, err := os.OpenFile(logFilePath, os.O_RDONLY|os.O_CREATE, 0600); err != nil {
 		s.logger.WithError(err).Errorf("Failed to create %s", logFilePath)
 		return err
 	}
