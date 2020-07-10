@@ -253,7 +253,13 @@ func TestBuildVMConfiguration(t *testing.T) {
 				Path: relVSockPath,
 				ID:   "agent_api",
 			}}
-			tc.expectedCfg.LogPath = svc.shimDir.FirecrackerLogFifoPath()
+
+			// Remove LogFifo and MetricsInfo in order to comply
+			// with new Firecracker logging.
+			// Include hard coded LogPath
+			// TODO: FIX TEST WHEN LogPath is no longer hardcoded
+			//tc.expectedCfg.LogPath = svc.shimDir.FirecrackerLogFifoPath()
+			tc.expectedCfg.LogPath = "/tmp/log__start.logs"
 			tc.expectedCfg.MetricsPath = svc.shimDir.FirecrackerMetricsFifoPath()
 
 			drives := make([]models.Drive, tc.expectedStubDriveCount)
