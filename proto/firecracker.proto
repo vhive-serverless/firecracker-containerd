@@ -122,6 +122,10 @@ message LoadSnapshotRequest {
     bool EnableUserPF = 4;
 }
 
+message LoadSnapshotResponse {
+    string SendSockPath = 1;
+}
+
 message OffloadRequest {
     string VMID = 1;
 }

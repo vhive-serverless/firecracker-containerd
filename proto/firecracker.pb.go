@@ -854,6 +854,44 @@ func (m *LoadSnapshotRequest) GetEnableUserPF() bool {
 	return false
 }
 
+type LoadSnapshotResponse struct {
+	SendSockPath         string   `protobuf:"bytes,1,opt,name=SendSockPath,json=sendSockPath,proto3" json:"SendSockPath,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *LoadSnapshotResponse) Reset()         { *m = LoadSnapshotResponse{} }
+func (m *LoadSnapshotResponse) String() string { return proto.CompactTextString(m) }
+func (*LoadSnapshotResponse) ProtoMessage()    {}
+func (*LoadSnapshotResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_a73317e9fb8da571, []int{13}
+}
+func (m *LoadSnapshotResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_LoadSnapshotResponse.Unmarshal(m, b)
+}
+func (m *LoadSnapshotResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_LoadSnapshotResponse.Marshal(b, m, deterministic)
+}
+func (m *LoadSnapshotResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_LoadSnapshotResponse.Merge(m, src)
+}
+func (m *LoadSnapshotResponse) XXX_Size() int {
+	return xxx_messageInfo_LoadSnapshotResponse.Size(m)
+}
+func (m *LoadSnapshotResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_LoadSnapshotResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_LoadSnapshotResponse proto.InternalMessageInfo
+
+func (m *LoadSnapshotResponse) GetSendSockPath() string {
+	if m != nil {
+		return m.SendSockPath
+	}
+	return ""
+}
+
 type OffloadRequest struct {
 	VMID                 string   `protobuf:"bytes,1,opt,name=VMID,json=vMID,proto3" json:"VMID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -865,7 +903,7 @@ func (m *OffloadRequest) Reset()         { *m = OffloadRequest{} }
 func (m *OffloadRequest) String() string { return proto.CompactTextString(m) }
 func (*OffloadRequest) ProtoMessage()    {}
 func (*OffloadRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_a73317e9fb8da571, []int{13}
+	return fileDescriptor_a73317e9fb8da571, []int{14}
 }
 func (m *OffloadRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_OffloadRequest.Unmarshal(m, b)
@@ -932,7 +970,7 @@ func (m *JailerConfig) Reset()         { *m = JailerConfig{} }
 func (m *JailerConfig) String() string { return proto.CompactTextString(m) }
 func (*JailerConfig) ProtoMessage()    {}
 func (*JailerConfig) Descriptor() ([]byte, []int) {
-	return fileDescriptor_a73317e9fb8da571, []int{14}
+	return fileDescriptor_a73317e9fb8da571, []int{15}
 }
 func (m *JailerConfig) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JailerConfig.Unmarshal(m, b)
@@ -1018,6 +1056,7 @@ func init() {
 	proto.RegisterType((*ResumeVMRequest)(nil), "ResumeVMRequest")
 	proto.RegisterType((*CreateSnapshotRequest)(nil), "CreateSnapshotRequest")
 	proto.RegisterType((*LoadSnapshotRequest)(nil), "LoadSnapshotRequest")
+	proto.RegisterType((*LoadSnapshotResponse)(nil), "LoadSnapshotResponse")
 	proto.RegisterType((*OffloadRequest)(nil), "OffloadRequest")
 	proto.RegisterType((*JailerConfig)(nil), "JailerConfig")
 }
