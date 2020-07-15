@@ -111,6 +111,7 @@ message LoadSnapshotRequest {
     string VMID = 1;
     string SnapshotFilePath = 2;
     string MemFilePath = 3;
+    bool EnableUserPF = 4;
 }
 
 message OffloadRequest {
