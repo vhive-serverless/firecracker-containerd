@@ -106,6 +106,13 @@ var (
 	_ shim.Init           = NewService
 )
 
+type loadSnapReq struct {
+	SnapshotPath         string `json:"snapshot_path"`
+	MemFilePath          string `json:"mem_file_path"`
+	SendSockAddr         string `json:"sock_file_path"`
+	EnableUserPageFaults bool   `json:"enable_user_page_faults"`
+}
+
 // implements shimapi
 type service struct {
 	taskManager   vm.TaskManager
@@ -1770,13 +1777,16 @@ func formPauseReq() (*http.Request, error) {
 	return req, nil
 }
 
-func formLoadSnapReq(snapshotPath, memPath string) (*http.Request, error) {
+func formLoadSnapReq(snapshotPath, memPath, sendSockAddr string, isUpf bool) (*http.Request, error) {
 	var req *http.Request
 
-	data := map[string]string{
-		"snapshot_path": snapshotPath,
-		"mem_file_path": memPath,
+	data := loadSnapReq{
+		SnapshotPath:         snapshotPath,
+		MemFilePath:          memPath,
+		SendSockAddr:         sendSockAddr,
+		EnableUserPageFaults: isUpf,
 	}
+
 	json, err := json.Marshal(data)
 	if err != nil {
 		logrus.WithError(err).Error("Failed to marshal json data")
