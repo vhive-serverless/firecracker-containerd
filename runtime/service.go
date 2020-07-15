@@ -790,7 +790,7 @@ func (s *service) ResumeVM(ctx context.Context, req *proto.ResumeVMRequest) (*em
 }
 
 // LoadSnapshot Loads a VM from a snapshot
-func (s *service) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotRequest) (*empty.Empty, error) {
+func (s *service) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotRequest) (*proto.LoadSnapshotResponse, error) {
 	if err := s.startFirecrackerProcess(); err != nil {
 		s.logger.WithError(err).Error("startFirecrackerProcess returned an error")
 		return nil, err
@@ -841,7 +841,7 @@ func (s *service) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotReque
 		return nil, err
 	}
 
-	return &empty.Empty{}, nil
+	return &proto.LoadSnapshotResponse{SendSockPath: s.shimDir.FirecrackerUPFSockPath()}, nil
 }
 
 // CreateSnapshot Creates a snapshot of a VM
