@@ -117,7 +117,7 @@ func (s *service) ResumeVM(ctx context.Context, req *proto.ResumeVMRequest) (*em
 	return s.local.ResumeVM(ctx, req)
 }
 
-func (s *service) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotRequest) (*empty.Empty, error) {
+func (s *service) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotRequest) (*proto.LoadSnapshotResponse, error) {
 	log.G(ctx).Debugf("load snapshot request: %+v", req)
 	return s.local.LoadSnapshot(ctx, req)
 }
