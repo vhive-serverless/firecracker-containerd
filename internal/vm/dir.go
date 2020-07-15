@@ -95,6 +95,12 @@ func (d Dir) FirecrackerSockRelPath() (string, error) {
 	return relPathTo(d.FirecrackerSockPath())
 }
 
+// FirecrackerUPFSockPath returns the path to the user page faults
+// socket of the firecracker process
+func (d Dir) FirecrackerUPFSockPath() string {
+	return filepath.Join(d.RootPath(), internal.FirecrackerUPFSockName)
+}
+
 // FirecrackerVSockPath returns the path to the vsock unix socket that the runtime uses
 // to communicate with the VM agent.
 func (d Dir) FirecrackerVSockPath() string {
