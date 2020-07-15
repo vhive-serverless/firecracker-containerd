@@ -1883,3 +1883,28 @@ func (s *service) startFirecrackerProcess() error {
 
 	return nil
 }
+
+func (s *service) dialFirecrackerSocket() error {
+	for {
+		var d net.Dialer
+		ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+		defer cancel()
+
+		c, err := d.DialContext(ctx, "unix", s.shimDir.FirecrackerSockPath())
+		if err != nil {
+			if ctx.Err() != nil {
+				s.logger.WithError(ctx.Err()).Error("timed out while waiting for firecracker socket")
+				return ctx.Err()
+			}
+
+			time.Sleep(1 * time.Millisecond)
+			continue
+		}
+
+		c.Close()
+
+		break
+	}
+
+	return nil
+}
