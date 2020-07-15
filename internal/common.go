@@ -34,6 +34,8 @@ const (
 	// FirecrackerVSockName is the name of the Firecracker VSock unix path used for communication
 	// between the runtime and the agent
 	FirecrackerVSockName = "firecracker.vsock"
+	// FirecrackerUPFSockName is the name of the Firecracker UPF socker
+	FirecrackerUPFSockName = "firecracker.upfsock"
 	// FirecrackerLogFifoName is the name of the Firecracker VMM log FIFO
 	FirecrackerLogFifoName = "fc-logs.fifo"
 	// FirecrackerMetricsFifoName is the name of the Firecracker VMM metrics FIFO
