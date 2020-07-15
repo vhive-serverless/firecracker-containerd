@@ -108,6 +108,13 @@ var (
 	_ shim.Init           = NewService
 )
 
+type loadSnapReq struct {
+	SnapshotPath         string `json:"snapshot_path"`
+	MemFilePath          string `json:"mem_file_path"`
+	SendSockAddr         string `json:"sock_file_path"`
+	EnableUserPageFaults bool   `json:"enable_user_page_faults"`
+}
+
 // implements shimapi
 type service struct {
 	taskManager   vm.TaskManager
@@ -851,7 +858,12 @@ func (s *service) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotReque
 	}
 	s.createHTTPControlClient()
 
-	loadSnapReq, err := formLoadSnapReq(req.SnapshotFilePath, req.MemFilePath)
+	sendSockAddr := s.shimDir.FirecrackerUPFSockPath()
+	if !req.EnableUserPF {
+		sendSockAddr = "dummy"
+	}
+
+	loadSnapReq, err := formLoadSnapReq(req.SnapshotFilePath, req.MemFilePath, sendSockAddr, req.EnableUserPF)
 	if err != nil {
 		s.logger.WithError(err).Error("Failed to create load snapshot request")
 		return nil, err
@@ -925,6 +937,11 @@ func (s *service) Offload(ctx context.Context, req *proto.OffloadRequest) (*empt
 
 	if err := os.RemoveAll(s.shimDir.FirecrackerVSockPath()); err != nil {
 		s.logger.WithError(err).Error("Failed to delete firecracker vsock")
+		return nil, err
+	}
+
+	if err := os.RemoveAll(s.shimDir.FirecrackerUPFSockPath()); err != nil {
+		s.logger.WithError(err).Error("Failed to delete firecracker UPF socket")
 		return nil, err
 	}
 
@@ -1794,13 +1811,16 @@ func formPauseReq() (*http.Request, error) {
 	return req, nil
 }
 
-func formLoadSnapReq(snapshotPath, memPath string) (*http.Request, error) {
+func formLoadSnapReq(snapshotPath, memPath, sendSockAddr string, isUpf bool) (*http.Request, error) {
 	var req *http.Request
 
-	data := map[string]string{
-		"snapshot_path": snapshotPath,
-		"mem_file_path": memPath,
+	data := loadSnapReq{
+		SnapshotPath:         snapshotPath,
+		MemFilePath:          memPath,
+		SendSockAddr:         sendSockAddr,
+		EnableUserPageFaults: isUpf,
 	}
+
 	json, err := json.Marshal(data)
 	if err != nil {
 		logrus.WithError(err).Error("Failed to marshal json data")

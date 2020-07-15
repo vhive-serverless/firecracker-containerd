@@ -796,6 +796,7 @@ type LoadSnapshotRequest struct {
 	VMID                 string   `protobuf:"bytes,1,opt,name=VMID,json=vMID,proto3" json:"VMID,omitempty"`
 	SnapshotFilePath     string   `protobuf:"bytes,2,opt,name=SnapshotFilePath,json=snapshotFilePath,proto3" json:"SnapshotFilePath,omitempty"`
 	MemFilePath          string   `protobuf:"bytes,3,opt,name=MemFilePath,json=memFilePath,proto3" json:"MemFilePath,omitempty"`
+	EnableUserPF         bool     `protobuf:"varint,4,opt,name=EnableUserPF,json=enableUserPF,proto3" json:"EnableUserPF,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -844,6 +845,13 @@ func (m *LoadSnapshotRequest) GetMemFilePath() string {
 		return m.MemFilePath
 	}
 	return ""
+}
+
+func (m *LoadSnapshotRequest) GetEnableUserPF() bool {
+	if m != nil {
+		return m.EnableUserPF
+	}
+	return false
 }
 
 type OffloadRequest struct {
