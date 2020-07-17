@@ -281,7 +281,9 @@ demo-network: install-cni-bins $(FCNET_CONFIG)
 # Firecracker submodule
 ##########################
 .PHONY: firecracker
-firecracker: $(FIRECRACKER_BIN)
+firecracker:
+	docker build -t fcuvm/dev:v16_upf -f _submodules/firecracker/tools/devctr/Dockerfile.x86_64 _submodules/firecracker/
+	_submodules/firecracker/tools/devtool build --release
 
 .PHONY: install-firecracker
 install-firecracker: firecracker
