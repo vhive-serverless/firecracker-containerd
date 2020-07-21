@@ -854,38 +854,38 @@ func (m *LoadSnapshotRequest) GetEnableUserPF() bool {
 	return false
 }
 
-type LoadSnapshotResponse struct {
+type OffloadResponse struct {
 	SendSockPath         string   `protobuf:"bytes,1,opt,name=SendSockPath,json=sendSockPath,proto3" json:"SendSockPath,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *LoadSnapshotResponse) Reset()         { *m = LoadSnapshotResponse{} }
-func (m *LoadSnapshotResponse) String() string { return proto.CompactTextString(m) }
-func (*LoadSnapshotResponse) ProtoMessage()    {}
-func (*LoadSnapshotResponse) Descriptor() ([]byte, []int) {
+func (m *OffloadResponse) Reset()         { *m = OffloadResponse{} }
+func (m *OffloadResponse) String() string { return proto.CompactTextString(m) }
+func (*OffloadResponse) ProtoMessage()    {}
+func (*OffloadResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_a73317e9fb8da571, []int{13}
 }
-func (m *LoadSnapshotResponse) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_LoadSnapshotResponse.Unmarshal(m, b)
+func (m *OffloadResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_OffloadResponse.Unmarshal(m, b)
 }
-func (m *LoadSnapshotResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_LoadSnapshotResponse.Marshal(b, m, deterministic)
+func (m *OffloadResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_OffloadResponse.Marshal(b, m, deterministic)
 }
-func (m *LoadSnapshotResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_LoadSnapshotResponse.Merge(m, src)
+func (m *OffloadResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_OffloadResponse.Merge(m, src)
 }
-func (m *LoadSnapshotResponse) XXX_Size() int {
-	return xxx_messageInfo_LoadSnapshotResponse.Size(m)
+func (m *OffloadResponse) XXX_Size() int {
+	return xxx_messageInfo_OffloadResponse.Size(m)
 }
-func (m *LoadSnapshotResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_LoadSnapshotResponse.DiscardUnknown(m)
+func (m *OffloadResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_OffloadResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_LoadSnapshotResponse proto.InternalMessageInfo
+var xxx_messageInfo_OffloadResponse proto.InternalMessageInfo
 
-func (m *LoadSnapshotResponse) GetSendSockPath() string {
+func (m *OffloadResponse) GetSendSockPath() string {
 	if m != nil {
 		return m.SendSockPath
 	}
@@ -1056,7 +1056,7 @@ func init() {
 	proto.RegisterType((*ResumeVMRequest)(nil), "ResumeVMRequest")
 	proto.RegisterType((*CreateSnapshotRequest)(nil), "CreateSnapshotRequest")
 	proto.RegisterType((*LoadSnapshotRequest)(nil), "LoadSnapshotRequest")
-	proto.RegisterType((*LoadSnapshotResponse)(nil), "LoadSnapshotResponse")
+	proto.RegisterType((*OffloadResponse)(nil), "OffloadResponse")
 	proto.RegisterType((*OffloadRequest)(nil), "OffloadRequest")
 	proto.RegisterType((*JailerConfig)(nil), "JailerConfig")
 }
