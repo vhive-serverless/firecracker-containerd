@@ -519,7 +519,7 @@ func (s *local) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotReq
 }
 
 // LoadSnapshot Loads a snapshot of a VM
-func (s *local) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotRequest) (*proto.LoadSnapshotResponse, error) {
+func (s *local) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotRequest) (*empty.Empty, error) {
 	client, err := s.shimFirecrackerClient(ctx, req.VMID)
 	if err != nil {
 		return nil, err
@@ -539,7 +539,7 @@ func (s *local) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotRequest
 // Offload Shuts down a VM started through the firecracker go sdk and deletes
 // the corresponding firecracker socket. All of the other resources (shim, other sockets)
 // will persist.
-func (s *local) Offload(ctx context.Context, req *proto.OffloadRequest) (*empty.Empty, error) {
+func (s *local) Offload(ctx context.Context, req *proto.OffloadRequest) (*proto.OffloadResponse, error) {
 	client, err := s.shimFirecrackerClient(ctx, req.VMID)
 	if err != nil {
 		return nil, err

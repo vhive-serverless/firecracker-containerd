@@ -102,7 +102,7 @@ message LoadSnapshotRequest {
     bool EnableUserPF = 4;
 }
 
-message LoadSnapshotResponse {
+message OffloadResponse {
     string SendSockPath = 1;
 }
 
