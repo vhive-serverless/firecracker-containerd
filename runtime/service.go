@@ -811,7 +811,7 @@ func (s *service) ResumeVM(ctx context.Context, req *proto.ResumeVMRequest) (*em
 }
 
 // LoadSnapshot Loads a VM from a snapshot
-func (s *service) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotRequest) (*proto.LoadSnapshotResponse, error) {
+func (s *service) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotRequest) (*empty.Empty, error) {
 	if err := s.startFirecrackerProcess(); err != nil {
 		s.logger.WithError(err).Error("startFirecrackerProcess returned an error")
 		return nil, err
@@ -862,7 +862,7 @@ func (s *service) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotReque
 		return nil, err
 	}
 
-	return &proto.LoadSnapshotResponse{SendSockPath: s.shimDir.FirecrackerUPFSockPath()}, nil
+	return &empty.Empty{}, nil
 }
 
 // CreateSnapshot Creates a snapshot of a VM
@@ -888,7 +888,7 @@ func (s *service) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotR
 
 // Offload Shuts down a VM and deletes the corresponding firecracker socket
 // and vsock. All of the other resources will persist
-func (s *service) Offload(ctx context.Context, req *proto.OffloadRequest) (*empty.Empty, error) {
+func (s *service) Offload(ctx context.Context, req *proto.OffloadRequest) (*proto.OffloadResponse, error) {
 	if err := syscall.Kill(s.firecrackerPid, 9); err != nil {
 		s.logger.WithError(err).Error("Failed to kill firecracker process")
 		return nil, err
@@ -909,7 +909,7 @@ func (s *service) Offload(ctx context.Context, req *proto.OffloadRequest) (*empt
 		return nil, err
 	}
 
-	return &empty.Empty{}, nil
+	return &proto.OffloadResponse{SendSockPath: s.shimDir.FirecrackerUPFSockPath()}, nil
 }
 
 func (s *service) buildVMConfiguration(req *proto.CreateVMRequest) (*firecracker.Config, error) {
