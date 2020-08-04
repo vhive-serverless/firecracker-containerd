@@ -49,6 +49,8 @@ message CreateVMResponse {
     string LogFifoPath = 3;
     string MetricsFifoPath = 4;
     string CgroupPath = 5;
+    string UPFSockPath = 6;
+    string FirecrackerPID = 7;
 }
 
 message PauseVMRequest {
@@ -116,8 +118,8 @@ message LoadSnapshotRequest {
     bool EnableUserPF = 4;
 }
 
-message OffloadResponse {
-    string SendSockPath = 1;
+message LoadResponse {
+    string FirecrackerPID = 1;
 }
 
 message OffloadRequest {
