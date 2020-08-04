@@ -522,6 +522,8 @@ func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRe
 	resp.MetricsFifoPath = s.machineConfig.MetricsFifo
 	resp.LogFifoPath = s.machineConfig.LogFifo
 	resp.SocketPath = s.shimDir.FirecrackerSockPath()
+	resp.FirecrackerPID = strconv.Itoa(s.firecrackerPid)
+	resp.UPFSockPath = s.shimDir.FirecrackerUPFSockPath()
 	if c, ok := s.jailer.(cgroupPather); ok {
 		resp.CgroupPath = c.CgroupPath()
 	}
@@ -1823,31 +1825,6 @@ func formCreateSnapReq(snapshotPath, memPath string) (*http.Request, error) {
 		logrus.WithError(err).Error("Failed to create new HTTP request in formCreateSnapReq")
 		return nil, err
 	}
-	req.Header.Add("accept", "application/json")
-	req.Header.Add("Content-Type", "application/json")
-
-	return req, nil
-}
-
-func formPatchDriveReq(driveID, pathOnHost string) (*http.Request, error) {
-	var req *http.Request
-
-	data := map[string]string{
-		"drive_id":     driveID,
-		"path_on_host": pathOnHost,
-	}
-	json, err := json.Marshal(data)
-	if err != nil {
-		logrus.WithError(err).Error("Failed to marshal json data")
-		return nil, err
-	}
-
-	req, err = http.NewRequest("PATCH", fmt.Sprintf("http+unix://firecracker/drives/%s", driveID), bytes.NewBuffer(json))
-	if err != nil {
-		logrus.WithError(err).Error("Failed to create new HTTP request in formPauseReq")
-		return nil, err
-	}
-
 	req.Header.Add("accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")
 
