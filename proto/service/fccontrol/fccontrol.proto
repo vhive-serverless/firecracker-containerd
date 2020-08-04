@@ -32,11 +32,11 @@ service Firecracker {
     rpc ResumeVM(ResumeVMRequest) returns (google.protobuf.Empty);
 
     // Loads VM from snapshot
-    rpc LoadSnapshot(LoadSnapshotRequest) returns (google.protobuf.Empty);
+    rpc LoadSnapshot(LoadSnapshotRequest) returns (LoadResponse);
 
     // Make a snapshot of a VM
     rpc CreateSnapshot(CreateSnapshotRequest) returns (google.protobuf.Empty);
 
     // Offload a snapshotted VM
-    rpc Offload(OffloadRequest) returns (OffloadResponse);
+    rpc Offload(OffloadRequest) returns (google.protobuf.Empty);
 }
