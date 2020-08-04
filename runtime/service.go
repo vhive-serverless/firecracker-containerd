@@ -508,6 +508,8 @@ func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRe
 	resp.MetricsFifoPath = s.machineConfig.MetricsFifo
 	resp.LogFifoPath = s.machineConfig.LogFifo
 	resp.SocketPath = s.shimDir.FirecrackerSockPath()
+	resp.FirecrackerPID = strconv.Itoa(s.firecrackerPid)
+	resp.UPFSockPath = s.shimDir.FirecrackerUPFSockPath()
 	if c, ok := s.jailer.(cgroupPather); ok {
 		resp.CgroupPath = c.CgroupPath()
 	}
@@ -790,7 +792,7 @@ func (s *service) ResumeVM(ctx context.Context, req *proto.ResumeVMRequest) (*em
 }
 
 // LoadSnapshot Loads a VM from a snapshot
-func (s *service) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotRequest) (*empty.Empty, error) {
+func (s *service) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotRequest) (*proto.LoadResponse, error) {
 	if err := s.startFirecrackerProcess(); err != nil {
 		s.logger.WithError(err).Error("startFirecrackerProcess returned an error")
 		return nil, err
@@ -823,25 +825,7 @@ func (s *service) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotReque
 		return nil, err
 	}
 
-	// Workaround for https://github.com/firecracker-microvm/firecracker/issues/1974
-	patchDriveReq, err := formPatchDriveReq("MN2HE43UOVRDA", s.taskDrivePathOnHost)
-	if err != nil {
-		s.logger.WithError(err).Error("Failed to create patch drive request")
-		return nil, err
-	}
-
-	resp, err = s.httpControlClient.Do(patchDriveReq)
-	if err != nil {
-		s.logger.WithError(err).Error("Failed to send patch drive request")
-		return nil, err
-	}
-	if !strings.Contains(resp.Status, "204") {
-		s.logger.WithError(err).Error("Failed to patch drive")
-		s.logger.WithError(err).Errorf("Status of request: %s", resp.Status)
-		return nil, err
-	}
-
-	return &empty.Empty{}, nil
+	return &proto.LoadResponse{FirecrackerPID: strconv.Itoa(s.firecrackerPid)}, nil
 }
 
 // CreateSnapshot Creates a snapshot of a VM
@@ -867,7 +851,7 @@ func (s *service) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotR
 
 // Offload Shuts down a VM and deletes the corresponding firecracker socket
 // and vsock. All of the other resources will persist
-func (s *service) Offload(ctx context.Context, req *proto.OffloadRequest) (*proto.OffloadResponse, error) {
+func (s *service) Offload(ctx context.Context, req *proto.OffloadRequest) (*empty.Empty, error) {
 	if err := syscall.Kill(s.firecrackerPid, 9); err != nil {
 		s.logger.WithError(err).Error("Failed to kill firecracker process")
 		return nil, err
@@ -888,7 +872,7 @@ func (s *service) Offload(ctx context.Context, req *proto.OffloadRequest) (*prot
 		return nil, err
 	}
 
-	return &proto.OffloadResponse{SendSockPath: s.shimDir.FirecrackerUPFSockPath()}, nil
+	return &empty.Empty{}, nil
 }
 
 func (s *service) buildVMConfiguration(req *proto.CreateVMRequest) (*firecracker.Config, error) {
@@ -1657,31 +1641,6 @@ func formCreateSnapReq(snapshotPath, memPath string) (*http.Request, error) {
 		logrus.WithError(err).Error("Failed to create new HTTP request in formCreateSnapReq")
 		return nil, err
 	}
-	req.Header.Add("accept", "application/json")
-	req.Header.Add("Content-Type", "application/json")
-
-	return req, nil
-}
-
-func formPatchDriveReq(driveID, pathOnHost string) (*http.Request, error) {
-	var req *http.Request
-
-	data := map[string]string{
-		"drive_id":     driveID,
-		"path_on_host": pathOnHost,
-	}
-	json, err := json.Marshal(data)
-	if err != nil {
-		logrus.WithError(err).Error("Failed to marshal json data")
-		return nil, err
-	}
-
-	req, err = http.NewRequest("PATCH", fmt.Sprintf("http+unix://firecracker/drives/%s", driveID), bytes.NewBuffer(json))
-	if err != nil {
-		logrus.WithError(err).Error("Failed to create new HTTP request in formPauseReq")
-		return nil, err
-	}
-
 	req.Header.Add("accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")
 
