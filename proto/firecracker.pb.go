@@ -200,6 +200,8 @@ type CreateVMResponse struct {
 	LogFifoPath          string   `protobuf:"bytes,3,opt,name=LogFifoPath,json=logFifoPath,proto3" json:"LogFifoPath,omitempty"`
 	MetricsFifoPath      string   `protobuf:"bytes,4,opt,name=MetricsFifoPath,json=metricsFifoPath,proto3" json:"MetricsFifoPath,omitempty"`
 	CgroupPath           string   `protobuf:"bytes,5,opt,name=CgroupPath,json=cgroupPath,proto3" json:"CgroupPath,omitempty"`
+	UPFSockPath          string   `protobuf:"bytes,6,opt,name=UPFSockPath,json=uPFSockPath,proto3" json:"UPFSockPath,omitempty"`
+	FirecrackerPID       string   `protobuf:"bytes,7,opt,name=FirecrackerPID,json=firecrackerPID,proto3" json:"FirecrackerPID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -302,6 +304,13 @@ func (m *PauseVMRequest) GetVMID() string {
 	return ""
 }
 
+func (m *CreateVMResponse) GetUPFSockPath() string {
+	if m != nil {
+		return m.UPFSockPath
+	}
+	return ""
+}
+
 type ResumeVMRequest struct {
 	VMID                 string   `protobuf:"bytes,1,opt,name=VMID,json=vMID,proto3" json:"VMID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -336,6 +345,13 @@ var xxx_messageInfo_ResumeVMRequest proto.InternalMessageInfo
 func (m *ResumeVMRequest) GetVMID() string {
 	if m != nil {
 		return m.VMID
+	}
+	return ""
+}
+
+func (m *CreateVMResponse) GetFirecrackerPID() string {
+	if m != nil {
+		return m.FirecrackerPID
 	}
 	return ""
 }
@@ -854,40 +870,40 @@ func (m *LoadSnapshotRequest) GetEnableUserPF() bool {
 	return false
 }
 
-type OffloadResponse struct {
-	SendSockPath         string   `protobuf:"bytes,1,opt,name=SendSockPath,json=sendSockPath,proto3" json:"SendSockPath,omitempty"`
+type LoadResponse struct {
+	FirecrackerPID       string   `protobuf:"bytes,1,opt,name=FirecrackerPID,json=firecrackerPID,proto3" json:"FirecrackerPID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *OffloadResponse) Reset()         { *m = OffloadResponse{} }
-func (m *OffloadResponse) String() string { return proto.CompactTextString(m) }
-func (*OffloadResponse) ProtoMessage()    {}
-func (*OffloadResponse) Descriptor() ([]byte, []int) {
+func (m *LoadResponse) Reset()         { *m = LoadResponse{} }
+func (m *LoadResponse) String() string { return proto.CompactTextString(m) }
+func (*LoadResponse) ProtoMessage()    {}
+func (*LoadResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_a73317e9fb8da571, []int{13}
 }
-func (m *OffloadResponse) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_OffloadResponse.Unmarshal(m, b)
+func (m *LoadResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_LoadResponse.Unmarshal(m, b)
 }
-func (m *OffloadResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_OffloadResponse.Marshal(b, m, deterministic)
+func (m *LoadResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_LoadResponse.Marshal(b, m, deterministic)
 }
-func (m *OffloadResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_OffloadResponse.Merge(m, src)
+func (m *LoadResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_LoadResponse.Merge(m, src)
 }
-func (m *OffloadResponse) XXX_Size() int {
-	return xxx_messageInfo_OffloadResponse.Size(m)
+func (m *LoadResponse) XXX_Size() int {
+	return xxx_messageInfo_LoadResponse.Size(m)
 }
-func (m *OffloadResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_OffloadResponse.DiscardUnknown(m)
+func (m *LoadResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_LoadResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_OffloadResponse proto.InternalMessageInfo
+var xxx_messageInfo_LoadResponse proto.InternalMessageInfo
 
-func (m *OffloadResponse) GetSendSockPath() string {
+func (m *LoadResponse) GetFirecrackerPID() string {
 	if m != nil {
-		return m.SendSockPath
+		return m.FirecrackerPID
 	}
 	return ""
 }
@@ -1056,7 +1072,7 @@ func init() {
 	proto.RegisterType((*ResumeVMRequest)(nil), "ResumeVMRequest")
 	proto.RegisterType((*CreateSnapshotRequest)(nil), "CreateSnapshotRequest")
 	proto.RegisterType((*LoadSnapshotRequest)(nil), "LoadSnapshotRequest")
-	proto.RegisterType((*OffloadResponse)(nil), "OffloadResponse")
+	proto.RegisterType((*LoadResponse)(nil), "LoadResponse")
 	proto.RegisterType((*OffloadRequest)(nil), "OffloadRequest")
 	proto.RegisterType((*JailerConfig)(nil), "JailerConfig")
 }

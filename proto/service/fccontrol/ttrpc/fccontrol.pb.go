@@ -61,9 +61,9 @@ type FirecrackerService interface {
 	GetVMMetadata(ctx context.Context, req *proto1.GetVMMetadataRequest) (*proto1.GetVMMetadataResponse, error)
 	PauseVM(ctx context.Context, req *proto1.PauseVMRequest) (*empty.Empty, error)
 	ResumeVM(ctx context.Context, req *proto1.ResumeVMRequest) (*empty.Empty, error)
-	LoadSnapshot(ctx context.Context, req *proto1.LoadSnapshotRequest) (*empty.Empty, error)
+	LoadSnapshot(ctx context.Context, req *proto1.LoadSnapshotRequest) (*proto1.LoadResponse, error)
 	CreateSnapshot(ctx context.Context, req *proto1.CreateSnapshotRequest) (*empty.Empty, error)
-	Offload(ctx context.Context, req *proto1.OffloadRequest) (*proto1.OffloadResponse, error)
+	Offload(ctx context.Context, req *proto1.OffloadRequest) (*empty.Empty, error)
 }
 
 func RegisterFirecrackerService(srv *github_com_containerd_ttrpc.Server, svc FirecrackerService) {
@@ -252,8 +252,8 @@ func (c *firecrackerClient) ResumeVM(ctx context.Context, req *proto1.ResumeVMRe
 	return &resp, nil
 }
 
-func (c *firecrackerClient) LoadSnapshot(ctx context.Context, req *proto1.LoadSnapshotRequest) (*empty.Empty, error) {
-	var resp empty.Empty
+func (c *firecrackerClient) LoadSnapshot(ctx context.Context, req *proto1.LoadSnapshotRequest) (*proto1.LoadResponse, error) {
+	var resp proto1.LoadResponse
 	if err := c.client.Call(ctx, "Firecracker", "LoadSnapshot", req, &resp); err != nil {
 		return nil, err
 	}
@@ -268,8 +268,8 @@ func (c *firecrackerClient) CreateSnapshot(ctx context.Context, req *proto1.Crea
 	return &resp, nil
 }
 
-func (c *firecrackerClient) Offload(ctx context.Context, req *proto1.OffloadRequest) (*proto1.OffloadResponse, error) {
-	var resp proto1.OffloadResponse
+func (c *firecrackerClient) Offload(ctx context.Context, req *proto1.OffloadRequest) (*empty.Empty, error) {
+	var resp empty.Empty
 	if err := c.client.Call(ctx, "Firecracker", "Offload", req, &resp); err != nil {
 		return nil, err
 	}
