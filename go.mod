@@ -26,7 +26,7 @@ require (
 	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/gogo/googleapis v1.1.0 // indirect
 	github.com/gogo/protobuf v1.3.0
-	github.com/golang/protobuf v1.3.1
+	github.com/golang/protobuf v1.4.2
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/imdario/mergo v0.3.8 // indirect
