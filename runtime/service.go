@@ -228,8 +228,6 @@ func NewService(shimCtx context.Context, id string, remotePublisher shim.Publish
 		jailer:  newNoopJailer(shimCtx, logger, shimDir),
 	}
 
-	s.startEventForwarders(remotePublisher)
-
 	err = s.serveFCControl()
 	if err != nil {
 		err = errors.Wrap(err, "failed to start fccontrol server")
@@ -488,12 +486,6 @@ func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRe
 			return nil, status.Errorf(codes.DeadlineExceeded, "VM %q didn't start within %s: %s", request.VMID, timeout, err)
 		}
 		return nil, errors.Wrap(err, "failed to create VM")
-	}
-
-	// creating the VM succeeded, setup monitors and publish events to celebrate
-	err = s.publishVMStart()
-	if err != nil {
-		s.logger.WithError(err).Error("failed to publish start VM event")
 	}
 
 	// Commented out because its execution cancels the shim, and
@@ -1440,11 +1432,6 @@ func (s *service) cleanup() error {
 		if err := s.jailer.Close(); err != nil {
 			result = multierror.Append(result, err)
 			s.logger.WithError(err).Error("failed to close jailer")
-		}
-
-		if err := s.publishVMStop(); err != nil {
-			result = multierror.Append(result, err)
-			s.logger.WithError(err).Error("failed to publish stop VM event")
 		}
 
 		// once the VM shuts down, the shim should too
