@@ -505,8 +505,6 @@ func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRe
 	close(s.vmReady)
 
 	resp.VMID = s.vmID
-	resp.MetricsFifoPath = s.machineConfig.MetricsFifo
-	resp.LogFifoPath = s.machineConfig.LogFifo
 	resp.SocketPath = s.shimDir.FirecrackerSockPath()
 	resp.FirecrackerPID = strconv.Itoa(s.firecrackerPid)
 	resp.UPFSockPath = s.shimDir.FirecrackerUPFSockPath()
@@ -549,68 +547,9 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 		return errors.Wrap(err, "failed to create jailer")
 	}
 
-	s.machineConfig, err = s.buildVMConfiguration(request)
-	if err != nil {
-		return errors.Wrapf(err, "failed to build VM configuration")
-	}
-
-	opts := []firecracker.Opt{}
-
-	if v, ok := s.config.DebugHelper.GetFirecrackerSDKLogLevel(); ok {
-		logger := log.G(s.shimCtx)
-		logger.Logger.SetLevel(v)
-		opts = append(opts, firecracker.WithLogger(logger))
-	}
-	relVSockPath, err := s.jailer.JailPath().FirecrackerVSockRelPath()
-	if err != nil {
-		return errors.Wrapf(err, "failed to get relative path to firecracker vsock")
-	}
-
-	jailedOpts, err := s.jailer.BuildJailedMachine(s.config, s.machineConfig, s.vmID)
-	if err != nil {
-		return errors.Wrap(err, "failed to build jailed machine options")
-	}
-	opts = append(opts, jailedOpts...)
-
-	// In the event that a noop jailer is used, we will pass in the shim context
-	// and have the SDK construct a new machine using that context. Otherwise, a
-	// custom process runner will be provided via options which will stomp over
-	// the shim context that was provided here.
-	s.machine, err = firecracker.NewMachine(s.shimCtx, *s.machineConfig, opts...)
-	if err != nil {
-		return errors.Wrapf(err, "failed to create new machine instance")
-	}
-
-	if err = s.machine.Start(s.shimCtx); err != nil {
-		return errors.Wrapf(err, "failed to start the VM")
-	}
-
-	s.logger.Info("calling agent")
-	conn, err := vm.VSockDial(requestCtx, s.logger, relVSockPath, defaultVsockPort)
-	if err != nil {
-		return errors.Wrapf(err, "failed to dial the VM over vsock")
-	}
-
-	rpcClient := ttrpc.NewClient(conn, ttrpc.WithOnClose(func() { _ = conn.Close() }))
-	s.agentClient = taskAPI.NewTaskClient(rpcClient)
-	s.eventBridgeClient = eventbridge.NewGetterClient(rpcClient)
-	s.driveMountClient = drivemount.NewDriveMounterClient(rpcClient)
-	s.exitAfterAllTasksDeleted = request.ExitAfterAllTasksDeleted
-
-	err = s.mountDrives(requestCtx)
-	if err != nil {
-		return err
-	}
-
 	s.createHTTPControlClient()
 
-	pid, err := s.machine.PID()
-	if err != nil {
-		s.logger.WithError(err).Error("Failed to get PID of firecracker process")
-		return err
-	}
-
-	s.firecrackerPid = pid
+	s.firecrackerPid = 0
 
 	s.logger.Info("successfully started the VM")
 
@@ -667,11 +606,9 @@ func (s *service) GetVMInfo(requestCtx context.Context, request *proto.GetVMInfo
 	}
 
 	return &proto.GetVMInfoResponse{
-		VMID:            s.vmID,
-		SocketPath:      s.shimDir.FirecrackerSockPath(),
-		LogFifoPath:     s.machineConfig.LogFifo,
-		MetricsFifoPath: s.machineConfig.MetricsFifo,
-		CgroupPath:      cgroupPath,
+		VMID:       s.vmID,
+		SocketPath: s.shimDir.FirecrackerSockPath(),
+		CgroupPath: cgroupPath,
 	}, nil
 }
 
@@ -852,9 +789,11 @@ func (s *service) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotR
 // Offload Shuts down a VM and deletes the corresponding firecracker socket
 // and vsock. All of the other resources will persist
 func (s *service) Offload(ctx context.Context, req *proto.OffloadRequest) (*empty.Empty, error) {
-	if err := syscall.Kill(s.firecrackerPid, 9); err != nil {
-		s.logger.WithError(err).Error("Failed to kill firecracker process")
-		return nil, err
+	if s.firecrackerPid != 0 {
+		if err := syscall.Kill(s.firecrackerPid, 9); err != nil {
+			s.logger.WithError(err).Error("Failed to kill firecracker process")
+			return nil, err
+		}
 	}
 
 	if err := os.RemoveAll(s.shimDir.FirecrackerSockPath()); err != nil {
