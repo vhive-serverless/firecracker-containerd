@@ -282,7 +282,6 @@ demo-network: install-cni-bins $(FCNET_CONFIG)
 ##########################
 .PHONY: firecracker
 firecracker:
-	docker build -t vhiveease/fcuvm_dev:v28 -f _submodules/firecracker/tools/devctr/Dockerfile.x86_64 _submodules/firecracker/
 	_submodules/firecracker/tools/devtool build --release
 
 .PHONY: install-firecracker
