@@ -1534,8 +1534,8 @@ func (s *service) monitorVMExit() {
 func (s *service) createHTTPControlClient() {
 	u := &httpunix.Transport{
 		DialTimeout:           100 * time.Millisecond,
-		RequestTimeout:        10 * time.Second,
-		ResponseHeaderTimeout: 10 * time.Second,
+		RequestTimeout:        60 * time.Second,
+		ResponseHeaderTimeout: 60 * time.Second,
 	}
 	u.RegisterLocation("firecracker", s.shimDir.FirecrackerSockPath())
 
