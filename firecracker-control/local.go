@@ -429,9 +429,145 @@ func (s *local) newShim(ns, vmID, containerdAddress string, shimSocket *net.Unix
 		if err := fcSocketFile.Close(); err != nil {
 			logger.WithError(err).Errorf("failed to close %q", fcSocketFile.Name())
 		}
+	}()
 
-		if err := os.RemoveAll(shimDir.RootPath()); err != nil {
-			logger.WithError(err).Errorf("failed to remove %q", shimDir.RootPath())
+	err = setShimOOMScore(cmd.Process.Pid)
+	if err != nil {
+		logger.WithError(err).Error()
+		return nil, err
+	}
+
+	return cmd, nil
+}
+
+func (s *local) loadShim(ctx context.Context, ns, vmID, containerdAddress string) (*exec.Cmd, error) {
+	logger := s.logger.WithField("vmID", vmID)
+	logger.Debug("Loading shim")
+
+	shimSocketAddress, err := fcShim.SocketAddress(ctx, vmID)
+	if err != nil {
+		err = errors.Wrap(err, "failed to obtain shim socket address")
+		s.logger.WithError(err).Error()
+		return nil, err
+	}
+
+	shimSocket, err := shim.NewSocket(shimSocketAddress)
+	if isEADDRINUSE(err) {
+		return nil, status.Errorf(codes.AlreadyExists, "VM with ID %q already exists (socket: %q)", vmID, shimSocketAddress)
+	} else if err != nil {
+		err = errors.Wrapf(err, "failed to open shim socket at address %q", shimSocketAddress)
+		s.logger.WithError(err).Error()
+		return nil, err
+	}
+
+	// If we're here, there is no pre-existing shim for this VMID, so we spawn a new one
+	defer shimSocket.Close()
+	if err := os.Mkdir(s.config.ShimBaseDir, 0700); err != nil && !os.IsExist(err) {
+		s.logger.WithError(err).Error()
+		return nil, errors.Wrapf(err, "failed to make shim base directory: %s", s.config.ShimBaseDir)
+	}
+
+	shimDir, err := vm.ShimDir(s.config.ShimBaseDir, ns, vmID)
+	if err != nil {
+		err = errors.Wrapf(err, "failed to build shim path")
+		s.logger.WithError(err).Error()
+		return nil, err
+	}
+
+	err = shimDir.Mkdir()
+	if err != nil {
+		err = errors.Wrapf(err, "failed to create VM dir %q", shimDir.RootPath())
+		s.logger.WithError(err).Error()
+		return nil, err
+	}
+
+	fcSocketAddress, err := fcShim.FCControlSocketAddress(ctx, vmID)
+	if err != nil {
+		err = errors.Wrap(err, "failed to obtain shim socket address")
+		s.logger.WithError(err).Error()
+		return nil, err
+	}
+
+	fcSocket, err := shim.NewSocket(fcSocketAddress)
+	if err != nil {
+		err = errors.Wrapf(err, "failed to open fccontrol socket at address %q", fcSocketAddress)
+		s.logger.WithError(err).Error()
+		return nil, err
+	}
+
+	args := []string{
+		"-namespace", ns,
+		"-address", containerdAddress,
+	}
+
+	cmd := exec.Command(internal.ShimBinaryName, args...)
+
+	// note: The working dir of the shim has an effect on the length of the path
+	// needed to specify various unix sockets that the shim uses to communicate
+	// with the firecracker VMM and guest agent within. The length of that path
+	// has a relatively low limit (usually 108 chars), so modifying the working
+	// dir should be done with caution. See internal/vm/dir.go for the path
+	// definitions.
+	cmd.Dir = shimDir.RootPath()
+
+	shimSocketFile, err := shimSocket.File()
+	if err != nil {
+		err = errors.Wrap(err, "failed to get shim socket fd")
+		logger.WithError(err).Error()
+		return nil, err
+	}
+
+	fcSocketFile, err := fcSocket.File()
+	if err != nil {
+		err = errors.Wrap(err, "failed to get shim fccontrol socket fd")
+		logger.WithError(err).Error()
+		return nil, err
+	}
+
+	cmd.ExtraFiles = append(cmd.ExtraFiles, shimSocketFile, fcSocketFile)
+	fcSocketFDNum := 2 + len(cmd.ExtraFiles) // "2 +" because ExtraFiles come after stderr (fd #2)
+
+	ttrpc := containerdAddress + ".ttrpc"
+	cmd.Env = append(os.Environ(),
+		fmt.Sprintf("%s=%s", ttrpcAddressEnv, ttrpc),
+		fmt.Sprintf("%s=%s", internal.VMIDEnvVarKey, vmID),
+		fmt.Sprintf("%s=%s", internal.FCSocketFDEnvKey, strconv.Itoa(fcSocketFDNum))) // TODO remove after containerd is updated to expose ttrpc server to shim
+
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		Setpgid: true,
+	}
+
+	// shim stderr is just raw text, so pass it through our logrus formatter first
+	cmd.Stderr = logger.WithField("shim_stream", "stderr").WriterLevel(logrus.ErrorLevel)
+	// shim stdout on the other hand is already formatted by logrus, so pass that transparently through to containerd logs
+	cmd.Stdout = logger.Logger.Out
+
+	logger.Debugf("starting %s", internal.ShimBinaryName)
+
+	err = cmd.Start()
+	if err != nil {
+		err = errors.Wrap(err, "failed to start shim child process")
+		logger.WithError(err).Error()
+		return nil, err
+	}
+
+	// make sure to wait after start
+	go func() {
+		if err := cmd.Wait(); err != nil {
+			if exitErr, ok := err.(*exec.ExitError); ok {
+				// shim is usually terminated by cancelling the context
+				logger.WithError(exitErr).Debug("shim has been terminated")
+			} else {
+				logger.WithError(err).Error("shim has been unexpectedly terminated")
+			}
+		}
+
+		// Close all Unix abstract sockets.
+		if err := shimSocketFile.Close(); err != nil {
+			logger.WithError(err).Errorf("failed to close %q", shimSocketFile.Name())
+		}
+		if err := fcSocketFile.Close(); err != nil {
+			logger.WithError(err).Errorf("failed to close %q", fcSocketFile.Name())
 		}
 	}()
 
@@ -440,6 +576,8 @@ func (s *local) newShim(ns, vmID, containerdAddress string, shimSocket *net.Unix
 		logger.WithError(err).Error()
 		return nil, err
 	}
+
+	s.addShim(shimSocketAddress, cmd)
 
 	return cmd, nil
 }
@@ -520,6 +658,18 @@ func (s *local) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotReq
 
 // LoadSnapshot Loads a snapshot of a VM
 func (s *local) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotRequest) (*proto.LoadResponse, error) {
+	ns, err := namespaces.NamespaceRequired(ctx)
+	if err != nil {
+		err = errors.Wrap(err, "error retrieving namespace of request")
+		s.logger.WithError(err).Error()
+		return nil, err
+	}
+
+	_, err = s.loadShim(ctx, ns, req.VMID, s.containerdAddress)
+	if err != nil {
+		return nil, err
+	}
+
 	client, err := s.shimFirecrackerClient(ctx, req.VMID)
 	if err != nil {
 		return nil, err
@@ -553,5 +703,10 @@ func (s *local) Offload(ctx context.Context, req *proto.OffloadRequest) (*empty.
 		return nil, err
 	}
 
+	waitErr := s.waitForShimToExit(ctx, req.VMID)
+	if waitErr == nil {
+		s.logger.Error("failed to wait for shim to exit on offload")
+		return nil, waitErr
+	}
 	return resp, nil
 }
