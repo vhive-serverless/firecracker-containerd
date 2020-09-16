@@ -872,8 +872,6 @@ func (s *service) Offload(ctx context.Context, req *proto.OffloadRequest) (*empt
 		return nil, err
 	}
 
-	s.shimCancel()
-
 	return &empty.Empty{}, nil
 }
 

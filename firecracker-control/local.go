@@ -267,6 +267,13 @@ func (s *local) waitForShimToExit(ctx context.Context, vmID string) error {
 	}
 	defer delete(s.processes, socketAddr)
 
+	s.logger.Debug("Killing shim")
+
+	if err := syscall.Kill(int(pid), 9); err != nil {
+		s.logger.WithError(err).Error("Failed to kill shim process")
+		return err
+	}
+
 	return internal.WaitForPidToExit(ctx, stopVMInterval, pid)
 }
 
