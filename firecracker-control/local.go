@@ -274,7 +274,7 @@ func (s *local) waitForShimToExit(ctx context.Context, vmID string) error {
 		return err
 	}
 
-	return internal.WaitForPidToExit(ctx, stopVMInterval, pid)
+	return nil
 }
 
 // GetVMInfo returns metadata for the VM with the given VMID.
@@ -711,7 +711,7 @@ func (s *local) Offload(ctx context.Context, req *proto.OffloadRequest) (*empty.
 	}
 
 	waitErr := s.waitForShimToExit(ctx, req.VMID)
-	if waitErr == nil {
+	if waitErr != nil {
 		s.logger.Error("failed to wait for shim to exit on offload")
 		return nil, waitErr
 	}
