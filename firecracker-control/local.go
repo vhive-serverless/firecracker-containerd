@@ -279,9 +279,9 @@ func (s *local) waitForShimToExit(ctx context.Context, vmID string, killShim boo
 		}
 
 		return nil
-	} else {
-		return internal.WaitForPidToExit(ctx, stopVMInterval, pid)
 	}
+
+	return internal.WaitForPidToExit(ctx, stopVMInterval, pid)
 }
 
 // GetVMInfo returns metadata for the VM with the given VMID.
@@ -742,4 +742,3 @@ func (s *local) Offload(ctx context.Context, req *proto.OffloadRequest) (*empty.
 	}
 	return resp, nil
 }
-
