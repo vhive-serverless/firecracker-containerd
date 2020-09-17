@@ -71,6 +71,9 @@ type local struct {
 
 	processesMu sync.Mutex
 	processes   map[string]int32
+
+	fcControlSocket *net.UnixListener
+	shimSocket      *net.UnixListener
 }
 
 func newLocal(ic *plugin.InitContext) (*local, error) {
@@ -243,7 +246,7 @@ func (s *local) StopVM(requestCtx context.Context, req *proto.StopVMRequest) (*e
 	defer client.Close()
 
 	resp, shimErr := client.StopVM(requestCtx, req)
-	waitErr := s.waitForShimToExit(requestCtx, req.VMID)
+	waitErr := s.waitForShimToExit(requestCtx, req.VMID, false)
 
 	// Assuming the shim is returning containerd's error code, return the error as is if possible.
 	if waitErr == nil {
@@ -252,7 +255,7 @@ func (s *local) StopVM(requestCtx context.Context, req *proto.StopVMRequest) (*e
 	return resp, multierror.Append(shimErr, waitErr).ErrorOrNil()
 }
 
-func (s *local) waitForShimToExit(ctx context.Context, vmID string) error {
+func (s *local) waitForShimToExit(ctx context.Context, vmID string, killShim bool) error {
 	socketAddr, err := fcShim.SocketAddress(ctx, vmID)
 	if err != nil {
 		return err
@@ -267,14 +270,18 @@ func (s *local) waitForShimToExit(ctx context.Context, vmID string) error {
 	}
 	defer delete(s.processes, socketAddr)
 
-	s.logger.Debug("Killing shim")
+	if killShim {
+		s.logger.Debug("Killing shim")
 
-	if err := syscall.Kill(int(pid), 9); err != nil {
-		s.logger.WithError(err).Error("Failed to kill shim process")
-		return err
+		if err := syscall.Kill(int(pid), 9); err != nil {
+			s.logger.WithError(err).Error("Failed to kill shim process")
+			return err
+		}
+
+		return nil
+	} else {
+		return internal.WaitForPidToExit(ctx, stopVMInterval, pid)
 	}
-
-	return nil
 }
 
 // GetVMInfo returns metadata for the VM with the given VMID.
@@ -467,6 +474,8 @@ func (s *local) loadShim(ctx context.Context, ns, vmID, containerdAddress string
 		return nil, err
 	}
 
+	s.shimSocket = shimSocket
+
 	// If we're here, there is no pre-existing shim for this VMID, so we spawn a new one
 	defer shimSocket.Close()
 	if err := os.Mkdir(s.config.ShimBaseDir, 0700); err != nil && !os.IsExist(err) {
@@ -501,6 +510,8 @@ func (s *local) loadShim(ctx context.Context, ns, vmID, containerdAddress string
 		s.logger.WithError(err).Error()
 		return nil, err
 	}
+
+	s.fcControlSocket = fcSocket
 
 	args := []string{
 		"-namespace", ns,
@@ -710,10 +721,25 @@ func (s *local) Offload(ctx context.Context, req *proto.OffloadRequest) (*empty.
 		return nil, err
 	}
 
-	waitErr := s.waitForShimToExit(ctx, req.VMID)
+	s.shimSocket.Close()
+	s.fcControlSocket.Close()
+
+	fcSocketAddress, err := fcShim.FCControlSocketAddress(ctx, req.VMID)
+	if err != nil {
+		s.logger.Error("failed to get FC socket address")
+		return nil, err
+	}
+	removeErr := os.RemoveAll(fcSocketAddress)
+	if removeErr != nil {
+		s.logger.Errorf("failed to remove fc socket addr %v", removeErr)
+		return nil, err
+	}
+
+	waitErr := s.waitForShimToExit(ctx, req.VMID, true)
 	if waitErr != nil {
 		s.logger.Error("failed to wait for shim to exit on offload")
 		return nil, waitErr
 	}
 	return resp, nil
 }
+
