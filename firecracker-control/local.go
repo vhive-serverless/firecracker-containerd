@@ -724,14 +724,26 @@ func (s *local) Offload(ctx context.Context, req *proto.OffloadRequest) (*empty.
 	s.shimSocket.Close()
 	s.fcControlSocket.Close()
 
+	shimSocketAddress, err := fcShim.SocketAddress(ctx, req.VMID)
+	if err != nil {
+		err = errors.Wrap(err, "failed to obtain shim socket address")
+		s.logger.WithError(err).Error()
+		return nil, err
+	}
+	removeErr := os.RemoveAll(shimSocketAddress)
+	if removeErr != nil {
+		s.logger.Errorf("failed to remove shim socket addr file: %v", removeErr)
+		return nil, err
+	}
+
 	fcSocketAddress, err := fcShim.FCControlSocketAddress(ctx, req.VMID)
 	if err != nil {
 		s.logger.Error("failed to get FC socket address")
 		return nil, err
 	}
-	removeErr := os.RemoveAll(fcSocketAddress)
+	removeErr = os.RemoveAll(fcSocketAddress)
 	if removeErr != nil {
-		s.logger.Errorf("failed to remove fc socket addr %v", removeErr)
+		s.logger.Errorf("failed to remove fc socket addr file: %v", removeErr)
 		return nil, err
 	}
 
