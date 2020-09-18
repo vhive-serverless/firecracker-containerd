@@ -73,7 +73,6 @@ type local struct {
 	processes   map[string]int32
 
 	fcControlSocket *net.UnixListener
-	shimSocket      *net.UnixListener
 }
 
 func newLocal(ic *plugin.InitContext) (*local, error) {
@@ -474,8 +473,6 @@ func (s *local) loadShim(ctx context.Context, ns, vmID, containerdAddress string
 		return nil, err
 	}
 
-	s.shimSocket = shimSocket
-
 	// If we're here, there is no pre-existing shim for this VMID, so we spawn a new one
 	defer shimSocket.Close()
 	if err := os.Mkdir(s.config.ShimBaseDir, 0700); err != nil && !os.IsExist(err) {
@@ -721,7 +718,6 @@ func (s *local) Offload(ctx context.Context, req *proto.OffloadRequest) (*empty.
 		return nil, err
 	}
 
-	s.shimSocket.Close()
 	s.fcControlSocket.Close()
 
 	shimSocketAddress, err := fcShim.SocketAddress(ctx, req.VMID)
@@ -730,7 +726,6 @@ func (s *local) Offload(ctx context.Context, req *proto.OffloadRequest) (*empty.
 		s.logger.WithError(err).Error()
 		return nil, err
 	}
-	s.logger.Infof("socket is: %s", shimSocketAddress)
 	removeErr := os.RemoveAll(shimSocketAddress)
 	if removeErr != nil {
 		s.logger.Errorf("failed to remove shim socket addr file: %v", removeErr)
@@ -753,6 +748,6 @@ func (s *local) Offload(ctx context.Context, req *proto.OffloadRequest) (*empty.
 		s.logger.Error("failed to wait for shim to exit on offload")
 		return nil, waitErr
 	}
-	time.Sleep(5 * time.Millisecond)
+
 	return resp, nil
 }
