@@ -730,6 +730,7 @@ func (s *local) Offload(ctx context.Context, req *proto.OffloadRequest) (*empty.
 		s.logger.WithError(err).Error()
 		return nil, err
 	}
+	s.logger.Infof("socket is: %s", shimSocketAddress)
 	removeErr := os.RemoveAll(shimSocketAddress)
 	if removeErr != nil {
 		s.logger.Errorf("failed to remove shim socket addr file: %v", removeErr)
@@ -752,5 +753,6 @@ func (s *local) Offload(ctx context.Context, req *proto.OffloadRequest) (*empty.
 		s.logger.Error("failed to wait for shim to exit on offload")
 		return nil, waitErr
 	}
+	time.Sleep(100 * time.Millisecond)
 	return resp, nil
 }
