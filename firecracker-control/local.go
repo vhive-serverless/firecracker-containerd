@@ -753,6 +753,6 @@ func (s *local) Offload(ctx context.Context, req *proto.OffloadRequest) (*empty.
 		s.logger.Error("failed to wait for shim to exit on offload")
 		return nil, waitErr
 	}
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(5 * time.Millisecond)
 	return resp, nil
 }
