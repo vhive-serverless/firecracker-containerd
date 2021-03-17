@@ -103,14 +103,6 @@ enum DriveExposePolicy {
     BIND = 1;
 }
 
-message PauseVMRequest {
-    string VMID = 1;
-}
-
-message ResumeVMRequest {
-    string VMID = 1;
-}
-
 message CreateSnapshotRequest {
     string VMID = 1;
     string SnapshotFilePath = 2;

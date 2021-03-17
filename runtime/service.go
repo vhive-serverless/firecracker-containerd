@@ -802,52 +802,6 @@ func (s *service) GetVMMetadata(requestCtx context.Context, request *proto.GetVM
 	return &proto.GetVMMetadataResponse{Metadata: string(metadata)}, nil
 }
 
-// PauseVM Pauses a VM
-func (s *service) PauseVM(ctx context.Context, req *proto.PauseVMRequest) (*empty.Empty, error) {
-	pauseReq, err := formPauseReq()
-	if err != nil {
-		s.logger.WithError(err).Error("Failed to create pause vm request")
-		return nil, err
-	}
-
-	err = s.waitVMReady()
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := s.httpControlClient.Do(pauseReq)
-	if err != nil {
-		s.logger.WithError(err).Error("Failed to send pause VM request")
-		return nil, err
-	}
-	if !strings.Contains(resp.Status, "204") {
-		s.logger.WithError(err).Error("Failed to pause VM")
-		return nil, err
-	}
-
-	return &empty.Empty{}, nil
-}
-
-// ResumeVM Resumes a VM
-func (s *service) ResumeVM(ctx context.Context, req *proto.ResumeVMRequest) (*empty.Empty, error) {
-	resumeReq, err := formResumeReq()
-	if err != nil {
-		s.logger.WithError(err).Error("Failed to create resume vm request")
-		return nil, err
-	}
-
-	resp, err := s.httpControlClient.Do(resumeReq)
-	if err != nil {
-		s.logger.WithError(err).Error("Failed to send resume VM request")
-		return nil, err
-	}
-	if !strings.Contains(resp.Status, "204") {
-		s.logger.WithError(err).Error("Failed to resume VM")
-		return nil, err
-	}
-	return &empty.Empty{}, nil
-}
-
 // LoadSnapshot Loads a VM from a snapshot
 func (s *service) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotRequest) (*proto.LoadResponse, error) {
 	if err := s.startFirecrackerProcess(); err != nil {

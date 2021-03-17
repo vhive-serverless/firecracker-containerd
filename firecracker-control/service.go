@@ -107,16 +107,6 @@ func (s *service) GetVMMetadata(ctx context.Context, req *proto.GetVMMetadataReq
 	return s.local.GetVMMetadata(ctx, req)
 }
 
-func (s *service) PauseVM(ctx context.Context, req *proto.PauseVMRequest) (*empty.Empty, error) {
-	log.G(ctx).Debugf("pause VM request: %+v", req)
-	return s.local.PauseVM(ctx, req)
-}
-
-func (s *service) ResumeVM(ctx context.Context, req *proto.ResumeVMRequest) (*empty.Empty, error) {
-	log.G(ctx).Debugf("resume VM request: %+v", req)
-	return s.local.ResumeVM(ctx, req)
-}
-
 func (s *service) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotRequest) (*proto.LoadResponse, error) {
 	log.G(ctx).Debugf("load snapshot request: %+v", req)
 	return s.local.LoadSnapshot(ctx, req)

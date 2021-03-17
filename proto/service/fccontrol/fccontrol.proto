@@ -31,12 +31,6 @@ service Firecracker {
     // Get Vm's instance metadata
     rpc GetVMMetadata(GetVMMetadataRequest) returns (GetVMMetadataResponse);
 
-    // Pauses a VM
-    rpc PauseVM(PauseVMRequest) returns (google.protobuf.Empty);
-
-    // Resumes a VM
-    rpc ResumeVM(ResumeVMRequest) returns (google.protobuf.Empty);
-
     // Loads VM from snapshot
     rpc LoadSnapshot(LoadSnapshotRequest) returns (LoadResponse);
 
