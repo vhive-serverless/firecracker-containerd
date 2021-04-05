@@ -47,10 +47,6 @@ require (
 	go.etcd.io/bbolt v1.3.1-etcd.8 // indirect
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
 	golang.org/x/sys v0.0.0-20200323222414-85ca7c5b95cd
-<<<<<<< HEAD
-=======
-	golang.org/x/tools v0.0.0-20200804011535-6c149bb5ef0d // indirect
->>>>>>> *Updated Firecracker and return PID
 	google.golang.org/genproto v0.0.0-20181109154231-b5d43981345b // indirect
 	google.golang.org/grpc v1.21.0
 	gotest.tools v2.2.0+incompatible // indirect
