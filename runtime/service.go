@@ -1918,3 +1918,133 @@ func (s *service) dialFirecrackerSocket() error {
 
 	return nil
 }
+
+// PauseVM Pauses a VM
+func (s *service) PauseVM(ctx context.Context, req *proto.PauseVMRequest) (*empty.Empty, error) {
+	pauseReq, err := formPauseReq()
+	if err != nil {
+		s.logger.WithError(err).Error("Failed to create pause vm request")
+		return nil, err
+	}
+
+	err = s.waitVMReady()
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.httpControlClient.Do(pauseReq)
+	if err != nil {
+		s.logger.WithError(err).Error("Failed to send pause VM request")
+		return nil, err
+	}
+	if !strings.Contains(resp.Status, "204") {
+		s.logger.WithError(err).Error("Failed to pause VM")
+		return nil, err
+	}
+
+	return &empty.Empty{}, nil
+}
+
+// ResumeVM Resumes a VM
+func (s *service) ResumeVM(ctx context.Context, req *proto.ResumeVMRequest) (*empty.Empty, error) {
+	resumeReq, err := formResumeReq()
+	if err != nil {
+		s.logger.WithError(err).Error("Failed to create resume vm request")
+		return nil, err
+	}
+
+	resp, err := s.httpControlClient.Do(resumeReq)
+	if err != nil {
+		s.logger.WithError(err).Error("Failed to send resume VM request")
+		return nil, err
+	}
+	if !strings.Contains(resp.Status, "204") {
+		s.logger.WithError(err).Error("Failed to resume VM")
+		return nil, err
+	}
+	return &empty.Empty{}, nil
+}
+
+// LoadSnapshot Loads a VM from a snapshot
+func (s *service) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotRequest) (*proto.LoadResponse, error) {
+	if err := s.startFirecrackerProcess(); err != nil {
+		s.logger.WithError(err).Error("startFirecrackerProcess returned an error")
+		return nil, err
+	}
+
+	if err := s.dialFirecrackerSocket(); err != nil {
+		s.logger.WithError(err).Error("Failed to wait for firecracker socket")
+	}
+	s.createHTTPControlClient()
+
+	sendSockAddr := s.shimDir.FirecrackerUPFSockPath()
+	if !req.EnableUserPF {
+		sendSockAddr = "dummy"
+	}
+
+	loadSnapReq, err := formLoadSnapReq(req.SnapshotFilePath, req.MemFilePath, sendSockAddr, req.EnableUserPF)
+	if err != nil {
+		s.logger.WithError(err).Error("Failed to create load snapshot request")
+		return nil, err
+	}
+
+	resp, err := s.httpControlClient.Do(loadSnapReq)
+	if err != nil {
+		s.logger.WithError(err).Error("Failed to send load snapshot request")
+		return nil, err
+	}
+	if !strings.Contains(resp.Status, "204") {
+		s.logger.WithError(err).Error("Failed to load VM from snapshot")
+		s.logger.WithError(err).Errorf("Status of request: %s", resp.Status)
+		return nil, err
+	}
+
+	return &proto.LoadResponse{FirecrackerPID: strconv.Itoa(s.firecrackerPid)}, nil
+}
+
+// CreateSnapshot Creates a snapshot of a VM
+func (s *service) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotRequest) (*empty.Empty, error) {
+	createSnapReq, err := formCreateSnapReq(req.SnapshotFilePath, req.MemFilePath)
+	if err != nil {
+		s.logger.WithError(err).Error("Failed to create make snapshot request")
+		return nil, err
+	}
+
+	resp, err := s.httpControlClient.Do(createSnapReq)
+	if err != nil {
+		s.logger.WithError(err).Error("Failed to send make snapshot request")
+		return nil, err
+	}
+	if !strings.Contains(resp.Status, "204") {
+		s.logger.WithError(err).Error("Failed to make snapshot of VM")
+		return nil, err
+	}
+
+	return &empty.Empty{}, nil
+}
+
+// Offload Shuts down a VM and deletes the corresponding firecracker socket
+// and vsock. All of the other resources will persist
+func (s *service) Offload(ctx context.Context, req *proto.OffloadRequest) (*empty.Empty, error) {
+	if err := syscall.Kill(s.firecrackerPid, 9); err != nil {
+		s.logger.WithError(err).Error("Failed to kill firecracker process")
+		return nil, err
+	}
+
+	if err := os.RemoveAll(s.shimDir.FirecrackerSockPath()); err != nil {
+		s.logger.WithError(err).Error("Failed to delete firecracker socket")
+		return nil, err
+	}
+
+	if err := os.RemoveAll(s.shimDir.FirecrackerVSockPath()); err != nil {
+		s.logger.WithError(err).Error("Failed to delete firecracker vsock")
+		return nil, err
+	}
+
+	if err := os.RemoveAll(s.shimDir.FirecrackerUPFSockPath()); err != nil {
+		s.logger.WithError(err).Error("Failed to delete firecracker UPF socket")
+		return nil, err
+	}
+
+	return &empty.Empty{}, nil
+}
