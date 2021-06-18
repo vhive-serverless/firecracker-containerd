@@ -15,7 +15,7 @@ service Firecracker {
 
     // Resumes a VM
     rpc ResumeVM(ResumeVMRequest) returns (google.protobuf.Empty);
-
+    
     // Stops existing Firecracker instance by VM ID
     rpc StopVM(StopVMRequest) returns (google.protobuf.Empty);
 
@@ -42,4 +42,13 @@ service Firecracker {
 
     // Updates a balloon device statistics polling interval.
     rpc UpdateBalloonStats(UpdateBalloonStatsRequest) returns(google.protobuf.Empty);
+
+    // Loads VM from snapshot
+    rpc LoadSnapshot(LoadSnapshotRequest) returns (LoadResponse);
+
+    // Make a snapshot of a VM
+    rpc CreateSnapshot(CreateSnapshotRequest) returns (google.protobuf.Empty);
+
+    // Offload a snapshotted VM
+    rpc Offload(OffloadRequest) returns (google.protobuf.Empty);
 }

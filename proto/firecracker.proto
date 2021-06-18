@@ -49,6 +49,8 @@ message CreateVMResponse {
     string LogFifoPath = 3;
     string MetricsFifoPath = 4;
     string CgroupPath = 5;
+    string UPFSockPath = 6;
+    string FirecrackerPID = 7;
 }
 
 message PauseVMRequest {
@@ -102,6 +104,28 @@ enum DriveExposePolicy {
     COPY = 0;
     BIND = 1;
 }
+
+message CreateSnapshotRequest {
+    string VMID = 1;
+    string SnapshotFilePath = 2;
+    string MemFilePath = 3;
+}
+
+message LoadSnapshotRequest {
+    string VMID = 1;
+    string SnapshotFilePath = 2;
+    string MemFilePath = 3;
+    bool EnableUserPF = 4;
+}
+
+message LoadResponse {
+    string FirecrackerPID = 1;
+}
+
+message OffloadRequest {
+    string VMID = 1;
+}
+
 
 message JailerConfig {
     string NetNS = 1;
