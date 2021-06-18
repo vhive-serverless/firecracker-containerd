@@ -1939,7 +1939,7 @@ func (s *service) PauseVM(ctx context.Context, req *proto.PauseVMRequest) (*empt
 	}
 	if !strings.Contains(resp.Status, "204") {
 		s.logger.WithError(err).Error("Failed to pause VM")
-		return nil, err
+		return nil, errors.New("Failed to pause VM")
 	}
 
 	return &empty.Empty{}, nil
@@ -1960,7 +1960,7 @@ func (s *service) ResumeVM(ctx context.Context, req *proto.ResumeVMRequest) (*em
 	}
 	if !strings.Contains(resp.Status, "204") {
 		s.logger.WithError(err).Error("Failed to resume VM")
-		return nil, err
+		return nil, errors.New("Failed to resume VM")
 	}
 	return &empty.Empty{}, nil
 }
@@ -1996,7 +1996,7 @@ func (s *service) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotReque
 	if !strings.Contains(resp.Status, "204") {
 		s.logger.WithError(err).Error("Failed to load VM from snapshot")
 		s.logger.WithError(err).Errorf("Status of request: %s", resp.Status)
-		return nil, err
+		return nil, errors.New("Failed to load VM from snapshot")
 	}
 
 	return &proto.LoadResponse{FirecrackerPID: strconv.Itoa(s.firecrackerPid)}, nil
@@ -2017,7 +2017,7 @@ func (s *service) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotR
 	}
 	if !strings.Contains(resp.Status, "204") {
 		s.logger.WithError(err).Error("Failed to make snapshot of VM")
-		return nil, err
+		return nil, errors.New("Failed to make snapshot of VM")
 	}
 
 	return &empty.Empty{}, nil
