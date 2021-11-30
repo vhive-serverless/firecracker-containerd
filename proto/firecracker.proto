@@ -118,6 +118,7 @@ message LoadSnapshotRequest {
     string SnapshotFilePath = 2;
     string MemFilePath = 3;
     bool EnableUserPF = 4;
+    string NetworkNamespace = 5;
 }
 
 message LoadResponse {

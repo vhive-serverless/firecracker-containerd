@@ -174,6 +174,10 @@ type service struct {
 	httpControlClient   *http.Client
 	firecrackerPid      int
 	taskDrivePathOnHost string
+
+	snapLoaded             bool
+	networkNamespace       string
+	netNS                  ns.NetNS
 }
 
 func shimOpts(shimCtx context.Context) (*shim.Opts, error) {
@@ -621,7 +625,8 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 		return errors.Wrapf(err, "failed to create new machine instance")
 	}
 
-	if err = s.netNSStartVM(s.shimCtx, request); err != nil {
+	s.networkNamespace, s.netNS = netNSFromProto(request)
+	if err = s.netNSStartVM(s.shimCtx); err != nil {
 		return errors.Wrapf(err, "failed to start the VM")
 	}
 
@@ -661,20 +666,13 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 // netNSStartVM starts the firecracker process with the network namespace
 // specified in the VM config. If the namespace is not specified, the process
 // is started in the default network namespace.
-func (s *service) netNSStartVM(ctx context.Context, request *proto.CreateVMRequest) error {
-	namespace := netNSFromProto(request)
-
-	if namespace == "" {
+func (s *service) netNSStartVM(ctx context.Context) error {
+	if s.networkNamespace == "" {
 		// Start without namespace
 		return s.machine.Start(ctx)
 	}
 
-	// Get the network namespace handle.
-	netNS, err := ns.GetNS(namespace)
-	if err != nil {
-		return errors.Wrapf(err, "unable to find netns %s", netNS)
-	}
-	return netNS.Do(func(_ ns.NetNS) error {
+	return s.netNS.Do(func(_ ns.NetNS) error {
 		// Start the firecracker process in the target network namespace.
 		return s.machine.Start(ctx)
 	})
@@ -1903,7 +1901,14 @@ func (s *service) startFirecrackerProcess() error {
 		"--show-log-origin",
 	}
 
-	firecrackerCmd := exec.Command(firecPath, args...)
+	var firecrackerCmd *exec.Cmd
+
+	if s.networkNamespace == "" {
+		firecrackerCmd = exec.Command(firecPath, args...)
+	} else {
+		cmdArgs := append([]string{"nsenter", fmt.Sprintf("--net=%s", s.networkNamespace), firecPath}, args...)
+		firecrackerCmd = exec.Command("sudo", cmdArgs...)
+	}
 	firecrackerCmd.Dir = s.shimDir.RootPath()
 
 	if err := firecrackerCmd.Start(); err != nil {
@@ -1955,17 +1960,35 @@ func (s *service) PauseVM(ctx context.Context, req *proto.PauseVMRequest) (*empt
 		return nil, err
 	}
 
-	resp, err := s.httpControlClient.Do(pauseReq)
-	if err != nil {
-		s.logger.WithError(err).Error("Failed to send pause VM request")
-		return nil, err
+	if s.networkNamespace == "" {
+		err = s.SendPauseVmRequest(pauseReq)
+	} else {
+		err = s.netNS.Do(func(_ ns.NetNS) error {
+			return s.SendPauseVmRequest(pauseReq)
+		})
 	}
-	if !strings.Contains(resp.Status, "204") {
-		s.logger.WithError(err).Error("Failed to pause VM")
-		return nil, errors.New("Failed to pause VM")
+
+	if err != nil {
+		s.logger.WithError(err).Error("Pause VM failed")
+		return nil, err
 	}
 
 	return &empty.Empty{}, nil
+}
+
+// SendPauseVmRequest sends a pause http request to the firecracker process
+func (s *service) SendPauseVmRequest(pauseReq *http.Request) error {
+	resp, err := s.httpControlClient.Do(pauseReq)
+
+	if err != nil {
+		return errors.Wrapf(err, "Failed to send pause VM request")
+	}
+
+	if !strings.Contains(resp.Status, "204") {
+		return errors.New(fmt.Sprintf("Failed to pause VM, status %s", resp.Status))
+	}
+
+	return nil
 }
 
 // ResumeVM Resumes a VM
@@ -1976,28 +1999,57 @@ func (s *service) ResumeVM(ctx context.Context, req *proto.ResumeVMRequest) (*em
 		return nil, err
 	}
 
-	resp, err := s.httpControlClient.Do(resumeReq)
+	if s.networkNamespace == "" {
+		err = s.SendResumeVmRequest(resumeReq)
+	} else {
+		err = s.netNS.Do(func(_ ns.NetNS) error {
+			return s.SendResumeVmRequest(resumeReq)
+		})
+	}
+
 	if err != nil {
-		s.logger.WithError(err).Error("Failed to send resume VM request")
+		s.logger.WithError(err).Error("Resume VM failed")
 		return nil, err
 	}
-	if !strings.Contains(resp.Status, "204") {
-		s.logger.WithError(err).Error("Failed to resume VM")
-		return nil, errors.New("Failed to resume VM")
-	}
+
 	return &empty.Empty{}, nil
+}
+
+// SendResumeVmRequest sends a resume http request to the firecracker process
+func (s *service) SendResumeVmRequest(resumeReq *http.Request) error {
+	resp, err := s.httpControlClient.Do(resumeReq)
+
+	if err != nil {
+		return errors.Wrapf(err, "Failed to send resume VM request")
+	}
+
+	if !strings.Contains(resp.Status, "204") {
+		return errors.New(fmt.Sprintf("Failed to resume VM, status %s", resp.Status))
+	}
+
+	return nil
 }
 
 // LoadSnapshot Loads a VM from a snapshot
 func (s *service) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotRequest) (*proto.LoadResponse, error) {
+	s.networkNamespace, s.netNS = netNSFromSnapRequest(req)
+	s.snapLoaded = true
+
 	if err := s.startFirecrackerProcess(); err != nil {
 		s.logger.WithError(err).Error("startFirecrackerProcess returned an error")
 		return nil, err
 	}
 
-	if err := s.dialFirecrackerSocket(); err != nil {
-		s.logger.WithError(err).Error("Failed to wait for firecracker socket")
+	if s.networkNamespace != "" {
+		if err := s.netNS.Do(func(_ ns.NetNS) error { return s.dialFirecrackerSocket() }); err != nil {
+			s.logger.WithError(err).Error("Failed to wait for firecracker socket")
+		}
+	} else {
+		if err := s.dialFirecrackerSocket(); err != nil {
+			s.logger.WithError(err).Error("Failed to wait for firecracker socket")
+		}
 	}
+
 	s.createHTTPControlClient()
 
 	sendSockAddr := s.shimDir.FirecrackerUPFSockPath()
@@ -2011,18 +2063,35 @@ func (s *service) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotReque
 		return nil, err
 	}
 
-	resp, err := s.httpControlClient.Do(loadSnapReq)
-	if err != nil {
-		s.logger.WithError(err).Error("Failed to send load snapshot request")
-		return nil, err
+	if s.networkNamespace == "" {
+		err = s.SendLoadSnapRequest(loadSnapReq)
+	} else {
+		err = s.netNS.Do(func(_ ns.NetNS) error {
+			return s.SendLoadSnapRequest(loadSnapReq)
+		})
 	}
-	if !strings.Contains(resp.Status, "204") {
-		s.logger.WithError(err).Error("Failed to load VM from snapshot")
-		s.logger.WithError(err).Errorf("Status of request: %s", resp.Status)
-		return nil, errors.New("Failed to load VM from snapshot")
+
+	if err != nil {
+		s.logger.WithError(err).Error("Load snapshot failed")
+		return nil, err
 	}
 
 	return &proto.LoadResponse{FirecrackerPID: strconv.Itoa(s.firecrackerPid)}, nil
+}
+
+// SendLoadSnapRequest sends a load snapshot http request to the firecracker process
+func (s *service) SendLoadSnapRequest(loadSnapReq *http.Request) error {
+	resp, err := s.httpControlClient.Do(loadSnapReq)
+
+	if err != nil {
+		return errors.Wrapf(err, "Failed to send make load snapshot request")
+	}
+
+	if !strings.Contains(resp.Status, "204") {
+		return errors.New(fmt.Sprintf("Failed to load VM from snapshot, status %s", resp.Status))
+	}
+
+	return nil
 }
 
 // CreateSnapshot Creates a snapshot of a VM
@@ -2033,17 +2102,35 @@ func (s *service) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotR
 		return nil, err
 	}
 
-	resp, err := s.httpControlClient.Do(createSnapReq)
-	if err != nil {
-		s.logger.WithError(err).Error("Failed to send make snapshot request")
-		return nil, err
+	if s.networkNamespace == "" {
+		err = s.SendCreateSnapRequest(createSnapReq)
+	} else {
+		err = s.netNS.Do(func(_ ns.NetNS) error {
+			return s.SendCreateSnapRequest(createSnapReq)
+		})
 	}
-	if !strings.Contains(resp.Status, "204") {
-		s.logger.WithError(err).Error("Failed to make snapshot of VM")
-		return nil, errors.New("Failed to make snapshot of VM")
+
+	if err != nil {
+		s.logger.WithError(err).Error("Create snapshot failed")
+		return nil, err
 	}
 
 	return &empty.Empty{}, nil
+}
+
+// SendCreateSnapRequest sends a create snapshot http request to the firecracker process
+func (s *service) SendCreateSnapRequest(createSnapReq *http.Request) error {
+	resp, err := s.httpControlClient.Do(createSnapReq)
+
+	if err != nil {
+		return errors.Wrapf(err, "Failed to send make snapshot request")
+	}
+
+	if !strings.Contains(resp.Status, "204") {
+		return errors.New(fmt.Sprintf("Failed to make snapshot of VM, status %s", resp.Status))
+	}
+
+	return nil
 }
 
 // Offload Shuts down a VM and deletes the corresponding firecracker socket

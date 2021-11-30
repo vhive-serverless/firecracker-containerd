@@ -14,6 +14,7 @@
 package main
 
 import (
+	"github.com/containernetworking/plugins/pkg/ns"
 	"net"
 	"time"
 
@@ -118,14 +119,34 @@ func networkConfigFromProto(nwIface *proto.FirecrackerNetworkInterface, vmID str
 	return result, nil
 }
 
-// netNSFromProto returns the network namespace set, if any in the protobuf
+// netNSFromProto returns the name and handle of the network namespace set, if any in the protobuf
 // message.
-func netNSFromProto(request *proto.CreateVMRequest) string {
+func netNSFromProto(request *proto.CreateVMRequest) (string, ns.NetNS) {
 	if request != nil {
-		return request.NetworkNamespace
+		netNS, err := ns.GetNS(request.NetworkNamespace)
+		if err != nil {
+			return "", nil
+		}
+
+		return request.NetworkNamespace, netNS
 	}
 
-	return ""
+	return "", nil
+}
+
+// netNSFromProto returns the name and handle of the network namespace set, if any in the protobuf
+// message.
+func netNSFromSnapRequest(request *proto.LoadSnapshotRequest) (string, ns.NetNS) {
+	if request != nil {
+		netNS, err := ns.GetNS(request.NetworkNamespace)
+		if err != nil {
+			return "", nil
+		}
+
+		return request.NetworkNamespace, netNS
+	}
+
+	return "", nil
 }
 
 // rateLimiterFromProto creates a firecracker RateLimiter object from the
