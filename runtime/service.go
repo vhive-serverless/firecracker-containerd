@@ -1889,11 +1889,11 @@ func formLoadSnapReq(snapshotPath, memPath, sendSockAddr string, isUpf bool, new
 	return req, nil
 }
 
-func formCreateSnapReq(snapshotPath, memPath string) (*http.Request, error) {
+func formCreateSnapReq(snapshotPath, memPath, snapshotType string) (*http.Request, error) {
 	var req *http.Request
 
 	data := map[string]string{
-		"snapshot_type": "Full",
+		"snapshot_type": snapshotType,
 		"snapshot_path": snapshotPath,
 		"mem_file_path": memPath,
 	}
@@ -2140,7 +2140,7 @@ func (s *service) SendLoadSnapRequest(loadSnapReq *http.Request) error {
 
 // CreateSnapshot Creates a snapshot of a VM
 func (s *service) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotRequest) (*empty.Empty, error) {
-	createSnapReq, err := formCreateSnapReq(req.SnapshotFilePath, req.MemFilePath)
+	createSnapReq, err := formCreateSnapReq(req.SnapshotFilePath, req.MemFilePath, req.SnapshotType)
 	if err != nil {
 		s.logger.WithError(err).Error("Failed to create make snapshot request")
 		return nil, err

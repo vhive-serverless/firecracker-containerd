@@ -111,6 +111,7 @@ message CreateSnapshotRequest {
     string VMID = 1;
     string SnapshotFilePath = 2;
     string MemFilePath = 3;
+    string SnapshotType = 4;
 }
 
 message LoadSnapshotRequest {

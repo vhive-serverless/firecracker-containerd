@@ -56,6 +56,7 @@ func machineConfigurationFromProto(cfg *config.Config, req *proto.FirecrackerMac
 		config.MemSizeMib = firecracker.Int64(int64(size))
 	}
 
+	config.TrackDirtyPages = req.TrackDirtyPages
 	config.HtEnabled = firecracker.Bool(req.HtEnabled)
 
 	return config
