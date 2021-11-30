@@ -46,6 +46,7 @@ import (
 	taskAPI "github.com/containerd/containerd/runtime/v2/task"
 	"github.com/containerd/fifo"
 	"github.com/containerd/ttrpc"
+	"github.com/containernetworking/plugins/pkg/ns"
 	"github.com/firecracker-microvm/firecracker-go-sdk"
 	"github.com/firecracker-microvm/firecracker-go-sdk/client/models"
 	"github.com/gofrs/uuid"
@@ -620,7 +621,7 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 		return errors.Wrapf(err, "failed to create new machine instance")
 	}
 
-	if err = s.machine.Start(s.shimCtx); err != nil {
+	if err = s.netNSStartVM(s.shimCtx, request); err != nil {
 		return errors.Wrapf(err, "failed to start the VM")
 	}
 
@@ -655,6 +656,28 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 	s.logger.Info("successfully started the VM")
 
 	return nil
+}
+
+// netNSStartVM starts the firecracker process with the network namespace
+// specified in the VM config. If the namespace is not specified, the process
+// is started in the default network namespace.
+func (s *service) netNSStartVM(ctx context.Context, request *proto.CreateVMRequest) error {
+	namespace := netNSFromProto(request)
+
+	if namespace == "" {
+		// Start without namespace
+		return s.machine.Start(ctx)
+	}
+
+	// Get the network namespace handle.
+	netNS, err := ns.GetNS(namespace)
+	if err != nil {
+		return errors.Wrapf(err, "unable to find netns %s", netNS)
+	}
+	return netNS.Do(func(_ ns.NetNS) error {
+		// Start the firecracker process in the target network namespace.
+		return s.machine.Start(ctx)
+	})
 }
 
 func (s *service) mountDrives(requestCtx context.Context) error {

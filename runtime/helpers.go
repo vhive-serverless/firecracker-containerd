@@ -118,6 +118,16 @@ func networkConfigFromProto(nwIface *proto.FirecrackerNetworkInterface, vmID str
 	return result, nil
 }
 
+// netNSFromProto returns the network namespace set, if any in the protobuf
+// message.
+func netNSFromProto(request *proto.CreateVMRequest) string {
+	if request != nil {
+		return request.NetworkNamespace
+	}
+
+	return ""
+}
+
 // rateLimiterFromProto creates a firecracker RateLimiter object from the
 // protobuf message.
 func rateLimiterFromProto(rl *proto.FirecrackerRateLimiter) *models.RateLimiter {
