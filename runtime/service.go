@@ -273,20 +273,22 @@ func (s *service) startEventForwarders(remotePublisher shim.Publisher) {
 	go func() {
 		<-s.vmReady
 
-		// Once the VM is ready, also start forwarding events from it to our exchange
-		attachCh := eventbridge.Attach(ctx, s.eventBridgeClient, s.eventExchange)
+		if ! s.snapLoaded {
+			// Once the VM is ready, also start forwarding events from it to our exchange
+			attachCh := eventbridge.Attach(ctx, s.eventBridgeClient, s.eventExchange)
 
-		err := <-attachCh
-		if err != nil && err != context.Canceled {
-			s.logger.WithError(err).Error("error while forwarding events from VM agent")
+			err := <-attachCh
+			if err != nil && err != context.Canceled  && !strings.Contains(err.Error(), "context canceled") {
+				s.logger.WithError(err).Error("error while forwarding events from VM agent")
+			}
+
+			err = <-republishCh
+			if err != nil && err != context.Canceled {
+				s.logger.WithError(err).Error("error while republishing events")
+			}
+
+			remotePublisher.Close()
 		}
-
-		err = <-republishCh
-		if err != nil && err != context.Canceled {
-			s.logger.WithError(err).Error("error while republishing events")
-		}
-
-		remotePublisher.Close()
 	}()
 }
 
@@ -515,10 +517,8 @@ func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRe
 		s.logger.WithError(err).Error("failed to publish start VM event")
 	}
 
-	// Commented out because its execution cancels the shim, and
-	// it would get executed on Offload if we leave it, killing the shim,
-	// and making snapshots impossible.
-	//go s.monitorVMExit()
+	// Cancels the shim
+	go s.monitorVMExit()
 
 	// let all the other methods know that the VM is ready for tasks
 	close(s.vmReady)
@@ -720,10 +720,49 @@ func (s *service) StopVM(requestCtx context.Context, request *proto.StopVMReques
 		return nil, err
 	}
 
-	if err = s.shutdown(requestCtx, timeout, &taskAPI.ShutdownRequest{Now: true}); err != nil {
+	if ! s.snapLoaded {
+		err = s.shutdown(requestCtx, timeout, &taskAPI.ShutdownRequest{Now: true})
+	} else {
+		err = s.shutdownSnapLoadedVm()
+	}
+
+	if err != nil {
 		return nil, err
 	}
+
 	return &empty.Empty{}, nil
+}
+
+// shutdownSnapLoadedVm shuts down a vm that has been loaded from a snapshot
+func (s *service) shutdownSnapLoadedVm() error {
+	// Kill firecracker process and its shild processes
+	if err := syscall.Kill(-s.firecrackerPid, 9); err != nil {
+		s.logger.WithError(err).Error("Failed to kill firecracker process")
+		return err
+	}
+
+	// Delete firecracker socket
+	if err := os.RemoveAll(s.shimDir.FirecrackerSockPath()); err != nil {
+		s.logger.WithError(err).Error("Failed to delete firecracker socket")
+		return err
+	}
+
+	// Delete firecracker vsock
+	if err := os.RemoveAll(s.shimDir.FirecrackerVSockPath()); err != nil {
+		s.logger.WithError(err).Error("Failed to delete firecracker vsock")
+		return err
+	}
+
+	// Delete firecracker upf sock
+	if err := os.RemoveAll(s.shimDir.FirecrackerUPFSockPath()); err != nil {
+		s.logger.WithError(err).Error("Failed to delete firecracker UPF socket")
+		return err
+	}
+
+	if err := s.cleanup(); err != nil {
+		s.logger.WithError(err).Error("failed to clean up the VM")
+	}
+	return nil
 }
 
 // GetVMInfo returns metadata for the VM being managed by this shim. If the VM has not been created yet, this
@@ -1746,7 +1785,6 @@ func (s *service) cleanup() error {
 
 // monitorVMExit watches the VM and cleanup resources when it terminates.
 // Comment out because unused
-/*
 func (s *service) monitorVMExit() {
 	// Block until the VM exits
 	if err := s.machine.Wait(s.shimCtx); err != nil && err != context.Canceled {
@@ -1757,7 +1795,6 @@ func (s *service) monitorVMExit() {
 		s.logger.WithError(err).Error("failed to clean up the VM")
 	}
 }
-*/
 
 func (s *service) createHTTPControlClient() {
 	u := &httpunix.Transport{
@@ -1910,6 +1947,9 @@ func (s *service) startFirecrackerProcess() error {
 		firecrackerCmd = exec.Command("sudo", cmdArgs...)
 	}
 	firecrackerCmd.Dir = s.shimDir.RootPath()
+
+	// Make sure all child processes get killed
+	firecrackerCmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 
 	if err := firecrackerCmd.Start(); err != nil {
 		logrus.WithError(err).Error("Failed to start firecracker process")
@@ -2076,6 +2116,8 @@ func (s *service) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotReque
 		return nil, err
 	}
 
+	close(s.vmReady)
+
 	return &proto.LoadResponse{FirecrackerPID: strconv.Itoa(s.firecrackerPid)}, nil
 }
 
@@ -2134,11 +2176,25 @@ func (s *service) SendCreateSnapRequest(createSnapReq *http.Request) error {
 }
 
 // Offload Shuts down a VM and deletes the corresponding firecracker socket
-// and vsock. All of the other resources will persist
+// and vsock. All of the other resources will persist. Depracated!
 func (s *service) Offload(ctx context.Context, req *proto.OffloadRequest) (*empty.Empty, error) {
-	if err := syscall.Kill(s.firecrackerPid, 9); err != nil {
-		s.logger.WithError(err).Error("Failed to kill firecracker process")
-		return nil, err
+
+	if !s.snapLoaded {
+		_, err := s.agentClient.Shutdown(ctx, &taskAPI.ShutdownRequest{Now: true})
+		if err != nil {
+			return nil, err
+		}
+
+		if err := syscall.Kill(s.firecrackerPid, 9); err != nil {
+			s.logger.WithError(err).Error("Failed to kill firecracker process")
+			return nil, err
+		}
+	} else {
+		// Make sure to kill child process if snaploaded
+		if err := syscall.Kill(-s.firecrackerPid, 9); err != nil {
+			s.logger.WithError(err).Error("Failed to kill firecracker process")
+			return nil, err
+		}
 	}
 
 	if err := os.RemoveAll(s.shimDir.FirecrackerSockPath()); err != nil {
@@ -2154,6 +2210,10 @@ func (s *service) Offload(ctx context.Context, req *proto.OffloadRequest) (*empt
 	if err := os.RemoveAll(s.shimDir.FirecrackerUPFSockPath()); err != nil {
 		s.logger.WithError(err).Error("Failed to delete firecracker UPF socket")
 		return nil, err
+	}
+
+	if err := s.cleanup(); err != nil {
+		s.logger.WithError(err).Error("failed to clean up the VM")
 	}
 
 	return &empty.Empty{}, nil

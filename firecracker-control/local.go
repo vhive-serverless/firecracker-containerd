@@ -96,17 +96,45 @@ func newLocal(ic *plugin.InitContext) (*local, error) {
 func (s *local) CreateVM(requestCtx context.Context, req *proto.CreateVMRequest) (*proto.CreateVMResponse, error) {
 	var err error
 
-	id := req.GetVMID()
-	if err := identifiers.Validate(id); err != nil {
+	// Create shim
+	_, err = s.CreateShim(requestCtx, req.GetVMID())
+	if err != nil {
+		return nil, err
+	}
+
+	client, err := s.shimFirecrackerClient(requestCtx, req.GetVMID())
+	if err != nil {
+		err = errors.Wrap(err, "failed to create firecracker shim client")
 		s.logger.WithError(err).Error()
 		return nil, err
 	}
 
+	defer client.Close()
+
+	resp, err := client.CreateVM(requestCtx, req)
+	if err != nil {
+		s.logger.WithError(err).Error("shim CreateVM returned error")
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func (s *local) CreateShim(requestCtx context.Context, id string) (codes.Code, error) {
+	var err error
+
+	// Validate VM id
+	if err := identifiers.Validate(id); err != nil {
+		s.logger.WithError(err).Error()
+		return codes.Unknown, err
+	}
+
+	// Validate namespace
 	ns, err := namespaces.NamespaceRequired(requestCtx)
 	if err != nil {
 		err = errors.Wrap(err, "error retrieving namespace of request")
 		s.logger.WithError(err).Error()
-		return nil, err
+		return codes.Unknown, err
 	}
 
 	s.logger.Debugf("using namespace: %s", ns)
@@ -118,36 +146,36 @@ func (s *local) CreateVM(requestCtx context.Context, req *proto.CreateVMRequest)
 	if err != nil {
 		err = errors.Wrap(err, "failed to obtain shim socket address")
 		s.logger.WithError(err).Error()
-		return nil, err
+		return codes.Unknown, err
 	}
 
 	shimSocket, err := shim.NewSocket(shimSocketAddress)
 	if shim.SocketEaddrinuse(err) {
-		return nil, status.Errorf(codes.AlreadyExists, "VM with ID %q already exists (socket: %q)", id, shimSocketAddress)
+		return codes.AlreadyExists, status.Errorf(codes.AlreadyExists, "VM with ID %q already exists (socket: %q)", id, shimSocketAddress)
 	} else if err != nil {
 		err = errors.Wrapf(err, "failed to open shim socket at address %q", shimSocketAddress)
 		s.logger.WithError(err).Error()
-		return nil, err
+		return codes.Unknown, err
 	}
 
 	// If we're here, there is no pre-existing shim for this VMID, so we spawn a new one
 	if err := os.Mkdir(s.config.ShimBaseDir, 0700); err != nil && !os.IsExist(err) {
 		s.logger.WithError(err).Error()
-		return nil, errors.Wrapf(err, "failed to make shim base directory: %s", s.config.ShimBaseDir)
+		return codes.Unknown, errors.Wrapf(err, "failed to make shim base directory: %s", s.config.ShimBaseDir)
 	}
 
 	shimDir, err := vm.ShimDir(s.config.ShimBaseDir, ns, id)
 	if err != nil {
 		err = errors.Wrapf(err, "failed to build shim path")
 		s.logger.WithError(err).Error()
-		return nil, err
+		return codes.Unknown, err
 	}
 
 	err = shimDir.Mkdir()
 	if err != nil {
 		err = errors.Wrapf(err, "failed to create VM dir %q", shimDir.RootPath())
 		s.logger.WithError(err).Error()
-		return nil, err
+		return codes.Unknown, err
 	}
 
 	defer func() {
@@ -167,19 +195,19 @@ func (s *local) CreateVM(requestCtx context.Context, req *proto.CreateVMRequest)
 	if err != nil {
 		err = errors.Wrap(err, "failed to obtain shim socket address")
 		s.logger.WithError(err).Error()
-		return nil, err
+		return codes.Unknown, err
 	}
 
 	fcSocket, err := shim.NewSocket(fcSocketAddress)
 	if err != nil {
 		err = errors.Wrapf(err, "failed to open fccontrol socket at address %q", fcSocketAddress)
 		s.logger.WithError(err).Error()
-		return nil, err
+		return codes.Unknown, err
 	}
 
 	cmd, err := s.newShim(ns, id, s.containerdAddress, shimSocket, fcSocket)
 	if err != nil {
-		return nil, err
+		return codes.Unknown, err
 	}
 
 	defer func() {
@@ -188,25 +216,11 @@ func (s *local) CreateVM(requestCtx context.Context, req *proto.CreateVMRequest)
 		}
 	}()
 
-	client, err := s.shimFirecrackerClient(requestCtx, id)
-	if err != nil {
-		err = errors.Wrap(err, "failed to create firecracker shim client")
-		s.logger.WithError(err).Error()
-		return nil, err
-	}
-
-	defer client.Close()
-
-	resp, err := client.CreateVM(requestCtx, req)
-	if err != nil {
-		s.logger.WithError(err).Error("shim CreateVM returned error")
-		return nil, err
-	}
-
 	s.addShim(shimSocketAddress, cmd)
 
-	return resp, nil
+	return codes.OK, nil
 }
+
 
 func (s *local) addShim(address string, cmd *exec.Cmd) {
 	s.processesMu.Lock()
@@ -617,6 +631,14 @@ func (s *local) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotReq
 
 // LoadSnapshot Loads a snapshot of a VM
 func (s *local) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotRequest) (*proto.LoadResponse, error) {
+	var err error
+
+	// Create shim if not exists yet
+	code, err := s.CreateShim(ctx, req.GetVMID())
+	if err != nil && code != codes.AlreadyExists {
+		return nil, err
+	}
+
 	client, err := s.shimFirecrackerClient(ctx, req.VMID)
 	if err != nil {
 		return nil, err
