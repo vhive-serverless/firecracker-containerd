@@ -112,6 +112,7 @@ type loadSnapReq struct {
 	MemFilePath          string `json:"mem_file_path"`
 	SendSockAddr         string `json:"sock_file_path"`
 	EnableUserPageFaults bool   `json:"enable_user_page_faults"`
+	NewSnapshotPath      string `json:"new_snapshot_path"`
 }
 
 // implements shimapi
@@ -1860,7 +1861,7 @@ func formPauseReq() (*http.Request, error) {
 	return req, nil
 }
 
-func formLoadSnapReq(snapshotPath, memPath, sendSockAddr string, isUpf bool) (*http.Request, error) {
+func formLoadSnapReq(snapshotPath, memPath, sendSockAddr string, isUpf bool, newSnapshotPath string) (*http.Request, error) {
 	var req *http.Request
 
 	data := loadSnapReq{
@@ -1868,6 +1869,7 @@ func formLoadSnapReq(snapshotPath, memPath, sendSockAddr string, isUpf bool) (*h
 		MemFilePath:          memPath,
 		SendSockAddr:         sendSockAddr,
 		EnableUserPageFaults: isUpf,
+		NewSnapshotPath:      newSnapshotPath,
 	}
 
 	json, err := json.Marshal(data)
@@ -2097,7 +2099,7 @@ func (s *service) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotReque
 		sendSockAddr = "dummy"
 	}
 
-	loadSnapReq, err := formLoadSnapReq(req.SnapshotFilePath, req.MemFilePath, sendSockAddr, req.EnableUserPF)
+	loadSnapReq, err := formLoadSnapReq(req.SnapshotFilePath, req.MemFilePath, sendSockAddr, req.EnableUserPF, req.NewSnapshotPath)
 	if err != nil {
 		s.logger.WithError(err).Error("Failed to create load snapshot request")
 		return nil, err
