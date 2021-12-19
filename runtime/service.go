@@ -274,22 +274,24 @@ func (s *service) startEventForwarders(remotePublisher shim.Publisher) {
 	go func() {
 		<-s.vmReady
 
-		if ! s.snapLoaded {
-			// Once the VM is ready, also start forwarding events from it to our exchange
-			attachCh := eventbridge.Attach(ctx, s.eventBridgeClient, s.eventExchange)
-
-			err := <-attachCh
-			if err != nil && err != context.Canceled  && !strings.Contains(err.Error(), "context canceled") {
-				s.logger.WithError(err).Error("error while forwarding events from VM agent")
-			}
-
-			err = <-republishCh
-			if err != nil && err != context.Canceled {
-				s.logger.WithError(err).Error("error while republishing events")
-			}
-
-			remotePublisher.Close()
+		if s.snapLoaded {
+			return
 		}
+
+		// Once the VM is ready, also start forwarding events from it to our exchange
+		attachCh := eventbridge.Attach(ctx, s.eventBridgeClient, s.eventExchange)
+
+		err := <-attachCh
+		if err != nil && err != context.Canceled  && !strings.Contains(err.Error(), "context canceled") {
+			s.logger.WithError(err).Error("error while forwarding events from VM agent")
+		}
+
+		err = <-republishCh
+		if err != nil && err != context.Canceled {
+			s.logger.WithError(err).Error("error while republishing events")
+		}
+
+		remotePublisher.Close()
 	}()
 }
 
@@ -736,7 +738,7 @@ func (s *service) StopVM(requestCtx context.Context, request *proto.StopVMReques
 
 // shutdownSnapLoadedVm shuts down a vm that has been loaded from a snapshot
 func (s *service) shutdownSnapLoadedVm() error {
-	// Kill firecracker process and its shild processes
+	// Kill firecracker process and its child processes
 	if err := syscall.Kill(-s.firecrackerPid, 9); err != nil {
 		s.logger.WithError(err).Error("Failed to kill firecracker process")
 		return err
@@ -1799,9 +1801,9 @@ func (s *service) monitorVMExit() {
 
 func (s *service) createHTTPControlClient() {
 	u := &httpunix.Transport{
-		DialTimeout:           1000 * time.Millisecond,
-		RequestTimeout:        60 * time.Second,
-		ResponseHeaderTimeout: 60 * time.Second,
+		DialTimeout:           500 * time.Millisecond,
+		RequestTimeout:        15 * time.Second,
+		ResponseHeaderTimeout: 15 * time.Second,
 	}
 	u.RegisterLocation("firecracker", s.shimDir.FirecrackerSockPath())
 
@@ -2178,7 +2180,7 @@ func (s *service) SendCreateSnapRequest(createSnapReq *http.Request) error {
 }
 
 // Offload Shuts down a VM and deletes the corresponding firecracker socket
-// and vsock. All of the other resources will persist. Depracated!
+// and vsock. All of the other resources will persist. DEPRECATED!
 func (s *service) Offload(ctx context.Context, req *proto.OffloadRequest) (*empty.Empty, error) {
 
 	if !s.snapLoaded {

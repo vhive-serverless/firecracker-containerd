@@ -98,12 +98,13 @@ message IPConfiguration {
 message FirecrackerMachineConfiguration {
 	string CPUTemplate = 1; // Specifies the cpu template. Example: "T2" or "C3"
 	bool HtEnabled = 2; // Specifies if hyper-threading should be enabled
-	bool TrackDirtyPages = 3; // Specified if dirty-page-tracking should be enabled.
 	 // Specifies the memory size of VM
 	 // This lets us create a Firecracker VM of up to 4096 TiB, which
 	 // for a microVM should be large enough
-	uint32 MemSizeMib = 4;
-	uint32 VcpuCount = 5; // Specifies the number of vCPUs for the VM
+	uint32 MemSizeMib = 3;
+	uint32 VcpuCount = 4; // Specifies the number of vCPUs for the VM
+	bool TrackDirtyPages = 5; // Specified if dirty-page-tracking should be enabled.
+
 }
 
 // Message to specify the block device config for a Firecracker VM
