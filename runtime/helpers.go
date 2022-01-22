@@ -123,6 +123,10 @@ func networkConfigFromProto(nwIface *proto.FirecrackerNetworkInterface, vmID str
 // netNSFromProto returns the name and handle of the network namespace set, if any in the protobuf
 // message.
 func netNSFromProto(request *proto.CreateVMRequest) (string, ns.NetNS) {
+	if request.NetworkNamespace == "" {
+		return "", nil
+	}
+
 	if request != nil {
 		netNS, err := ns.GetNS(request.NetworkNamespace)
 		if err != nil {
@@ -138,6 +142,10 @@ func netNSFromProto(request *proto.CreateVMRequest) (string, ns.NetNS) {
 // netNSFromProto returns the name and handle of the network namespace set, if any in the protobuf
 // message.
 func netNSFromSnapRequest(request *proto.LoadSnapshotRequest) (string, ns.NetNS) {
+	if request.NetworkNamespace == "" {
+		return "", nil
+	}
+
 	if request != nil {
 		netNS, err := ns.GetNS(request.NetworkNamespace)
 		if err != nil {

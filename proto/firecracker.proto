@@ -43,6 +43,7 @@ message CreateVMRequest {
     FirecrackerBalloonDevice BalloonDevice = 14;
 
     string NetworkNamespace = 15;
+    bool OffloadEnabled = 16;
 }
 
 message CreateVMResponse {
@@ -121,6 +122,7 @@ message LoadSnapshotRequest {
     bool EnableUserPF = 4;
     string NetworkNamespace = 5;
     string NewSnapshotPath = 6;
+    bool Offloaded = 7;
 }
 
 message LoadResponse {
