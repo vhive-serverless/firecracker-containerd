@@ -177,6 +177,7 @@ type service struct {
 	taskDrivePathOnHost string
 
 	snapLoaded             bool
+	offloadEnabled         bool
 	networkNamespace       string
 	netNS                  ns.NetNS
 }
@@ -274,7 +275,7 @@ func (s *service) startEventForwarders(remotePublisher shim.Publisher) {
 	go func() {
 		<-s.vmReady
 
-		if s.snapLoaded {
+		if !s.offloadEnabled && s.snapLoaded {
 			return
 		}
 
@@ -496,6 +497,8 @@ func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRe
 		resp      proto.CreateVMResponse
 	)
 
+	s.offloadEnabled = request.OffloadEnabled
+
 	s.vmStartOnce.Do(func() {
 		err = s.createVM(ctxWithTimeout, request)
 		createRan = true
@@ -521,7 +524,9 @@ func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRe
 	}
 
 	// Cancels the shim
-	go s.monitorVMExit()
+	if ! s.offloadEnabled {
+		go s.monitorVMExit()
+	}
 
 	// let all the other methods know that the VM is ready for tasks
 	close(s.vmReady)
@@ -1916,7 +1921,7 @@ func formCreateSnapReq(snapshotPath, memPath, snapshotType string) (*http.Reques
 	return req, nil
 }
 
-func (s *service) startFirecrackerProcess() error {
+func (s *service) startFirecrackerProcess(offload bool) error {
 	firecPath, err := exec.LookPath("firecracker")
 	if err != nil {
 		logrus.WithError(err).Error("failed to look up firecracker binary")
@@ -1953,7 +1958,9 @@ func (s *service) startFirecrackerProcess() error {
 	firecrackerCmd.Dir = s.shimDir.RootPath()
 
 	// Make sure all child processes get killed
-	firecrackerCmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	if ! offload {
+		firecrackerCmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	}
 
 	if err := firecrackerCmd.Start(); err != nil {
 		logrus.WithError(err).Error("Failed to start firecracker process")
@@ -2079,7 +2086,7 @@ func (s *service) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotReque
 	s.networkNamespace, s.netNS = netNSFromSnapRequest(req)
 	s.snapLoaded = true
 
-	if err := s.startFirecrackerProcess(); err != nil {
+	if err := s.startFirecrackerProcess(req.Offloaded); err != nil {
 		s.logger.WithError(err).Error("startFirecrackerProcess returned an error")
 		return nil, err
 	}
@@ -2120,7 +2127,9 @@ func (s *service) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotReque
 		return nil, err
 	}
 
-	close(s.vmReady)
+	if ! req.Offloaded {
+		close(s.vmReady)
+	}
 
 	return &proto.LoadResponse{FirecrackerPID: strconv.Itoa(s.firecrackerPid)}, nil
 }
@@ -2180,25 +2189,12 @@ func (s *service) SendCreateSnapRequest(createSnapReq *http.Request) error {
 }
 
 // Offload Shuts down a VM and deletes the corresponding firecracker socket
-// and vsock. All of the other resources will persist. DEPRECATED!
+// and vsock. All of the other resources will persist.
 func (s *service) Offload(ctx context.Context, req *proto.OffloadRequest) (*empty.Empty, error) {
 
-	if !s.snapLoaded {
-		_, err := s.agentClient.Shutdown(ctx, &taskAPI.ShutdownRequest{Now: true})
-		if err != nil {
-			return nil, err
-		}
-
-		if err := syscall.Kill(s.firecrackerPid, 9); err != nil {
-			s.logger.WithError(err).Error("Failed to kill firecracker process")
-			return nil, err
-		}
-	} else {
-		// Make sure to kill child process if snaploaded
-		if err := syscall.Kill(-s.firecrackerPid, 9); err != nil {
-			s.logger.WithError(err).Error("Failed to kill firecracker process")
-			return nil, err
-		}
+	if err := syscall.Kill(s.firecrackerPid, 9); err != nil {
+		s.logger.WithError(err).Error("Failed to kill firecracker process")
+		return nil, err
 	}
 
 	if err := os.RemoveAll(s.shimDir.FirecrackerSockPath()); err != nil {
@@ -2214,10 +2210,6 @@ func (s *service) Offload(ctx context.Context, req *proto.OffloadRequest) (*empt
 	if err := os.RemoveAll(s.shimDir.FirecrackerUPFSockPath()); err != nil {
 		s.logger.WithError(err).Error("Failed to delete firecracker UPF socket")
 		return nil, err
-	}
-
-	if err := s.cleanup(); err != nil {
-		s.logger.WithError(err).Error("failed to clean up the VM")
 	}
 
 	return &empty.Empty{}, nil

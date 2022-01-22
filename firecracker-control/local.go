@@ -633,10 +633,12 @@ func (s *local) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotReq
 func (s *local) LoadSnapshot(ctx context.Context, req *proto.LoadSnapshotRequest) (*proto.LoadResponse, error) {
 	var err error
 
-	// Create shim if not exists yet
-	code, err := s.CreateShim(ctx, req.GetVMID())
-	if err != nil && code != codes.AlreadyExists {
-		return nil, err
+	// Create shim if not exists yet for non-offloaded snapshots
+	if ! req.Offloaded {
+		code, err := s.CreateShim(ctx, req.GetVMID())
+		if err != nil && code != codes.AlreadyExists {
+			return nil, err
+		}
 	}
 
 	client, err := s.shimFirecrackerClient(ctx, req.VMID)
