@@ -41,6 +41,9 @@ message CreateVMRequest {
     string MetricsFifoPath = 13;
 
     FirecrackerBalloonDevice BalloonDevice = 14;
+
+    string NetworkNamespace = 15;
+    bool OffloadEnabled = 16;
 }
 
 message CreateVMResponse {
@@ -109,6 +112,7 @@ message CreateSnapshotRequest {
     string VMID = 1;
     string SnapshotFilePath = 2;
     string MemFilePath = 3;
+    string SnapshotType = 4;
 }
 
 message LoadSnapshotRequest {
@@ -116,6 +120,9 @@ message LoadSnapshotRequest {
     string SnapshotFilePath = 2;
     string MemFilePath = 3;
     bool EnableUserPF = 4;
+    string NetworkNamespace = 5;
+    string NewSnapshotPath = 6;
+    bool Offloaded = 7;
 }
 
 message LoadResponse {

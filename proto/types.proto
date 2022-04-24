@@ -103,6 +103,8 @@ message FirecrackerMachineConfiguration {
 	 // for a microVM should be large enough
 	uint32 MemSizeMib = 3;
 	uint32 VcpuCount = 4; // Specifies the number of vCPUs for the VM
+	bool TrackDirtyPages = 5; // Specified if dirty-page-tracking should be enabled.
+
 }
 
 // Message to specify the block device config for a Firecracker VM

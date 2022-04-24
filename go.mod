@@ -45,6 +45,8 @@ require (
 )
 
 replace (
+	github.com/containerd/containerd => github.com/ease-lab/containerd v1.5.5-ids
+
 	// Pin gPRC-related dependencies as like containerd v1.5.x.
 	github.com/gogo/googleapis => github.com/gogo/googleapis v1.3.2
 	github.com/golang/protobuf => github.com/golang/protobuf v1.3.5
