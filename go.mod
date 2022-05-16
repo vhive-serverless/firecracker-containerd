@@ -17,7 +17,7 @@ require (
 	github.com/golang/protobuf v1.4.3
 	github.com/hashicorp/go-multierror v1.1.0
 	github.com/mdlayher/vsock v0.0.0-20190329173812-a92c53d5dcab
-	github.com/miekg/dns v1.1.16
+	github.com/miekg/dns v1.1.25
 	github.com/opencontainers/runc v1.0.0-rc93
 	github.com/opencontainers/runtime-spec v1.0.3-0.20200929063507-e6143ca7d51d
 	github.com/pkg/errors v0.9.1
