@@ -974,6 +974,8 @@ func (s *service) buildVMConfiguration(req *proto.CreateVMRequest) (*firecracker
 
 	if req.JailerConfig != nil {
 		cfg.NetNS = req.JailerConfig.NetNS
+	} else {
+		cfg.NetNS = req.NetNS
 	}
 
 	s.logger.Debugf("using socket path: %s", cfg.SocketPath)
