@@ -898,7 +898,7 @@ type MemoryBackend struct {
 	unknownFields protoimpl.UnknownFields
 
 	BackendType string `protobuf:"bytes,1,opt,name=BackendType,proto3" json:"BackendType,omitempty"` // Either File or Uffd
-	BackendPath string `protobuf:"bytes,2,opt,name=BackendPath,proto3" json:"BackendPath,omitempty"` // Either path to the file that contains the guest memory to be loaded or path to the UDS where a process is listening for a UFFD initialization
+	BackendPath string `protobuf:"bytes,2,opt,name=BackendPath,proto3" json:"BackendPath,omitempty"` // Either path to the file that contains the guest memory to be loaded or path to the UDS where a process is listening for a UFFD initialization control payload and open file descriptor that it can use to serve this process's guest memory page faults
 }
 
 func (x *MemoryBackend) Reset() {

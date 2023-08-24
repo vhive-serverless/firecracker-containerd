@@ -44,7 +44,6 @@ message CreateVMRequest {
 
     // The network namespace of the VM.
     string NetNS = 15;
-
     // Whether the VM should be created by loading a snapshot.
     bool LoadSnapshot = 16;
     // Path to the file that contains the guest memory to be loaded.
