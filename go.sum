@@ -311,8 +311,8 @@ github.com/cpuguy83/go-md2man/v2 v2.0.0/go.mod h1:maD7wRr/U5Z6m/iR4s+kqSMx2CaBsr
 github.com/creack/pty v1.1.7/go.mod h1:lj5s0c3V2DBrqTV7llrYr5NG6My20zk30Fl46Y7DoTY=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/creack/pty v1.1.11/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
-github.com/curiousgeorgiy/firecracker-go-sdk v1.0.1-0.20230824075215-a7c7685f81c9 h1:nTYswz5tOSH49Cnc7JLSFFush3uMQko2Fy2aJRitXXA=
-github.com/curiousgeorgiy/firecracker-go-sdk v1.0.1-0.20230824075215-a7c7685f81c9/go.mod h1:pcsIXRGgbFGr9QtUdlQCP/z6tuB7EMw6zXgFkcu7Q0c=
+github.com/curiousgeorgiy/firecracker-go-sdk v1.0.1-0.20230824105512-abb9daabdc66 h1:ymwu7b1OD55wQn1/G/FmwzQsFZM32CyJN1u1x9CuXKM=
+github.com/curiousgeorgiy/firecracker-go-sdk v1.0.1-0.20230824105512-abb9daabdc66/go.mod h1:pcsIXRGgbFGr9QtUdlQCP/z6tuB7EMw6zXgFkcu7Q0c=
 github.com/cyphar/filepath-securejoin v0.2.2/go.mod h1:FpkQEhXnPnOthhzymB7CGsFk2G9VLXONKD9G7QGMM+4=
 github.com/cyphar/filepath-securejoin v0.2.3/go.mod h1:aPGpWjXOXUn2NCNjFvBE6aRxGGx79pTxQpKOJNYHHl4=
 github.com/d2g/dhcp4 v0.0.0-20170904100407-a1d1b6c41b1c/go.mod h1:Ct2BUK8SB0YC1SMSibvLzxjeJLnrYEVLULFNiHY9YfQ=
