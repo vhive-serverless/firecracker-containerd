@@ -7,10 +7,11 @@
 package proto
 
 import (
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
+
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -229,6 +230,13 @@ func (x *CreateVMRequest) GetBalloonDevice() *FirecrackerBalloonDevice {
 		return x.BalloonDevice
 	}
 	return nil
+}
+
+func (m *CreateVMRequest) GetNetNS() string {
+	if m != nil {
+		return m.NetNS
+	}
+	return ""
 }
 
 type CreateVMResponse struct {
