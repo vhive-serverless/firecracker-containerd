@@ -21,3 +21,4 @@ SuccessAction=reboot
 Type=simple
 WorkingDirectory=/container
 ExecStart=/usr/local/bin/agent
+StandardOutput=journal+console

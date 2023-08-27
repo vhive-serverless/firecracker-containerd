@@ -311,8 +311,6 @@ github.com/cpuguy83/go-md2man/v2 v2.0.0/go.mod h1:maD7wRr/U5Z6m/iR4s+kqSMx2CaBsr
 github.com/creack/pty v1.1.7/go.mod h1:lj5s0c3V2DBrqTV7llrYr5NG6My20zk30Fl46Y7DoTY=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/creack/pty v1.1.11/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
-github.com/curiousgeorgiy/firecracker-go-sdk v1.0.1-0.20230824105512-abb9daabdc66 h1:ymwu7b1OD55wQn1/G/FmwzQsFZM32CyJN1u1x9CuXKM=
-github.com/curiousgeorgiy/firecracker-go-sdk v1.0.1-0.20230824105512-abb9daabdc66/go.mod h1:pcsIXRGgbFGr9QtUdlQCP/z6tuB7EMw6zXgFkcu7Q0c=
 github.com/cyphar/filepath-securejoin v0.2.2/go.mod h1:FpkQEhXnPnOthhzymB7CGsFk2G9VLXONKD9G7QGMM+4=
 github.com/cyphar/filepath-securejoin v0.2.3/go.mod h1:aPGpWjXOXUn2NCNjFvBE6aRxGGx79pTxQpKOJNYHHl4=
 github.com/d2g/dhcp4 v0.0.0-20170904100407-a1d1b6c41b1c/go.mod h1:Ct2BUK8SB0YC1SMSibvLzxjeJLnrYEVLULFNiHY9YfQ=
@@ -982,8 +980,8 @@ github.com/urfave/cli v1.20.0/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijb
 github.com/urfave/cli v1.22.1/go.mod h1:Gos4lmkARVdJ6EkW0WaNv/tZAAMe9V7XWyB60NtXRu0=
 github.com/urfave/cli v1.22.2 h1:gsqYFH8bb9ekPA12kRo0hfjngWQjkJPlN9R0N78BoUo=
 github.com/urfave/cli v1.22.2/go.mod h1:Gos4lmkARVdJ6EkW0WaNv/tZAAMe9V7XWyB60NtXRu0=
-github.com/vhive-serverless/firecracker-go-sdk v0.0.0-20230910093528-55ab6c76ad40 h1:Tu1rkehXcNzvgE4vwR9sBaKG/ry3JaK+PgTF4UuOxTk=
-github.com/vhive-serverless/firecracker-go-sdk v0.0.0-20230910093528-55ab6c76ad40/go.mod h1:pcsIXRGgbFGr9QtUdlQCP/z6tuB7EMw6zXgFkcu7Q0c=
+github.com/vhive-serverless/firecracker-go-sdk v0.0.0-20230915154319-e911679830d2 h1:Wi2rF+gABB0dYvz0B+Gx7QF0eAij2pCqlV9o1NzyYdY=
+github.com/vhive-serverless/firecracker-go-sdk v0.0.0-20230915154319-e911679830d2/go.mod h1:pcsIXRGgbFGr9QtUdlQCP/z6tuB7EMw6zXgFkcu7Q0c=
 github.com/vishvananda/netlink v0.0.0-20181108222139-023a6dafdcdf/go.mod h1:+SR5DhBJrl6ZM7CoCKvpw5BKroDKQ+PJqOg65H/2ktk=
 github.com/vishvananda/netlink v1.1.0/go.mod h1:cTgwzPIzzgDAYoQrMm0EdrjRUBkTqKYppBueQtXaqoE=
 github.com/vishvananda/netlink v1.1.1-0.20201029203352-d40f9887b852/go.mod h1:twkDnbuQxJYemMlGd4JFIcuhgX83tXhKS2B/PRMpOho=
