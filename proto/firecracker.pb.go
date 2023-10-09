@@ -7,9 +7,7 @@
 package proto
 
 import (
-	reflect "reflect"
-	sync "sync"
-
+	"github.com/gogo/protobuf/proto"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
