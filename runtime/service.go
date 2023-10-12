@@ -594,7 +594,7 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 			return errors.New("failed to load snapshot: snapshot path or container snapshot path was not provided")
 		} 
 		if request.MemFilePath == "" && request.MemBackend.BackendType != "Uffd" {
-			return errors.New("failed to load snapshot: memroy file path was not provided")
+			return errors.New("failed to load snapshot: memory file path was not provided")
 		}
 		
 		opts = append(opts,

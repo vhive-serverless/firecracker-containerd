@@ -184,5 +184,5 @@ message FirecrackerBalloonDevice {
 
 message MemoryBackend {
 	string BackendType = 1; // Either File or Uffd
-	string BackendPath = 2; // Either path to the file that contains the guest memory to be loaded or path to the UDS where a process is listening for a UFFD initialization
+	string BackendPath = 2; // Either path to the file that contains the guest memory to be loaded or path to the UDS where a process is listening for a UFFD initialization control payload and open file descriptor that it can use to serve this process's guest memory page faults
 }
