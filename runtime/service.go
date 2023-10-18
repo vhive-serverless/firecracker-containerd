@@ -602,6 +602,7 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 			firecracker.WithSnapshot(
 				request.MemFilePath,
 				request.SnapshotPath,
+				request.ContainerSnapshotPath,
 				firecracker.WithMemoryBackend(request.MemBackend.BackendType, request.MemBackend.BackendPath),
 				func(c *firecracker.SnapshotConfig) { c.ResumeVM = true }))
 	}
