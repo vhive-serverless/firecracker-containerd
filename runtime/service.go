@@ -590,11 +590,20 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 	opts = append(opts, jailedOpts...)
 
 	if request.LoadSnapshot {
-		if request.SnapshotPath == "" || request.MemFilePath == "" || request.ContainerSnapshotPath == "" {
-			return errors.New("failed to load snapshot: one of the snapshot loading parameters was not provided")
+		if request.SnapshotPath == "" || request.ContainerSnapshotPath == "" {
+			return errors.New("failed to load snapshot: snapshot path or container snapshot path was not provided")
+		} 
+		if request.MemFilePath == "" && request.MemBackend.BackendType == "" {
+			return errors.New("either mem_file_path or mem_backend should be provided")
 		}
-		opts = append(opts, firecracker.WithSnapshot(request.MemFilePath, request.SnapshotPath, request.ContainerSnapshotPath,
-			func(c *firecracker.SnapshotConfig) { c.ResumeVM = true }))
+		
+		opts = append(opts,
+			firecracker.WithSnapshot(
+				request.MemFilePath,
+				request.SnapshotPath,
+				request.ContainerSnapshotPath,
+				firecracker.WithMemoryBackend(request.MemBackend.BackendType, request.MemBackend.BackendPath),
+				func(c *firecracker.SnapshotConfig) { c.ResumeVM = true }))
 	}
 
 	// In the event that a noop jailer is used, we will pass in the shim context

@@ -53,6 +53,8 @@ message CreateVMRequest {
     string SnapshotPath = 18;
     // Path to the disk device backing the container snapshot.
     string ContainerSnapshotPath = 19;
+    // Configuration for the backend that handles memory load. If this field is specified, `mem_file_path` is forbidden. Either `mem_backend` or `mem_file_path` must be present at a time.
+    MemoryBackend MemBackend = 20;
 }
 
 message CreateVMResponse {
