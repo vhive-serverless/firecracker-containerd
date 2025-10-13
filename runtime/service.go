@@ -592,11 +592,11 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 	if request.LoadSnapshot {
 		if request.SnapshotPath == "" || request.ContainerSnapshotPath == "" {
 			return errors.New("failed to load snapshot: snapshot path or container snapshot path was not provided")
-		} 
+		}
 		if request.MemFilePath == "" && request.MemBackend.BackendType == "" {
 			return errors.New("either mem_file_path or mem_backend should be provided")
 		}
-		
+
 		opts = append(opts,
 			firecracker.WithSnapshot(
 				request.MemFilePath,
@@ -610,6 +610,7 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 	// and have the SDK construct a new machine using that context. Otherwise, a
 	// custom process runner will be provided via options which will stomp over
 	// the shim context that was provided here.
+	fmt.Printf("firecracker config: %+v\n", s.machineConfig)
 	s.machine, err = firecracker.NewMachine(s.shimCtx, *s.machineConfig, opts...)
 	if err != nil {
 		return fmt.Errorf("failed to create new machine instance: %w", err)
@@ -996,6 +997,7 @@ func (s *service) buildVMConfiguration(req *proto.CreateVMRequest) (*firecracker
 	if !flag {
 		cfg.MachineCfg.CPUTemplate = ""
 	}
+	cfg.MachineCfg.CPUTemplate = ""
 
 	logPath := s.shimDir.FirecrackerLogFifoPath()
 	if req.LogFifoPath != "" {
