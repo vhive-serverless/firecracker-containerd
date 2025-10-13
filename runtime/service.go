@@ -593,11 +593,11 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 	if request.LoadSnapshot {
 		if request.SnapshotPath == "" || request.ContainerSnapshotPath == "" {
 			return errors.New("failed to load snapshot: snapshot path or container snapshot path was not provided")
-		} 
+		}
 		if request.MemFilePath == "" && request.MemBackend.BackendType == "" {
 			return errors.New("either mem_file_path or mem_backend should be provided")
 		}
-		
+
 		opts = append(opts,
 			firecracker.WithSnapshot(
 				request.MemFilePath,
