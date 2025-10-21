@@ -597,13 +597,20 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 			return errors.New("either mem_file_path or mem_backend should be provided")
 		}
 
+		snapOpts := []firecracker.WithSnapshotOpt{
+			firecracker.WithMemoryBackend(request.MemBackend.BackendType, request.MemBackend.BackendPath),
+			func(c *firecracker.SnapshotConfig) { c.ResumeVM = true },
+		}
+		if request.EnableDiffSnapshots {
+			snapOpts = append(snapOpts, func(c *firecracker.SnapshotConfig) { c.EnableDiffSnapshots = true })
+		}
+
 		opts = append(opts,
 			firecracker.WithSnapshot(
 				request.MemFilePath,
 				request.SnapshotPath,
 				request.ContainerSnapshotPath,
-				firecracker.WithMemoryBackend(request.MemBackend.BackendType, request.MemBackend.BackendPath),
-				func(c *firecracker.SnapshotConfig) { c.ResumeVM = true }))
+				snapOpts...))
 	}
 
 	// In the event that a noop jailer is used, we will pass in the shim context
