@@ -4,6 +4,29 @@ import "types.proto";
 
 option go_package = "proto";
 
+// PrepareShimRequest specifies parameters for preparing a shim
+message PrepareShimRequest {
+    // VM identifier for the shim
+    string VMID = 1;
+}
+
+message PrepareShimResponse {
+    // VM identifier
+    string VMID = 1;
+    // Namespace where the shim was created
+    string Namespace = 2;
+    // Socket address for the shim
+    string ShimSocketAddress = 3;
+    // Socket address for fccontrol
+    string FCSocketAddress = 4;
+}
+
+// RemoveShimRequest specifies parameters for removing a prepared shim
+message RemoveShimRequest {
+    // VM identifier for the shim to remove
+    string VMID = 1;
+}
+
 // CreateVMRequest specifies creation parameters for a new FC instance
 message CreateVMRequest {
     // VM identifier to assign

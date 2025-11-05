@@ -55,6 +55,8 @@ var fileDescriptor_b99f53e2bf82c5ef = []byte{
 }
 
 type FirecrackerService interface {
+	PrepareShim(ctx context.Context, req *proto1.PrepareShimRequest) (*proto1.PrepareShimResponse, error)
+	RemoveShim(ctx context.Context, req *proto1.RemoveShimRequest) (*types.Empty, error)
 	CreateVM(ctx context.Context, req *proto1.CreateVMRequest) (*proto1.CreateVMResponse, error)
 	PauseVM(ctx context.Context, req *proto1.PauseVMRequest) (*types.Empty, error)
 	ResumeVM(ctx context.Context, req *proto1.ResumeVMRequest) (*types.Empty, error)
@@ -72,6 +74,20 @@ type FirecrackerService interface {
 
 func RegisterFirecrackerService(srv *github_com_containerd_ttrpc.Server, svc FirecrackerService) {
 	srv.Register("Firecracker", map[string]github_com_containerd_ttrpc.Method{
+		"PrepareShim": func(ctx context.Context, unmarshal func(interface{}) error) (interface{}, error) {
+			var req proto1.PrepareShimRequest
+			if err := unmarshal(&req); err != nil {
+				return nil, err
+			}
+			return svc.PrepareShim(ctx, &req)
+		},
+		"RemoveShim": func(ctx context.Context, unmarshal func(interface{}) error) (interface{}, error) {
+			var req proto1.RemoveShimRequest
+			if err := unmarshal(&req); err != nil {
+				return nil, err
+			}
+			return svc.RemoveShim(ctx, &req)
+		},
 		"CreateVM": func(ctx context.Context, unmarshal func(interface{}) error) (interface{}, error) {
 			var req proto1.CreateVMRequest
 			if err := unmarshal(&req); err != nil {
@@ -174,6 +190,22 @@ func NewFirecrackerClient(client *github_com_containerd_ttrpc.Client) Firecracke
 	return &firecrackerClient{
 		client: client,
 	}
+}
+
+func (c *firecrackerClient) PrepareShim(ctx context.Context, req *proto1.PrepareShimRequest) (*proto1.PrepareShimResponse, error) {
+	var resp proto1.PrepareShimResponse
+	if err := c.client.Call(ctx, "Firecracker", "PrepareShim", req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *firecrackerClient) RemoveShim(ctx context.Context, req *proto1.RemoveShimRequest) (*types.Empty, error) {
+	var resp types.Empty
+	if err := c.client.Call(ctx, "Firecracker", "RemoveShim", req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
 }
 
 func (c *firecrackerClient) CreateVM(ctx context.Context, req *proto1.CreateVMRequest) (*proto1.CreateVMResponse, error) {

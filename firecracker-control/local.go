@@ -71,6 +71,18 @@ type local struct {
 	processes   map[string]int32
 }
 
+// ShimResources holds resources allocated during shim preparation
+type ShimResources struct {
+	VMID              string
+	Namespace         string
+	ShimSocketAddress string
+	ShimSocket        *net.UnixListener
+	FCSocketAddress   string
+	FCSocket          *net.UnixListener
+	ShimDir           *vm.Dir
+	Cmd               *exec.Cmd
+}
+
 func newLocal(ic *plugin.InitContext) (*local, error) {
 	if err := os.MkdirAll(ic.Root, 0750); err != nil && !os.IsExist(err) {
 		return nil, fmt.Errorf("failed to create root directory: %s: %w", ic.Root, err)
@@ -89,14 +101,25 @@ func newLocal(ic *plugin.InitContext) (*local, error) {
 	}, nil
 }
 
-// CreateVM creates new Firecracker VM instance. It creates a runtime shim for the VM and the forwards
-// the CreateVM request to that shim. If there is already a VM created with the provided VMID, then
-// AlreadyExists is returned.
-func (s *local) CreateVM(requestCtx context.Context, req *proto.CreateVMRequest) (*proto.CreateVMResponse, error) {
-	var err error
+// PrepareShim is a gRPC method that prepares all resources needed for a shim without creating the VM.
+// This allows the shim to be created in advance before the CreateVM call.
+func (s *local) PrepareShim(requestCtx context.Context, req *proto.PrepareShimRequest) (*proto.PrepareShimResponse, error) {
+	resources, err := s.prepareShim(requestCtx, req.VMID)
+	if err != nil {
+		return nil, err
+	}
 
-	id := req.GetVMID()
-	if err := identifiers.Validate(id); err != nil {
+	return &proto.PrepareShimResponse{
+		VMID:              resources.VMID,
+		Namespace:         resources.Namespace,
+		ShimSocketAddress: resources.ShimSocketAddress,
+		FCSocketAddress:   resources.FCSocketAddress,
+	}, nil
+}
+
+// RemoveShim is a gRPC method that cleans up a prepared shim that will not be used.
+func (s *local) RemoveShim(requestCtx context.Context, req *proto.RemoveShimRequest) (*types.Empty, error) {
+	if err := identifiers.Validate(req.VMID); err != nil {
 		s.logger.WithError(err).Error()
 		return nil, err
 	}
@@ -108,12 +131,109 @@ func (s *local) CreateVM(requestCtx context.Context, req *proto.CreateVMRequest)
 		return nil, err
 	}
 
-	s.logger.Debugf("using namespace: %s", ns)
+	// Get socket addresses
+	shimSocketAddress, err := shim.SocketAddress(requestCtx, s.containerdAddress, req.VMID)
+	if err != nil {
+		err = fmt.Errorf("failed to obtain shim socket address: %w", err)
+		s.logger.WithError(err).Error()
+		return nil, err
+	}
+
+	fcSocketAddress, err := fcShim.FCControlSocketAddress(requestCtx, s.containerdAddress, req.VMID)
+	if err != nil {
+		err = fmt.Errorf("failed to obtain fccontrol socket address: %w", err)
+		s.logger.WithError(err).Error()
+		return nil, err
+	}
+
+	shimDir, err := vm.ShimDir(s.config.ShimBaseDir, ns, req.VMID)
+	if err != nil {
+		err = fmt.Errorf("failed to build shim path: %w", err)
+		s.logger.WithError(err).Error()
+		return nil, err
+	}
+
+	// Create resources struct for cleanup
+	resources := &ShimResources{
+		VMID:              req.VMID,
+		Namespace:         ns,
+		ShimSocketAddress: shimSocketAddress,
+		FCSocketAddress:   fcSocketAddress,
+		ShimDir:           &shimDir,
+	}
+
+	// Find and kill the shim process
+	s.processesMu.Lock()
+	pid, ok := s.processes[shimSocketAddress]
+	if ok {
+		delete(s.processes, shimSocketAddress)
+	}
+	s.processesMu.Unlock()
+
+	if ok {
+		// Kill the process
+		if err := syscall.Kill(int(pid), syscall.SIGKILL); err != nil && err != syscall.ESRCH {
+			s.logger.WithError(err).Warn("failed to kill shim process")
+		}
+	}
+
+	if err := s.removeShim(resources); err != nil {
+		return nil, err
+	}
+
+	return &types.Empty{}, nil
+}
+
+// shimExists checks if a shim is already running for the given VMID
+func (s *local) shimExists(requestCtx context.Context, vmID string) (bool, error) {
+	shimSocketAddress, err := shim.SocketAddress(requestCtx, s.containerdAddress, vmID)
+	if err != nil {
+		return false, fmt.Errorf("failed to obtain shim socket address: %w", err)
+	}
+
+	// Try to create a listener on the socket address
+	// If it succeeds, no shim exists (we close it immediately)
+	// If we get EADDRINUSE, a shim already exists
+	listener, err := shim.NewSocket(shimSocketAddress)
+	if err == nil {
+		// No shim exists, close the listener we just created
+		listener.Close()
+		shim.RemoveSocket(shimSocketAddress)
+		return false, nil
+	}
+
+	if shim.SocketEaddrinuse(err) {
+		// A shim already exists
+		return true, nil
+	}
+
+	// Some other error occurred
+	return false, fmt.Errorf("failed to check for existing shim: %w", err)
+}
+
+// prepareShim prepares all resources needed for a shim without creating the VM.
+// This is the internal implementation called by both PrepareShim gRPC method and CreateVM.
+func (s *local) prepareShim(requestCtx context.Context, vmID string) (*ShimResources, error) {
+	var err error
+
+	if err := identifiers.Validate(vmID); err != nil {
+		s.logger.WithError(err).Error()
+		return nil, err
+	}
+
+	ns, err := namespaces.NamespaceRequired(requestCtx)
+	if err != nil {
+		err = fmt.Errorf("error retrieving namespace of request: %w", err)
+		s.logger.WithError(err).Error()
+		return nil, err
+	}
+
+	s.logger.Debugf("preparing shim for VM %s in namespace: %s", vmID, ns)
 
 	// We determine if there is already a shim managing a VM with the current VMID by attempting
 	// to listen on the abstract socket address (which is parameterized by VMID). If we get
 	// EADDRINUSE, then we assume there is already a shim for the VM and return an AlreadyExists error.
-	shimSocketAddress, err := shim.SocketAddress(requestCtx, s.containerdAddress, id)
+	shimSocketAddress, err := shim.SocketAddress(requestCtx, s.containerdAddress, vmID)
 	if err != nil {
 		err = fmt.Errorf("failed to obtain shim socket address: %w", err)
 		s.logger.WithError(err).Error()
@@ -122,25 +242,40 @@ func (s *local) CreateVM(requestCtx context.Context, req *proto.CreateVMRequest)
 
 	shimSocket, err := shim.NewSocket(shimSocketAddress)
 	if shim.SocketEaddrinuse(err) {
-		return nil, status.Errorf(codes.AlreadyExists, "VM with ID %q already exists (socket: %q)", id, shimSocketAddress)
+		return nil, status.Errorf(codes.AlreadyExists, "VM with ID %q already exists (socket: %q)", vmID, shimSocketAddress)
 	} else if err != nil {
 		err = fmt.Errorf("failed to open shim socket at address %q: %w", shimSocketAddress, err)
 		s.logger.WithError(err).Error()
 		return nil, err
 	}
 
-	// If we're here, there is no pre-existing shim for this VMID, so we spawn a new one
-	if err := os.Mkdir(s.config.ShimBaseDir, 0700); err != nil && !os.IsExist(err) {
+	resources := &ShimResources{
+		VMID:              vmID,
+		Namespace:         ns,
+		ShimSocketAddress: shimSocketAddress,
+		ShimSocket:        shimSocket,
+	}
+
+	// Cleanup on error
+	defer func() {
+		if err != nil {
+			s.cleanupShimResources(resources)
+		}
+	}()
+
+	// Create shim base directory
+	if err = os.Mkdir(s.config.ShimBaseDir, 0700); err != nil && !os.IsExist(err) {
 		s.logger.WithError(err).Error()
 		return nil, fmt.Errorf("failed to make shim base directory: %s: %w", s.config.ShimBaseDir, err)
 	}
 
-	shimDir, err := vm.ShimDir(s.config.ShimBaseDir, ns, id)
+	shimDir, err := vm.ShimDir(s.config.ShimBaseDir, ns, vmID)
 	if err != nil {
 		err = fmt.Errorf("failed to build shim path: %w", err)
 		s.logger.WithError(err).Error()
 		return nil, err
 	}
+	resources.ShimDir = &shimDir
 
 	err = shimDir.Mkdir()
 	if err != nil {
@@ -149,25 +284,14 @@ func (s *local) CreateVM(requestCtx context.Context, req *proto.CreateVMRequest)
 		return nil, err
 	}
 
-	defer func() {
-		if err != nil {
-			removeErr := os.RemoveAll(shimDir.RootPath())
-			if removeErr != nil {
-				s.logger.WithError(removeErr).WithField("path", shimDir.RootPath()).Error("failed to cleanup VM dir")
-			}
-		}
-	}()
-
-	// TODO we have to create separate listeners for the fccontrol service and shim service because
-	// containerd does not currently expose the shim server for us to register the fccontrol service with too.
-	// This is likely addressable through some relatively small upstream contributions; the following is a stop-gap
-	// solution until that time.
-	fcSocketAddress, err := fcShim.FCControlSocketAddress(requestCtx, s.containerdAddress, id)
+	// Create fccontrol socket
+	fcSocketAddress, err := fcShim.FCControlSocketAddress(requestCtx, s.containerdAddress, vmID)
 	if err != nil {
 		err = fmt.Errorf("failed to obtain shim socket address: %w", err)
 		s.logger.WithError(err).Error()
 		return nil, err
 	}
+	resources.FCSocketAddress = fcSocketAddress
 
 	fcSocket, err := shim.NewSocket(fcSocketAddress)
 	if err != nil {
@@ -175,18 +299,130 @@ func (s *local) CreateVM(requestCtx context.Context, req *proto.CreateVMRequest)
 		s.logger.WithError(err).Error()
 		return nil, err
 	}
+	resources.FCSocket = fcSocket
 
-	cmd, err := s.newShim(ns, id, s.containerdAddress, shimSocket, fcSocket)
+	// Start the shim process
+	cmd, err := s.newShim(ns, vmID, s.containerdAddress, shimSocket, fcSocket)
+	if err != nil {
+		return nil, err
+	}
+	resources.Cmd = cmd
+
+	s.logger.Debugf("shim prepared successfully for VM %s", vmID)
+	return resources, nil
+}
+
+// RemoveShim cleans up a prepared shim that will not be used.
+// This is the internal implementation.
+func (s *local) removeShim(resources *ShimResources) error {
+	if resources == nil {
+		return nil
+	}
+
+	s.logger.Debugf("removing unused shim for VM %s", resources.VMID)
+
+	var result *multierror.Error
+
+	// Kill the shim process if it was started
+	if resources.Cmd != nil && resources.Cmd.Process != nil {
+		if err := resources.Cmd.Process.Kill(); err != nil {
+			s.logger.WithError(err).Warn("failed to kill shim process")
+			result = multierror.Append(result, fmt.Errorf("failed to kill shim process: %w", err))
+		}
+	}
+
+	// Clean up all resources
+	if err := s.cleanupShimResources(resources); err != nil {
+		result = multierror.Append(result, err)
+	}
+
+	return result.ErrorOrNil()
+}
+
+// cleanupShimResources is a helper function to clean up shim resources
+func (s *local) cleanupShimResources(resources *ShimResources) error {
+	if resources == nil {
+		return nil
+	}
+
+	var result *multierror.Error
+
+	// Remove sockets
+	if resources.ShimSocket != nil {
+		if err := resources.ShimSocket.Close(); err != nil {
+			s.logger.WithError(err).Warn("failed to close shim socket")
+			result = multierror.Append(result, err)
+		}
+		if resources.ShimSocketAddress != "" {
+			if err := shim.RemoveSocket(resources.ShimSocketAddress); err != nil {
+				s.logger.WithError(err).Warn("failed to remove shim socket")
+				result = multierror.Append(result, err)
+			}
+		}
+	}
+
+	if resources.FCSocket != nil {
+		if err := resources.FCSocket.Close(); err != nil {
+			s.logger.WithError(err).Warn("failed to close fccontrol socket")
+			result = multierror.Append(result, err)
+		}
+		if resources.FCSocketAddress != "" {
+			if err := shim.RemoveSocket(resources.FCSocketAddress); err != nil {
+				s.logger.WithError(err).Warn("failed to remove fccontrol socket")
+				result = multierror.Append(result, err)
+			}
+		}
+	}
+
+	// Remove shim directory
+	if resources.ShimDir != nil {
+		if err := os.RemoveAll(resources.ShimDir.RootPath()); err != nil {
+			s.logger.WithError(err).WithField("path", resources.ShimDir.RootPath()).Warn("failed to remove VM dir")
+			result = multierror.Append(result, err)
+		}
+	}
+
+	return result.ErrorOrNil()
+}
+
+// CreateVM creates new Firecracker VM instance. It creates a runtime shim for the VM and the forwards
+// the CreateVM request to that shim. If there is already a VM created with the provided VMID, then
+// AlreadyExists is returned. If a shim was pre-created using PrepareShim, it will be used.
+func (s *local) CreateVM(requestCtx context.Context, req *proto.CreateVMRequest) (*proto.CreateVMResponse, error) {
+	var err error
+
+	id := req.GetVMID()
+	if err := identifiers.Validate(id); err != nil {
+		s.logger.WithError(err).Error()
+		return nil, err
+	}
+
+	// Check if a shim was already prepared for this VMID
+	shimExists, err := s.shimExists(requestCtx, id)
 	if err != nil {
 		return nil, err
 	}
 
-	defer func() {
+	var resources *ShimResources
+	
+	if !shimExists {
+		// No pre-created shim, so prepare a new one
+		resources, err = s.prepareShim(requestCtx, id)
 		if err != nil {
-			cmd.Process.Kill()
+			return nil, err
 		}
-	}()
 
+		// Ensure cleanup on error (only if we created the shim)
+		defer func() {
+			if err != nil {
+				s.removeShim(resources)
+			}
+		}()
+	} else {
+		s.logger.Debugf("using pre-created shim for VM %s", id)
+	}
+
+	// Create firecracker client to communicate with the shim
 	client, err := s.shimFirecrackerClient(requestCtx, id)
 	if err != nil {
 		err = fmt.Errorf("failed to create firecracker shim client: %w", err)
@@ -196,13 +432,17 @@ func (s *local) CreateVM(requestCtx context.Context, req *proto.CreateVMRequest)
 
 	defer client.Close()
 
+	// Forward the CreateVM request to the shim
 	resp, err := client.CreateVM(requestCtx, req)
 	if err != nil {
 		s.logger.WithError(err).Error("shim CreateVM returned error")
 		return nil, err
 	}
 
-	s.addShim(shimSocketAddress, cmd)
+	// Register the shim process for tracking (only if we created it)
+	if resources != nil {
+		s.addShim(resources.ShimSocketAddress, resources.Cmd)
+	}
 
 	return resp, nil
 }

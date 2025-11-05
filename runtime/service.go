@@ -452,6 +452,18 @@ func (s *service) waitVMReady() error {
 	}
 }
 
+// PrepareShim is a stub implementation to satisfy the FirecrackerService interface.
+// This method is not used by the runtime shim, only by the firecracker-control service.
+func (s *service) PrepareShim(requestCtx context.Context, req *proto.PrepareShimRequest) (*proto.PrepareShimResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "PrepareShim is not implemented in the runtime shim")
+}
+
+// RemoveShim is a stub implementation to satisfy the FirecrackerService interface.
+// This method is not used by the runtime shim, only by the firecracker-control service.
+func (s *service) RemoveShim(requestCtx context.Context, req *proto.RemoveShimRequest) (*types.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "RemoveShim is not implemented in the runtime shim")
+}
+
 // CreateVM will attempt to create the VM as specified in the provided request, but only on the first request
 // received. Any subsequent requests will be ignored and get an AlreadyExists error response.
 func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRequest) (*proto.CreateVMResponse, error) {
@@ -627,18 +639,27 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 		return fmt.Errorf("failed to start the VM: %w", err)
 	}
 
-	s.logger.Info("calling agent")
-	conn, err := vsock.DialContext(requestCtx, relVSockPath, defaultVsockPort, vsock.WithLogger(s.logger))
-	if err != nil {
-		return fmt.Errorf("failed to dial the VM over vsock: %w", err)
+	callAgent := func() {
+		s.logger.Info("calling agent")
+		conn, err := vsock.DialContext(requestCtx, relVSockPath, defaultVsockPort, vsock.WithRetryInterval(1*time.Millisecond), vsock.WithLogger(s.logger))
+		if err != nil {
+			s.logger.WithError(err).Error("failed to dial the VM over vsock")
+			return
+		}
+
+		rpcClient := ttrpc.NewClient(conn, ttrpc.WithOnClose(func() { _ = conn.Close() }))
+		s.agentClient = taskAPI.NewTaskClient(rpcClient)
+		s.eventBridgeClient = eventbridge.NewGetterClient(rpcClient)
+		s.driveMountClient = drivemount.NewDriveMounterClient(rpcClient)
+		s.ioProxyClient = ioproxy.NewIOProxyClient(rpcClient)
+		s.exitAfterAllTasksDeleted = request.ExitAfterAllTasksDeleted
 	}
 
-	rpcClient := ttrpc.NewClient(conn, ttrpc.WithOnClose(func() { _ = conn.Close() }))
-	s.agentClient = taskAPI.NewTaskClient(rpcClient)
-	s.eventBridgeClient = eventbridge.NewGetterClient(rpcClient)
-	s.driveMountClient = drivemount.NewDriveMounterClient(rpcClient)
-	s.ioProxyClient = ioproxy.NewIOProxyClient(rpcClient)
-	s.exitAfterAllTasksDeleted = request.ExitAfterAllTasksDeleted
+	if !request.LoadSnapshot {
+		callAgent()
+	} else {
+		callAgent() // if we load snap, agent is not needed straight away, remove from critical path
+	}
 
 	if !request.LoadSnapshot {
 		err = s.mountDrives(requestCtx)

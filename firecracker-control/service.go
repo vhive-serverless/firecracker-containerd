@@ -67,6 +67,16 @@ func (s *service) RegisterTTRPC(server *ttrpc.Server) error {
 	return nil
 }
 
+func (s *service) PrepareShim(ctx context.Context, req *proto.PrepareShimRequest) (*proto.PrepareShimResponse, error) {
+	log.G(ctx).Debugf("prepare shim request: %+v", req)
+	return s.local.PrepareShim(ctx, req)
+}
+
+func (s *service) RemoveShim(ctx context.Context, req *proto.RemoveShimRequest) (*types.Empty, error) {
+	log.G(ctx).Debugf("remove shim request: %+v", req)
+	return s.local.RemoveShim(ctx, req)
+}
+
 func (s *service) CreateVM(ctx context.Context, req *proto.CreateVMRequest) (*proto.CreateVMResponse, error) {
 	log.G(ctx).Debugf("create VM request: %+v", req)
 	return s.local.CreateVM(ctx, req)
