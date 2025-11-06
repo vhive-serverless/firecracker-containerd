@@ -19,6 +19,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"syscall"
@@ -166,6 +167,28 @@ func initCache(config config.Config, monitor *metrics.Monitor) (*cache.RemoteSna
 	}
 
 	vsockDial := func(ctx context.Context, host string, port uint64) (net.Conn, error) {
+		// If host is a Unix socket path (starts with /), wait for the socket file to exist
+		if strings.HasPrefix(host, "/") {
+			shimDir := filepath.Dir(host)
+			ticker := time.NewTicker(retryInterval)
+			defer ticker.Stop()
+			for {
+				select {
+				case <-ctx.Done():
+					return nil, ctx.Err()
+				case <-ticker.C:
+					// Check if shim directory still exists (shim is still prepared)
+					if _, err := os.Stat(shimDir); os.IsNotExist(err) {
+						return nil, fmt.Errorf("shim directory %s no longer exists", shimDir)
+					}
+					if _, err := os.Stat(host); err == nil {
+						// File exists, proceed to dial
+						goto dial
+					}
+				}
+			}
+		}
+	dial:
 		return vsock.DialContext(ctx, host, uint32(port), vsock.WithLogger(log.G(ctx)),
 			vsock.WithAckMsgTimeout(2*time.Second),
 			vsock.WithRetryInterval(retryInterval),
