@@ -543,13 +543,21 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 		namespace = namespaces.Default
 	}
 
-	dir, err := vm.ShimDir(s.config.ShimBaseDir, namespace, s.vmID)
-	if err != nil {
-		return err
+	// Use the shimDir that was already initialized in NewService
+	// This is important when the shim was pre-created via PrepareShim
+	if s.shimDir.RootPath() == "" {
+		dir, err := vm.ShimDir(s.config.ShimBaseDir, namespace, s.vmID)
+		if err != nil {
+			return err
+		}
+		s.shimDir = dir
+		s.logger.Infof("shimDir was empty, created new shimDir: %s", s.shimDir.RootPath())
+	} else {
+		s.logger.Infof("reusing existing shimDir: %s", s.shimDir.RootPath())
 	}
 
-	s.logger.Info("creating new VM")
-	s.jailer, err = newJailer(s.shimCtx, s.logger, dir.RootPath(), s, request)
+	s.logger.Infof("creating new VM with jailer for shimDir: %s", s.shimDir.RootPath())
+	s.jailer, err = newJailer(s.shimCtx, s.logger, s.shimDir.RootPath(), s, request)
 	if err != nil {
 		return fmt.Errorf("failed to create jailer: %w", err)
 	}
@@ -579,6 +587,14 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 	if err != nil {
 		return fmt.Errorf("failed to get relative path to firecracker vsock: %w", err)
 	}
+
+	// Debug: Check current working directory
+	cwd, _ := os.Getwd()
+	jailVSockPath := s.jailer.JailPath().FirecrackerVSockPath()
+	s.logger.Infof("Current working directory: %s", cwd)
+	s.logger.Infof("JailPath root: %s", s.jailer.JailPath().RootPath())
+	s.logger.Infof("Absolute vsock path: %s", jailVSockPath)
+	s.logger.Infof("Relative vsock path: %s", relVSockPath)
 
 	jailedOpts, err := s.jailer.BuildJailedMachine(s.config, s.machineConfig, s.vmID)
 	if err != nil {
@@ -640,27 +656,24 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 		return fmt.Errorf("failed to start the VM: %w", err)
 	}
 
-	callAgent := func() {
-		s.logger.Info("calling agent")
-		conn, err := vsock.DialContext(requestCtx, relVSockPath, defaultVsockPort, vsock.WithRetryInterval(1*time.Millisecond), vsock.WithLogger(s.logger))
-		if err != nil {
-			s.logger.WithError(err).Error("failed to dial the VM over vsock")
-			return
-		}
+	retry := 100 * time.Millisecond
+	if request.LoadSnapshot {
+		retry = 1 * time.Millisecond
+	}
+	s.logger.Infof("Connecting to agent with retry interval: %v", retry)
 
-		rpcClient := ttrpc.NewClient(conn, ttrpc.WithOnClose(func() { _ = conn.Close() }))
-		s.agentClient = taskAPI.NewTaskClient(rpcClient)
-		s.eventBridgeClient = eventbridge.NewGetterClient(rpcClient)
-		s.driveMountClient = drivemount.NewDriveMounterClient(rpcClient)
-		s.ioProxyClient = ioproxy.NewIOProxyClient(rpcClient)
-		s.exitAfterAllTasksDeleted = request.ExitAfterAllTasksDeleted
+	conn, err := vsock.Dial(relVSockPath, defaultVsockPort, vsock.WithLogger(s.logger), vsock.WithRetryInterval(retry), vsock.WithDialTimeout(10*time.Second))
+	if err != nil {
+		s.logger.WithError(err).Error("failed to dial the VM over vsock")
+		return
 	}
 
-	if !request.LoadSnapshot {
-		callAgent()
-	} else {
-		callAgent() // if we load snap, agent is not needed straight away, remove from critical path
-	}
+	rpcClient := ttrpc.NewClient(conn, ttrpc.WithOnClose(func() { _ = conn.Close() }))
+	s.agentClient = taskAPI.NewTaskClient(rpcClient)
+	s.eventBridgeClient = eventbridge.NewGetterClient(rpcClient)
+	s.driveMountClient = drivemount.NewDriveMounterClient(rpcClient)
+	s.ioProxyClient = ioproxy.NewIOProxyClient(rpcClient)
+	s.exitAfterAllTasksDeleted = request.ExitAfterAllTasksDeleted
 
 	if !request.LoadSnapshot {
 		err = s.mountDrives(requestCtx)
