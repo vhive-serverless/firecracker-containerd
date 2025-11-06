@@ -109,6 +109,9 @@ func (s *local) PrepareShim(requestCtx context.Context, req *proto.PrepareShimRe
 		return nil, err
 	}
 
+	// Register the shim process for tracking so it can be killed later
+	s.addShim(resources.ShimSocketAddress, resources.Cmd)
+
 	return &proto.PrepareShimResponse{
 		VMID:              resources.VMID,
 		Namespace:         resources.Namespace,
@@ -119,17 +122,19 @@ func (s *local) PrepareShim(requestCtx context.Context, req *proto.PrepareShimRe
 
 // RemoveShim is a gRPC method that cleans up a prepared shim that will not be used.
 func (s *local) RemoveShim(requestCtx context.Context, req *proto.RemoveShimRequest) (*types.Empty, error) {
+	// s.logger.Debugf("removing shim for VM %s", req.VMID)
 	if err := identifiers.Validate(req.VMID); err != nil {
 		s.logger.WithError(err).Error()
 		return nil, err
 	}
 
-	ns, err := namespaces.NamespaceRequired(requestCtx)
-	if err != nil {
-		err = fmt.Errorf("error retrieving namespace of request: %w", err)
-		s.logger.WithError(err).Error()
-		return nil, err
-	}
+	// ns, err := namespaces.NamespaceRequired(requestCtx)
+	// if err != nil {
+	// 	err = fmt.Errorf("error retrieving namespace of request: %w", err)
+	// 	s.logger.WithError(err).Error()
+	// 	return nil, err
+	// }
+	ns := req.VMID
 
 	// Get socket addresses
 	shimSocketAddress, err := shim.SocketAddress(requestCtx, s.containerdAddress, req.VMID)
@@ -221,12 +226,13 @@ func (s *local) prepareShim(requestCtx context.Context, vmID string) (*ShimResou
 		return nil, err
 	}
 
-	ns, err := namespaces.NamespaceRequired(requestCtx)
-	if err != nil {
-		err = fmt.Errorf("error retrieving namespace of request: %w", err)
-		s.logger.WithError(err).Error()
-		return nil, err
-	}
+	// ns, err := namespaces.NamespaceRequired(requestCtx)
+	// if err != nil {
+	// 	err = fmt.Errorf("error retrieving namespace of request: %w", err)
+	// 	s.logger.WithError(err).Error()
+	// 	return nil, err
+	// }
+	ns := vmID
 
 	s.logger.Debugf("preparing shim for VM %s in namespace: %s", vmID, ns)
 
@@ -404,7 +410,7 @@ func (s *local) CreateVM(requestCtx context.Context, req *proto.CreateVMRequest)
 	}
 
 	var resources *ShimResources
-	
+
 	if !shimExists {
 		// No pre-created shim, so prepare a new one
 		resources, err = s.prepareShim(requestCtx, id)
