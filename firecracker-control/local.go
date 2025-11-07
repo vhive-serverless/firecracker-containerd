@@ -554,13 +554,13 @@ func (s *local) waitForShimToExit(ctx context.Context, vmID string) error {
 	}
 
 	s.processesMu.Lock()
-	defer s.processesMu.Unlock()
-
 	pid, ok := s.processes[socketAddr]
 	if !ok {
+		s.processesMu.Unlock()
 		return fmt.Errorf("failed to find a shim process for %q", socketAddr)
 	}
-	defer delete(s.processes, socketAddr)
+	delete(s.processes, socketAddr)
+	s.processesMu.Unlock()
 
 	return internal.WaitForPidToExit(ctx, stopVMInterval, pid)
 }
