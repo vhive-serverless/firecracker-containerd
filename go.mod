@@ -2,8 +2,10 @@ module github.com/firecracker-microvm/firecracker-containerd
 
 go 1.24.0
 
+replace github.com/firecracker-microvm/firecracker-go-sdk => github.com/vhive-serverless/firecracker-go-sdk v0.0.0-20230910093528-55ab6c76ad40
+
 require (
-	github.com/awslabs/tc-redirect-tap v0.0.0-20211025175357-e30dfca224c2
+	github.com/awslabs/tc-redirect-tap v0.0.0-20250516183331-34bf829e9a5c
 	github.com/containerd/containerd v1.7.29
 	github.com/containerd/containerd/api v1.8.0
 	github.com/containerd/continuity v0.4.4
@@ -16,7 +18,6 @@ require (
 	github.com/containernetworking/plugins v1.7.1
 	github.com/firecracker-microvm/firecracker-go-sdk v1.0.1-0.20250818195323-ed6ff32aa924
 	github.com/gofrs/uuid v3.3.0+incompatible
-	github.com/golang/protobuf v1.5.4
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/miekg/dns v1.1.62
 	github.com/moby/sys/user v0.3.0
@@ -86,6 +87,7 @@ require (
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
+	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
