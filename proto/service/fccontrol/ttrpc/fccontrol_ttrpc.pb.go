@@ -6,27 +6,44 @@ import (
 	context "context"
 	ttrpc "github.com/containerd/ttrpc"
 	proto "github.com/firecracker-microvm/firecracker-containerd/proto"
-	empty "github.com/golang/protobuf/ptypes/empty"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 type FirecrackerService interface {
+	PrepareShim(context.Context, *proto.PrepareShimRequest) (*proto.PrepareShimResponse, error)
+	RemoveShim(context.Context, *proto.RemoveShimRequest) (*emptypb.Empty, error)
 	CreateVM(context.Context, *proto.CreateVMRequest) (*proto.CreateVMResponse, error)
-	PauseVM(context.Context, *proto.PauseVMRequest) (*empty.Empty, error)
-	ResumeVM(context.Context, *proto.ResumeVMRequest) (*empty.Empty, error)
-	StopVM(context.Context, *proto.StopVMRequest) (*empty.Empty, error)
+	PauseVM(context.Context, *proto.PauseVMRequest) (*emptypb.Empty, error)
+	ResumeVM(context.Context, *proto.ResumeVMRequest) (*emptypb.Empty, error)
+	CreateSnapshot(context.Context, *proto.CreateSnapshotRequest) (*emptypb.Empty, error)
+	StopVM(context.Context, *proto.StopVMRequest) (*emptypb.Empty, error)
 	GetVMInfo(context.Context, *proto.GetVMInfoRequest) (*proto.GetVMInfoResponse, error)
-	SetVMMetadata(context.Context, *proto.SetVMMetadataRequest) (*empty.Empty, error)
-	UpdateVMMetadata(context.Context, *proto.UpdateVMMetadataRequest) (*empty.Empty, error)
+	SetVMMetadata(context.Context, *proto.SetVMMetadataRequest) (*emptypb.Empty, error)
+	UpdateVMMetadata(context.Context, *proto.UpdateVMMetadataRequest) (*emptypb.Empty, error)
 	GetVMMetadata(context.Context, *proto.GetVMMetadataRequest) (*proto.GetVMMetadataResponse, error)
 	GetBalloonConfig(context.Context, *proto.GetBalloonConfigRequest) (*proto.GetBalloonConfigResponse, error)
-	UpdateBalloon(context.Context, *proto.UpdateBalloonRequest) (*empty.Empty, error)
+	UpdateBalloon(context.Context, *proto.UpdateBalloonRequest) (*emptypb.Empty, error)
 	GetBalloonStats(context.Context, *proto.GetBalloonStatsRequest) (*proto.GetBalloonStatsResponse, error)
-	UpdateBalloonStats(context.Context, *proto.UpdateBalloonStatsRequest) (*empty.Empty, error)
+	UpdateBalloonStats(context.Context, *proto.UpdateBalloonStatsRequest) (*emptypb.Empty, error)
 }
 
 func RegisterFirecrackerService(srv *ttrpc.Server, svc FirecrackerService) {
 	srv.RegisterService("Firecracker", &ttrpc.ServiceDesc{
 		Methods: map[string]ttrpc.Method{
+			"PrepareShim": func(ctx context.Context, unmarshal func(interface{}) error) (interface{}, error) {
+				var req proto.PrepareShimRequest
+				if err := unmarshal(&req); err != nil {
+					return nil, err
+				}
+				return svc.PrepareShim(ctx, &req)
+			},
+			"RemoveShim": func(ctx context.Context, unmarshal func(interface{}) error) (interface{}, error) {
+				var req proto.RemoveShimRequest
+				if err := unmarshal(&req); err != nil {
+					return nil, err
+				}
+				return svc.RemoveShim(ctx, &req)
+			},
 			"CreateVM": func(ctx context.Context, unmarshal func(interface{}) error) (interface{}, error) {
 				var req proto.CreateVMRequest
 				if err := unmarshal(&req); err != nil {
@@ -47,6 +64,13 @@ func RegisterFirecrackerService(srv *ttrpc.Server, svc FirecrackerService) {
 					return nil, err
 				}
 				return svc.ResumeVM(ctx, &req)
+			},
+			"CreateSnapshot": func(ctx context.Context, unmarshal func(interface{}) error) (interface{}, error) {
+				var req proto.CreateSnapshotRequest
+				if err := unmarshal(&req); err != nil {
+					return nil, err
+				}
+				return svc.CreateSnapshot(ctx, &req)
 			},
 			"StopVM": func(ctx context.Context, unmarshal func(interface{}) error) (interface{}, error) {
 				var req proto.StopVMRequest
@@ -125,6 +149,22 @@ func NewFirecrackerClient(client *ttrpc.Client) FirecrackerService {
 	}
 }
 
+func (c *firecrackerClient) PrepareShim(ctx context.Context, req *proto.PrepareShimRequest) (*proto.PrepareShimResponse, error) {
+	var resp proto.PrepareShimResponse
+	if err := c.client.Call(ctx, "Firecracker", "PrepareShim", req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *firecrackerClient) RemoveShim(ctx context.Context, req *proto.RemoveShimRequest) (*emptypb.Empty, error) {
+	var resp emptypb.Empty
+	if err := c.client.Call(ctx, "Firecracker", "RemoveShim", req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
 func (c *firecrackerClient) CreateVM(ctx context.Context, req *proto.CreateVMRequest) (*proto.CreateVMResponse, error) {
 	var resp proto.CreateVMResponse
 	if err := c.client.Call(ctx, "Firecracker", "CreateVM", req, &resp); err != nil {
@@ -133,24 +173,32 @@ func (c *firecrackerClient) CreateVM(ctx context.Context, req *proto.CreateVMReq
 	return &resp, nil
 }
 
-func (c *firecrackerClient) PauseVM(ctx context.Context, req *proto.PauseVMRequest) (*empty.Empty, error) {
-	var resp empty.Empty
+func (c *firecrackerClient) PauseVM(ctx context.Context, req *proto.PauseVMRequest) (*emptypb.Empty, error) {
+	var resp emptypb.Empty
 	if err := c.client.Call(ctx, "Firecracker", "PauseVM", req, &resp); err != nil {
 		return nil, err
 	}
 	return &resp, nil
 }
 
-func (c *firecrackerClient) ResumeVM(ctx context.Context, req *proto.ResumeVMRequest) (*empty.Empty, error) {
-	var resp empty.Empty
+func (c *firecrackerClient) ResumeVM(ctx context.Context, req *proto.ResumeVMRequest) (*emptypb.Empty, error) {
+	var resp emptypb.Empty
 	if err := c.client.Call(ctx, "Firecracker", "ResumeVM", req, &resp); err != nil {
 		return nil, err
 	}
 	return &resp, nil
 }
 
-func (c *firecrackerClient) StopVM(ctx context.Context, req *proto.StopVMRequest) (*empty.Empty, error) {
-	var resp empty.Empty
+func (c *firecrackerClient) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotRequest) (*emptypb.Empty, error) {
+	var resp emptypb.Empty
+	if err := c.client.Call(ctx, "Firecracker", "CreateSnapshot", req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *firecrackerClient) StopVM(ctx context.Context, req *proto.StopVMRequest) (*emptypb.Empty, error) {
+	var resp emptypb.Empty
 	if err := c.client.Call(ctx, "Firecracker", "StopVM", req, &resp); err != nil {
 		return nil, err
 	}
@@ -165,16 +213,16 @@ func (c *firecrackerClient) GetVMInfo(ctx context.Context, req *proto.GetVMInfoR
 	return &resp, nil
 }
 
-func (c *firecrackerClient) SetVMMetadata(ctx context.Context, req *proto.SetVMMetadataRequest) (*empty.Empty, error) {
-	var resp empty.Empty
+func (c *firecrackerClient) SetVMMetadata(ctx context.Context, req *proto.SetVMMetadataRequest) (*emptypb.Empty, error) {
+	var resp emptypb.Empty
 	if err := c.client.Call(ctx, "Firecracker", "SetVMMetadata", req, &resp); err != nil {
 		return nil, err
 	}
 	return &resp, nil
 }
 
-func (c *firecrackerClient) UpdateVMMetadata(ctx context.Context, req *proto.UpdateVMMetadataRequest) (*empty.Empty, error) {
-	var resp empty.Empty
+func (c *firecrackerClient) UpdateVMMetadata(ctx context.Context, req *proto.UpdateVMMetadataRequest) (*emptypb.Empty, error) {
+	var resp emptypb.Empty
 	if err := c.client.Call(ctx, "Firecracker", "UpdateVMMetadata", req, &resp); err != nil {
 		return nil, err
 	}
@@ -197,8 +245,8 @@ func (c *firecrackerClient) GetBalloonConfig(ctx context.Context, req *proto.Get
 	return &resp, nil
 }
 
-func (c *firecrackerClient) UpdateBalloon(ctx context.Context, req *proto.UpdateBalloonRequest) (*empty.Empty, error) {
-	var resp empty.Empty
+func (c *firecrackerClient) UpdateBalloon(ctx context.Context, req *proto.UpdateBalloonRequest) (*emptypb.Empty, error) {
+	var resp emptypb.Empty
 	if err := c.client.Call(ctx, "Firecracker", "UpdateBalloon", req, &resp); err != nil {
 		return nil, err
 	}
@@ -213,8 +261,8 @@ func (c *firecrackerClient) GetBalloonStats(ctx context.Context, req *proto.GetB
 	return &resp, nil
 }
 
-func (c *firecrackerClient) UpdateBalloonStats(ctx context.Context, req *proto.UpdateBalloonStatsRequest) (*empty.Empty, error) {
-	var resp empty.Empty
+func (c *firecrackerClient) UpdateBalloonStats(ctx context.Context, req *proto.UpdateBalloonStatsRequest) (*emptypb.Empty, error) {
+	var resp emptypb.Empty
 	if err := c.client.Call(ctx, "Firecracker", "UpdateBalloonStats", req, &resp); err != nil {
 		return nil, err
 	}
