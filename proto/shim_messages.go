@@ -16,10 +16,12 @@ package proto
 // PrepareShimRequest specifies parameters for preparing a shim
 type PrepareShimRequest struct {
 	// VM identifier for the shim
-	VMID                 string   `protobuf:"bytes,1,opt,name=VMID,proto3" json:"VMID,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	VMID string `protobuf:"bytes,1,opt,name=VMID,proto3" json:"VMID,omitempty"`
+	// Optional CreateVMRequest to be used when creating a prewarmed VMM
+	CreateVmRequest      *CreateVMRequest `protobuf:"bytes,2,opt,name=create_vm_request,json=createVmRequest,proto3" json:"create_vm_request,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
+	XXX_unrecognized     []byte           `json:"-"`
+	XXX_sizecache        int32            `json:"-"`
 }
 
 func (m *PrepareShimRequest) Reset()         { *m = PrepareShimRequest{} }
@@ -31,6 +33,13 @@ func (m *PrepareShimRequest) GetVMID() string {
 		return m.VMID
 	}
 	return ""
+}
+
+func (m *PrepareShimRequest) GetCreateVmRequest() *CreateVMRequest {
+	if m != nil {
+		return m.CreateVmRequest
+	}
+	return nil
 }
 
 // PrepareShimResponse returns information about the prepared shim

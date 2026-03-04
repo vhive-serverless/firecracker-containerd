@@ -109,6 +109,29 @@ func (s *local) PrepareShim(requestCtx context.Context, req *proto.PrepareShimRe
 		return nil, err
 	}
 
+	defer func() {
+		if err != nil {
+			if removeErr := s.removeShim(resources); removeErr != nil {
+				s.logger.WithError(removeErr).Warn("failed to cleanup shim resources after prepare error")
+			}
+		}
+	}()
+
+	client, err := s.shimFirecrackerClient(requestCtx, req.VMID)
+	if err != nil {
+		err = fmt.Errorf("failed to create firecracker shim client for prepare: %w", err)
+		s.logger.WithError(err).Error()
+		return nil, err
+	}
+
+	_, err = client.PrepareShim(requestCtx, req)
+	client.Close()
+	if err != nil {
+		err = fmt.Errorf("shim PrepareShim returned error: %w", err)
+		s.logger.WithError(err).Error()
+		return nil, err
+	}
+
 	// Register the shim process for tracking so it can be killed later
 	s.addShim(resources.ShimSocketAddress, resources.Cmd)
 
