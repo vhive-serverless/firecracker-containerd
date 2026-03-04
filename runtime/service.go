@@ -150,6 +150,7 @@ type service struct {
 
 	machine          *firecracker.Machine
 	machineConfig    *firecracker.Config
+	vmmPrewarmed     bool
 	vsockIOPortCount uint32
 	vsockPortMu      sync.Mutex
 
@@ -452,10 +453,122 @@ func (s *service) waitVMReady() error {
 	}
 }
 
-// PrepareShim is a stub implementation to satisfy the FirecrackerService interface.
-// This method is not used by the runtime shim, only by the firecracker-control service.
+func (s *service) vmIsReady() bool {
+	select {
+	case <-s.vmReady:
+		return true
+	default:
+		return false
+	}
+}
+
+func (s *service) buildCreateVMResponse() *proto.CreateVMResponse {
+	resp := &proto.CreateVMResponse{
+		VMID:            s.vmID,
+		MetricsFifoPath: s.machineConfig.MetricsFifo,
+		LogFifoPath:     s.machineConfig.LogFifo,
+		SocketPath:      s.shimDir.FirecrackerSockPath(),
+	}
+	if c, ok := s.jailer.(cgroupPather); ok {
+		resp.CgroupPath = c.CgroupPath()
+	}
+
+	return resp
+}
+
+func (s *service) prewarmVMM(requestCtx context.Context, request *proto.CreateVMRequest) (err error) {
+	namespace, ok := namespaces.Namespace(s.shimCtx)
+	if !ok {
+		namespace = namespaces.Default
+	}
+
+	if s.shimDir.RootPath() == "" {
+		dir, dirErr := vm.ShimDir(s.config.ShimBaseDir, namespace, s.vmID)
+		if dirErr != nil {
+			return dirErr
+		}
+		s.shimDir = dir
+	}
+
+	s.jailer, err = newJailer(s.shimCtx, s.logger, s.shimDir.RootPath(), s, request)
+	if err != nil {
+		return fmt.Errorf("failed to create jailer for prewarm: %w", err)
+	}
+
+	defer func() {
+		if err != nil && s.jailer != nil {
+			if e := s.jailer.Stop(true); e != nil {
+				s.logger.WithError(e).Debug("failed to stop firecracker after prewarm failure")
+			}
+		}
+	}()
+
+	s.machineConfig, err = s.buildVMConfiguration(request)
+	if err != nil {
+		return fmt.Errorf("failed to build VM configuration for prewarm: %w", err)
+	}
+
+	opts := []firecracker.Opt{}
+	if v, ok := s.config.DebugHelper.GetFirecrackerSDKLogLevel(); ok {
+		logger := log.G(s.shimCtx)
+		logger.Logger.SetLevel(v)
+		opts = append(opts, firecracker.WithLogger(logger))
+	}
+
+	jailedOpts, err := s.jailer.BuildJailedMachine(s.config, s.machineConfig, s.vmID)
+	if err != nil {
+		return fmt.Errorf("failed to build jailed machine options for prewarm: %w", err)
+	}
+	opts = append(opts, jailedOpts...)
+
+	s.machine, err = firecracker.NewMachine(s.shimCtx, *s.machineConfig, opts...)
+	if err != nil {
+		return fmt.Errorf("failed to create new machine instance for prewarm: %w", err)
+	}
+
+	prewarmHandlers := s.machine.Handlers.FcInit.
+		Remove(firecracker.CreateMachineHandlerName).
+		Remove(firecracker.CreateBootSourceHandlerName).
+		Remove(firecracker.AttachDrivesHandlerName).
+		Remove(firecracker.CreateNetworkInterfacesHandlerName).
+		Remove(firecracker.AddVsocksHandlerName).
+		Remove(firecracker.ConfigMmdsHandlerName).
+		Remove(firecracker.CreateBalloonHandlerName).
+		Remove(firecracker.LoadSnapshotHandlerName)
+
+	if err = prewarmHandlers.Run(s.shimCtx, s.machine); err != nil {
+		return fmt.Errorf("failed to prewarm VMM process: %w", err)
+	}
+
+	s.vmmPrewarmed = true
+	s.logger.Info("successfully prewarmed Firecracker VMM process")
+	return nil
+}
+
+// PrepareShim pre-initializes the Firecracker process and VM using default runtime settings.
+// Later CreateVM calls will reuse this running VM and return the existing VM metadata.
 func (s *service) PrepareShim(requestCtx context.Context, req *proto.PrepareShimRequest) (*proto.PrepareShimResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "PrepareShim is not implemented in the runtime shim")
+	if req.GetVMID() != "" && s.vmID != "" && req.GetVMID() != s.vmID {
+		return nil, status.Errorf(codes.InvalidArgument, "requested VMID %q does not match shim VMID %q", req.GetVMID(), s.vmID)
+	}
+	if s.vmIsReady() || s.vmmPrewarmed {
+		return &proto.PrepareShimResponse{VMID: s.vmID}, nil
+	}
+
+	// Use CreateVMRequest provided in PrepareShimRequest when available so
+	// prewarmed VMM can be configured as requested. Ensure VMID is set.
+	createReq := req.GetCreateVmRequest()
+	if createReq == nil {
+		createReq = &proto.CreateVMRequest{VMID: s.vmID}
+	} else if createReq.VMID == "" {
+		createReq.VMID = s.vmID
+	}
+
+	if err := s.prewarmVMM(requestCtx, createReq); err != nil {
+		return nil, err
+	}
+
+	return &proto.PrepareShimResponse{VMID: s.vmID}, nil
 }
 
 // RemoveShim is a stub implementation to satisfy the FirecrackerService interface.
@@ -487,7 +600,10 @@ func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRe
 		createRan = true
 	})
 	if !createRan {
-		return nil, status.Error(codes.AlreadyExists, "shim cannot create VM more than once")
+		if !s.vmIsReady() {
+			return nil, status.Error(codes.AlreadyExists, "shim cannot create VM more than once")
+		}
+		return s.buildCreateVMResponse(), nil
 	}
 
 	// If we failed to create the VM, we have no point in existing anymore, so shutdown
@@ -510,14 +626,7 @@ func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRe
 	// let all the other methods know that the VM is ready for tasks
 	close(s.vmReady)
 
-	resp.VMID = s.vmID
-	resp.MetricsFifoPath = s.machineConfig.MetricsFifo
-	resp.LogFifoPath = s.machineConfig.LogFifo
-	resp.SocketPath = s.shimDir.FirecrackerSockPath()
-	if c, ok := s.jailer.(cgroupPather); ok {
-		resp.CgroupPath = c.CgroupPath()
-	}
-
+	resp = *s.buildCreateVMResponse()
 	return &resp, nil
 }
 
@@ -531,128 +640,176 @@ func (s *service) publishVMStop() error {
 
 func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRequest) (err error) {
 	var vsockFd *os.File
+	var relVSockPath string
 	defer func() {
 		if vsockFd != nil {
 			vsockFd.Close()
 		}
 	}()
-
-	namespace, ok := namespaces.Namespace(s.shimCtx)
-	if !ok {
-		namespace = namespaces.Default
-	}
-
-	// Use the shimDir that was already initialized in NewService
-	// This is important when the shim was pre-created via PrepareShim
-	if s.shimDir.RootPath() == "" {
-		dir, err := vm.ShimDir(s.config.ShimBaseDir, namespace, s.vmID)
-		if err != nil {
-			return err
-		}
-		s.shimDir = dir
-		s.logger.Infof("shimDir was empty, created new shimDir: %s", s.shimDir.RootPath())
-	} else {
-		s.logger.Infof("reusing existing shimDir: %s", s.shimDir.RootPath())
-	}
-
-	s.logger.Infof("creating new VM with jailer for shimDir: %s", s.shimDir.RootPath())
-	s.jailer, err = newJailer(s.shimCtx, s.logger, s.shimDir.RootPath(), s, request)
-	if err != nil {
-		return fmt.Errorf("failed to create jailer: %w", err)
-	}
-
 	defer func() {
-		// in the event of an error, we should stop the VM
-		if err != nil {
+		if err != nil && s.jailer != nil {
 			if e := s.jailer.Stop(true); e != nil {
 				s.logger.WithError(e).Debug("failed to stop firecracker")
 			}
 		}
 	}()
 
-	s.machineConfig, err = s.buildVMConfiguration(request)
-	if err != nil {
-		return fmt.Errorf("failed to build VM configuration: %w", err)
-	}
+	if s.vmmPrewarmed {
+		if s.machine == nil || s.jailer == nil {
+			return errors.New("prewarmed VMM state is incomplete")
+		}
 
-	opts := []firecracker.Opt{}
-
-	if v, ok := s.config.DebugHelper.GetFirecrackerSDKLogLevel(); ok {
-		logger := log.G(s.shimCtx)
-		logger.Logger.SetLevel(v)
-		opts = append(opts, firecracker.WithLogger(logger))
-	}
-	relVSockPath, err := s.jailer.JailPath().FirecrackerVSockRelPath()
-	if err != nil {
-		return fmt.Errorf("failed to get relative path to firecracker vsock: %w", err)
-	}
-
-	// Debug: Check current working directory
-	cwd, _ := os.Getwd()
-	jailVSockPath := s.jailer.JailPath().FirecrackerVSockPath()
-	s.logger.Infof("Current working directory: %s", cwd)
-	s.logger.Infof("JailPath root: %s", s.jailer.JailPath().RootPath())
-	s.logger.Infof("Absolute vsock path: %s", jailVSockPath)
-	s.logger.Infof("Relative vsock path: %s", relVSockPath)
-
-	jailedOpts, err := s.jailer.BuildJailedMachine(s.config, s.machineConfig, s.vmID)
-	if err != nil {
-		return fmt.Errorf("failed to build jailed machine options: %w", err)
-	}
-
-	if request.BalloonDevice == nil {
-		s.logger.Debug("No balloon device is setup")
-	} else {
-		// Creates a new balloon device if one does not already exist, otherwise updates it, before machine startup.
-		balloon, err := s.createBalloon(requestCtx, request)
+		s.machineConfig, err = s.buildVMConfiguration(request)
 		if err != nil {
-			return fmt.Errorf("failed to create balloon device: %w", err)
+			return fmt.Errorf("failed to build VM configuration for prewarmed VMM: %w", err)
 		}
-		balloonOpts, err := s.buildBalloonDeviceOpt(balloon)
-		if err != nil {
-			return fmt.Errorf("failed to create balloon device options: %w", err)
-		}
-		opts = append(opts, balloonOpts...)
-	}
+		s.machine.Cfg = *s.machineConfig
 
-	opts = append(opts, jailedOpts...)
+		if request.LoadSnapshot {
+			if request.SnapshotPath == "" || request.ContainerSnapshotPath == "" {
+				return errors.New("failed to load snapshot: snapshot path or container snapshot path was not provided")
+			}
+			if request.MemFilePath == "" && request.MemBackend.BackendType == "" {
+				return errors.New("either mem_file_path or mem_backend should be provided")
+			}
 
-	if request.LoadSnapshot {
-		if request.SnapshotPath == "" || request.ContainerSnapshotPath == "" {
-			return errors.New("failed to load snapshot: snapshot path or container snapshot path was not provided")
-		}
-		if request.MemFilePath == "" && request.MemBackend.BackendType == "" {
-			return errors.New("either mem_file_path or mem_backend should be provided")
-		}
+			snapOpts := []firecracker.WithSnapshotOpt{
+				firecracker.WithMemoryBackend(request.MemBackend.BackendType, request.MemBackend.BackendPath),
+				func(c *firecracker.SnapshotConfig) { c.ResumeVM = true },
+			}
+			if request.EnableDiffSnapshots {
+				snapOpts = append(snapOpts, func(c *firecracker.SnapshotConfig) { c.EnableDiffSnapshots = true })
+			}
 
-		snapOpts := []firecracker.WithSnapshotOpt{
-			firecracker.WithMemoryBackend(request.MemBackend.BackendType, request.MemBackend.BackendPath),
-			func(c *firecracker.SnapshotConfig) { c.ResumeVM = true },
-		}
-		if request.EnableDiffSnapshots {
-			snapOpts = append(snapOpts, func(c *firecracker.SnapshotConfig) { c.EnableDiffSnapshots = true })
-		}
-
-		opts = append(opts,
 			firecracker.WithSnapshot(
 				request.MemFilePath,
 				request.SnapshotPath,
 				request.ContainerSnapshotPath,
-				snapOpts...))
+				snapOpts...,
+			)(s.machine)
+		}
+
+		finalizeHandlers := s.machine.Handlers.FcInit.
+			Remove(jailerHandlerName).
+			Remove(firecracker.SetupNetworkHandlerName).
+			Remove(firecracker.StartVMMHandlerName).
+			Remove(firecracker.CreateLogFilesHandlerName).
+			Remove(firecracker.BootstrapLoggingHandlerName)
+
+		if err = finalizeHandlers.Run(s.shimCtx, s.machine); err != nil {
+			return fmt.Errorf("failed to configure prewarmed VMM: %w", err)
+		}
+
+		if !request.LoadSnapshot {
+			debugSDK := false
+			if level, ok := s.config.DebugHelper.GetFirecrackerSDKLogLevel(); ok {
+				debugSDK = level == logrus.DebugLevel
+			}
+
+			client := firecracker.NewClient(s.machineConfig.SocketPath, s.logger, debugSDK)
+			action := models.InstanceActionInfoActionTypeInstanceStart
+			startInfo := models.InstanceActionInfo{ActionType: &action}
+			if _, err = client.CreateSyncAction(s.shimCtx, &startInfo); err != nil {
+				return fmt.Errorf("failed to start VM from prewarmed VMM: %w", err)
+			}
+		}
+	} else {
+		namespace, ok := namespaces.Namespace(s.shimCtx)
+		if !ok {
+			namespace = namespaces.Default
+		}
+
+		// Use the shimDir that was already initialized in NewService
+		// This is important when the shim was pre-created via PrepareShim
+		if s.shimDir.RootPath() == "" {
+			dir, err := vm.ShimDir(s.config.ShimBaseDir, namespace, s.vmID)
+			if err != nil {
+				return err
+			}
+			s.shimDir = dir
+			s.logger.Infof("shimDir was empty, created new shimDir: %s", s.shimDir.RootPath())
+		} else {
+			s.logger.Infof("reusing existing shimDir: %s", s.shimDir.RootPath())
+		}
+
+		s.logger.Infof("creating new VM with jailer for shimDir: %s", s.shimDir.RootPath())
+		s.jailer, err = newJailer(s.shimCtx, s.logger, s.shimDir.RootPath(), s, request)
+		if err != nil {
+			return fmt.Errorf("failed to create jailer: %w", err)
+		}
+
+		s.machineConfig, err = s.buildVMConfiguration(request)
+		if err != nil {
+			return fmt.Errorf("failed to build VM configuration: %w", err)
+		}
+
+		opts := []firecracker.Opt{}
+
+		if v, ok := s.config.DebugHelper.GetFirecrackerSDKLogLevel(); ok {
+			logger := log.G(s.shimCtx)
+			logger.Logger.SetLevel(v)
+			opts = append(opts, firecracker.WithLogger(logger))
+		}
+
+		jailedOpts, err := s.jailer.BuildJailedMachine(s.config, s.machineConfig, s.vmID)
+		if err != nil {
+			return fmt.Errorf("failed to build jailed machine options: %w", err)
+		}
+
+		if request.BalloonDevice == nil {
+			s.logger.Debug("No balloon device is setup")
+		} else {
+			balloon, err := s.createBalloon(requestCtx, request)
+			if err != nil {
+				return fmt.Errorf("failed to create balloon device: %w", err)
+			}
+			balloonOpts, err := s.buildBalloonDeviceOpt(balloon)
+			if err != nil {
+				return fmt.Errorf("failed to create balloon device options: %w", err)
+			}
+			opts = append(opts, balloonOpts...)
+		}
+
+		opts = append(opts, jailedOpts...)
+
+		if request.LoadSnapshot {
+			if request.SnapshotPath == "" || request.ContainerSnapshotPath == "" {
+				return errors.New("failed to load snapshot: snapshot path or container snapshot path was not provided")
+			}
+			if request.MemFilePath == "" && request.MemBackend.BackendType == "" {
+				return errors.New("either mem_file_path or mem_backend should be provided")
+			}
+
+			snapOpts := []firecracker.WithSnapshotOpt{
+				firecracker.WithMemoryBackend(request.MemBackend.BackendType, request.MemBackend.BackendPath),
+				func(c *firecracker.SnapshotConfig) { c.ResumeVM = true },
+			}
+			if request.EnableDiffSnapshots {
+				snapOpts = append(snapOpts, func(c *firecracker.SnapshotConfig) { c.EnableDiffSnapshots = true })
+			}
+
+			opts = append(opts,
+				firecracker.WithSnapshot(
+					request.MemFilePath,
+					request.SnapshotPath,
+					request.ContainerSnapshotPath,
+					snapOpts...))
+		}
+
+		fmt.Printf("firecracker config: %+v\n", s.machineConfig)
+		s.machine, err = firecracker.NewMachine(s.shimCtx, *s.machineConfig, opts...)
+		if err != nil {
+			return fmt.Errorf("failed to create new machine instance: %w", err)
+		}
+
+		if err = s.machine.Start(s.shimCtx); err != nil {
+			return fmt.Errorf("failed to start the VM: %w", err)
+		}
 	}
 
-	// In the event that a noop jailer is used, we will pass in the shim context
-	// and have the SDK construct a new machine using that context. Otherwise, a
-	// custom process runner will be provided via options which will stomp over
-	// the shim context that was provided here.
-	fmt.Printf("firecracker config: %+v\n", s.machineConfig)
-	s.machine, err = firecracker.NewMachine(s.shimCtx, *s.machineConfig, opts...)
+	relVSockPath, err = s.jailer.JailPath().FirecrackerVSockRelPath()
 	if err != nil {
-		return fmt.Errorf("failed to create new machine instance: %w", err)
-	}
-
-	if err = s.machine.Start(s.shimCtx); err != nil {
-		return fmt.Errorf("failed to start the VM: %w", err)
+		return fmt.Errorf("failed to get relative path to firecracker vsock: %w", err)
 	}
 
 	retry := 100 * time.Millisecond
@@ -1045,7 +1202,7 @@ func (s *service) buildVMConfiguration(req *proto.CreateVMRequest) (*firecracker
 		logPath = req.LogFifoPath
 	}
 	err = syscall.Mkfifo(logPath, 0700)
-	if err != nil {
+	if err != nil && !os.IsExist(err) {
 		return nil, err
 	}
 
@@ -1054,7 +1211,7 @@ func (s *service) buildVMConfiguration(req *proto.CreateVMRequest) (*firecracker
 		metricsPath = req.MetricsFifoPath
 	}
 	err = syscall.Mkfifo(metricsPath, 0700)
-	if err != nil {
+	if err != nil && !os.IsExist(err) {
 		return nil, err
 	}
 
@@ -1085,7 +1242,11 @@ func (s *service) buildVMConfiguration(req *proto.CreateVMRequest) (*firecracker
 		cfg.KernelImagePath = s.config.KernelImagePath
 	}
 
-	cfg.Drives = s.buildRootDrive(req)
+	if s.machineConfig != nil && len(s.machineConfig.Drives) > 0 {
+		cfg.Drives = s.machineConfig.Drives
+	} else {
+		cfg.Drives = s.buildRootDrive(req)
+	}
 
 	// Drives configuration
 	containerCount := int(req.ContainerCount)
@@ -1096,7 +1257,7 @@ func (s *service) buildVMConfiguration(req *proto.CreateVMRequest) (*firecracker
 		containerCount = 1
 	}
 
-	if !req.LoadSnapshot {
+	if !req.LoadSnapshot && !s.vmmPrewarmed {
 		s.containerStubHandler, err = CreateContainerStubs(
 			&cfg, s.jailer, containerCount, s.logger)
 		if err != nil {
@@ -1104,7 +1265,7 @@ func (s *service) buildVMConfiguration(req *proto.CreateVMRequest) (*firecracker
 		}
 	}
 
-	if !req.LoadSnapshot {
+	if !req.LoadSnapshot && !s.vmmPrewarmed {
 		s.driveMountStubs, err = CreateDriveMountStubs(
 			&cfg, s.jailer, req.DriveMounts, s.logger)
 		if err != nil {
@@ -1130,6 +1291,7 @@ func (s *service) buildVMConfiguration(req *proto.CreateVMRequest) (*firecracker
 		cfg.NetworkInterfaces = append(cfg.NetworkInterfaces, *netCfg)
 	}
 
+	s.logger.Debugf("final VM configuration: %+v", cfg)
 	return &cfg, nil
 }
 

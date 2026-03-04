@@ -8,6 +8,8 @@ option go_package = "proto";
 message PrepareShimRequest {
     // VM identifier for the shim
     string VMID = 1;
+    // Optional CreateVMRequest to be used when creating a prewarmed VMM
+    CreateVMRequest create_vm_request = 2;
 }
 
 message PrepareShimResponse {
