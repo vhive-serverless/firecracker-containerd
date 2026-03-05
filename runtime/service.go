@@ -135,7 +135,10 @@ type service struct {
 	// vmReady is closed once CreateVM has been successfully called
 	vmReady                  chan struct{}
 	vmStartOnce              sync.Once
+	agentClientMu            sync.Mutex
 	agentClient              taskAPI.TaskService
+	agentRPCClient           *ttrpc.Client
+	agentConn                net.Conn
 	eventBridgeClient        eventbridge.Getter
 	driveMountClient         drivemount.DriveMounterService
 	ioProxyClient            ioproxy.IOProxyService
@@ -826,10 +829,7 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 	}
 
 	rpcClient := ttrpc.NewClient(conn, ttrpc.WithOnClose(func() { _ = conn.Close() }))
-	s.agentClient = taskAPI.NewTaskClient(rpcClient)
-	s.eventBridgeClient = eventbridge.NewGetterClient(rpcClient)
-	s.driveMountClient = drivemount.NewDriveMounterClient(rpcClient)
-	s.ioProxyClient = ioproxy.NewIOProxyClient(rpcClient)
+	s.setAgentClients(conn, rpcClient)
 	s.exitAfterAllTasksDeleted = request.ExitAfterAllTasksDeleted
 
 	if !request.LoadSnapshot {
@@ -841,6 +841,56 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 
 	s.logger.Info("successfully started the VM")
 	return nil
+}
+
+func (s *service) setAgentClients(conn net.Conn, rpcClient *ttrpc.Client) {
+	s.agentClientMu.Lock()
+	defer s.agentClientMu.Unlock()
+
+	if s.agentRPCClient != nil {
+		if err := s.agentRPCClient.Close(); err != nil {
+			s.logger.WithError(err).Debug("failed to close previous agent ttrpc client")
+		}
+	}
+	if s.agentConn != nil {
+		if err := s.agentConn.Close(); err != nil {
+			s.logger.WithError(err).Debug("failed to close previous agent vsock connection")
+		}
+	}
+
+	s.agentConn = conn
+	s.agentRPCClient = rpcClient
+	s.agentClient = taskAPI.NewTaskClient(rpcClient)
+	s.eventBridgeClient = eventbridge.NewGetterClient(rpcClient)
+	s.driveMountClient = drivemount.NewDriveMounterClient(rpcClient)
+	s.ioProxyClient = ioproxy.NewIOProxyClient(rpcClient)
+}
+
+func (s *service) reconnectAgent() error {
+	relVSockPath, err := s.jailer.JailPath().FirecrackerVSockRelPath()
+	if err != nil {
+		return fmt.Errorf("failed to get relative path to firecracker vsock: %w", err)
+	}
+
+	conn, err := vsock.Dial(relVSockPath, defaultVsockPort, vsock.WithLogger(s.logger), vsock.WithRetryInterval(10*time.Millisecond), vsock.WithDialTimeout(10*time.Second))
+	if err != nil {
+		return fmt.Errorf("failed to reconnect to VM over vsock: %w", err)
+	}
+
+	rpcClient := ttrpc.NewClient(conn, ttrpc.WithOnClose(func() { _ = conn.Close() }))
+	s.setAgentClients(conn, rpcClient)
+
+	return nil
+}
+
+func isClosedTTRPCErr(err error) bool {
+	if err == nil {
+		return false
+	}
+	errText := strings.ToLower(err.Error())
+	return strings.Contains(errText, "ttrpc: closed") ||
+		strings.Contains(errText, "connection is closing") ||
+		strings.Contains(errText, "use of closed network connection")
 }
 
 func (s *service) mountDrives(requestCtx context.Context) error {
@@ -1481,6 +1531,25 @@ func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTask
 		return nil, err
 	}
 	resp, err := s.taskManager.CreateTask(requestCtx, request, agent, ioConnectorSet)
+	if err != nil && isClosedTTRPCErr(err) {
+		logger.WithError(err).Warn("agent ttrpc connection closed while creating task, reconnecting and retrying")
+
+		if reconnectErr := s.reconnectAgent(); reconnectErr != nil {
+			return nil, fmt.Errorf("failed to reconnect to agent after create task error: %w", reconnectErr)
+		}
+
+		retryIO, ioErr := s.newIOProxy(logger, request.Stdin, request.Stdout, request.Stderr, extraData)
+		if ioErr != nil {
+			return nil, ioErr
+		}
+
+		agent, err = s.agent()
+		if err != nil {
+			return nil, err
+		}
+
+		resp, err = s.taskManager.CreateTask(requestCtx, request, agent, retryIO)
+	}
 	if err != nil {
 		err = fmt.Errorf("failed to create task: %w", err)
 		logger.WithError(err).Error()
@@ -2011,6 +2080,27 @@ func (s *service) cleanup() error {
 			s.logger.WithError(err).Error("failed to publish stop VM event")
 		}
 
+		s.agentClientMu.Lock()
+		if s.agentRPCClient != nil {
+			if err := s.agentRPCClient.Close(); err != nil {
+				result = multierror.Append(result, err)
+				s.logger.WithError(err).Error("failed to close agent ttrpc client")
+			}
+			s.agentRPCClient = nil
+		}
+		if s.agentConn != nil {
+			if err := s.agentConn.Close(); err != nil {
+				result = multierror.Append(result, err)
+				s.logger.WithError(err).Error("failed to close agent vsock connection")
+			}
+			s.agentConn = nil
+		}
+		s.agentClient = nil
+		s.eventBridgeClient = nil
+		s.driveMountClient = nil
+		s.ioProxyClient = nil
+		s.agentClientMu.Unlock()
+
 		// once the VM shuts down, the shim should too
 		s.shimCancel()
 
@@ -2037,5 +2127,13 @@ func (s *service) agent() (taskAPI.TaskService, error) {
 	if pid == 0 {
 		return nil, status.Errorf(codes.NotFound, "failed to find VM %q", s.vmID)
 	}
+
+	s.agentClientMu.Lock()
+	defer s.agentClientMu.Unlock()
+
+	if s.agentClient == nil {
+		return nil, status.Errorf(codes.Unavailable, "agent client is not connected for VM %q", s.vmID)
+	}
+
 	return s.agentClient, nil
 }
