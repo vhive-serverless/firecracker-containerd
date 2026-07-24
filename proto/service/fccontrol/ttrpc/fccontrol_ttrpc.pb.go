@@ -10,6 +10,8 @@ import (
 )
 
 type FirecrackerService interface {
+	PrepareShim(context.Context, *proto.PrepareShimRequest) (*proto.PrepareShimResponse, error)
+	RemoveShim(context.Context, *proto.RemoveShimRequest) (*emptypb.Empty, error)
 	CreateVM(context.Context, *proto.CreateVMRequest) (*proto.CreateVMResponse, error)
 	PauseVM(context.Context, *proto.PauseVMRequest) (*emptypb.Empty, error)
 	ResumeVM(context.Context, *proto.ResumeVMRequest) (*emptypb.Empty, error)
@@ -28,6 +30,20 @@ type FirecrackerService interface {
 func RegisterFirecrackerService(srv *ttrpc.Server, svc FirecrackerService) {
 	srv.RegisterService("Firecracker", &ttrpc.ServiceDesc{
 		Methods: map[string]ttrpc.Method{
+			"PrepareShim": func(ctx context.Context, unmarshal func(interface{}) error) (interface{}, error) {
+				var req proto.PrepareShimRequest
+				if err := unmarshal(&req); err != nil {
+					return nil, err
+				}
+				return svc.PrepareShim(ctx, &req)
+			},
+			"RemoveShim": func(ctx context.Context, unmarshal func(interface{}) error) (interface{}, error) {
+				var req proto.RemoveShimRequest
+				if err := unmarshal(&req); err != nil {
+					return nil, err
+				}
+				return svc.RemoveShim(ctx, &req)
+			},
 			"CreateVM": func(ctx context.Context, unmarshal func(interface{}) error) (interface{}, error) {
 				var req proto.CreateVMRequest
 				if err := unmarshal(&req); err != nil {
@@ -131,6 +147,22 @@ func NewFirecrackerClient(client *ttrpc.Client) FirecrackerService {
 	return &firecrackerClient{
 		client: client,
 	}
+}
+
+func (c *firecrackerClient) PrepareShim(ctx context.Context, req *proto.PrepareShimRequest) (*proto.PrepareShimResponse, error) {
+	var resp proto.PrepareShimResponse
+	if err := c.client.Call(ctx, "Firecracker", "PrepareShim", req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *firecrackerClient) RemoveShim(ctx context.Context, req *proto.RemoveShimRequest) (*emptypb.Empty, error) {
+	var resp emptypb.Empty
+	if err := c.client.Call(ctx, "Firecracker", "RemoveShim", req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
 }
 
 func (c *firecrackerClient) CreateVM(ctx context.Context, req *proto.CreateVMRequest) (*proto.CreateVMResponse, error) {
