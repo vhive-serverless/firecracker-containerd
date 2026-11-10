@@ -1,8 +1,8 @@
 # Modernization acceptance ledger
 
-No milestone is complete. A checked item requires worker evidence from a committed
-checkout and pushed dependency references. Branches for later steps must be created
-only after the preceding milestone's completion commit passes every gate.
+Step 1 has passed worker acceptance from a committed checkout. See `step-1.md`
+for the tested revision, pushed dependency references, and evidence. Each later
+branch starts at the validated completion commit of its prerequisite.
 
 ## Initial audit
 
@@ -20,21 +20,21 @@ only after the preceding milestone's completion commit passes every gate.
 ## Step 1: modernize-runtime
 
 - [x] Create runtime branch from master be68640 (current upstream dependency and security fixes; vHive changes ported in Step 2).
-- [ ] Preserve relevant SDK 1.14 work and regenerate from exact v1.18.0 Swagger using a pinned generator.
-- [ ] Update SDK defaults, API helpers, validation/error handling and tests; push SDK commit before runtime reference.
-- [ ] Select supported containerd 2.x; migrate imports, plugins, config, task/events, clients and snapshotters.
-- [ ] Update actual runc binary and module together; update guest agent and host shim/control layer.
-- [ ] Inspect Amazon Linux kernel provenance; update source/artifact path, kernel config, boot args, init, virtio/vsock, filesystems and security features.
-- [ ] Update guest rootfs with reproducible provenance, preserving baseline storage behavior.
-- [ ] Validate cgroup v2 host and guest limits, accounting, OOM and cleanup.
-- [ ] Update CNI/plugin binaries, tc-redirect-tap and network dependencies.
-- [ ] Update devmapper/thin-pool, retained stargz, drive mapping and volumes.
-- [ ] Update toolchains, builders, system libraries, protobuf/ttrpc generation and CI.
-- [ ] Reconcile module pins, submodules, downloaded tests and docs; audit jailer and recovery paths.
-- [ ] Worker clean build/install; image pull; create/start/exec/stop/delete OCI containers in Firecracker.
-- [ ] Worker networking, filesystem writes, supported volumes, logs, signals and resource limits.
-- [ ] Worker repeated operations and representative failures without resource leaks; relevant tests pass.
-- [ ] Commit/push all repositories; validate committed checkout without untracked state; capture exact versions/commands/paths and limitations.
+- [x] Preserve relevant SDK 1.14 work and regenerate from exact v1.18.0 Swagger using a pinned generator.
+- [x] Update SDK defaults, API helpers, validation/error handling and tests; push SDK commit before runtime reference.
+- [x] Select supported containerd 2.x; migrate imports, plugins, config, task/events, clients and snapshotters.
+- [x] Update actual runc binary and module together; update guest agent and host shim/control layer.
+- [x] Inspect Amazon Linux kernel provenance; update source/artifact path, kernel config, boot args, init, virtio/vsock, filesystems and security features.
+- [x] Update guest rootfs with reproducible provenance, preserving baseline storage behavior.
+- [x] Validate cgroup v2 host and guest limits, accounting, OOM and cleanup.
+- [x] Update CNI/plugin binaries, tc-redirect-tap and network dependencies.
+- [x] Update devmapper/thin-pool, retained stargz, drive mapping and volumes.
+- [x] Update toolchains, builders, system libraries, protobuf/ttrpc generation and CI.
+- [x] Reconcile module pins, submodules, downloaded tests and docs; audit jailer and recovery paths.
+- [x] Worker clean build/install; image pull; create/start/exec/stop/delete OCI containers in Firecracker.
+- [x] Worker networking, filesystem writes, supported volumes, logs, signals and resource limits.
+- [x] Worker repeated operations and representative failures without resource leaks; relevant tests pass.
+- [x] Commit/push all repositories; validate committed checkout without untracked state; capture exact versions/commands/paths and limitations.
 
 ## Step 2: vhive-compatible (not started)
 

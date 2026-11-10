@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "vm_id": "efe8b6c0-87a8-4918-90e3-fe1eca69ea19",
+  "namespace": "default",
+  "shim": {
+    "pid": 1755682,
+    "start_ticks": "1937081"
+  },
+  "vmm": {
+    "pid": 1755699,
+    "start_ticks": "1937083"
+  },
+  "own_netns": false
+}
+CONTROLLER_RESTART_RECONNECT_OK
+SHIM_CRASH_RECOVERY_OK

@@ -1,8 +1,15 @@
 # Step 1: modernized runtime
 
-Status: implementation under worker validation; **not a completed milestone**.
-The completion revision and final committed-checkout results will be recorded only
-when every Step 1 gate passes. Later milestone branches have not been created.
+Branch: `modernize-runtime`. The implementation at
+`e666612819bc1efa71c645434bc36385f92e6423` passed all Step 1 acceptance gates
+from the clean checkout `/users/nehalem/fc-ctrd-mod/validated-runtime` on the
+designated worker. This branch preserves that runtime and the evidence below.
+
+The installed stack pulled an OCI image and ran it inside Firecracker, where
+it wrote and read back a file on its ext4 container root. A second native test
+started a task, used exec to write a file, restarted the controller, and used exec
+again to verify the file. It then killed the shim and verified that the VMM,
+VM directory, and containerd task bundle were removed.
 
 ## Stack and compatibility
 
@@ -72,7 +79,7 @@ The shim drains control replies on shutdown, publishes the VM stop event before
 exit, and reserves stdout for the containerd bootstrap and delete protocols.
 Both crash tests check that containerd removes the task bundle as well as the VM.
 
-## Candidate reproduction procedure
+## Reproduction procedure
 
 All compilation and execution must run on `nehalem@amd218.utah.cloudlab.us`.
 The default workspace is `/users/nehalem/fc-ctrd-mod`. The scripts support
@@ -81,23 +88,28 @@ if it adds the Docker group.
 
 ```bash
 set -euo pipefail
-mkdir -p "$HOME/fc-ctrd-mod/evidence"
-cd "$HOME/fc-ctrd-mod"
+export STACK_DIR="$HOME/fc-ctrd-mod"
+mkdir -p "$STACK_DIR/evidence"
+checkout=$(mktemp -d "$STACK_DIR/step1-repro.XXXXXXXX")
 git clone --branch modernize-runtime --recurse-submodules \
-  https://github.com/vhive-serverless/firecracker-containerd.git runtime
-cd runtime
+  https://github.com/vhive-serverless/firecracker-containerd.git "$checkout"
+cd "$checkout"
 tools/modernize/prepare-worker.sh
-# In a new SSH session, enter the same committed checkout:
-tools/modernize/build-stack.sh 2>&1 | tee ../evidence/build-stack.log
-tools/modernize/install-stack.sh 2>&1 | tee ../evidence/install-stack.log
-INSTALL_DIR="$HOME/fc-ctrd-mod/install/$(git rev-parse --short=12 HEAD)" \
-RUN_NAME=fcmod-validation WORK_DIR="$HOME/fc-ctrd-mod/validate-run" \
-  tools/modernize/run-worker.sh 2>&1 | tee ../evidence/validation-lifecycle.log
-tools/modernize/test-stack.sh 2>&1 | tee ../evidence/acceptance.log
-sudo -n env RUNTIME_SRC="$PWD" WORK_DIR="$HOME/fc-ctrd-mod/validate-run" \
-  RUN_NAME=fcmod-validation RESTART_CONTROLLER=1 \
+# If provisioning added the Docker group, reconnect and return to this checkout.
+revision=$(git rev-parse --short=12 HEAD)
+run_name="fcmod-repro-$revision-$(date +%s)"
+work_dir="$STACK_DIR/$run_name"
+logs="$STACK_DIR/evidence/$run_name"
+mkdir -p "$logs"
+tools/modernize/build-stack.sh 2>&1 | tee "$logs/build-stack.log"
+tools/modernize/install-stack.sh 2>&1 | tee "$logs/install-stack.log"
+INSTALL_DIR="$STACK_DIR/install/$revision" RUN_NAME="$run_name" WORK_DIR="$work_dir" \
+  tools/modernize/run-worker.sh 2>&1 | tee "$logs/lifecycle.log"
+sudo -n env RUNTIME_SRC="$PWD" WORK_DIR="$work_dir" \
+  RUN_NAME="$run_name" RESTART_CONTROLLER=1 \
   python3 tools/modernize/test-crash-recovery.py \
-  2>&1 | tee ../evidence/controller-recovery.log
+  2>&1 | tee "$logs/controller-recovery.log"
+tools/modernize/test-stack.sh 2>&1 | tee "$logs/acceptance.log"
 ```
 
 `test-stack.sh` rebuilds the test image with the checkout's revision tag, runs
@@ -114,30 +126,48 @@ The install script uses a dedicated prefix and does not replace the worker's Doc
 runtime binaries. Dedicated systemd units, sockets, state and thin pools isolate
 these tests from the distro containerd and baseline runtime.
 
-## Evidence to date
+## Worker results
 
-The original committed baseline was built and ran OCI containers on the worker;
-its old guest kernel was actually 4.14.174, not the version implied by newer
-configuration files. The baseline evidence and full storage trace are under
-`evidence/` and `baseline-audit.md`.
+The worker ran Ubuntu 24.04.5 LTS and Linux 6.8.0-147-generic on an AMD EPYC 7302P
+with 32 logical CPUs, about 125 GiB RAM, and KVM. The tested installation is
+`/users/nehalem/fc-ctrd-mod/install/e666612819bc`. Its `bin/` contains
+`firecracker-containerd`, `firecracker-ctr`, `containerd-shim-aws-firecracker`,
+`firecracker`, and `runc`. The installed guest inputs are in `share/runtime/`.
+The daemon reported containerd `2.3.7+unknown` and the exact runtime revision;
+runc reported `1.4.2`, Go `1.26.11`, and libseccomp `2.5.4`.
 
-Development validation has passed SDK unit tests, a real VMM release API test,
-privileged KVM lifecycle tests, SDK tests from its pushed commit, runtime short
-tests, protobuf regeneration, native VMM/kernel/rootfs builds, real OCI lifecycle
-and filesystem writes, guest cgroup v2 inspection, separate-pool ownership and
-cleanup, and a real shim SIGKILL recovery test. These development results do not
-replace the pending committed-checkout build/install and full acceptance suite.
+| Gate | Worker result |
+| --- | --- |
+| Build, install, and input verification | Passed with the pinned VMM, SDK, runc, kernel, and guest inputs. |
+| Unit tests and generated code | Unprivileged and root suites, lint, tracked-module tidy, and forced protobuf regeneration passed. |
+| Runtime integration | 33 passed. Includes CNI, runc jails, CPU and memory accounting and OOM, volume and drive operations, disk exhaustion, signals, exec and attach, logs and exact binary output, startup failures, pause and resume, event ordering, and repeated graceful and crash cleanup. |
+| Snapshotter integration | 5 passed. Includes metrics, single and multiple container launch, and a volume copied from a guest image. |
+| Native recovery | Controller restart preserved a live task's filesystem state; shim crash cleanup removed the VMM and task bundle. |
+| Thin pools and SDK | Pool isolation and cleanup passed. The pinned SDK passed 79 tests, including privileged KVM, jailer, snapshot, and restore cases. Its existing `TestLogAndMetrics` skip remains. |
 
-The committed implementation checkpoint `c21a0e8` independently built and
-installed on the worker, ran an OCI container from its installed prefix, passed
-root unit tests, and survived controller restart followed by shim-crash cleanup.
-Subsequent worker tests passed explicit cgroup v2 memory/CPU limits, accounting and
-throttling, three CNI/runc-jail crash-cleanup iterations, exact 4 MiB binary output
-under a slow consumer, and stargz image execution with filesystem writes. The SDK
-snapshot-load regression found by its complete privileged suite has been fixed
-and pushed. Tests cover snapshot load with a memory backend and SSH content checks.
+The full acceptance run ended with `COMMITTED_STACK_ACCEPTANCE_OK`. Its test
+pools and SDK test cgroup were removed. The [acceptance receipt](evidence/e666612819bc-acceptance-receipt.log)
+contains individual results, binary hashes, and the full log's checksum.
+See the [native lifecycle](evidence/e666612819bc-native-lifecycle.log),
+[native recovery](evidence/e666612819bc-native-recovery.log),
+[build receipt](evidence/e666612819bc-build-receipt.log), and
+[worker toolchains](evidence/e666612819bc-worker-toolchains.log) for the exact
+paths and versions. Raw build, install, and test logs remain on the worker under
+`/users/nehalem/fc-ctrd-mod/evidence/e666612819bc-*.log`.
 
-The complete final acceptance script is still pending on the current completion
-candidate. Earlier development runs and the checkpoint above are evidence of
-progress; they are not a declaration that this milestone is complete. No
-Step 2, CRI, Kubernetes checkpoint/restore, or memory-efficiency outcome is claimed.
+The runtime branch is pushed to `vhive-serverless/firecracker-containerd`, and
+the SDK branch and pinned revision are pushed to `JooyoungPark73/firecracker-go-sdk`.
+The Firecracker gitlink uses the existing upstream release tag and needs no VMM
+fork change. The enclosing workspace has three independent repositories and no
+root submodule references to update.
+
+## Limits of this milestone
+
+This procedure was tested on the designated x86-64 worker. It reconstructs the
+pinned stack and records artifact hashes; it does not require byte-identical
+artifacts across hosts. Worker packages and build utilities resolve from their
+distribution archives, and their tested versions are in the toolchain receipt.
+The guest storage layout is intentionally unchanged. CRI, Kubernetes Pod
+checkpoint/restore, and the memory experiments belong to subsequent milestones.
+The original baseline and its actual Linux 4.14.174 kernel are documented in
+`baseline-audit.md` with a separate storage trace.
