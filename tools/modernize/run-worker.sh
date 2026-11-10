@@ -3,7 +3,7 @@
 # Run against a dedicated service, thin pool, state directory and containerd socket.
 set -euo pipefail
 stack_dir=${STACK_DIR:-"$HOME/fc-ctrd-mod"}
-src=${RUNTIME_SRC:-"$stack_dir/runtime"}
+src=${RUNTIME_SRC:-$(cd "$(dirname "$0")/../.." && pwd)}
 work=${WORK_DIR:-"$stack_dir/modernize-run"}
 unit=${RUN_NAME:-fcmod-modernize}
 [[ "$unit" =~ ^fcmod-[a-z0-9-]+$ ]] || { echo 'RUN_NAME must start with fcmod- and contain lowercase letters, digits or hyphens.' >&2; exit 2; }

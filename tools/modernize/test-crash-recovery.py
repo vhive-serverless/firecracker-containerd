@@ -8,7 +8,7 @@ import subprocess
 import time
 import uuid
 
-src = Path(os.environ.get("RUNTIME_SRC", str(Path.home() / "fc-ctrd-mod/runtime")))
+src = Path(os.environ.get("RUNTIME_SRC", str(Path(__file__).resolve().parents[2])))
 run_name = os.environ.get("RUN_NAME", "fcmod-modernize")
 work = Path(os.environ.get("WORK_DIR", str(src.parent / "modernize-run")))
 state = Path("/run") / run_name

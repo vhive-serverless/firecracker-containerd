@@ -22,11 +22,11 @@ cleanup() {
 }
 trap cleanup EXIT
 python3 tools/modernize/verify-inputs.py
+make lint
 make test-images
 env -u ENABLE_ISOLATED_TESTS DISABLE_ROOT_TESTS=1 go test -short -timeout=180s ./...
 sudo -n env -u ENABLE_ISOLATED_TESTS PATH="$PATH" GOMODCACHE="$(go env GOMODCACHE)" \
     GOCACHE="$(go env GOCACHE)" go test -timeout=180s ./...
-make lint
 make tidy
 make -C proto clean
 make proto

@@ -5,6 +5,10 @@ FROM public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b613046
 ENV PATH="/bin:/usr/bin:/usr/local/bin:/sbin:/usr/sbin:/usr/local/sbin:/usr/local/go/bin"
 ENV INSTALLROOT="/usr/local"
 ENV DEBIAN_FRONTEND="noninteractive"
+# The runners mount /go across otherwise independent test containers. The Go
+# build cache keys include source and toolchain inputs, so reuse is safe across
+# test cases and committed revisions.
+ENV GOCACHE="/go/build-cache"
 
 ARG FIRECRACKER_TARGET=x86_64-unknown-linux-musl
 ENV FICD_LOG_DIR="/var/log/firecracker-containerd-test"
