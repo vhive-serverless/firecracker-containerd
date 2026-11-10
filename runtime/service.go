@@ -108,10 +108,10 @@ var (
 
 // implements shimapi
 type service struct {
-	taskManager   vm.TaskManager
+	taskManager     vm.TaskManager
 	eventExchange   *exchange.Exchange
 	remotePublisher shim.Publisher
-	namespace     string
+	namespace       string
 
 	logger *logrus.Entry
 
