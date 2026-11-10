@@ -237,16 +237,8 @@ func RecoverVM(ctx context.Context, dir Dir) error {
 	}
 	if state.RuncBinary != "" {
 		client := runc.Runc{Command: state.RuncBinary}
-		containers, err := client.List(ctx)
-		if err != nil {
+		if err := DeleteRuncBundle(ctx, &client, state.VMID, dir.RootPath()); err != nil {
 			return err
-		}
-		for _, container := range containers {
-			if container.ID == state.VMID {
-				if err := client.Delete(ctx, state.VMID, &runc.DeleteOpts{Force: true}); err != nil {
-					return err
-				}
-			}
 		}
 	}
 	for _, network := range state.Networks {
@@ -258,6 +250,15 @@ func RecoverVM(ctx context.Context, dir Dir) error {
 		if err := client.DelNetworkList(ctx, conf, &network.Runtime); err != nil {
 			return err
 		}
+		// Only the SDK's default cache is private to this VM. Preserve shared
+		// or custom caches and any data that remains after CNI DEL.
+		if network.CacheDir == filepath.Join("/var/lib/cni", state.VMID) {
+			for _, path := range []string{filepath.Join(network.CacheDir, "results"), network.CacheDir} {
+				if err := os.Remove(path); err != nil && !os.IsNotExist(err) && !errors.Is(err, unix.ENOTEMPTY) {
+					return err
+				}
+			}
+		}
 	}
 	if state.OwnNetNS && state.NetNS != "" {
 		if err := unix.Unmount(state.NetNS, unix.MNT_DETACH); err != nil && !errors.Is(err, unix.EINVAL) && !errors.Is(err, unix.ENOENT) {
@@ -268,6 +269,34 @@ func RecoverVM(ctx context.Context, dir Dir) error {
 		}
 	}
 	return os.Remove(filepath.Join(dir.RootPath(), RecoveryFileName))
+}
+
+// OwnedRuncContainer refuses to operate on an ID belonging to another bundle.
+// Explicit VM IDs must be globally unique, including across namespaces.
+func OwnedRuncContainer(ctx context.Context, client *runc.Runc, id, bundle string) (*runc.Container, error) {
+	containers, err := client.List(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, container := range containers {
+		if container.ID != id {
+			continue
+		}
+		if filepath.Clean(container.Bundle) != filepath.Clean(bundle) {
+			return nil, fmt.Errorf("runc ID %q belongs to another bundle %q", id, container.Bundle)
+		}
+		return container, nil
+	}
+	return nil, nil
+}
+
+// DeleteRuncBundle deletes only the jail owned by this VM directory.
+func DeleteRuncBundle(ctx context.Context, client *runc.Runc, id, bundle string) error {
+	container, err := OwnedRuncContainer(ctx, client, id, bundle)
+	if err != nil || container == nil {
+		return err
+	}
+	return client.Delete(ctx, id, &runc.DeleteOpts{Force: true})
 }
 
 // BundleVMDir reads only the VM identifier written by the bootstrap helper;

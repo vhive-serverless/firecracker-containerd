@@ -603,10 +603,10 @@ func (j *runcJailer) Close() error {
 	defer cancel()
 
 	// Delete the container, if it is still running.
-	runcErr := j.runcClient.Delete(ctx, j.vmID, &runc.DeleteOpts{Force: true})
+	runcErr := vm.DeleteRuncBundle(ctx, &j.runcClient, j.vmID, j.OCIBundlePath())
 
-	// Regardless of the result, remove the directory.
-	removeErr := os.RemoveAll(j.OCIBundlePath())
+	// Leave recovery metadata in the bundle for the controller's exit monitor.
+	removeErr := os.RemoveAll(j.RootPath())
 
 	return multierror.Append(runcErr, removeErr).ErrorOrNil()
 }
@@ -668,6 +668,10 @@ func getNetNS(spec specs.Spec) string {
 }
 
 func (j runcJailer) Stop(force bool) error {
+	container, err := vm.OwnedRuncContainer(j.ctx, &j.runcClient, j.vmID, j.OCIBundlePath())
+	if err != nil || container == nil {
+		return err
+	}
 	signal := syscall.SIGTERM
 	if force {
 		signal = syscall.SIGKILL
@@ -677,9 +681,12 @@ func (j runcJailer) Stop(force bool) error {
 
 // IsRunning checks if the runc container is still running.
 func (j *runcJailer) IsRunning(ctx context.Context) bool {
-	state, err := j.runcClient.State(ctx, j.vmID)
+	state, err := vm.OwnedRuncContainer(ctx, &j.runcClient, j.vmID, j.OCIBundlePath())
 	if err != nil {
 		j.logger.WithError(err).Debug("runc state failed")
+		return false
+	}
+	if state == nil {
 		return false
 	}
 	j.logger.WithField("status", state.Status).Debug("runc container status")

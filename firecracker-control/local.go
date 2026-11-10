@@ -309,7 +309,9 @@ func (s *local) waitForShimToExit(ctx context.Context, vmID string) error {
 	pid, ok := s.processes[socketAddr]
 	s.processesMu.Unlock()
 	if ok {
-		return internal.WaitForPidToExit(ctx, stopVMInterval, pid)
+		if err := internal.WaitForPidToExit(ctx, stopVMInterval, pid); err != nil {
+			return err
+		}
 	}
 	// The monitor may already have reaped the shim and removed its map entry.
 	namespace, err := namespaces.NamespaceRequired(ctx)
@@ -321,14 +323,31 @@ func (s *local) waitForShimToExit(ctx context.Context, vmID string) error {
 		return err
 	}
 	state, err := vm.ReadRecoveryState(dir)
-	if os.IsNotExist(err) {
-		return nil
-	}
-	if err != nil {
+	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
-	return waitOwnedShim(ctx, state.Shim)
-
+	if err == nil {
+		if err := waitOwnedShim(ctx, state.Shim); err != nil {
+			return err
+		}
+	}
+	// Process exit precedes CNI, jail and directory cleanup by the monitor.
+	cleanupCtx, cancel := context.WithTimeout(ctx, 20*time.Second)
+	defer cancel()
+	ticker := time.NewTicker(stopVMInterval)
+	defer ticker.Stop()
+	for {
+		if _, err := os.Stat(dir.RootPath()); os.IsNotExist(err) {
+			return nil
+		} else if err != nil {
+			return err
+		}
+		select {
+		case <-cleanupCtx.Done():
+			return fmt.Errorf("wait for VM cleanup: %w", cleanupCtx.Err())
+		case <-ticker.C:
+		}
+	}
 }
 
 // GetVMInfo returns metadata for the VM with the given VMID.

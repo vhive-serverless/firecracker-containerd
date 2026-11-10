@@ -63,14 +63,15 @@ func (s *local) cleanupExitedVM(namespace, id string, dir vm.Dir) {
 	err := vm.RecoverVM(ctx, dir)
 	if err != nil {
 		logger.WithError(err).Error("VM recovery failed; retaining recovery metadata")
+		return
 	}
+	if err := os.RemoveAll(dir.RootPath()); err != nil {
+		logger.WithError(err).Error("failed to remove VM directory")
+		return
+	}
+	// Reserve sockets until the old VM directory is completely removed.
 	if socketErr := s.removeSockets(namespace, id); socketErr != nil {
 		logger.WithError(socketErr).Error("failed to remove shim sockets")
-	}
-	if err == nil {
-		if err := os.RemoveAll(dir.RootPath()); err != nil {
-			logger.WithError(err).Error("failed to remove VM directory")
-		}
 	}
 }
 

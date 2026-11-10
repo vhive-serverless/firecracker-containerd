@@ -10,6 +10,7 @@ export RUSTUP_HOME="$stack_dir/toolchains/rustup"
 export CARGO_HOME="$stack_dir/toolchains/cargo"
 export STATIC_AGENT=on
 export STATIC_DOCKER_CREDENTIAL_MMDS=on
+export DOCKER_IMAGE_TAG="$revision"
 cd "$repo_dir"
 if [ "${ALLOW_DIRTY:-0}" != 1 ]; then
     test -z "$(git status --porcelain)"

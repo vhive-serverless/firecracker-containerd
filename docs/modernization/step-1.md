@@ -61,6 +61,12 @@ namespace. PID start times plus pidfds prevent signalling an unrelated reused PI
 Cleanup errors retain metadata; reuse of that VM identifier requires successful
 recovery first. This is VM crash cleanup, not checkpoint/restore.
 
+Runc operations verify the recorded bundle path before signalling or deleting a
+jail. Explicit VM IDs must be globally unique across namespaces. The shim leaves
+recovery metadata for its parent, which completes CNI cleanup before releasing
+the VM's sockets. StopVM waits for this cleanup, including empty private CNI cache
+directories. Custom or shared CNI cache directories are preserved.
+
 ## Candidate reproduction procedure
 
 All compilation and execution must run on `nehalem@amd218.utah.cloudlab.us`.

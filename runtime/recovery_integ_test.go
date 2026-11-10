@@ -39,6 +39,15 @@ import (
 )
 
 func TestCrashRecovery_Isolated(t *testing.T) {
+	testVMRecovery(t, true)
+}
+
+func TestCNIGracefulCleanup_Isolated(t *testing.T) {
+	testVMRecovery(t, false)
+}
+
+func testVMRecovery(t *testing.T, crash bool) {
+	t.Helper()
 	integtest.Prepare(t)
 	ctx, cancel := context.WithTimeout(namespaces.WithNamespace(context.Background(), defaultNamespace), 120*time.Second)
 	defer cancel()
@@ -81,20 +90,26 @@ func TestCrashRecovery_Isolated(t *testing.T) {
 			require.NoError(t, err)
 			require.NotZero(t, state.VMM.PID)
 			require.True(t, state.OwnNetNS)
-			// Acquire the process handle before checking identity and signalling.
-			fd, err := unix.PidfdOpen(state.Shim.PID, 0)
-			require.NoError(t, err)
-			actual, err := vm.ReadProcessIdentity(state.Shim.PID)
-			require.NoError(t, err)
-			require.Equal(t, state.Shim, actual)
-			require.NoError(t, unix.PidfdSendSignal(fd, syscall.SIGKILL, nil, 0))
-			require.NoError(t, unix.Close(fd))
+			if crash {
+				// Acquire the process handle before checking identity and signalling.
+				fd, err := unix.PidfdOpen(state.Shim.PID, 0)
+				require.NoError(t, err)
+				actual, err := vm.ReadProcessIdentity(state.Shim.PID)
+				require.NoError(t, err)
+				require.Equal(t, state.Shim, actual)
+				require.NoError(t, unix.PidfdSendSignal(fd, syscall.SIGKILL, nil, 0))
+				require.NoError(t, unix.Close(fd))
+			} else {
+				_, err := control.StopVM(ctx, &proto.StopVMRequest{VMID: id})
+				require.NoError(t, err)
+			}
 			require.Eventually(t, func() bool {
 				_, statErr := os.Stat(directory.RootPath())
 				alive, aliveErr := vm.IsProcessAlive(state.VMM)
 				return os.IsNotExist(statErr) && aliveErr == nil && !alive
 			}, 30*time.Second, 100*time.Millisecond, "orphan VM and jail must be removed")
 			require.NoFileExists(t, state.NetNS)
+			require.NoDirExists(t, filepath.Join("/var/lib/cni", id), "private CNI cache must be removed")
 			require.False(t, cgroupExists(response.CgroupPath), "host jail cgroup must be removed")
 			allocations, err := os.ReadDir(filepath.Join("/var/lib/cni/networks", network))
 			require.NoError(t, err)

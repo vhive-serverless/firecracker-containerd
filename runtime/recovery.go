@@ -15,6 +15,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -41,6 +42,9 @@ func (s *service) recordRecoveryState(ctx context.Context, ownNetNS bool) error 
 				return err
 			}
 			pid = actual.Pid
+			if filepath.Clean(actual.Bundle) != filepath.Clean(jailer.OCIBundlePath()) {
+				return fmt.Errorf("runc ID %q belongs to another bundle %q", s.vmID, actual.Bundle)
+			}
 			state.RuncBinary = jailer.Config.RuncBinPath
 		}
 		state.VMM, err = vm.ReadProcessIdentity(pid)
