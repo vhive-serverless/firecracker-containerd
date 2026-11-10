@@ -19,7 +19,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 
 	containerd "github.com/containerd/containerd/v2/client"
@@ -152,7 +151,7 @@ func (p *GuestVolumeImageProvider) copy(ctx context.Context, containerName strin
 
 	stdin := bytes.NewBuffer(b)
 	var stdout, stderr bytes.Buffer
-	task, err := container.NewTask(ctx, cio.NewCreator(cio.WithStreams(stdin, &stdout, os.Stderr)))
+	task, err := container.NewTask(ctx, cio.NewCreator(cio.WithStreams(stdin, &stdout, &stderr)))
 	if err != nil {
 		return err
 	}

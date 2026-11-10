@@ -113,7 +113,10 @@ func TestBinaryOutput_Isolated(t *testing.T) {
 	const name = "binary-output"
 	container, err := client.NewContainer(ctx, name,
 		containerd.WithSnapshotter(defaultSnapshotterName), containerd.WithNewSnapshot(name, image),
-		containerd.WithNewSpec(oci.WithProcessArgs("/bin/dd", "if=/dev/zero", "bs=65536", "count=64")))
+		containerd.WithNewSpec(oci.WithProcessArgs("/bin/sh", "-ec", `
+printf 'begin\n' >&2
+dd if=/dev/zero bs=65536 count=64 2>/dev/null
+printf 'end\n' >&2`)))
 	require.NoError(t, err)
 	defer func() { _ = container.Delete(ctx, containerd.WithSnapshotCleanup) }()
 	var output delayedCapture
@@ -134,5 +137,6 @@ func TestBinaryOutput_Isolated(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, output.Bytes(), 4*1024*1024, "binary output truncated: %s", stderr.String())
 	require.Equal(t, sha256.Sum256(make([]byte, 4*1024*1024)), sha256.Sum256(output.Bytes()))
+	require.Equal(t, "begin\nend\n", stderr.String())
 	t.Logf("slow consumer received %d bytes without corruption", output.Len())
 }

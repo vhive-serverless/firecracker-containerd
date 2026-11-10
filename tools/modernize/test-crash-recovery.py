@@ -28,7 +28,8 @@ def identity(pid):
 try:
     command("run", "--detach", "--runtime", "aws.firecracker", "--snapshotter", "devmapper",
             "docker.io/library/alpine:3.23.0", name, "/bin/sleep", "300")
-    vmid = (state / "io.containerd.runtime.v2.task/default" / name / "firecracker-vm-id").read_text().strip()
+    task_bundle = state / "io.containerd.runtime.v2.task/default" / name
+    vmid = (task_bundle / "firecracker-vm-id").read_text().strip()
     directory = work / "shim" / ("default#" + vmid)
     metadata = json.loads((directory / "recovery.json").read_text())
     print(json.dumps(metadata, indent=2), flush=True)
@@ -70,11 +71,12 @@ try:
     deadline = time.monotonic() + 30
     while time.monotonic() < deadline:
         gone = all(identity(metadata[key]["pid"]) != metadata[key]["start_ticks"] for key in ("shim", "vmm"))
-        if gone and not directory.exists():
+        if gone and not directory.exists() and not task_bundle.exists():
             break
         time.sleep(0.2)
     assert gone, "shim or VMM survived crash recovery"
     assert not directory.exists(), "VM directory was retained after cleanup"
+    assert not task_bundle.exists(), "containerd task bundle was retained after cleanup"
     print("SHIM_CRASH_RECOVERY_OK", flush=True)
 finally:
     command("tasks", "kill", "--signal", "SIGKILL", name, check=False)

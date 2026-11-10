@@ -46,6 +46,8 @@ The persistent guest overlay redesign belongs to Step 4. The default devmapper c
 has a disk-backed writable layer. The optional guest stargz service instead mounts
 its store on tmpfs; its verified container overlay upper/work directories live
 under that store. Step 4 must also account for that separate path. Small runtime tmpfs mounts remain distinct.
+The stargz `volume-init` helper is statically linked because it runs inside the
+selected workload image, which may have a different libc from the guest.
 
 Thin pools now have separate backing files and loop devices for each name. Removal
 is scoped to the selected pool and detaches its owned loop devices. The old LVM
@@ -66,6 +68,9 @@ jail. Explicit VM IDs must be globally unique across namespaces. The shim leaves
 recovery metadata for its parent, which completes CNI cleanup before releasing
 the VM's sockets. StopVM waits for this cleanup, including empty private CNI cache
 directories. Custom or shared CNI cache directories are preserved.
+The shim drains control replies on shutdown, publishes the VM stop event before
+exit, and reserves stdout for the containerd bootstrap and delete protocols.
+Both crash tests check that containerd removes the task bundle as well as the VM.
 
 ## Candidate reproduction procedure
 

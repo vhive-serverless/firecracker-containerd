@@ -12,10 +12,10 @@ only after the preceding milestone's completion commit passes every gate.
 - [x] Locate both vHive branches in firecracker-containerd and inspect changed-file scope.
 - [x] Inspect SDK feat/update-firecracker-1.14 history; it descends from current SDK main and contains API regeneration, helpers and jailer fixes.
 - [x] Resolve upstream Firecracker v1.18.0 tag and peeled commit.
-- [ ] Reproduce baseline build, installation and container operations on worker; save existing failures separately.
-- [ ] Inspect actual baseline kernel/rootfs/binary versions and guest mounts on worker.
-- [ ] Complete host-to-guest-to-container storage trace, including volumes and stargz.
-- [ ] Pin compatible target revisions and reproducible build/artifact configurations.
+- [x] Reproduce baseline build, installation and container operations on worker; save existing failures separately.
+- [x] Inspect actual baseline kernel/rootfs/binary versions and guest mounts on worker.
+- [x] Complete host-to-guest-to-container storage trace, including volumes and stargz.
+- [x] Pin compatible target revisions and reproducible build/artifact configurations.
 
 ## Step 1: modernize-runtime
 

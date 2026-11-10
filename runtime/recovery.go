@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/containerd/containerd/v2/pkg/namespaces"
 	"github.com/containernetworking/cni/libcni"
@@ -122,6 +123,20 @@ func recoverBundle(ctx context.Context) error {
 	}
 	if err != nil {
 		return err
+	}
+	// A closed task connection may precede process exit during shutdown.
+	// Wait for that exact shim, without ever signalling a live shim.
+	state, err := vm.ReadRecoveryState(dir)
+	if os.IsNotExist(err) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	waitCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+	if err := vm.WaitProcessExit(waitCtx, state.Shim); err != nil {
+		return fmt.Errorf("wait for shim %d to exit: %w", state.Shim.PID, err)
 	}
 	return vm.RecoverVM(ctx, dir)
 }

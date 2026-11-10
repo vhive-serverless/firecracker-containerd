@@ -42,10 +42,11 @@ git rev-parse HEAD > bin/receipts/acceptance/runtime-revision
 go list -m -json all > bin/receipts/acceptance/go-modules.json
 go version -m agent/agent > bin/receipts/acceptance/agent-build-info
 sha256sum bin/firecracker _submodules/runc/runc agent/agent \
+    _submodules/stargz-snapshotter/out/containerd-stargz-grpc volume/volume-init \
     runtime/containerd-shim-aws-firecracker \
     firecracker-control/cmd/containerd/firecracker-containerd \
     firecracker-control/cmd/containerd/firecracker-ctr \
-    default-vmlinux.bin tools/image-builder/rootfs.img \
+    default-vmlinux.bin tools/image-builder/rootfs.img tools/image-builder/rootfs-stargz.img \
     > bin/receipts/acceptance/binaries.sha256
 docker image inspect "localhost/firecracker-containerd-test:$DOCKER_IMAGE_TAG" \
     > bin/receipts/acceptance/test-image.json

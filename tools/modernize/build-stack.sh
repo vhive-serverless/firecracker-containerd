@@ -34,6 +34,7 @@ go list -m -json all > bin/receipts/build/go-modules.json
 git rev-parse HEAD > bin/receipts/build/runtime-revision
 git submodule status > bin/receipts/build/submodules
 for binary in bin/firecracker _submodules/runc/runc \
+    _submodules/stargz-snapshotter/out/containerd-stargz-grpc volume/volume-init \
     agent/agent runtime/containerd-shim-aws-firecracker \
     firecracker-control/cmd/containerd/firecracker-containerd \
     firecracker-control/cmd/containerd/firecracker-ctr; do

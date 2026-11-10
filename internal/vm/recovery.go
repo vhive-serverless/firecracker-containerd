@@ -21,6 +21,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/containerd/containerd/v2/pkg/atomicfile"
 	runc "github.com/containerd/go-runc"
@@ -152,6 +153,23 @@ func IsProcessAlive(identity ProcessIdentity) (bool, error) {
 	poll := []unix.PollFd{{Fd: int32(fd), Events: unix.POLLIN}}
 	n, err := unix.Poll(poll, 0)
 	return n == 0, err
+}
+
+// WaitProcessExit waits for the recorded process identity to exit.
+func WaitProcessExit(ctx context.Context, identity ProcessIdentity) error {
+	ticker := time.NewTicker(100 * time.Millisecond)
+	defer ticker.Stop()
+	for {
+		alive, err := IsProcessAlive(identity)
+		if err != nil || !alive {
+			return err
+		}
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
+		}
+	}
 }
 
 // killOwnedProcess opens a pidfd before checking identity, so even PID reuse

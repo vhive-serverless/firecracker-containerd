@@ -100,7 +100,20 @@ func testVMRecovery(t *testing.T, crash bool) {
 				require.NoError(t, unix.PidfdSendSignal(fd, syscall.SIGKILL, nil, 0))
 				require.NoError(t, unix.Close(fd))
 			} else {
-				_, err := control.StopVM(ctx, &proto.StopVMRequest{VMID: id})
+				exit, err := task.Wait(ctx)
+				require.NoError(t, err)
+				require.NoError(t, task.Kill(ctx, syscall.SIGKILL))
+				select {
+				case status := <-exit:
+					code, _, err := status.Result()
+					require.NoError(t, err)
+					require.Equal(t, uint32(128+syscall.SIGKILL), code)
+				case <-ctx.Done():
+					t.Fatal(ctx.Err())
+				}
+				_, err = task.Delete(ctx)
+				require.NoError(t, err)
+				_, err = control.StopVM(ctx, &proto.StopVMRequest{VMID: id, TimeoutSeconds: 30})
 				require.NoError(t, err)
 			}
 			require.Eventually(t, func() bool {
@@ -116,12 +129,19 @@ func testVMRecovery(t *testing.T, crash bool) {
 			for _, allocation := range allocations {
 				require.Nil(t, net.ParseIP(allocation.Name()), "IPAM allocation leaked")
 			}
-			// Containerd's dead-shim cleanup publishes task exit and deletes its bundle.
-			require.Eventually(t, func() bool {
-				_, err := task.Delete(ctx, containerd.WithProcessKill)
-				return err == nil || strings.Contains(err.Error(), "not found")
-			}, 10*time.Second, 100*time.Millisecond)
+			if crash {
+				// Containerd's dead-shim cleanup publishes task exit and deletes its bundle.
+				require.Eventually(t, func() bool {
+					_, err := task.Delete(ctx, containerd.WithProcessKill)
+					return err == nil || strings.Contains(err.Error(), "not found")
+				}, 10*time.Second, 100*time.Millisecond)
+			}
 			require.NoError(t, container.Delete(ctx, containerd.WithSnapshotCleanup))
+			taskBundle := filepath.Join("/run/containerd/io.containerd.runtime.v2.task", defaultNamespace, id)
+			require.Eventually(t, func() bool {
+				_, err := os.Stat(taskBundle)
+				return os.IsNotExist(err)
+			}, 10*time.Second, 100*time.Millisecond, "containerd task bundle leaked")
 			after, err := net.Interfaces()
 			require.NoError(t, err)
 			require.Len(t, after, len(before), "host network interfaces leaked")

@@ -327,7 +327,7 @@ func (s *local) waitForShimToExit(ctx context.Context, vmID string) error {
 		return err
 	}
 	if err == nil {
-		if err := waitOwnedShim(ctx, state.Shim); err != nil {
+		if err := vm.WaitProcessExit(ctx, state.Shim); err != nil {
 			return err
 		}
 	}

@@ -43,6 +43,7 @@ import (
 	"github.com/containerd/containerd/v2/pkg/protobuf"
 	"github.com/containerd/containerd/v2/pkg/protobuf/types"
 	"github.com/containerd/containerd/v2/pkg/shim"
+	"github.com/containerd/containerd/v2/pkg/shutdown"
 	"github.com/containerd/containerd/v2/pkg/ttrpcutil"
 	"github.com/containerd/fifo"
 	"github.com/containerd/log"
@@ -108,7 +109,8 @@ var (
 // implements shimapi
 type service struct {
 	taskManager   vm.TaskManager
-	eventExchange *exchange.Exchange
+	eventExchange   *exchange.Exchange
+	remotePublisher shim.Publisher
 	namespace     string
 
 	logger *logrus.Entry
@@ -174,7 +176,7 @@ func shimOpts(shimCtx context.Context) (*shim.Opts, error) {
 }
 
 // NewService creates new runtime shim.
-func NewService(shimCtx context.Context, _ string, remotePublisher shim.Publisher, shimCancel func()) (*service, error) {
+func NewService(shimCtx context.Context, remotePublisher shim.Publisher, sd shutdown.Service) (*service, error) {
 	cfg, err := config.LoadConfig("")
 	if err != nil {
 		return nil, err
@@ -211,13 +213,14 @@ func NewService(shimCtx context.Context, _ string, remotePublisher shim.Publishe
 	}
 
 	s := &service{
-		taskManager:   vm.NewTaskManager(shimCtx, logger),
-		eventExchange: exchange.NewExchange(),
-		namespace:     namespace,
+		taskManager:     vm.NewTaskManager(shimCtx, logger),
+		eventExchange:   exchange.NewExchange(),
+		remotePublisher: remotePublisher,
+		namespace:       namespace,
 
 		logger:     logger,
 		shimCtx:    shimCtx,
-		shimCancel: shimCancel,
+		shimCancel: sd.Shutdown,
 
 		vmID:    vmID,
 		shimDir: shimDir,
@@ -232,7 +235,7 @@ func NewService(shimCtx context.Context, _ string, remotePublisher shim.Publishe
 
 	s.startEventForwarders(remotePublisher)
 
-	err = s.serveFCControl()
+	err = s.serveFCControl(sd)
 	if err != nil {
 		err = fmt.Errorf("failed to start fccontrol server: %w", err)
 		s.logger.WithError(err).Error()
@@ -279,7 +282,7 @@ func (s *service) startEventForwarders(remotePublisher shim.Publisher) {
 // containerd does not currently expose the shim server for us to register the fccontrol service with too.
 // This is likely addressable through some relatively small upstream contributions; the following is a stop-gap
 // solution until that time.
-func (s *service) serveFCControl() error {
+func (s *service) serveFCControl(sd shutdown.Service) error {
 	// If the fccontrol socket was configured, setup the fccontrol server
 	fcSocketFDEnvVal := os.Getenv(internal.FCSocketFDEnvKey)
 	if fcSocketFDEnvVal == "" {
@@ -305,10 +308,13 @@ func (s *service) serveFCControl() error {
 		return err
 	}
 
+	// Let in-flight replies reach the controller before RunShim exits. In
+	// particular the VM monitor may initiate shutdown during StopVM.
+	sd.RegisterCallback(fcServer.Shutdown)
 	go func() {
 		defer fcListener.Close()
 		err := fcServer.Serve(s.shimCtx, fcListener)
-		if err != nil && !strings.Contains(err.Error(), "use of closed network connection") {
+		if err != nil && !errors.Is(err, ttrpc.ErrServerClosed) && !errors.Is(err, net.ErrClosed) {
 			s.logger.WithError(err).Error("fccontrol ttrpc server error")
 		}
 	}()
@@ -525,11 +531,15 @@ func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRe
 }
 
 func (s *service) publishVMStart() error {
-	return s.eventExchange.Publish(s.shimCtx, StartEventName, &proto.VMStart{VMID: s.vmID})
+	return s.remotePublisher.Publish(s.shimCtx, StartEventName, &proto.VMStart{VMID: s.vmID})
 }
 
 func (s *service) publishVMStop() error {
-	return s.eventExchange.Publish(s.shimCtx, StopEventName, &proto.VMStop{VMID: s.vmID})
+	// The VM is gone and this shim is about to exit. Deliver its final event
+	// directly so the asynchronous guest event bridge cannot lose it.
+	ctx, cancel := context.WithTimeout(context.WithoutCancel(s.shimCtx), defaultStopVMTimeout)
+	defer cancel()
+	return s.remotePublisher.Publish(ctx, StopEventName, &proto.VMStop{VMID: s.vmID})
 }
 
 func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRequest) (err error) {
@@ -1823,8 +1833,10 @@ func (s *service) monitorJailedFirecracker(rj *runcJailer) {
 			return
 		case <-ticker.C:
 			if !rj.IsRunning(s.shimCtx) {
-				s.logger.Warn("runc container init process died, canceling shim context")
-				s.shimCancel()
+				s.logger.Warn("runc container init process died, cleaning up VM")
+				if err := s.cleanup(); err != nil {
+					s.logger.WithError(err).Error("failed to clean up the jailed VM")
+				}
 				return
 			}
 		}
