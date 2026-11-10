@@ -155,6 +155,12 @@ See the [native lifecycle](evidence/e666612819bc-native-lifecycle.log),
 paths and versions. Raw build, install, and test logs remain on the worker under
 `/users/nehalem/fc-ctrd-mod/evidence/e666612819bc-*.log`.
 
+A fresh repeat at `61cf6e590d4856381839858b9596d30d6197e771` reproduced an
+intermittent attach failure. The test now holds the old FIFO writer open until
+the new attachment receives the guest's echo, then closes stdin. The volume
+helper also decodes a complete JSON request without requiring the caller to
+close stdin before the asynchronous copy finishes.
+
 The runtime branch is pushed to `vhive-serverless/firecracker-containerd`, and
 the SDK branch and pinned revision are pushed to `JooyoungPark73/firecracker-go-sdk`.
 The Firecracker gitlink uses the existing upstream release tag and needs no VMM

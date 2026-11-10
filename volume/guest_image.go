@@ -167,11 +167,6 @@ func (p *GuestVolumeImageProvider) copy(ctx context.Context, containerName strin
 		return err
 	}
 
-	err = task.CloseIO(ctx, containerd.WithStdinCloser)
-	if err != nil {
-		return err
-	}
-
 	select {
 	case status := <-exitCh:
 		if err := status.Error(); err != nil {

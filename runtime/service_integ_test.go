@@ -2554,6 +2554,22 @@ func TestPauseResume_Isolated(t *testing.T) {
 		})
 	}
 }
+
+type attachCapture struct {
+	buffer bytes.Buffer
+	ready  chan struct{}
+	want   int
+}
+
+func (w *attachCapture) Write(data []byte) (int, error) {
+	n, err := w.buffer.Write(data)
+	if w.ready != nil && w.buffer.Len() >= w.want {
+		close(w.ready)
+		w.ready = nil
+	}
+	return n, err
+}
+
 func TestAttach_Isolated(t *testing.T) {
 	integtest.Prepare(t)
 
@@ -2611,6 +2627,7 @@ func TestAttach_Isolated(t *testing.T) {
 			)
 			require.NoError(t, err)
 
+			defer c.Delete(ctx, containerd.WithSnapshotCleanup)
 			io, err := tc.newIO(ctx, name)
 			require.NoError(t, err)
 
@@ -2626,7 +2643,8 @@ func TestAttach_Isolated(t *testing.T) {
 			require.NoError(t, err)
 
 			stdin := bytes.NewBufferString("hello\n")
-			var stdout bytes.Buffer
+			received := make(chan struct{})
+			stdout := attachCapture{ready: received, want: len(tc.expected)}
 			t2, err := c.Task(
 				ctx,
 				cio.NewAttach(cio.WithStreams(stdin, &stdout, nil)),
@@ -2634,18 +2652,33 @@ func TestAttach_Isolated(t *testing.T) {
 			require.NoError(t, err)
 			assert.Equal(t, t1.ID(), t2.ID())
 
+			if tc.expected != "" {
+				// NewAttach opens its FIFO asynchronously. Keep the old
+				// writer open until the new writer has delivered input;
+				// a gap between writers makes the proxy observe EOF.
+				select {
+				case <-received:
+				case <-ctx.Done():
+					t.Fatal(ctx.Err())
+				}
+			}
 			err = io.Close()
 			assert.NoError(t, err)
-
 			err = t2.CloseIO(ctx, containerd.WithStdinCloser)
 			assert.NoError(t, err)
 
-			<-ch
+			select {
+			case exit := <-ch:
+				require.NoError(t, exit.Error())
+				require.Zero(t, exit.ExitCode())
+			case <-ctx.Done():
+				t.Fatal(ctx.Err())
+			}
 
 			_, err = t2.Delete(ctx)
 			require.NoError(t, err)
 
-			assert.Equal(t, tc.expected, stdout.String())
+			assert.Equal(t, tc.expected, stdout.buffer.String())
 		})
 	}
 }

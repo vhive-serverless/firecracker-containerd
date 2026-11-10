@@ -18,7 +18,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 
 	"github.com/containerd/continuity/fs"
@@ -51,14 +50,10 @@ func copyVolume(in volume.GuestVolumeImageInput) error {
 }
 
 func realMain() error {
-	b, err := io.ReadAll(os.Stdin)
-	if err != nil {
-		return err
-	}
-
 	var in volume.GuestVolumeImageInput
-	err = json.Unmarshal(b, &in)
-	if err != nil {
+	// One complete JSON request is enough. The task's stdin proxy may
+	// remain open until the process exits.
+	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {
 		return err
 	}
 
