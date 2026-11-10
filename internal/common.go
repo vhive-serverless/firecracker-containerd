@@ -122,7 +122,7 @@ func ParseStubContent(r io.Reader) (string, error) {
 func GenerateStubContent(id string) (string, error) {
 	length := len(id)
 	if length > 0xFF {
-		return "", fmt.Errorf("Length of drive id, %d, is too long and is limited to %d bytes", length, 0xFF)
+		return "", fmt.Errorf("length of drive id, %d, is too long and is limited to %d bytes", length, 0xFF)
 	}
 
 	return fmt.Sprintf("%s%c%s", MagicStubBytes, byte(length), id), nil

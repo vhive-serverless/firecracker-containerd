@@ -19,8 +19,8 @@ import (
 	"sync"
 	"time"
 
-	taskAPI "github.com/containerd/containerd/api/runtime/task/v2"
-	"github.com/containerd/containerd/protobuf/types"
+	taskAPI "github.com/containerd/containerd/api/runtime/task/v3"
+	"github.com/containerd/containerd/v2/pkg/protobuf/types"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -42,19 +42,19 @@ type TaskManager interface {
 	// IOConnectorSet.
 	// If the TaskManager was shutdown by a previous call to ShutdownIfEmpty, an
 	// error will be returned.
-	CreateTask(context.Context, *taskAPI.CreateTaskRequest, taskAPI.TaskService, IOProxy) (*taskAPI.CreateTaskResponse, error)
+	CreateTask(context.Context, *taskAPI.CreateTaskRequest, taskAPI.TTRPCTaskService, IOProxy) (*taskAPI.CreateTaskResponse, error)
 
 	// DeleteProcess removes a task or exec being managed from the TaskManager.
 	// It deletes the process from the provided TaskService using the provided
 	// request. It also blocks until all IO for the task has been flushed or a
 	// hardcoded timeout is hit.
-	DeleteProcess(context.Context, *taskAPI.DeleteRequest, taskAPI.TaskService) (*taskAPI.DeleteResponse, error)
+	DeleteProcess(context.Context, *taskAPI.DeleteRequest, taskAPI.TTRPCTaskService) (*taskAPI.DeleteResponse, error)
 
 	// ExecProcess adds an exec process to be managed. It must be an exec for a
 	// Task already managed by the TaskManager.
 	// If the TaskManager was shutdown by a previous call to ShutdownIfEmpty, an
 	// error will be returned.
-	ExecProcess(context.Context, *taskAPI.ExecProcessRequest, taskAPI.TaskService, IOProxy) (*types.Empty, error)
+	ExecProcess(context.Context, *taskAPI.ExecProcessRequest, taskAPI.TTRPCTaskService, IOProxy) (*types.Empty, error)
 
 	// ShutdownIfEmpty will atomically check if there are no tasks left being managed and, if so,
 	// prevent any new tasks from being added going forward (future attempts will return an error).
@@ -175,7 +175,7 @@ func (m *taskManager) ShutdownIfEmpty() bool {
 func (m *taskManager) CreateTask(
 	reqCtx context.Context,
 	req *taskAPI.CreateTaskRequest,
-	taskService taskAPI.TaskService,
+	taskService taskAPI.TTRPCTaskService,
 	ioProxy IOProxy,
 ) (_ *taskAPI.CreateTaskResponse, err error) {
 	taskID := req.ID
@@ -221,7 +221,7 @@ func (m *taskManager) CreateTask(
 func (m *taskManager) ExecProcess(
 	reqCtx context.Context,
 	req *taskAPI.ExecProcessRequest,
-	taskService taskAPI.TaskService,
+	taskService taskAPI.TTRPCTaskService,
 	ioProxy IOProxy,
 ) (_ *types.Empty, err error) {
 	taskID := req.ID
@@ -265,7 +265,7 @@ func (m *taskManager) ExecProcess(
 func (m *taskManager) DeleteProcess(
 	reqCtx context.Context,
 	req *taskAPI.DeleteRequest,
-	taskService taskAPI.TaskService,
+	taskService taskAPI.TTRPCTaskService,
 ) (*taskAPI.DeleteResponse, error) {
 	resp, err := taskService.Delete(reqCtx, req)
 	if err != nil {
@@ -287,7 +287,7 @@ func (m *taskManager) DeleteProcess(
 	return resp, nil
 }
 
-func (m *taskManager) monitorExit(proc *vmProc, taskService taskAPI.TaskService) {
+func (m *taskManager) monitorExit(proc *vmProc, taskService taskAPI.TTRPCTaskService) {
 	waitResp, waitErr := taskService.Wait(proc.ctx, &taskAPI.WaitRequest{
 		ID:     proc.taskID,
 		ExecID: proc.execID,

@@ -16,7 +16,8 @@ WORKDIR    := tmp/rootfs
 WORKDIRLOC := $(shell readlink -f $(WORKDIR))
 IMAGE_DIRS := /dev /bin /etc /etc/init.d /tmp /var /run /proc /sys /container/rootfs /agent /rom /overlay
 DIRS       := $(foreach dir,$(IMAGE_DIRS),"$(WORKDIR)$(dir)")
-DEBMIRROR  ?= http://deb.debian.org/debian
+DEBMIRROR  ?= https://snapshot.debian.org/archive/debian/20261110T000000Z/
+DEBIAN_RELEASE ?= trixie
 PACKAGES   := udev systemd systemd-sysv procps libseccomp2 haveged
 
 COMMA      := ,
@@ -35,7 +36,7 @@ export DOCKER_IMAGE_TAG?=latest
 # /usr/local/bin/ in the root filesystem.
 define install_dir =
 if [ -d $(subst $(SUFFIX),,$@) ]; then \
-  cd $(subst $(SUFFIX),,$@) && tar cf - . | (cd "$(WORKDIRLOC)" && tar xvf -);\
+  cd $(subst $(SUFFIX),,$@) && tar --owner=0 --group=0 -cf - . | (cd "$(WORKDIRLOC)" && tar --keep-directory-symlink -xvf -);\
 fi
 # Reset the timestamp on $(WORKDIR), which may have been modified by the
 # creation of files in it:
@@ -46,7 +47,7 @@ define run_debootstrap =
 	debootstrap \
 		--variant=minbase \
 		--include=$(subst $(SPACE),$(COMMA),$(PACKAGES))\
-		bullseye \
+		$(DEBIAN_RELEASE) \
 		"$(WORKDIR)" $(DEBMIRROR)
 	rm -rf "$(WORKDIR)/var/cache/apt/archives" \
 	       "$(WORKDIR)/usr/share/doc" \

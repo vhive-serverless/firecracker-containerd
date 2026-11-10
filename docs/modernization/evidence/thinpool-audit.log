@@ -1,0 +1,16 @@
+0 20971520 thin-pool 7:5 7:4 128 32768 1 skip_block_zeroing 
+0 20971520 thin-pool 7:7 7:6 128 32768 1 skip_block_zeroing 
+NAME       BACK-FILE
+/dev/loop1 /users/nehalem/fc-ctrd-mod/baseline/tmp/devmapper/metadata
+/dev/loop6 /users/nehalem/fc-ctrd-mod/runtime/tmp/devmapper/fcmod-pool-audit-b/data
+/dev/loop4 /users/nehalem/fc-ctrd-mod/runtime/tmp/devmapper/fcmod-pool-audit-a/data
+/dev/loop2 /users/nehalem/fc-ctrd-mod/runtime/tmp/devmapper/data
+/dev/loop0 /users/nehalem/fc-ctrd-mod/baseline/tmp/devmapper/data
+/dev/loop7 /users/nehalem/fc-ctrd-mod/runtime/tmp/devmapper/fcmod-pool-audit-b/metadata
+/dev/loop5 /users/nehalem/fc-ctrd-mod/runtime/tmp/devmapper/fcmod-pool-audit-a/metadata
+/dev/loop3 /users/nehalem/fc-ctrd-mod/runtime/tmp/devmapper/metadata
+device-mapper: message ioctl on fcmod-pool-audit-b  failed: No data available
+Command failed.
+device-mapper: message ioctl on fcmod-pool-audit-a  failed: No data available
+Command failed.
+THINPOOL_ISOLATION_AND_CLEANUP_OK

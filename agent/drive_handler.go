@@ -21,8 +21,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/containerd/containerd/mount"
-	"github.com/containerd/containerd/protobuf/types"
+	"github.com/containerd/containerd/v2/core/mount"
+	"github.com/containerd/containerd/v2/pkg/protobuf/types"
 	"github.com/containerd/log"
 	"github.com/firecracker-microvm/firecracker-containerd/internal"
 	drivemount "github.com/firecracker-microvm/firecracker-containerd/proto/service/drivemount/ttrpc"

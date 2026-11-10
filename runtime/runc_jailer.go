@@ -101,7 +101,7 @@ func newRuncJailer(
 		logger:     l,
 		Config:     cfg,
 		vmID:       vmID,
-		runcClient: runc.Runc{},
+		runcClient: runc.Runc{Command: cfg.RuncBinPath},
 	}
 
 	spec := specs.Spec{}
@@ -245,7 +245,7 @@ func (j *runcJailer) BuildJailedRootHandler(cfg *config.Config, machineConfig *f
 
 			// copy drives to new contents path
 			for i, d := range m.Cfg.Drives {
-				drivePath := firecracker.StringValue(d.PathOnHost)
+				drivePath := d.PathOnHost
 				fileName := filepath.Base(drivePath)
 				newDrivePath := filepath.Join(rootPath, fileName)
 
@@ -260,7 +260,7 @@ func (j *runcJailer) BuildJailedRootHandler(cfg *config.Config, machineConfig *f
 
 				if !internal.IsStubDrive(f) {
 					mode := 0600
-					if firecracker.BoolValue(d.IsReadOnly) {
+					if d.IsReadOnly {
 						mode = 0400
 					}
 					if err := j.exposeFileToJail(drivePath, newDrivePath, os.FileMode(mode)); err != nil {
@@ -273,7 +273,7 @@ func (j *runcJailer) BuildJailedRootHandler(cfg *config.Config, machineConfig *f
 				}
 
 				j.logger.WithField("drive", newDrivePath).Debug("Adding drive")
-				m.Cfg.Drives[i].PathOnHost = firecracker.String(fileName)
+				m.Cfg.Drives[i].PathOnHost = fileName
 			}
 
 			// Setting the proper path to where the vsock path should be

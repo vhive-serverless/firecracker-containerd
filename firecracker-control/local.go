@@ -24,13 +24,15 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/containerd/containerd/identifiers"
-	"github.com/containerd/containerd/namespaces"
-	"github.com/containerd/containerd/plugin"
-	"github.com/containerd/containerd/protobuf/types"
-	"github.com/containerd/containerd/runtime/v2/shim"
-	"github.com/containerd/containerd/sys"
+	"github.com/containerd/containerd/v2/pkg/identifiers"
+	"github.com/containerd/containerd/v2/pkg/namespaces"
+	"github.com/containerd/containerd/v2/pkg/protobuf/types"
+	"github.com/containerd/containerd/v2/pkg/shim"
+	"github.com/containerd/containerd/v2/pkg/sys"
+	"github.com/containerd/containerd/v2/plugins"
 	"github.com/containerd/log"
+	"github.com/containerd/plugin"
+	"github.com/containerd/plugin/registry"
 	"github.com/hashicorp/go-multierror"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
@@ -52,11 +54,11 @@ var (
 )
 
 func init() {
-	plugin.Register(&plugin.Registration{
-		Type: plugin.ServicePlugin,
+	registry.Register(&plugin.Registration{
+		Type: plugins.ServicePlugin,
 		ID:   localPluginID,
 		InitFn: func(ic *plugin.InitContext) (interface{}, error) {
-			log.G(ic.Context).Debugf("initializing %s plugin (root: %q)", localPluginID, ic.Root)
+			log.G(ic.Context).Debugf("initializing %s plugin (root: %q)", localPluginID, ic.Properties[plugins.PropertyRootDir])
 			return newLocal(ic)
 		},
 	})
@@ -72,8 +74,8 @@ type local struct {
 }
 
 func newLocal(ic *plugin.InitContext) (*local, error) {
-	if err := os.MkdirAll(ic.Root, 0750); err != nil && !os.IsExist(err) {
-		return nil, fmt.Errorf("failed to create root directory: %s: %w", ic.Root, err)
+	if err := os.MkdirAll(ic.Properties[plugins.PropertyRootDir], 0750); err != nil && !os.IsExist(err) {
+		return nil, fmt.Errorf("failed to create root directory: %s: %w", ic.Properties[plugins.PropertyRootDir], err)
 	}
 
 	cfg, err := config.LoadConfig("")
@@ -81,12 +83,16 @@ func newLocal(ic *plugin.InitContext) (*local, error) {
 		return nil, fmt.Errorf("failed to load config: %w", err)
 	}
 
-	return &local{
-		containerdAddress: ic.Address,
+	service := &local{
+		containerdAddress: ic.Properties[plugins.PropertyGRPCAddress],
 		logger:            log.G(ic.Context),
 		config:            cfg,
 		processes:         make(map[string]int32),
-	}, nil
+	}
+	if err := service.reconnectShims(ic.Context); err != nil {
+		return nil, err
+	}
+	return service, nil
 }
 
 // CreateVM creates new Firecracker VM instance. It creates a runtime shim for the VM and the forwards
@@ -113,7 +119,7 @@ func (s *local) CreateVM(requestCtx context.Context, req *proto.CreateVMRequest)
 	// We determine if there is already a shim managing a VM with the current VMID by attempting
 	// to listen on the abstract socket address (which is parameterized by VMID). If we get
 	// EADDRINUSE, then we assume there is already a shim for the VM and return an AlreadyExists error.
-	shimSocketAddress, err := shim.SocketAddress(requestCtx, s.containerdAddress, id)
+	shimSocketAddress, err := shim.SocketAddress(requestCtx, s.containerdAddress, id, false)
 	if err != nil {
 		err = fmt.Errorf("failed to obtain shim socket address: %w", err)
 		s.logger.WithError(err).Error()
@@ -128,6 +134,8 @@ func (s *local) CreateVM(requestCtx context.Context, req *proto.CreateVMRequest)
 		s.logger.WithError(err).Error()
 		return nil, err
 	}
+	shimSocket.SetUnlinkOnClose(false)
+	defer shimSocket.Close()
 
 	// If we're here, there is no pre-existing shim for this VMID, so we spawn a new one
 	if err := os.Mkdir(s.config.ShimBaseDir, 0700); err != nil && !os.IsExist(err) {
@@ -141,6 +149,10 @@ func (s *local) CreateVM(requestCtx context.Context, req *proto.CreateVMRequest)
 		s.logger.WithError(err).Error()
 		return nil, err
 	}
+	// A previous failed cleanup must finish before this VM identity is reused.
+	if err := vm.RecoverVM(requestCtx, shimDir); err != nil {
+		return nil, fmt.Errorf("recover previous VM %q: %w", id, err)
+	}
 
 	err = shimDir.Mkdir()
 	if err != nil {
@@ -149,8 +161,9 @@ func (s *local) CreateVM(requestCtx context.Context, req *proto.CreateVMRequest)
 		return nil, err
 	}
 
+	launched := false
 	defer func() {
-		if err != nil {
+		if err != nil && !launched {
 			removeErr := os.RemoveAll(shimDir.RootPath())
 			if removeErr != nil {
 				s.logger.WithError(removeErr).WithField("path", shimDir.RootPath()).Error("failed to cleanup VM dir")
@@ -175,11 +188,14 @@ func (s *local) CreateVM(requestCtx context.Context, req *proto.CreateVMRequest)
 		s.logger.WithError(err).Error()
 		return nil, err
 	}
+	fcSocket.SetUnlinkOnClose(false)
+	defer fcSocket.Close()
 
 	cmd, err := s.newShim(ns, id, s.containerdAddress, shimSocket, fcSocket)
 	if err != nil {
 		return nil, err
 	}
+	launched = true
 
 	defer func() {
 		if err != nil {
@@ -284,21 +300,35 @@ func (s *local) ResumeVM(ctx context.Context, req *proto.ResumeVMRequest) (*type
 }
 
 func (s *local) waitForShimToExit(ctx context.Context, vmID string) error {
-	socketAddr, err := shim.SocketAddress(ctx, s.containerdAddress, vmID)
+	socketAddr, err := shim.SocketAddress(ctx, s.containerdAddress, vmID, false)
 	if err != nil {
 		return err
 	}
 
 	s.processesMu.Lock()
-	defer s.processesMu.Unlock()
-
 	pid, ok := s.processes[socketAddr]
-	if !ok {
-		return fmt.Errorf("failed to find a shim process for %q", socketAddr)
+	s.processesMu.Unlock()
+	if ok {
+		return internal.WaitForPidToExit(ctx, stopVMInterval, pid)
 	}
-	defer delete(s.processes, socketAddr)
+	// The monitor may already have reaped the shim and removed its map entry.
+	namespace, err := namespaces.NamespaceRequired(ctx)
+	if err != nil {
+		return err
+	}
+	dir, err := vm.ShimDir(s.config.ShimBaseDir, namespace, vmID)
+	if err != nil {
+		return err
+	}
+	state, err := vm.ReadRecoveryState(dir)
+	if os.IsNotExist(err) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	return waitOwnedShim(ctx, state.Shim)
 
-	return internal.WaitForPidToExit(ctx, stopVMInterval, pid)
 }
 
 // GetVMInfo returns metadata for the VM with the given VMID.
@@ -479,6 +509,7 @@ func (s *local) newShim(ns, vmID, containerdAddress string, shimSocket *net.Unix
 		logger.WithError(err).Error()
 		return nil, err
 	}
+	defer shimSocketFile.Close()
 
 	fcSocketFile, err := fcSocket.File()
 	if err != nil {
@@ -486,6 +517,7 @@ func (s *local) newShim(ns, vmID, containerdAddress string, shimSocket *net.Unix
 		logger.WithError(err).Error()
 		return nil, err
 	}
+	defer fcSocketFile.Close()
 
 	cmd.ExtraFiles = append(cmd.ExtraFiles, shimSocketFile, fcSocketFile)
 	fcSocketFDNum := 2 + len(cmd.ExtraFiles) // "2 +" because ExtraFiles come after stderr (fd #2)
@@ -525,25 +557,14 @@ func (s *local) newShim(ns, vmID, containerdAddress string, shimSocket *net.Unix
 			}
 		}
 
-		// Close all Unix sockets.
-		if err := shimSocketFile.Close(); err != nil {
-			logger.WithError(err).Errorf("failed to close %q", shimSocketFile.Name())
-		}
-		if err := fcSocketFile.Close(); err != nil {
-			logger.WithError(err).Errorf("failed to close %q", fcSocketFile.Name())
-		}
+		s.forgetShim(ns, vmID, int32(cmd.Process.Pid))
+		s.cleanupExitedVM(ns, vmID, shimDir)
 
-		if err := s.removeSockets(ns, vmID); err != nil {
-			logger.WithError(err).Errorf("failed to remove sockets")
-		}
-
-		if err := os.RemoveAll(shimDir.RootPath()); err != nil {
-			logger.WithError(err).Errorf("failed to remove %q", shimDir.RootPath())
-		}
 	}()
 
 	err = setShimOOMScore(cmd.Process.Pid)
 	if err != nil {
+		_ = cmd.Process.Kill()
 		logger.WithError(err).Error()
 		return nil, err
 	}
@@ -557,7 +578,7 @@ func (s *local) removeSockets(ns string, vmID string) error {
 	// This context is only used for passing the namespace.
 	ctx := namespaces.WithNamespace(context.Background(), ns)
 
-	address, err := shim.SocketAddress(ctx, s.containerdAddress, vmID)
+	address, err := shim.SocketAddress(ctx, s.containerdAddress, vmID, false)
 	if err != nil {
 		result = multierror.Append(result, err)
 	} else {

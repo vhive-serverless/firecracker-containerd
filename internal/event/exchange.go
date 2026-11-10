@@ -16,8 +16,8 @@
 package event
 
 import (
-	"github.com/containerd/containerd/events/exchange"
-	"github.com/containerd/containerd/runtime/v2/shim"
+	"github.com/containerd/containerd/v2/core/events/exchange"
+	"github.com/containerd/containerd/v2/pkg/shim"
 )
 
 var _ shim.Publisher = &ExchangeCloser{}

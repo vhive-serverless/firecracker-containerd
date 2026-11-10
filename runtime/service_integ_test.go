@@ -31,14 +31,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/containerd/containerd"
 	"github.com/containerd/containerd/api/events"
-	"github.com/containerd/containerd/cio"
-	"github.com/containerd/containerd/containers"
-	"github.com/containerd/containerd/errdefs"
-	"github.com/containerd/containerd/namespaces"
-	"github.com/containerd/containerd/oci"
-	"github.com/containerd/containerd/runtime"
+	containerd "github.com/containerd/containerd/v2/client"
+	"github.com/containerd/containerd/v2/core/containers"
+	"github.com/containerd/containerd/v2/core/runtime"
+	"github.com/containerd/containerd/v2/pkg/cio"
+	"github.com/containerd/containerd/v2/pkg/namespaces"
+	"github.com/containerd/containerd/v2/pkg/oci"
+	"github.com/containerd/errdefs"
 	"github.com/containerd/go-runc"
 	"github.com/containerd/typeurl/v2"
 	"github.com/containernetworking/plugins/pkg/ns"
@@ -220,6 +220,7 @@ func vmIDtoMacAddr(vmID uint) string {
 }
 
 func ipCommand(ctx context.Context, args ...string) error {
+	// #nosec G702 -- only test-generated ip subcommands and addresses are passed; no shell is invoked.
 	out, err := exec.CommandContext(ctx, "ip", args...).CombinedOutput()
 	if err != nil {
 		s := strings.Trim(string(out), "\n")
@@ -1145,10 +1146,12 @@ func TestDriveMount_Isolated(t *testing.T) {
 				Contents: "foo\n",
 			},
 			RateLimiter: &proto.FirecrackerRateLimiter{
+				// Permit filesystem metadata reads within the VM startup deadline.
+				// A 333-byte bucket throttles modern ext4 mount I/O for minutes.
 				Bandwidth: &proto.FirecrackerTokenBucket{
-					OneTimeBurst: 111,
+					OneTimeBurst: 1024 * 1024,
 					RefillTime:   222,
-					Capacity:     333,
+					Capacity:     4 * 1024 * 1024,
 				},
 				Ops: &proto.FirecrackerTokenBucket{
 					OneTimeBurst: 1111,
@@ -1176,8 +1179,8 @@ func TestDriveMount_Isolated(t *testing.T) {
 		},
 	}
 
-	vmDriveMounts := []*proto.FirecrackerDriveMount{}
-	ctrBindMounts := []specs.Mount{}
+	vmDriveMounts := make([]*proto.FirecrackerDriveMount, 0, len(vmMounts))
+	ctrBindMounts := make([]specs.Mount, 0, len(vmMounts))
 	ctrCommands := []string{}
 	for _, vmMount := range vmMounts {
 		vmDriveMounts = append(vmDriveMounts, &proto.FirecrackerDriveMount{
@@ -1591,13 +1594,12 @@ func TestRandomness_Isolated(t *testing.T) {
 	)
 	rngtestCmd.Stdout = &rngtestStdout
 	rngtestCmd.Stderr = &rngtestStderr
-	rngtestStdin, err := rngtestCmd.StdinPipe()
-	require.NoError(t, err, "failed to get pipe to rngtest command's stdin")
-
-	ddStdout := rngtestStdin
+	// Capture and verify the complete binary stream before running rngtest.
+	// This also detects stdio truncation independently of the randomness test.
+	var ddStdout bytes.Buffer
 	var ddStderr bytes.Buffer
 
-	task, err := ddContainer.NewTask(ctx, cio.NewCreator(cio.WithStreams(nil, ddStdout, &ddStderr)))
+	task, err := ddContainer.NewTask(ctx, cio.NewCreator(cio.WithStreams(nil, &ddStdout, &ddStderr)))
 	require.NoError(t, err, "failed to create task for dd container")
 
 	exitCh, err := task.Wait(ctx)
@@ -1605,9 +1607,6 @@ func TestRandomness_Isolated(t *testing.T) {
 
 	err = task.Start(ctx)
 	require.NoError(t, err, "failed to start task for dd container")
-
-	err = rngtestCmd.Start()
-	require.NoError(t, err, "failed to start rngtest")
 
 	select {
 	case exitStatus := <-exitCh:
@@ -1626,7 +1625,9 @@ func TestRandomness_Isolated(t *testing.T) {
 			"context cancelled while waiting for dd container to exit (is it blocked on reading /dev/random?), err: %v", ctx.Err())
 	}
 
-	err = rngtestCmd.Wait()
+	require.Len(t, ddStdout.Bytes(), blockCount*2500, "binary stdout was truncated")
+	rngtestCmd.Stdin = bytes.NewReader(ddStdout.Bytes())
+	err = rngtestCmd.Run()
 	t.Logf("stdout output from rngtest:\n %s", rngtestStdout.String())
 	t.Logf("stderr output from rngtest:\n %s", rngtestStderr.String())
 	if err != nil {

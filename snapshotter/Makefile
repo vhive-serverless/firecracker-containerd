@@ -48,12 +48,13 @@ install: demux-snapshotter http-address-resolver
 test:
 	go test ./... $(EXTRAGOARGS)
 
-integ-test:
+integ-test: test-deps
+	test -n "$(INTEG_TESTNAMES)"
 	$(MAKE) $(addprefix integ-test-,$(INTEG_TESTNAMES))
 
-integ-test-%: logs
+integ-test-%: logs test-deps
 	$(CURDIR)/../tools/thinpool.sh reset "$(FICD_DM_POOL)"
-	docker run --rm -it \
+	docker run --rm \
 		--privileged \
 		--ipc=host \
 		--network=bridge \
@@ -76,6 +77,10 @@ integ-test-%: logs
 
 logs:
 	mkdir logs
+
+.PHONY: test-deps
+test-deps:
+	$(MAKE) -C .. test-deps-in-docker
 
 clean:
 	- rm -f demux-snapshotter

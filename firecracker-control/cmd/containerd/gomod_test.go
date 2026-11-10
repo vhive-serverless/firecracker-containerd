@@ -15,7 +15,7 @@
 // dependencies visible to Go's module tooling so they are not pruned.
 package main
 
-import "github.com/containerd/containerd/cmd/ctr/app"
+import "github.com/containerd/containerd/v2/cmd/ctr/app"
 
 // Right now, firecracker-ctr command is built by Makefile.
 // Go's toolchain is not aware about the command and "go mod tidy" removes

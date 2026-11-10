@@ -16,7 +16,7 @@
 package vm
 
 import (
-	"github.com/containerd/containerd/mount"
+	"github.com/containerd/containerd/v2/core/mount"
 	"github.com/firecracker-microvm/firecracker-containerd/internal/vm"
 )
 
