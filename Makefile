@@ -372,14 +372,15 @@ runc: $(RUNC_BIN)
 $(RUNC_DIR)/VERSION:
 	git submodule update --init --recursive $(RUNC_DIR)
 
-tools/runc-builder-stamp: tools/docker/Dockerfile.runc-builder
+.PHONY: tools/runc-builder-$(DOCKER_IMAGE_TAG)-stamp
+tools/runc-builder-$(DOCKER_IMAGE_TAG)-stamp: tools/docker/Dockerfile.runc-builder
 	docker build \
 		-t localhost/$(RUNC_BUILDER_NAME):$(DOCKER_IMAGE_TAG) \
 		-f tools/docker/Dockerfile.runc-builder \
 		tools/
 	touch $@
 
-$(RUNC_BIN): $(RUNC_DIR)/VERSION tools/runc-builder-stamp
+$(RUNC_BIN): $(RUNC_DIR)/VERSION tools/runc-builder-$(DOCKER_IMAGE_TAG)-stamp
 	docker run --rm --user $(UID) \
 		--volume $(CURDIR)/$(RUNC_DIR):/gopath/src/github.com/opencontainers/runc \
 		--volume $(CURDIR)/deps:/target \
@@ -402,14 +403,15 @@ stargz-snapshotter: $(STARGZ_BIN)
 $(STARGZ_DIR)/go.mod:
 	git submodule update --init --recursive $(STARGZ_DIR)
 
-tools/stargz-builder-stamp: tools/docker/Dockerfile.stargz-builder
+.PHONY: tools/stargz-builder-$(DOCKER_IMAGE_TAG)-stamp
+tools/stargz-builder-$(DOCKER_IMAGE_TAG)-stamp: tools/docker/Dockerfile.stargz-builder
 	docker build \
 		-t localhost/$(STARGZ_BUILDER_NAME):$(DOCKER_IMAGE_TAG) \
 		-f tools/docker/Dockerfile.stargz-builder \
 		tools/
 	touch $@
 
-$(STARGZ_BIN): $(STARGZ_DIR)/go.mod tools/stargz-builder-stamp
+$(STARGZ_BIN): $(STARGZ_DIR)/go.mod tools/stargz-builder-$(DOCKER_IMAGE_TAG)-stamp
 	docker run --rm \
 	--user $(UID):$(GID) \
 	--volume $(GO_CACHE_VOLUME_NAME):/go \

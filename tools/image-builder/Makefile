@@ -105,9 +105,10 @@ rootfs-stargz.img: PACKAGES   += fuse ca-certificates socat
 rootfs-stargz.img: files_common_sgzstamp files_debootstrap_sgzstamp files_ephemeral_sgzstamp files_stargz_sgzstamp files_ephemeral_stargz_sgzstamp
 	mksquashfs "$(WORKDIR)" $@ -noappend
 
-builder: builder_stamp
+builder: builder_$(DOCKER_IMAGE_TAG)_stamp
 
-builder_stamp:
+.PHONY: builder_$(DOCKER_IMAGE_TAG)_stamp
+builder_$(DOCKER_IMAGE_TAG)_stamp: Dockerfile.debian-image
 	docker build -t fc-image-builder:$(DOCKER_IMAGE_TAG) -f Dockerfile.debian-image .
 	touch $@
 
@@ -116,7 +117,7 @@ builder_stamp:
 # $ make rootfs.img
 # you can use
 # $ make rootfs.img-in-docker
-%-in-docker: builder_stamp
+%-in-docker: builder_$(DOCKER_IMAGE_TAG)_stamp
 	docker run --rm \
 		--security-opt=apparmor=unconfined \
 		--volume $(CURDIR):/src \
