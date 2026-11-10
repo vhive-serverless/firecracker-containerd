@@ -1,0 +1,2 @@
+# Worker evidence retains terminal formatting and is not source code.
+docs/modernization/evidence/*.log -whitespace
