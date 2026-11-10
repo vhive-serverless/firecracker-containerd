@@ -58,4 +58,4 @@ require (
 
 replace github.com/firecracker-microvm/firecracker-containerd => ../../../
 
-replace github.com/firecracker-microvm/firecracker-go-sdk => github.com/JooyoungPark73/firecracker-go-sdk v0.0.0-20261110201002-de266295ced4
+replace github.com/firecracker-microvm/firecracker-go-sdk => github.com/JooyoungPark73/firecracker-go-sdk v0.0.0-20261110215740-0d7a093c9b0c

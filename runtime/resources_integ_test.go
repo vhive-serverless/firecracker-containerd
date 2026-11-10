@@ -47,8 +47,9 @@ func TestResourceAccounting_Isolated(t *testing.T) {
 		containerd.WithNewSpec(
 			oci.WithMemoryLimit(64*1024*1024), oci.WithCPUCFS(50000, 100000),
 			oci.WithLinuxNamespace(specs.LinuxNamespace{Type: specs.CgroupNamespace}),
+			oci.WithMounts([]specs.Mount{{Destination: "/sys/fs/cgroup", Type: "cgroup", Source: "cgroup", Options: []string{"ro", "nosuid", "noexec", "nodev"}}}),
 			oci.WithProcessArgs("/bin/sh", "-ec", `
-                test "$(stat -f -c %T /sys/fs/cgroup)" = cgroup2fs
+                test "$(stat -f -c %t /sys/fs/cgroup)" = 63677270
                 test "$(cat /sys/fs/cgroup/memory.max)" = 67108864
                 test "$(cat /sys/fs/cgroup/cpu.max)" = "50000 100000"
                 echo RESOURCE_LIMITS_OK
@@ -58,7 +59,13 @@ func TestResourceAccounting_Isolated(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	task, err := container.NewTask(ctx, cio.NewCreator(cio.WithStreams(nil, &stdout, &stderr)))
 	require.NoError(t, err)
-	defer func() { _ = task.Kill(ctx, syscall.SIGKILL); _, _ = task.Delete(ctx, containerd.WithProcessKill) }()
+	defer func() {
+		_ = task.Kill(ctx, syscall.SIGKILL)
+		_, _ = task.Delete(ctx, containerd.WithProcessKill)
+		t.Logf("resource test stdout=%s stderr=%s", stdout.String(), stderr.String())
+	}()
+	exited, err := task.Wait(ctx)
+	require.NoError(t, err)
 	require.NoError(t, task.Start(ctx))
 	// Accumulate several quota periods so throttling and CPU usage are measurable.
 	time.Sleep(time.Second)
@@ -66,13 +73,20 @@ func TestResourceAccounting_Isolated(t *testing.T) {
 	require.NoError(t, err)
 	var accounting stats.Metrics
 	require.NoError(t, metric.Data.UnmarshalTo(&accounting))
+	t.Logf("guest cgroup v2 accounting: %s", accounting.String())
 	require.Positive(t, accounting.GetCPU().GetUsageUsec())
 	require.Positive(t, accounting.GetCPU().GetNrThrottled())
 	require.Positive(t, accounting.GetMemory().GetUsage())
 	require.Less(t, accounting.GetMemory().GetUsage(), uint64(64*1024*1024))
 	require.Positive(t, accounting.GetPids().GetCurrent())
-	t.Logf("guest cgroup v2 accounting: %s", accounting.String())
 	require.NoError(t, task.Kill(ctx, syscall.SIGKILL))
+	select {
+	case status := <-exited:
+		require.NoError(t, status.Error())
+		require.EqualValues(t, 137, status.ExitCode())
+	case <-ctx.Done():
+		t.Fatal(ctx.Err())
+	}
 	_, err = task.Delete(ctx)
 	require.NoError(t, err)
 	require.Contains(t, stdout.String(), "RESOURCE_LIMITS_OK", stderr.String())

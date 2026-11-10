@@ -32,6 +32,31 @@ try:
     directory = work / "shim" / ("default#" + vmid)
     metadata = json.loads((directory / "recovery.json").read_text())
     print(json.dumps(metadata, indent=2), flush=True)
+    if os.environ.get("RESTART_CONTROLLER") == "1":
+        assert run_name.startswith("fcmod-")
+        command("tasks", "exec", "--exec-id", "write-state", name,
+                "/bin/sh", "-ec", "echo controller-restart > /restart-state")
+        def main_pid():
+            return int(subprocess.check_output(
+                ["systemctl", "show", run_name, "--property=MainPID", "--value"], text=True))
+        previous = main_pid()
+        assert previous > 1
+        controller_args = Path(f"/proc/{previous}/cmdline").read_bytes()
+        assert b"firecracker-containerd" in controller_args and str(work / "config.toml").encode() in controller_args
+        subprocess.run(["systemctl", "kill", "--kill-whom=main", "--signal=KILL", run_name], check=True)
+        deadline = time.monotonic() + 10
+        while main_pid() == previous and time.monotonic() < deadline:
+            time.sleep(0.1)
+        subprocess.run(["systemctl", "restart", run_name], check=True)
+        deadline = time.monotonic() + 30
+        while time.monotonic() < deadline:
+            if command("version", check=False).returncode == 0:
+                break
+            time.sleep(0.2)
+        assert main_pid() > 1 and main_pid() != previous
+        result = command("tasks", "exec", "--exec-id", "read-state", name, "/bin/cat", "/restart-state")
+        assert result.stdout.strip() == "controller-restart", result
+        print("CONTROLLER_RESTART_RECONNECT_OK", flush=True)
     for key in ("shim", "vmm"):
         process = metadata[key]
         assert process["pid"] > 1 and identity(process["pid"]) == process["start_ticks"], key

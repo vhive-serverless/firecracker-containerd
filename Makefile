@@ -118,7 +118,7 @@ deps = \
 	$(BINPATH)/ltag
 
 lint: $(deps)
-	$(BINPATH)/ltag -t ./.headers -excludes "tools $(SUBMODULES)" -check -v
+	$(BINPATH)/ltag -t ./.headers -excludes "tools $(SUBMODULES) tmp bin" -check -v
 # Change HEAD~1 to HEAD~20 once this commit falls out of range:
 # https://github.com/firecracker-microvm/firecracker-containerd/commit/9711138b150ac9133ca01379ac19a2e7884c251d
 	$(BINPATH)/git-validation -run DCO,short-subject -range HEAD~1..HEAD

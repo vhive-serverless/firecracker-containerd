@@ -97,7 +97,9 @@ for attempt in $(seq 1 30); do
     sleep 1
 done
 sudo -n "$ctr" --address "$socket" plugins ls
-sudo -n "$ctr" --address "$socket" images pull --snapshotter devmapper docker.io/library/alpine:3.23.0
+smoke_image=docker.io/library/alpine:3.23.0@sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+sudo -n "$ctr" --address "$socket" images pull --snapshotter devmapper "$smoke_image"
+sudo -n "$ctr" --address "$socket" images tag --force "$smoke_image" docker.io/library/alpine:3.23.0
 sudo -n env PATH="$runtime_path" "$ctr" --address "$socket" run \
     --runtime aws.firecracker --snapshotter devmapper --rm \
     docker.io/library/alpine:3.23.0 fcmod-modernize-smoke \

@@ -12,7 +12,7 @@ commit `eaf83bb718a559d324613d566eaf776b31a62340`. No VMM source modification is
 needed for this step. The SDK `modernize-runtime` branch preserves the earlier
 `feat/update-firecracker-1.14` work and adds Swagger v1.18 generation with
 `go-swagger v0.33.1`; its pushed commit is
-`de266295ced4e5cec6b44796a0e41c16c2bec477`.
+`0d7a093c9b0cee5b93d0b9551888a571bb478154`.
 
 The runtime uses containerd v2.3.7 (API v1.11.1), runc v1.4.2, CNI plugins v1.9.1,
 CNI library v1.3.0, and stargz-snapshotter v0.18.2. The retained tc-redirect-tap
@@ -42,8 +42,10 @@ Unified cgroups are enabled. See `baseline-audit.md` for original provenance.
 Actual guest inspection confirms the preserved layout: read-only squashfs guest
 base, tmpfs guest overlay upper, and separate ext4 container roots on host-backed
 devmapper thin devices. Host backing files reside on `/dev/sda3` (ext3), not tmpfs.
-The persistent guest overlay redesign belongs to Step 4. Container writes already
-have a disk-backed writable layer. Small runtime tmpfs mounts remain distinct.
+The persistent guest overlay redesign belongs to Step 4. The default devmapper container path already
+has a disk-backed writable layer. The optional guest stargz service instead mounts
+its store on tmpfs; its verified container overlay upper/work directories live
+under that store. Step 4 must also account for that separate path. Small runtime tmpfs mounts remain distinct.
 
 Thin pools now have separate backing files and loop devices for each name. Removal
 is scoped to the selected pool and detaches its owned loop devices. The old LVM
@@ -67,6 +69,9 @@ The default workspace is `/users/nehalem/fc-ctrd-mod`. The scripts support
 if it adds the Docker group.
 
 ```bash
+set -euo pipefail
+mkdir -p "$HOME/fc-ctrd-mod/evidence"
+cd "$HOME/fc-ctrd-mod"
 git clone --branch modernize-runtime --recurse-submodules \
   https://github.com/vhive-serverless/firecracker-containerd.git runtime
 cd runtime
@@ -77,14 +82,21 @@ tools/modernize/install-stack.sh 2>&1 | tee ../evidence/install-stack.log
 INSTALL_DIR="$HOME/fc-ctrd-mod/install/$(git rev-parse --short=12 HEAD)" \
 RUN_NAME=fcmod-validation WORK_DIR="$HOME/fc-ctrd-mod/validate-run" \
   tools/modernize/run-worker.sh 2>&1 | tee ../evidence/validation-lifecycle.log
-STATIC_AGENT=on make test-images
-FICD_DM_VOLUME_GROUP= make -k -C runtime integ-test \
-  EXTRAGOARGS='-v -count=1 -timeout=300s'
-DISABLE_ROOT_TESTS=1 go test -short -timeout=120s ./...
-make lint
+tools/modernize/test-stack.sh 2>&1 | tee ../evidence/acceptance.log
+sudo -n env RUNTIME_SRC="$PWD" WORK_DIR="$HOME/fc-ctrd-mod/validate-run" \
+  RUN_NAME=fcmod-validation RESTART_CONTROLLER=1 \
+  python3 tools/modernize/test-crash-recovery.py \
+  2>&1 | tee ../evidence/controller-recovery.log
 ```
 
-The final procedure will also include resource accounting/failure tests and cleanup.
+`test-stack.sh` rebuilds the test image with the checkout's revision tag, runs
+unprivileged and root unit checks, lint, tracked-module tidy, forced protobuf
+regeneration, the complete runtime and snapshotter integration suites, thin-pool
+ownership/cleanup tests, and the exact pinned SDK suite from its own clean clone.
+The native recovery test kills the dedicated controller, reconnects to the existing
+VM, checks its filesystem state, and then kills its shim and verifies VM cleanup.
+Test networking is isolated; the SDK's native jailer test uses the host cgroup
+namespace for cgroup v2 and removes its specifically owned test cgroup afterward.
 `ALLOW_DIRTY=1` exists for development only; it is not valid milestone evidence.
 `bin/receipts/` records revisions, Go module graph, binary hashes and build metadata.
 The install script uses a dedicated prefix and does not replace the worker's Docker
@@ -105,7 +117,16 @@ and filesystem writes, guest cgroup v2 inspection, separate-pool ownership and
 cleanup, and a real shim SIGKILL recovery test. These development results do not
 replace the pending committed-checkout build/install and full acceptance suite.
 
-Known outstanding gates include the complete runtime integration suite, explicit
-resource accounting/limits/leak and controller-restart checks, retained snapshotter
-integration, final documentation, and independent committed reconstruction. No
+The committed implementation checkpoint `c21a0e8` independently built and
+installed on the worker, ran an OCI container from its installed prefix, passed
+root unit tests, and survived controller restart followed by shim-crash cleanup.
+Subsequent worker tests passed explicit cgroup v2 memory/CPU limits, accounting and
+throttling, three CNI/runc-jail crash-cleanup iterations, exact 4 MiB binary output
+under a slow consumer, and stargz image execution with filesystem writes. The SDK
+snapshot-load regression found by its complete privileged suite has been fixed
+and pushed. Tests cover snapshot load with a memory backend and SSH content checks.
+
+The complete final acceptance script is still pending on the current completion
+candidate. Earlier development runs and the checkpoint above are evidence of
+progress; they are not a declaration that this milestone is complete. No
 Step 2, CRI, Kubernetes checkpoint/restore, or memory-efficiency outcome is claimed.

@@ -33,7 +33,7 @@ import (
 const (
 	snapshotterName = "demux"
 
-	al2stargz = "ghcr.io/firecracker-microvm/firecracker-containerd/amazonlinux:latest-esgz"
+	al2stargz = "ghcr.io/firecracker-microvm/firecracker-containerd/amazonlinux@sha256:3df2da42bfeb79cd5ef93bb7eff5630a2634b3688659e8bef83e981ed8083ccb"
 
 	noAuth = ""
 
@@ -52,7 +52,7 @@ func TestLaunchContainerWithRemoteSnapshotter_Isolated(t *testing.T) {
 	integtest.Prepare(t, integtest.WithDefaultNetwork())
 
 	vmID := 0
-	err := launchContainerWithRemoteSnapshotterInVM(context.Background(), strconv.Itoa(vmID))
+	err := launchContainerWithRemoteSnapshotterInVM(context.Background(), t, strconv.Itoa(vmID))
 	require.NoError(t, err)
 }
 
@@ -66,14 +66,14 @@ func TestLaunchMultipleContainersWithRemoteSnapshotter_Isolated(t *testing.T) {
 		ctx := ctx
 		id := vmID
 		eg.Go(func() error {
-			return launchContainerWithRemoteSnapshotterInVM(ctx, strconv.Itoa(id))
+			return launchContainerWithRemoteSnapshotterInVM(ctx, t, strconv.Itoa(id))
 		})
 	}
 	err := eg.Wait()
 	require.NoError(t, err)
 }
 
-func launchContainerWithRemoteSnapshotterInVM(ctx context.Context, vmID string) error {
+func launchContainerWithRemoteSnapshotterInVM(ctx context.Context, t testing.TB, vmID string) error {
 	// For integration testing, assume the namespace is same as the VM ID.
 	namespace := vmID
 
@@ -84,10 +84,13 @@ func launchContainerWithRemoteSnapshotterInVM(ctx context.Context, vmID string) 
 		return fmt.Errorf("Unable to create client to containerd service at %s, is containerd running? [%v]", integtest.ContainerdSockPath, err)
 	}
 
+	defer client.Close()
 	fcClient, err := integtest.NewFCControlClient(integtest.ContainerdSockPath)
 	if err != nil {
 		return fmt.Errorf("Failed to create fccontrol client. [%v]", err)
 	}
+
+	defer fcClient.Close()
 
 	// Disable 8250 serial device and lessen the number of log messages written to the serial console.
 	// https://github.com/firecracker-microvm/firecracker/blob/v1.1.0/docs/prod-host-setup.md
@@ -142,9 +145,9 @@ func launchContainerWithRemoteSnapshotterInVM(ctx context.Context, vmID string) 
 		containerd.WithSnapshotter(snapshotterName),
 		containerd.WithNewSnapshot("snapshot", image),
 		containerd.WithNewSpec(
-			oci.WithProcessArgs("echo", "hello"),
-			oci.WithDefaultPathEnv,
 			firecrackeroci.WithVMLocalImageConfig(image),
+			oci.WithDefaultPathEnv,
+			oci.WithProcessArgs("/bin/sh", "-ec", "echo stargz-write > /stargz-write; test \"$(cat /stargz-write)\" = stargz-write; cat /proc/mounts >&2; echo hello"),
 			firecrackeroci.WithVMID(vmID),
 			firecrackeroci.WithVMNetwork,
 		),
@@ -154,9 +157,13 @@ func launchContainerWithRemoteSnapshotterInVM(ctx context.Context, vmID string) 
 	}
 	defer container.Delete(ctx, containerd.WithSnapshotCleanup)
 
-	_, err = integtest.RunTask(ctx, container)
+	result, err := integtest.RunTask(ctx, container)
 	if err != nil {
 		return fmt.Errorf("Failed to run task in VM[%s]: %w", vmID, err)
+	}
+	t.Logf("namespace=%s remote snapshotter mounts:\n%s", namespace, result.Stderr)
+	if result.ExitCode != 0 || result.Stdout != "hello\n" {
+		return fmt.Errorf("remote snapshotter workload exit=%d stdout=%q stderr=%q", result.ExitCode, result.Stdout, result.Stderr)
 	}
 	return nil
 }

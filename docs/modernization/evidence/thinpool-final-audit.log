@@ -1,0 +1,12 @@
+0 20971520 thin-pool 7:15 7:14 128 32768 1 skip_block_zeroing 
+0 20971520 thin-pool 7:17 7:16 128 32768 1 skip_block_zeroing 
+Name:              fcmod-pool-audit-1199489-b
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 12
+Number of targets: 1
+
+THINPOOL_ISOLATION_AND_CLEANUP_OK

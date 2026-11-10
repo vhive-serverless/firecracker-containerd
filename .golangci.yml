@@ -48,6 +48,8 @@ linters:
         text: G404
     paths:
       - _submodules
+      - ^tmp/
+      - ^bin/
       - snapshotter/internal/integtest/stargz
       - third_party$
       - builtin$
@@ -60,6 +62,8 @@ formatters:
     generated: lax
     paths:
       - _submodules
+      - ^tmp/
+      - ^bin/
       - snapshotter/internal/integtest/stargz
       - third_party$
       - builtin$

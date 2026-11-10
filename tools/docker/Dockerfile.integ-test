@@ -74,9 +74,13 @@ RUN set -eu; containerd >/tmp/containerd-preload.log 2>&1 & daemon=$!; \
     sleep 1; \
   done; \
   if [ "$ready" != 1 ]; then cat /tmp/containerd-preload.log; exit 1; fi; \
-  ctr --address /run/firecracker-containerd/containerd.sock content fetch docker.io/library/alpine:3.10.1 >/dev/null && \
-  ctr --address /run/firecracker-containerd/containerd.sock content fetch docker.io/mlabbe/iperf3:3.6-r0 >/dev/null && \
-  ctr --address /run/firecracker-containerd/containerd.sock content fetch docker.io/library/postgres:14.3 >/dev/null
+  for pair in \
+    'docker.io/library/alpine:3.10.1@sha256:6a92cd1fcdc8d8cdec60f33dda4db2cb1fcdcacf3410a8e05b3741f44a9b5998' \
+    'docker.io/mlabbe/iperf3:3.6-r0@sha256:1ae7855531c64f83144c3a4ba68f02b17d1588f3470a183688e877e8eb3cceac' \
+    'docker.io/library/postgres:14.3@sha256:2d1e636f07781d4799b3f2edbff78a0a5494f24c4512cb56a83ebfd0e04ec074'; do \
+    ctr --address /run/firecracker-containerd/containerd.sock content fetch "$pair" >/dev/null; \
+    ctr --address /run/firecracker-containerd/containerd.sock images tag "$pair" "${pair%@*}"; \
+  done
 
 ADD bin/firecracker /usr/local/bin
 

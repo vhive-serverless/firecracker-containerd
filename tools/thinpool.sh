@@ -69,12 +69,9 @@ if [[ -z "$FICD_DM_VOLUME_GROUP" ]]; then
             sudo dmsetup remove $snapshot
         done
 
-        local dev_no=1
-        while true; do
-            sudo dmsetup message "$name" 0 "delete $dev_no" || break
-            dev_no=$(($dev_no + 1))
-        done
-
+        # The complete pool and its private metadata backing are discarded;
+        # enumerating thin IDs until the first gap neither finds all IDs nor
+        # adds any cleanup beyond removing the pool itself.
         sudo dmsetup remove "$name"
         for path in "$DIR/data" "$DIR/metadata"; do
             while read -r dev; do

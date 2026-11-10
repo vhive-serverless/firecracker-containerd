@@ -94,8 +94,8 @@
     "sdk": {
       "remote": "git@github.com:JooyoungPark73/firecracker-go-sdk.git",
       "branch": "modernize-runtime",
-      "commit": "de266295ced4e5cec6b44796a0e41c16c2bec477",
-      "module_replacement": "github.com/JooyoungPark73/firecracker-go-sdk v0.0.0-20261110201002-de266295ced4"
+      "commit": "0d7a093c9b0cee5b93d0b9551888a571bb478154",
+      "module_replacement": "github.com/JooyoungPark73/firecracker-go-sdk v0.0.0-20261110215740-0d7a093c9b0c"
     },
     "containerd": {
       "version": "v2.3.7",
@@ -134,6 +134,13 @@
       "protoc": "3.21.12-3+deb12u1 (pinned Go builder distribution)",
       "protoc_gen_go": "v1.36.10",
       "protoc_gen_go_ttrpc": "v1.2.8"
+    },
+    "stargz_test_image": "ghcr.io/firecracker-microvm/firecracker-containerd/amazonlinux@sha256:3df2da42bfeb79cd5ef93bb7eff5630a2634b3688659e8bef83e981ed8083ccb",
+    "workload_images": {
+      "alpine_3_10_1": "sha256:6a92cd1fcdc8d8cdec60f33dda4db2cb1fcdcacf3410a8e05b3741f44a9b5998",
+      "iperf3_3_6_r0": "sha256:1ae7855531c64f83144c3a4ba68f02b17d1588f3470a183688e877e8eb3cceac",
+      "postgres_14_3": "sha256:2d1e636f07781d4799b3f2edbff78a0a5494f24c4512cb56a83ebfd0e04ec074",
+      "alpine_3_23_0": "sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375"
     }
   }
 }
