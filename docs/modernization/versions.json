@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "Steps 1 and 2 corrected and accepted; Step 3 CRI and native Pod restore remain incomplete",
+  "status": "Steps 1 and 2 preserved; Step 3 explicitly WIP; user authorized proceeding to Step 4 on 2026-11-11",
   "step_1_validation": {
     "runtime_branch": "modernize-runtime",
     "completion_commit": "6585eba92db4f8c55f6567cf8d2c8d695adcba05",
@@ -275,5 +275,10 @@
     "tested_commit": "40a3cdd37d5e19e8212db69d665319e05eed42e6",
     "receipt": "evidence/40a3cdd-upstream-one-node-receipt.log",
     "result": "stock-runtime baseline passed; full Step 3 acceptance pending"
+  },
+  "milestone_order_override": {
+    "date": "2026-11-11",
+    "instruction": "Keep Step 3 incomplete and explicitly WIP, and proceed to Step 4.",
+    "step_3_complete": false
   }
 }

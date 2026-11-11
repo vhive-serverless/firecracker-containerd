@@ -52,6 +52,9 @@ message CreateVMRequest {
     string ContainerSnapshotPath = 19;
     MemoryBackend MemBackend = 20;
     bool EnableDiffSnapshots = 21;
+
+    // Restore a native checkpoint, including its existing guest processes.
+    string NativeCheckpointDirectory = 22;
 }
 
 message CreateVMResponse {
@@ -60,6 +63,16 @@ message CreateVMResponse {
     string LogFifoPath = 3;
     string MetricsFifoPath = 4;
     string CgroupPath = 5;
+    repeated RestoredProcessIO RestoredIO = 6;
+}
+
+message RestoredProcessIO {
+    string ID = 1;
+    string ExecID = 2;
+    string Stdin = 3;
+    string Stdout = 4;
+    string Stderr = 5;
+    bool Terminal = 6;
 }
 
 message PauseVMRequest {

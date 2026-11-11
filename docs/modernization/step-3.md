@@ -1,12 +1,13 @@
-# Step 3 implementation status
+# Step 3 — WIP
 
-Step 3 is incomplete. Steps 1 and 2 retain their accepted branches. This branch
+Step 3 is explicitly **WIP and incomplete**. On 2026-11-11 the user authorized
+starting Step 4 without completing this milestone. Steps 1 and 2 retain their accepted branches. This branch
 currently adds a containerd CRI adapter, RuntimeClass deployment tests and native
 snapshot capture and restore components. Full CRI compliance, whole-Pod restore
 and Kubernetes checkpoint/restore remain incomplete.
 
 The [API audit](step-3-api-audit.md) records the v1.38 alpha target and the missing
-workflow in the released builds tested so far. Step 4 has not started.
+workflow in the released builds tested so far. Step 4 proceeds from a pinned WIP baseline by explicit user instruction.
 
 This branch also carries the validated task creation cleanup correction from
 Step 1 commit `6585eba` through Step 2 commit `d959a78`. Their receipts are linked
@@ -536,3 +537,12 @@ The [native pin receipt](evidence/20727f4-native-pin-receipt.log) preserves
 the complete evidence and failed/skipped names. Ordinary RuntimeClass acceptance
 was subsequently demonstrated as described above; full CRI compliance and Pod
 checkpoint/restore remain incomplete.
+
+## Preserved restore prototype
+
+The `CreateVMRequest.NativeCheckpointDirectory` path is a WIP prototype. It
+clones and checksums artifact files, restores host volume tables, loads a new
+VMM with a vsock reset and attempts to adopt captured tasks and fresh I/O.
+Source compilation and lint passed on the worker; end-to-end restore acceptance
+has not been established. The standalone restore test is retained for later
+work. No CRI or Kubernetes Pod restore completion is claimed.
