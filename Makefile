@@ -158,6 +158,9 @@ files_ephemeral_stargz: $(STARGZ_BIN) docker-credential-mmds-in-docker volume-in
 image: files_ephemeral
 	$(MAKE) -C tools/image-builder all-in-docker
 
+image-dax: files_ephemeral
+	$(MAKE) -C tools/image-builder dax-in-docker
+
 image-stargz: files_ephemeral files_ephemeral_stargz
 	$(MAKE) -C tools/image-builder stargz-in-docker
 

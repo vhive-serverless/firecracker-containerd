@@ -58,6 +58,7 @@ endef
 
 all: rootfs.img rootfs-debug.img
 stargz: rootfs-stargz.img
+dax: rootfs-dax.img
 
 $(WORKDIR):
 	mkdir $(WORKDIR)
@@ -89,6 +90,9 @@ endif
 
 rootfs.img: files_common_stamp files_debootstrap_stamp files_ephemeral_stamp
 	mksquashfs "$(WORKDIR)" rootfs.img -noappend
+
+rootfs-dax.img: rootfs.img build-dax-rootfs.sh
+	./build-dax-rootfs.sh rootfs.img $@
 
 rootfs-debug.img: files_common_stamp files_debootstrap_stamp files_ephemeral_stamp
 	rm -fr tmp/$@
@@ -130,7 +134,7 @@ builder_$(DOCKER_IMAGE_TAG)_stamp: Dockerfile.debian-image
 clean:
 	-rm -f *stamp
 	if [ $(UID) -eq 0 ]; then \
-	  rm -f rootfs.img rootfs-debug.img rootfs-stargz.img;\
+	  rm -f rootfs.img rootfs-debug.img rootfs-stargz.img rootfs-dax.img rootfs-dax.img.*;\
 	else \
 	  $(MAKE) clean-in-docker ;\
 	fi
@@ -139,4 +143,4 @@ distclean: clean
 	rm -rf files_ephemeral
 	- docker rmi fc-image-builder:$(DOCKER_IMAGE_TAG)
 
-.PHONY: debootstrap clean distclean builder %-in-docker
+.PHONY: debootstrap clean distclean builder dax %-in-docker
