@@ -22,4 +22,7 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 docker run --cidfile "$workspace/container-id" \
-    --volume "$workspace/vms:/srv/firecracker_containerd_tests" "$@"
+    --volume "$workspace/vms:/srv/firecracker_containerd_tests" "$@" &
+# A trapped signal interrupts wait immediately; waiting on foreground Docker
+# would defer cleanup until the container's workload itself exits.
+wait "$!"
