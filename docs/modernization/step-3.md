@@ -1,5 +1,13 @@
 # Step 3 — WIP
 
+Task-test synchronization maintenance at
+`6ef58125739aa87ce59e2007b2bc93ea943fbf65` passed 200 targeted worker
+repetitions across root/nonroot, single/default concurrency and plain/race modes.
+The [maintenance receipt](evidence/6ef5812-task-wait-sync-receipt.log) records
+the commands and hashes. Prior functional results retain their original source
+revisions and pins. **Step 3 remains WIP and incomplete**; no restore acceptance
+was rerun or established by this test-only change.
+
 Install-loop maintenance at `a5a2cb84a503338884692c1387fa2b1b3d5a3c72` passed the
 worker fixture: a failing first component stops installation before the second,
 and a successful component still installs. The [maintenance receipt](evidence/a5a2cb8-install-guard-receipt.log)
