@@ -48,6 +48,9 @@ type mockTaskService struct {
 
 	// map of "taskID/execID" to chan struct{} that will be used to block Wait requests
 	waitCh sync.Map
+
+	// map of "taskID/execID" to optional buffered Wait-start notifications
+	waitStarted sync.Map
 }
 
 func (s *mockTaskService) Create(_ context.Context, req *taskAPI.CreateTaskRequest) (*taskAPI.CreateTaskResponse, error) {
@@ -126,6 +129,14 @@ func (s *mockTaskService) Wait(_ context.Context, req *taskAPI.WaitRequest) (*ta
 	reqCh, _ := s.waitRequests.LoadOrStore(req.ID, make(chan *taskAPI.WaitRequest, 128))
 	reqCh.(chan *taskAPI.WaitRequest) <- req
 
+	// Notify only after recording the request, without blocking or consuming it.
+	if started, ok := s.waitStarted.Load(s.processID(req.ID, req.ExecID)); ok {
+		select {
+		case started.(chan struct{}) <- struct{}{}:
+		default:
+		}
+	}
+
 	waitCh, _ := s.waitCh.Load(s.processID(req.ID, req.ExecID))
 	if waitCh != nil {
 		<-(waitCh.(chan struct{}))
@@ -155,6 +166,13 @@ func (s *mockTaskService) PopWaitRequests(id string) (reqs []*taskAPI.WaitReques
 
 func (s *mockTaskService) SetWaitCh(taskID, execID string, waitCh chan struct{}) {
 	s.waitCh.Store(s.processID(taskID, execID), waitCh)
+}
+
+// WatchWaitStart must be registered before creating the process.
+func (s *mockTaskService) WatchWaitStart(taskID, execID string) <-chan struct{} {
+	started := make(chan struct{}, 1)
+	s.waitStarted.Store(s.processID(taskID, execID), started)
+	return started
 }
 
 func mockIOConnector(conn io.ReadWriteCloser) IOConnector {
@@ -329,8 +347,19 @@ func TestTaskManager_CreateExecDeleteTask(t *testing.T) {
 
 	tm := NewTaskManager(shimCtx, logger.WithField("test", t.Name()))
 	ts := &mockTaskService{}
+	waitForWaitStart := func(started <-chan struct{}, process *mockProc) {
+		t.Helper()
+		timer := time.NewTimer(5 * time.Second)
+		defer timer.Stop()
+		select {
+		case <-started:
+		case <-timer.C:
+			t.Fatalf("Wait did not start for task %q exec %q", process.TaskID, process.ExecID)
+		}
+	}
 
 	mockTask := newMockProc("fakeTask", "", mockIOConnector, mockIOConnector, mockIOConnector)
+	taskWaitStarted := ts.WatchWaitStart(mockTask.TaskID, mockTask.ExecID)
 	ts.SetWaitCh(mockTask.TaskID, mockTask.ExecID, mockTask.WaitCh)
 
 	// Create a task, simulate data on stdin, stdout, stderr
@@ -338,6 +367,7 @@ func TestTaskManager_CreateExecDeleteTask(t *testing.T) {
 	_, err := tm.CreateTask(createReqCtx, &taskAPI.CreateTaskRequest{ID: mockTask.TaskID}, ts, mockTask.IOConnectorSet)
 	require.NoError(t, err, "create task failed")
 	createReqCancel()
+	waitForWaitStart(taskWaitStarted, mockTask)
 
 	taskStdinData := []byte("stdin")
 	err = mockTask.WriteStdin(taskStdinData)
@@ -353,6 +383,7 @@ func TestTaskManager_CreateExecDeleteTask(t *testing.T) {
 
 	// Exec a process, simulate stdio
 	mockExec := newMockProc(mockTask.TaskID, "fakeExec", mockIOConnector, mockIOConnector, mockIOConnector)
+	execWaitStarted := ts.WatchWaitStart(mockExec.TaskID, mockExec.ExecID)
 	ts.SetWaitCh(mockExec.TaskID, mockExec.ExecID, mockExec.WaitCh)
 
 	execReqCtx, execReqCancel := context.WithCancel(shimCtx)
@@ -362,6 +393,7 @@ func TestTaskManager_CreateExecDeleteTask(t *testing.T) {
 	}, ts, mockExec.IOConnectorSet)
 	require.NoError(t, err, "exec failed")
 	execReqCancel()
+	waitForWaitStart(execWaitStarted, mockExec)
 
 	execStdinData := []byte("execstdin")
 	err = mockExec.WriteStdin(execStdinData)
