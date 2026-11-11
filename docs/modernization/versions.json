@@ -525,6 +525,22 @@
     "evidence": "evidence/step4-cache-test/verification.json",
     "evidence_sha256": "666d90dbfd00ac03f609876f25164cc8ec3a2cc6f4e712f544c3ea4d13e47ca6",
     "validation": "200 targeted repetitions with GOMAXPROCS=1, 50 targeted race repetitions, whole cache package race; all passed on designated worker with Go 1.26.11",
-    "scope": "Test-only synchronization fix; production code unchanged; no new VM acceptance or Step 3 completion claim."
+    "scope": "Test-only synchronization fix; production code unchanged; no new VM acceptance or Step 3 completion claim.",
+    "ci_successes": {
+      "modernize-runtime": "https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43086330863",
+      "vhive-compatible": "https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43086330660",
+      "cri-native-snapshot-restore": "https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43086330921",
+      "damon-virtio-pmem": "https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43086330942"
+    }
+  },
+  "step_4_native_capture_interruption": {
+    "test_source": "5186d40578d58b23c432e6c5af15789654d548c1",
+    "runtime_source": "72f4fc9173bef33cc1c981ad285758716f635e02",
+    "verification": "evidence/step4-capture-interrupt/clean-5186d40/verification.json",
+    "verification_sha256": "68c6d5c9e3cbc4615807ee2bfba657c0a594e66a4f7f3ca11ff42ea9e7fb3760",
+    "source_clean": true,
+    "jailer_modes_passed": 2,
+    "seconds": 31.54,
+    "scope": "Transport interruption after quiescing; thaw, artifact cleanup, exec and subsequent capture. Runtime API only; Step 3 remains WIP."
   }
 }

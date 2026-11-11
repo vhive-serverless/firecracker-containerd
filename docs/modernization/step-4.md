@@ -419,3 +419,26 @@ The [shared receipt](evidence/step4-cache-test/verification.json) records all fo
 validated milestone backports, exact commands and raw hashes. The old failure
 was not reproduced in 30 baseline repetitions; these checks are test maintenance,
 not new full-stack acceptance. Step 3 CRI and Kubernetes restore remain WIP.
+
+## Capture interruption after quiescing
+
+`TestNativeCheckpointInterrupt_Isolated` in `5186d40` adds a real in-flight
+capture cancellation check. The existing pre-cancelled request test does not
+exercise this phase. A nonempty staged memory file establishes that task pause,
+VMM pause and volume freeze/save have already occurred. The test then closes a
+dedicated control connection, which propagates cancellation through the control
+forwarder to the shim. With pinned ttrpc v1.2.8, cancelling only the caller's
+context stops its local wait; it does not send a cancellation frame.
+
+Both jailer modes must return a failed interrupted request, remove the destination
+and temporary stage, resume the source task, support guest exec, and complete a
+subsequent capture. The test uses 512 MiB VMs and observes the capture phase;
+it does not add production hooks or rely on a fixed cancellation delay.
+The [evidence](evidence/step4-capture-interrupt/README.md) distinguishes earlier
+observer-design failures, final development validation and committed acceptance.
+This covers native runtime capture interruption, not Kubernetes Pod restore.
+
+Clean committed worker validation at `5186d40` passed both jailer modes in
+31.54 seconds and both modules' lint. Production Go sources, module manifests
+and submodule pins match the retained `72f4fc9` runtime image. The private pool
+and storage were removed; the unrelated control-plane workload was preserved.
