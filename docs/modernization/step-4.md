@@ -1,15 +1,17 @@
-# Step 4 — WIP
+# Step 4 — storage, memory and native runtime validation
 
 The user authorized starting this branch on 2026-11-11 while **Step 3 remains
 incomplete, explicitly WIP**. `damon-virtio-pmem` starts at the preserved Step 3
 commit `26ceead7d0b4d1c6ea32a012c24b76efb4fb0439`. This is an explicit exception
 to the original milestone ordering. It does not waive either milestone's tests.
 
-Step 3 supports ordinary Firecracker RuntimeClass Pods and native capture, but
-has unresolved CRI conformance failures, no released Kubernetes whole-Pod restore
-path, and an unaccepted runtime restore prototype. Its latest development
-restore test failed before reconnecting to the clone shim socket. Step 4 must
-retain these limitations; passing storage tests cannot imply restore acceptance.
+The preserved Step 3 branch supports ordinary Firecracker RuntimeClass Pods and
+native capture, but retains recorded CRI conformance failures and incomplete
+Kubernetes Pod checkpoint/restore integration. Its runtime restore prototype
+was unaccepted. This Step 4 branch fixes and validates direct runtime restore
+at `72f4fc9173bef33cc1c981ad285758716f635e02`, alongside storage, mechanisms and
+the controlled memory evaluation. That result does not complete Step 3 or its
+remaining Kubernetes/CRI acceptance gates.
 
 ## Baseline evidence
 
@@ -130,7 +132,8 @@ storage script after the FIFO correction, plus full build and private install.
 The [receipt](evidence/8f8d00f-storage-acceptance-receipt.log) and
 [raw acceptance](evidence/8f8d00f-storage-acceptance.log) record component tests,
 host/guest ENOSPC, both jailer modes, RAM control, independent repeated capture,
-cross-filesystem telemetry and all eight CreateVM cases. Native restore remains WIP.
+cross-filesystem telemetry and all eight CreateVM cases. That receipt accepts
+storage and capture; the later runtime restore acceptance is recorded below.
 
 Test VM state now defaults to the sibling directory
 `../.ficd-test-vms/<checkout-name>` via `FICD_VM_STORAGE`. This keeps root-owned
@@ -184,7 +187,8 @@ controls and costs.
 Native capture already copies every configured virtio-blk drive after guest
 quiescing and VMM pause. New disks need capture regression coverage. Pmem backing
 is referenced by pathname in VMM snapshots, so relocation and immutable lifetime
-need an explicit contract. End-to-end native restore remains WIP from Step 3.
+need an explicit contract. The later runtime restore validation below covers
+those storage paths while retaining Step 3's Kubernetes/CRI limitations.
 
 [Pmem integration notes](step-4-pmem.md) describe the optional immutable ext4
 root, digest-pinned sharing, matching virtio-blk control and artifact handling.
@@ -195,6 +199,23 @@ recorded above; native restore and Kubernetes/CRI integration have separate
 acceptance requirements.
 
 ## Native runtime storage restore
+
+Clean worker commit `72f4fc9173bef33cc1c981ad285758716f635e02` passed full build,
+private installation, lint, race units, all **14 native restore cases**, and both
+cold-boot reporting cases. The [receipt](evidence/72f4fc9-native-receipt.log),
+[verified case counts](evidence/72f4fc9-native-verification.json) and
+[raw acceptance log](evidence/72f4fc9-native-acceptance.log) record exact pins,
+binaries, test image and commands. The checkout stayed clean and its private
+pool was removed. Ordinary restore took 55.83 s; the twelve storage cases took
+489.51 s; the reporting regression took 19.83 s.
+
+All six reclamation-enabled clones also demonstrated actual post-restore
+reporting activity: deleting a resident 64 MiB cache file released 60.9–63.8 MiB
+of VMM RSS, with target/actual balloon size zero. Fresh 64 MiB allocations then
+preserved an independent 16 MiB file's checksum. This establishes the exercised
+reporting/reuse path; RSS release is not a net physical-memory saving estimate.
+Actual lower-file DAX matched all twelve storage cases (true for four pmem
+cases). These acceptance checks run separately from the frozen memory results.
 
 `CheckpointVM` and `CreateVMRequest.NativeCheckpointDirectory` operate on a
 whole VM through the runtime control API. They do not rebuild Kubernetes or
@@ -251,3 +272,14 @@ test. It does not run Kubernetes restore. The native tests use the same host and
 namespace, with no network devices. Restoring networked VMs requires explicit
 replacement TAPs and matching captured MAC/IP configuration; neither cross-host
 relocation nor restored network connections are accepted by these tests.
+Unjailed pmem restore also retains the captured absolute cache prefix; jailed
+snapshots use the stable digest basename. These tests do not accept relocating
+that pmem path.
+
+Earlier failures remain available. The initial
+[storage restore run](evidence/step4-native-dev-storage.log) rejected all
+reclamation-enabled clones because a pre-load balloon PUT configured boot
+resources. The later [385aca4 run](evidence/385aca4-native-acceptance.log) exposed
+an empty source response after checkpoint: the shell created `/response` before
+writing it. The fixture now publishes a complete response by atomic rename.
+Neither earlier run is relabeled as acceptance of the final commit.

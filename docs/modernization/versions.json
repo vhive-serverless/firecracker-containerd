@@ -289,7 +289,7 @@
     "sdk_commit": "832b1a5132e06f5e2167b64b97b5cd8946604005"
   },
   "step_4_guest_storage": {
-    "status": "Committed disk-backed storage and native capture component passed at 8f8d00f; native restore/overall Step4 remain WIP",
+    "status": "Disk-backed storage/capture passed at 8f8d00f; direct native runtime restore passed at 72f4fc9; inherited Step3 Kubernetes/CRI gates remain WIP",
     "default_mode": "disk",
     "default_capacity_mib": 512,
     "capacity_range_mib": [
@@ -312,7 +312,7 @@
     "test_state_directory": "FICD_VM_STORAGE; defaults to ../.ficd-test-vms/<checkout-name>, outside source/build contexts"
   },
   "step_4_memory": {
-    "status": "Storage/mechanism components and controlled evaluation passed committed worker acceptance; native restore validation is separate; Step3 remains WIP",
+    "status": "Storage/mechanism components, controlled evaluation and direct native runtime restore passed committed worker acceptance; inherited Step3 Kubernetes/CRI gates remain WIP",
     "free_page_reporting": "FirecrackerBalloonDevice.FreePageReporting; independent of target amount",
     "damon": "Bounded non-anonymous reclamation and reporting passed clean committed worker acceptance at 9706231",
     "pmem_dax": "Clean committed pmem/DAX, both jailers, shared immutable backing, private writes, combined DAMON capture and matching block capture passed at 438c2cb",
@@ -424,6 +424,31 @@
       "result": "PASS; full build/private install/lint/race/forced proto; eight root VMs; same immutable inode, private writes, canary/refault, probe hash, both repeated capture profiles; clean source and private pool removed",
       "scope": "component acceptance; no native restore or controlled memory savings claim"
     }
+  },
+  "step_4_native_runtime_restore": {
+    "status": "PASS for direct runtime API; not CRI or Kubernetes Pod restore acceptance",
+    "tested_runtime_commit": "72f4fc9173bef33cc1c981ad285758716f635e02",
+    "worker_checkout": "/users/nehalem/fc-ctrd-mod/step4-native-final",
+    "install_prefix": "/users/nehalem/fc-ctrd-mod/install/72f4fc9173be",
+    "receipt": "evidence/72f4fc9-native-receipt.log",
+    "receipt_sha256": "0a3c23bc1aa16d87dccf5572974ab39a7a0a879e54312daaf41b6910c3a5ae6a",
+    "verification": "evidence/72f4fc9-native-verification.json",
+    "raw_log": "evidence/72f4fc9-native-acceptance.log",
+    "source_clean": true,
+    "private_pool_removed": true,
+    "native_base_cases": 2,
+    "native_storage_cases": 12,
+    "post_restore_reporting_cases": 6,
+    "cold_reporting_cases": 2,
+    "ordinary_restore_seconds": 55.83,
+    "storage_restore_seconds": 489.51,
+    "cold_reporting_seconds": 19.83,
+    "reporting_rss_drop_kib_min": 62324,
+    "reporting_rss_drop_kib_max": 65328,
+    "reporting_interpretation": "Physical VMM RSS release after freeing a resident file, retained checksum and fresh allocations; target/actual balloon zero; not a net physical-memory saving estimate",
+    "scope": "Same host/namespace and pmem cache prefix; source VMM gone; private disk copies, real disk backing/full guest-upper reservation, unchanged artifacts, memory token/counter, matched logs and task lifecycle",
+    "limitations": "No accepted containerd/Kubernetes sandbox ownership reconstruction, networked restore or cross-host relocation; full inherited Step3 CRI/Kubernetes gates remain WIP",
+    "ci_success": "https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43072956487"
   },
   "task_wait_test_maintenance": {
     "main_commit": "0cabdfa94b899edb56f3ea58f6a06622a4dd13f0",

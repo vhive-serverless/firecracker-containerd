@@ -79,3 +79,9 @@ passed all 21 trials. Reclamation's fixed-window host-memory benefit was small
 in this workload and added CPU/readback costs. Its report distinguishes guest
 cache endpoints, mapped PSS and cgroup memory, and discloses the original
 reporting-frame freshness limitation.
+
+The later [native runtime restore acceptance](step-4.md#native-runtime-storage-restore)
+passed at `72f4fc9`. Six restored reclamation-enabled VMs demonstrated RSS
+release, zero balloon target/actual size and retained-data correctness after
+fresh allocations. This extends the runtime checks without accepting Step 3's
+remaining Kubernetes/CRI integration.

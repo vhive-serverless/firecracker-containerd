@@ -70,9 +70,10 @@ branch starts at the validated completion commit of its prerequisite.
 - [x] Host disk/device/mount inspection, bounded capacity/reservation, jail ownership, cleanup, and real host/guest ENOSPC checks passed at 8f8d00f.
 - [x] Independently configurable virtio-pmem/DAX and DAMON plus actual balloon free-page reporting; component acceptance at 020f85b, 9706231 and 438c2cb records pinned VMM/SDK/kernel support and deviations.
 - [x] Account for pmem metadata, cold accesses, filesystem/DAX compatibility and explicit immutable sharing; matching ext4 block controls and measured configuration costs are retained in the 0a268c5 evaluation.
-- [ ] Integrate consistent disks with memory/VMM snapshots; quiesce/flush/snapshot/restore ordering, no advanced disks or writable sharing.
+- [x] Integrate consistent disks with memory/VMM snapshots; quiesce/flush/snapshot/restore ordering, private copied writable disks, full cloned-upper reservation and actual VMM-open inode checks passed clean 72f4fc9 across six storage profiles and both jailers.
 - [x] Worker write/copy-up/rename/delete/writeback/exhaustion tests and idle-reclaim/reactivation correctness passed in storage/mechanism acceptance and all 21 controlled trials.
-- [ ] Worker Step 3 lifecycle/snapshot suite for supported optimization combinations.
+- [x] Worker direct runtime restore/lifecycle checks passed at 72f4fc9: fourteen cases, original VMM terminated, memory/filesystem state, matched logs, exec/stats/kill/wait/delete and six actual post-restore reporting/reuse checks.
+- [ ] Full inherited Step 3 integration acceptance: CRI failures and Kubernetes Pod checkpoint/restore remain explicitly WIP; direct runtime tests do not satisfy those gates.
 - [x] Run identical workloads/resources for original baseline, disk baseline, pmem only, reclamation only and combined, plus matching ext4 block controls: clean 0a268c5, 21 trials, three randomized blocks.
 - [x] Measure peak/integrated host memory, guest anonymous/page cache, shared backing, CPU, faults/I/O, disk, latency and correctness; separate accounting domains and retain missing metrics and reporting-counter freshness limitations.
 - [x] Commit/push evaluation scripts/config/results; frozen 0a268c5 observations, strict summaries, independently checked integrals, plots, commands and limitations are preserved. Runtime restore acceptance remains a separate gate above.

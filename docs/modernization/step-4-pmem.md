@@ -100,3 +100,8 @@ The later [controlled evaluation](../../tools/memory-eval/results/0a268c5589c3/R
 passed 21 trials. Pmem saved memory against matched ext4 block controls, while
 the full ext4/pmem configurations remained larger than the SquashFS baselines.
 The report retains startup, cache, CPU, I/O and reactivation costs.
+
+The later [native runtime restore acceptance](step-4.md#native-runtime-storage-restore)
+passed at `72f4fc9`, including pmem and combined profiles with both jailers,
+independent writable disks and actual post-restore reporting activity. It does
+not complete the preserved Step 3 branch or its Kubernetes/CRI integration.
