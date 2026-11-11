@@ -135,8 +135,9 @@ host/guest ENOSPC, both jailer modes, RAM control, independent repeated capture,
 cross-filesystem telemetry and all eight CreateVM cases. That receipt accepts
 storage and capture; the later runtime restore acceptance is recorded below.
 
-Test VM state now defaults to the sibling directory
-`../.ficd-test-vms/<checkout-name>` via `FICD_VM_STORAGE`. This keeps root-owned
+Test VM storage now defaults to the sibling directory
+`../.ficd-test-vms/<checkout-name>` via `FICD_VM_STORAGE`. Runtime and snapshotter
+runners allocate and clean a private child directory for each invocation. This keeps root-owned
 scratch disks outside Go package discovery and Docker build contexts. It must
 reside on real host disk; allocation verifies the opened file's filesystem.
 Existing stopped test data under `runtime/vm-storage` or `runtime/.vm-storage`
@@ -333,3 +334,75 @@ DAX image hashes may differ from the historical receipt; retain the new inputs.
 conformance or Kubernetes Pod checkpoint/restore acceptance. The inherited
 integration gate remains open even though Step 4's storage, memory evaluation,
 direct runtime restore and ordinary Pod checks have passed.
+
+## Broader lifecycle and CRI regression follow-up
+
+The continuation audit found that the CRI and snapshotter test containers had
+not yet mounted host-disk VM storage. Their runners now bind private disk-backed
+storage. Runtime and snapshotter invocations also use
+`tools/modernize/run-isolated-vm-test.sh`: each Docker invocation receives a new
+child directory under `FICD_VM_STORAGE`, and the wrapper removes its container
+before removing that directory. This preserves the isolation formerly supplied
+by Docker's private filesystem. Some older tests deliberately leave their VM
+running until the test container exits; those fixtures must not become input
+to the next test. This runner cleanup does not replace explicit runtime cleanup
+assertions inside the tests.
+
+The unfiltered CRI run used clean harness `393f5f6` and the pinned `72f4fc9`
+runtime image recorded above. It completed 113 of 142 specs: **97 passed,
+16 failed, 29 skipped**. The failed test names exactly match the preserved
+`20727f4` result: host namespaces/networking, mount-propagation/read-only
+semantics and AppArmor setup. There are no new failed names in this run, but
+**the suite still fails and CRI compliance remains WIP**. The
+[CRI verification](evidence/393f5f6-cri/verification.json) preserves counts,
+failed names, input hashes and raw report/logs. Its private storage, pool and
+container were removed.
+
+The broader runtime checks retained the exact 35 isolated test names from the
+accepted `20727f4` baseline and ran them against `72f4fc9`. The initial run had
+30 passes and five failures. Four cleanup assertions encountered the persistent
+immutable cache or fixtures from earlier Docker invocations; the block-device
+assertion omitted the new 512 MiB guest upper. These failures are retained in
+[the raw baseline run](evidence/step4-regression/72f4fc9-base-regression.log).
+Corrections keep strict cleanup checks, allow only digest-verified read-only
+cache images, isolate test invocation storage, and explicitly assert the added
+guest block device.
+
+Separate committed correction checks passed:
+
+- `5fb79f1`: both modules' lint and six jailer/block-device subcases with an
+  intentionally retained real immutable cache.
+- `f5b3ba6`: all five snapshotter cases, including remote images, multiple VMs,
+  metrics and guest volumes, with host-disk VM backing.
+- `d5739e5`: drive mounting followed by all three affected jailer cases,
+  pmem/block sharing and DAX checks, both native restore jailer modes, and the
+  snapshotter guest-volume case. Every invocation removed its private storage.
+- `7c69ccc`: the remaining shim-cleanup and block-device cases, both modules'
+  lint, preservation of an expected exit status 37, and interruption cleanup
+  in five seconds for a 60-second workload. The earlier wrapper deferred its
+  signal handler until the workload exited; `29534de` corrected that behavior.
+
+The [regression verification](evidence/step4-regression/verification.json)
+records exact source revisions, raw hashes, commands and cleanup checks.
+These are an initial run plus targeted corrections, **not one uninterrupted
+passing full-suite run**. All runs use the validated `72f4fc9` runtime image;
+production Go sources, module files and dependency pins remain identical.
+Only tests, runners and documentation changed. The frozen memory evaluation
+and earlier native storage-restore acceptance retain their original revisions.
+
+Reproduce the unfiltered CRI regression from a clean current harness checkout
+with the retained pinned image:
+
+```sh
+export STACK_DIR=/users/nehalem/fc-ctrd-mod
+CRI_BASE_IMAGE=sha256:0ed23833cf6043e6f2e0fa6ef3e590cfd9626c03e69d66303f9a693b079021b5 \
+CRI_RUNTIME_REVISION=72f4fc9173bef33cc1c981ad285758716f635e02 \
+    tools/critest/test-cri.sh
+```
+
+For a fresh stack, use `tools/modernize/build-stack.sh`,
+`tools/modernize/install-stack.sh` and `tools/modernize/test-stack.sh` on the
+worker, then run CRI without the image/revision overrides. The general runtime
+acceptance timeout is now 1200 seconds per isolated invocation, matching the
+dedicated restore runner and accommodating the measured eight-minute storage
+restore matrix. All original test assertions remain enabled.

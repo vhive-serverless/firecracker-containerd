@@ -1,0 +1,13 @@
+script_revision=393f5f61240a2ac925dfef99e1894b6eb748cff1
+runtime_revision=72f4fc9173bef33cc1c981ad285758716f635e02
+image=sha256:0ed23833cf6043e6f2e0fa6ef3e590cfd9626c03e69d66303f9a693b079021b5
+focus=all
+source_dirty=false
+image_override=true
+websocket_streaming=0
+runtime_integration_tests=0
+vm_storage=/users/nehalem/fc-ctrd-mod/.ficd-test-vms/cri-cri-393f5f61240a-KF0dbsbG.yXSSP4vM
+TARGET SOURCE    FSTYPE
+/      /dev/sda3 ext3
+ce927eaef051b7d6fa2dd9b558c4fa0ac2a442c3995ab642aa65ea12dc18b935  tools/critest/test-cri.sh
+5ca39407f5a9efc9da20968a110a8aaf450b09cb270adfcebce76a5ea10b4c33  tools/critest/run-in-container.sh

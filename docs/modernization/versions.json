@@ -189,7 +189,7 @@
       "go_mod_sum": "h1:aU7NkGYZUmuJrZapoI3mEcNve7PZTySUOLBuch/vR6U=",
       "vsock_port": 10901,
       "protocol_version": 1,
-      "status": "Shim/agent bind mount wiring implemented and tested in worker development VMMs; committed runtime validation and native restore metadata pending"
+      "status": "Committed guest bind-volume validation at 6b3cf8f and direct native runtime restore at 72f4fc9; remaining mount semantics and Kubernetes/CRI integration stay WIP."
     },
     "cri_integration": {
       "binary": "cri/firecracker-cri",
@@ -301,7 +301,7 @@
     "host_backing": "direct ext3/ext4, XFS or Btrfs filesystem required",
     "ownership": "private file inside each VM jail; removed on VM cleanup",
     "boot_device_selection": "filesystem UUID; direct device probing before proc/udev startup",
-    "native_restore": "inherited Step 3 WIP; no restore acceptance claimed",
+    "native_restore": "Direct runtime storage restore accepted at 72f4fc9; see step_4_native_runtime_restore. Kubernetes/CRI Pod restore remains WIP.",
     "validation": {
       "tested_runtime_commit": "8f8d00fc2fb122d40c2e034f62e67978ba194c1e",
       "worker_checkout": "/users/nehalem/fc-ctrd-mod/step4-storage-dev",
@@ -494,5 +494,30 @@
     "raw_artifacts_verified": 92,
     "source_clean": true,
     "private_storage_pools_and_containers_removed": true
+  },
+  "step_4_cri_regression": {
+    "harness_source": "393f5f61240a2ac925dfef99e1894b6eb748cff1",
+    "runtime_source": "72f4fc9173bef33cc1c981ad285758716f635e02",
+    "runtime_image": "sha256:0ed23833cf6043e6f2e0fa6ef3e590cfd9626c03e69d66303f9a693b079021b5",
+    "counts": {
+      "skipped": 29,
+      "passed": 97,
+      "failed": 16
+    },
+    "same_failure_names_as_20727f4": true,
+    "scope": "Regression with disk-backed writable upper; suite failed, CRI conformance remains WIP.",
+    "verification": "evidence/393f5f6-cri/verification.json"
+  },
+  "step_4_broader_regression": {
+    "runtime_source": "72f4fc9173bef33cc1c981ad285758716f635e02",
+    "final_test_source": "7c69cccae0a1f2d0f25d1a0a0ff649307834a73a",
+    "verification": "evidence/step4-regression/verification.json",
+    "verification_sha256": "c8739bc46c0bdedeb2bfb03d81721fd8e76b76f09bfd54603a0ee2e85214b49f",
+    "initial_runtime_passed": 30,
+    "initial_runtime_failed": 5,
+    "all_five_failed_cases_passed_after_targeted_corrections": true,
+    "snapshotter_cases_passed": 5,
+    "interruption_cleanup_seconds": 5,
+    "scope": "Initial baseline plus targeted committed corrections; not an uninterrupted full-suite run. Production Go and dependency pins unchanged; CRI and Kubernetes restore remain WIP."
   }
 }
