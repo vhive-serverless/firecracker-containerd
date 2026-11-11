@@ -312,11 +312,27 @@
     "test_state_directory": "FICD_VM_STORAGE; defaults to ../.ficd-test-vms/<checkout-name>, outside source/build contexts"
   },
   "step_4_memory": {
-    "status": "WIP milestone; disk storage, free-page reporting, DAMON and pmem/DAX components passed committed worker acceptance; controlled evaluation pending",
+    "status": "Storage/mechanism components and controlled evaluation passed committed worker acceptance; native restore validation is separate; Step3 remains WIP",
     "free_page_reporting": "FirecrackerBalloonDevice.FreePageReporting; independent of target amount",
     "damon": "Bounded non-anonymous reclamation and reporting passed clean committed worker acceptance at 9706231",
     "pmem_dax": "Clean committed pmem/DAX, both jailers, shared immutable backing, private writes, combined DAMON capture and matching block capture passed at 438c2cb",
-    "evaluation": "five requested configurations plus matching filesystem controls pending",
+    "evaluation": "21 passed trials: five requested configurations plus two matching ext4 controls, three randomized blocks and 42 correct VM workloads",
+    "evaluation_validation": {
+      "tested_runtime_commit": "0a268c5589c37832e1c3dc89a7b60ed2701e0b9e",
+      "worker_checkout": "/users/nehalem/fc-ctrd-mod/step4-evaluation-dev",
+      "receipt": "evidence/0a268c5-evaluation-receipt.log",
+      "receipt_sha256": "1911a54d6149549a568bdb27e27734acf5d73db54291490af7131b6b933c16be",
+      "report": "../../tools/memory-eval/results/0a268c5589c3/REPORT.md",
+      "raw_archive_sha256": "3c65da18d4706b324244e03691b7542620dbf74537ee8349d138f492b6fa8dc2",
+      "primary_metric": "dedicated cgroup memory.current; sampled peak, full-trial integral and fixed common-idle mean; mapped VMM PSS is separate",
+      "pmem_vs_ext4_block_idle_mib": -100.55,
+      "combined_vs_ext4_reclaim_idle_mib": -97.81,
+      "reclaim_vs_disk_idle_mib": -14.18,
+      "combined_vs_disk_idle_mib": 320.69,
+      "interpretation": "Small single-worker experiment with verified/warmed backing; format/startup costs outweigh pmem savings versus SquashFS baselines; reclamation adds CPU/readback cost",
+      "reporting_freshness": "Original reporting frames may lag the final flush; never used as physical memory savings or complete final traffic/failure totals",
+      "future_metrics_fence_commit": "ee78dc08f080bcb9b35a14324bd791a833e18f1d"
+    },
     "free_page_reporting_validation": {
       "tested_runtime_commit": "020f85b7c137be6989d96fbf4d63c1a3b3e9b71e",
       "worker_checkout": "/users/nehalem/fc-ctrd-mod/step4-memory-dev",
@@ -408,6 +424,23 @@
       "result": "PASS; full build/private install/lint/race/forced proto; eight root VMs; same immutable inode, private writes, canary/refault, probe hash, both repeated capture profiles; clean source and private pool removed",
       "scope": "component acceptance; no native restore or controlled memory savings claim"
     }
+  },
+  "task_wait_test_maintenance": {
+    "main_commit": "0cabdfa94b899edb56f3ea58f6a06622a4dd13f0",
+    "ci_success": "https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43068267918",
+    "main_evidence": "evidence/0cabdfa-task-wait-sync-validation.json",
+    "main_evidence_sha256": "5bd351c97f07e9fc86856e5c7c8c230a8b8a01cb31b5a6e768d3eccb7833f2b5",
+    "validation": "800 patched targeted repetitions plus root/user package race checks; 40 clean-commit race repetitions; 300 baseline repetitions did not reproduce sporadic CI failure",
+    "step_1_tested": "8797ff8523fa03547a205e3ea81863198e09241b",
+    "step_1_documentation_head": "ee0a710c11fdf9f111a506cf7dd79a4e60967026",
+    "step_1_receipt": "evidence/8797ff8-task-wait-sync-receipt.log",
+    "step_2_tested": "b2df9bc08aa38bc6a2072dc59f50cbae35a7a20b",
+    "step_2_documentation_head": "1397d2bbea779bc637df3a682acf1d66c3388a60",
+    "step_2_receipt": "evidence/b2df9bc-task-wait-sync-receipt.log",
+    "step_3_tested": "6ef58125739aa87ce59e2007b2bc93ea943fbf65",
+    "step_3_documentation_head": "a5781cf2afabed0564d1862d9ddaeb6935b10f8e",
+    "step_3_receipt": "evidence/6ef5812-task-wait-sync-receipt.log",
+    "backport_validation": "Each clean committed branch passed 200 targeted repetitions across root/user, plain/race and one/default scheduler; no runtime changes or full VM revalidation; Step3 stays WIP"
   },
   "shared_jailer_telemetry_validation": {
     "common_fix": "c7d73c703d18d33e07b39c2785dbcb1f77af039f",

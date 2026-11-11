@@ -1,0 +1,219 @@
+Task-test Wait-start synchronization maintenance: PASS (step3).
+Branch: cri-native-snapshot-restore
+Tested source: 6ef58125739aa87ce59e2007b2bc93ea943fbf65
+Preserved parent documentation head: e9e1053fb31e6c7425614ed11e8b6abe2ed9f458
+Prior functional validation source: 3c0d1ce5ce8fc47e80607a8a9a11330746c2972b
+Worker checkout: /users/nehalem/fc-ctrd-mod/step3-fifo-committed
+Common signed fix: 426c7f5340e4f14b5abcce78be6fa7edede0c0c2
+Accepted main cherry-pick: 0cabdfa94b899edb56f3ea58f6a06622a4dd13f0
+Date: 2026-11-12 (Asia/Singapore); worker logs retain their original timestamps.
+Worker: nehalem@amd218.utah.cloudlab.us; Go go1.26.11 linux/amd64.
+The source commit was cherry-picked with -s -x and changes only internal/vm/task_test.go.
+It preserves the exact final request-count, task ID and ExecID assertions.
+
+The mock records each Wait request before sending an optional buffered notification
+for that exact task/exec identity. The lifecycle test registers each notification
+before launching its process and awaits it with a stopped five-second timer after
+cancelling the request context. The test then follows its existing I/O and exit
+sequence. No sleeps or production behavior changes were added. DeleteProcess still
+waits for I/O completion independently of the asynchronous monitorExit goroutine.
+
+Actual validation from the exact clean source revision:
+- Plain and race test binaries compiled with -mod=readonly, and go vet passed.
+- Targeted TestTaskManager_CreateExecDeleteTask passed 25 repetitions for each of
+  eight combinations: root/nonroot x GOMAXPROCS=1/default x plain/race (200 total).
+- No failures, skips or race warnings. Source remained clean before/after tests.
+- Existing prior documentation/functional heads are ancestors, not replaced.
+  go.mod, go.sum, versions.json, dependency references and prior receipts are unchanged.
+- No full VM rebuild, runtime suite, vHive deployment, CRI/native-restore test, global
+  installation, matrix run or observation was performed for this maintenance.
+  Prior functional acceptance remains tied to its original source and artifact hashes.
+
+Baseline limitations and main evidence:
+The lead confirmed the original c4ae5f3 CI timing failure: PopWaitRequests saw one
+request while two monitor goroutines were expected to have entered Wait. This task's
+300 bounded local pre-fix repetitions passed, so the sporadic failure was not locally
+reproduced. Earlier milestone branches did not rerun a pre-fix baseline.
+Main patch validation passed 800 targeted repetitions across all eight combinations,
+plus all 22 internal/vm tests under -race as root and nonroot (no skips). A clean
+committed build at 426c7f5 passed 40 further race repetitions. Those main results are
+separate from the 200 repetitions on this branch. Two initial main baseline harness
+invocations used incorrectly ordered env options and exited 127; their original logs
+remain retained. Corrected commands passed and only 300 valid attempts are counted.
+Main evidence: /users/nehalem/fc-ctrd-mod/evidence/c4ae5f3-ci-wait-sync/validation-summary.json
+Main evidence SHA-256: 5bd351c97f07e9fc86856e5c7c8c230a8b8a01cb31b5a6e768d3eccb7833f2b5
+The lead subsequently verified main GitHub Build SUCCESS for 0cabdfa via public API:
+https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43068267918
+That CI result does not relabel this branch's earlier runtime acceptance as rerun.
+
+Step 3 remains WIP and incomplete. Its prior functional validation here is only
+bounded FIFO maintenance; neither the preserved native restore prototype nor
+whole-Pod/CRI/Kubernetes restore acceptance is established by these unit tests.
+
+Direct reproduction from a clean checkout of tested source 6ef58125739aa87ce59e2007b2bc93ea943fbf65:
+cd /users/nehalem/fc-ctrd-mod/step3-fifo-committed
+export PATH=/users/nehalem/fc-ctrd-mod/toolchains/go1.26.11/bin:$PATH
+export GOTOOLCHAIN=local TMPDIR="$PWD/tmp"
+mkdir -p bin tmp
+go test -mod=readonly -c -o bin/task-wait-sync.test ./internal/vm
+go test -mod=readonly -race -c -o bin/task-wait-sync-race.test ./internal/vm
+go vet ./internal/vm
+# For each binary: user and sudo -n; GOMAXPROCS=1 and env -u GOMAXPROCS.
+# Options to env precede assignments. Example root/default race invocation:
+sudo -n env -u GOMAXPROCS TMPDIR="$TMPDIR" "$PWD/bin/task-wait-sync-race.test" \
+  -test.v -test.failfast -test.run='^TestTaskManager_CreateExecDeleteTask$' \
+  -test.count=25 -test.timeout=90s
+# Original driver records all eight exact variants and validates fetched parent
+# heads before loading a local source bundle. It was run before publishing source:
+# /users/nehalem/fc-ctrd-mod/evidence/validate-task-wait-backports.sh
+Driver SHA-256: 0e0203170996247cdfe4bcb33789fb7a629cdd7b035829d2b1711fdd0a60d9f2
+No force-push, reset of unrelated changes, /dev/sdb operation or milestone completion.
+
+Actual committed-source checks, binary/manifest/log SHA-256 values:
+{
+  "step": "step3",
+  "worker_checkout": "/users/nehalem/fc-ctrd-mod/step3-fifo-committed",
+  "source_revision": "6ef58125739aa87ce59e2007b2bc93ea943fbf65",
+  "source_clean": true,
+  "preserved_parent": "e9e1053fb31e6c7425614ed11e8b6abe2ed9f458",
+  "prior_functional_validation_revision": "3c0d1ce5ce8fc47e80607a8a9a11330746c2972b",
+  "common_fix": "426c7f5340e4f14b5abcce78be6fa7edede0c0c2",
+  "test_only": true,
+  "repetitions": 200,
+  "checks": [
+    {
+      "privilege": "user",
+      "gomaxprocs": "1",
+      "mode": "plain",
+      "repetitions": 25,
+      "log": "user-one-plain.log"
+    },
+    {
+      "privilege": "user",
+      "gomaxprocs": "1",
+      "mode": "race",
+      "repetitions": 25,
+      "log": "user-one-race.log"
+    },
+    {
+      "privilege": "user",
+      "gomaxprocs": "unset/default",
+      "mode": "plain",
+      "repetitions": 25,
+      "log": "user-normal-plain.log"
+    },
+    {
+      "privilege": "user",
+      "gomaxprocs": "unset/default",
+      "mode": "race",
+      "repetitions": 25,
+      "log": "user-normal-race.log"
+    },
+    {
+      "privilege": "root",
+      "gomaxprocs": "1",
+      "mode": "plain",
+      "repetitions": 25,
+      "log": "root-one-plain.log"
+    },
+    {
+      "privilege": "root",
+      "gomaxprocs": "1",
+      "mode": "race",
+      "repetitions": 25,
+      "log": "root-one-race.log"
+    },
+    {
+      "privilege": "root",
+      "gomaxprocs": "unset/default",
+      "mode": "plain",
+      "repetitions": 25,
+      "log": "root-normal-plain.log"
+    },
+    {
+      "privilege": "root",
+      "gomaxprocs": "unset/default",
+      "mode": "race",
+      "repetitions": 25,
+      "log": "root-normal-race.log"
+    }
+  ],
+  "baseline_note": "Main c4ae5f3 CI failure confirmed by lead; 300 bounded local pre-fix repeats did not reproduce it. Earlier branches did not rerun a pre-fix baseline.",
+  "full_runtime_acceptance_rerun": false,
+  "step3_wip": true,
+  "sha256": {
+    "/users/nehalem/fc-ctrd-mod/step3-fifo-committed/internal/vm/task_test.go": "813ad0522a259923b32037dd6c3a1d8e7c7db420ef04997002e9c54d6e2f40b2",
+    "/users/nehalem/fc-ctrd-mod/step3-fifo-committed/docs/modernization/versions.json": "7168e0fa5d6aec204e17722c70e10c8a8ea6233fb2ccc833d0345baf9a5e53db",
+    "/users/nehalem/fc-ctrd-mod/step3-fifo-committed/go.mod": "7cb6760d1af31b0aacca7abbac1c1d9b001b15f5a910ccc5dbfa7116760e1ec8",
+    "/users/nehalem/fc-ctrd-mod/step3-fifo-committed/go.sum": "aac0e33917a99bbb36b0496c8dd646eb936e11348ba08a24f2f6812d8f504a52",
+    "/users/nehalem/fc-ctrd-mod/step3-fifo-committed/bin/task-wait-sync.test": "fa168e9e11ed7b76ec3bc20661d534a6c7f1fe23522476526f41e54a427ffcef",
+    "/users/nehalem/fc-ctrd-mod/step3-fifo-committed/bin/task-wait-sync-race.test": "906565a80457cdfecba195482f375f8c0eed9687e1a80d45f98742340aa50a4c",
+    "/users/nehalem/fc-ctrd-mod/evidence/step3-task-wait-sync/build.log": "4cc7f60b0e6f1e3613043c0df6e7b7afafc98028352cc1d743facdea6f7566f8",
+    "/users/nehalem/fc-ctrd-mod/evidence/step3-task-wait-sync/root-normal-plain.log": "a63deed93430e8a5e0dd7f4ce204529752ce2c9c9e72302ff4b5cd37640965dc",
+    "/users/nehalem/fc-ctrd-mod/evidence/step3-task-wait-sync/root-normal-race.log": "58c324f7d48119029a08f0d6f6a68e243232e903215e8944872589ce653ee92e",
+    "/users/nehalem/fc-ctrd-mod/evidence/step3-task-wait-sync/root-one-plain.log": "12dd2218e66a4c20e6fcded7920cb6990bc4e99fc4d21ae88b0aaf275d2b43e7",
+    "/users/nehalem/fc-ctrd-mod/evidence/step3-task-wait-sync/root-one-race.log": "71b851698e422e6d3b09b4e15e65e9649ae6f94d3e8457832bd56cfef02edca7",
+    "/users/nehalem/fc-ctrd-mod/evidence/step3-task-wait-sync/status.log": "83f91bb3f6e423dc9a1086623c2e2b76b761615f48fc11b52da8c71594049367",
+    "/users/nehalem/fc-ctrd-mod/evidence/step3-task-wait-sync/user-normal-plain.log": "0e2aa8817d0af96338da08991e8c29d6d58cfc133b31431b98fb24c14ab50a61",
+    "/users/nehalem/fc-ctrd-mod/evidence/step3-task-wait-sync/user-normal-race.log": "4738c93f6a78719f049749e3f26ae569e939f90a4a8122dff5253961d83b1e65",
+    "/users/nehalem/fc-ctrd-mod/evidence/step3-task-wait-sync/user-one-plain.log": "c8b342b577230b694299ed0e2c641e4a6623a498107f7744b9f6b29bbc79bac8",
+    "/users/nehalem/fc-ctrd-mod/evidence/step3-task-wait-sync/user-one-race.log": "edc33d62b16370f3dca08355073603cf18fa87d30449b5bbc459ad942af82f5a",
+    "/users/nehalem/fc-ctrd-mod/evidence/validate-task-wait-backports.sh": "0e0203170996247cdfe4bcb33789fb7a629cdd7b035829d2b1711fdd0a60d9f2"
+  }
+}
+
+Actual build, bundle, dependency and source log:
+Wed Nov 11 17:32:42 UTC 2026
+From https://github.com/vhive-serverless/firecracker-containerd
+ * branch              cri-native-snapshot-restore -> FETCH_HEAD
+/users/nehalem/fc-ctrd-mod/evidence/ci-wait-sync-bundles/fcmod-ci-sync-step3.bundle is okay
+The bundle contains this ref:
+6ef58125739aa87ce59e2007b2bc93ea943fbf65 refs/heads/cri-native-snapshot-restore
+The bundle requires this ref:
+e9e1053fb31e6c7425614ed11e8b6abe2ed9f458 
+The bundle uses this hash algorithm: sha1
+From /users/nehalem/fc-ctrd-mod/evidence/ci-wait-sync-bundles/fcmod-ci-sync-step3.bundle
+ * branch              cri-native-snapshot-restore -> FETCH_HEAD
+Previous HEAD position was a5a2cb84 Stop installation when a component fails
+HEAD is now at 6ef58125 Synchronize task lifecycle test with mock Wait startup
+step=step3
+branch=cri-native-snapshot-restore
+source=6ef58125739aa87ce59e2007b2bc93ea943fbf65
+preserved_parent=e9e1053fb31e6c7425614ed11e8b6abe2ed9f458
+prior_functional_validation=3c0d1ce5ce8fc47e80607a8a9a11330746c2972b
+go version go1.26.11 linux/amd64
+{
+	"Path": "github.com/firecracker-microvm/firecracker-go-sdk",
+	"Version": "v1.0.1-0.20250818195323-ed6ff32aa924",
+	"Replace": {
+		"Path": "github.com/JooyoungPark73/firecracker-go-sdk",
+		"Version": "v0.0.0-20261111093432-832b1a5132e0",
+		"Time": "2026-11-11T09:34:32Z",
+		"Dir": "/users/nehalem/go/pkg/mod/github.com/!jooyoung!park73/firecracker-go-sdk@v0.0.0-20261111093432-832b1a5132e0",
+		"GoMod": "/users/nehalem/go/pkg/mod/cache/download/github.com/!jooyoung!park73/firecracker-go-sdk/@v/v0.0.0-20261111093432-832b1a5132e0.mod",
+		"GoVersion": "1.24.11",
+		"Sum": "h1:ZtzehkvEl/RfFFMq0UwXyONM35MUqRDyA5P+BnFQEhY=",
+		"GoModSum": "h1:IKSxd5Gsx+H4cFowjf6q4kuzbcCWkYsYGKxf/WKKNL4="
+	},
+	"Dir": "/users/nehalem/go/pkg/mod/github.com/!jooyoung!park73/firecracker-go-sdk@v0.0.0-20261111093432-832b1a5132e0",
+	"GoMod": "/users/nehalem/go/pkg/mod/cache/download/github.com/!jooyoung!park73/firecracker-go-sdk/@v/v0.0.0-20261111093432-832b1a5132e0.mod",
+	"GoVersion": "1.24.11"
+}
+813ad0522a259923b32037dd6c3a1d8e7c7db420ef04997002e9c54d6e2f40b2  internal/vm/task_test.go
+7168e0fa5d6aec204e17722c70e10c8a8ea6233fb2ccc833d0345baf9a5e53db  docs/modernization/versions.json
+7cb6760d1af31b0aacca7abbac1c1d9b001b15f5a910ccc5dbfa7116760e1ec8  go.mod
+aac0e33917a99bbb36b0496c8dd646eb936e11348ba08a24f2f6812d8f504a52  go.sum
+fa168e9e11ed7b76ec3bc20661d534a6c7f1fe23522476526f41e54a427ffcef  bin/task-wait-sync.test
+906565a80457cdfecba195482f375f8c0eed9687e1a80d45f98742340aa50a4c  bin/task-wait-sync-race.test
+
+Actual targeted status:
+user-one-plain PASS count=25
+user-one-race PASS count=25
+user-normal-plain PASS count=25
+user-normal-race PASS count=25
+root-one-plain PASS count=25
+root-one-race PASS count=25
+root-normal-plain PASS count=25
+root-normal-race PASS count=25
+source_clean=true
+BACKPORT_TARGETED_CHECKS_PASS

@@ -193,3 +193,61 @@ matched block controls, shared read-only backing, private writable state and
 both native capture profiles across both jailers. The controlled evaluation is
 recorded above; native restore and Kubernetes/CRI integration have separate
 acceptance requirements.
+
+## Native runtime storage restore
+
+`CheckpointVM` and `CreateVMRequest.NativeCheckpointDirectory` operate on a
+whole VM through the runtime control API. They do not rebuild Kubernetes or
+containerd sandbox ownership. The restore tests reconnect to the adopted tasks
+through the shim's task service; success there does not establish Kubernetes
+Pod restore or full CRI conformance.
+
+Capture serializes VM mutations, pauses running task groups and then the VMM,
+and freezes the VM's exported-volume server. Firecracker prepares block devices
+by draining pending operations and flushing their host backing before saving
+device state. Guest dirty cache remains part of captured RAM; this is not an
+application-level commit protocol. The runtime copies memory, VMM state, every
+configured block drive and immutable pmem backing, records hashes, and syncs
+the staged files/directories. It resumes the source before atomically publishing
+the artifact. External host writers to exported volumes must also be quiescent;
+the VM's gate cannot stop writes that bypass it.
+
+Restore validates the manifest, namespace, file sizes and checksums, creates
+private copies of writable disks, restores the exported-volume tables and loads
+memory/device state into a new VMM. Pmem uses its explicit digest-pinned read-only
+cache. Captured balloon state must be loaded with the snapshot: sending
+`PUT /balloon` first configures boot resources and makes Firecracker reject
+snapshot loading. Control-created shims also publish their task-service address
+so restored tasks can be reached after source termination.
+
+Writable clone storage must satisfy the same disk-filesystem allowlist as
+fresh creation. The runtime checks an opened workspace before copying any
+native files, then checks the opened cloned upper and reserves its full
+capacity without changing its bytes. Thin workload disk copies retain sparse
+allocation; their remaining logical capacity is not an additional host-wide
+reservation. Failed/canceled clones remove their newly created workspace.
+
+The storage test covers SquashFS disk, matching ext4 block, pmem, SquashFS
+reclamation, combined and ext4 reclamation, with both jailers. It advances source
+upper/workload/volume data after capture, terminates the original VMM and removes
+its VM directory, then requires the clone's original memory token/counter and
+checkpointed filesystem data. Clone writes must leave artifact hashes unchanged;
+actual VMM-open writable disks must have private inodes. It exercises restored
+State, Exec, logs, Stats, Kill, Wait and Delete, together with lower-file DAX and
+reclamation configuration checks.
+
+Build/install on the designated worker, then run:
+
+```sh
+export STACK_DIR=/users/nehalem/fc-ctrd-mod
+tools/modernize/build-stack.sh
+tools/modernize/install-stack.sh
+tools/modernize/test-native-restore.sh
+```
+
+The acceptance script requires a clean committed checkout, uses a private pool,
+and also runs the fresh-metrics reader regression and actual free-page-reporting
+test. It does not run Kubernetes restore. The native tests use the same host and
+namespace, with no network devices. Restoring networked VMs requires explicit
+replacement TAPs and matching captured MAC/IP configuration; neither cross-host
+relocation nor restored network connections are accepted by these tests.
