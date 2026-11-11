@@ -138,7 +138,7 @@ $(BINPATH)/ltag:
 	GOBIN=$(BINPATH) go install github.com/kunalkushwaha/ltag@v0.2.5
 
 install:
-	for d in $(SUBDIRS); do $(MAKE) -C $$d install; done
+	set -e; for d in $(SUBDIRS); do $(MAKE) -C $$d install; done
 
 files_ephemeral: $(RUNC_BIN) agent-in-docker
 	mkdir -p tools/image-builder/files_ephemeral/usr/local/bin
