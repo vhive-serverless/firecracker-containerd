@@ -205,6 +205,12 @@
       "checkpoint_pr_140186": "27d02988e4fb3008c4d29e9db6ad844f58cb8d1b",
       "restore_pr_143579": "5533040d9fce30bc30ed3c07e8b187ed788c2f8a",
       "status": "unmerged, not released; no substitution made"
+    },
+    "upstream_same_release": {
+      "version": "v1.37.2",
+      "commit": "c50e5395f1ae2d4a2c05f28fdcc38c0916cc1a32",
+      "apiserver_sha256": "b87e5a91107cf994bfa38c6c1b28eb39f01fc040734ec9942c22738bc8b8f34b",
+      "result": "upstream API server rejects required feature gate; not specific to k3s"
     }
   }
 }

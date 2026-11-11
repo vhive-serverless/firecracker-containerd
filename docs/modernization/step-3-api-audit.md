@@ -15,6 +15,7 @@ The script was tested from clean commit
 | Input | Exact input | Result |
 | --- | --- | --- |
 | Required k3s | `v1.37.2+k3s1`, binary reports `f6973cb8`; SHA-256 `265b3ee6a3198ef14033c63ef46cbb32370d83795199fb6d1b01f21575eddbda` | The API server rejects `PodLevelCheckpointRestore` as an unrecognized feature gate and shuts down. |
+| Same-version upstream Kubernetes | `v1.37.2`, source `c50e5395f1ae2d4a2c05f28fdcc38c0916cc1a32`; API server SHA-256 `b87e5a91107cf994bfa38c6c1b28eb39f01fc040734ec9942c22738bc8b8f34b` | The upstream binary also rejects the gate and exits with status 1. This is not specific to k3s packaging. |
 | Newer upstream release | Kubernetes `v1.38.0-beta.0`, source `1ca7499c9a5669c1f025dbe14f1da7dd9a0eb58a`; API server binary SHA-256 `24c8161f0e983a3134002c7f32866dc8fe36f706a4e645a94bb2c0c81984afa0` | The API server rejects the same gate and exits with status 1. |
 | CRI API source | `k8s.io/cri-api v0.37.2` | Defines `CheckpointPod` and `RestorePod`. Their presence in the protocol does not implement the Kubernetes workflow. |
 | Runtime's current CRI dependency | `k8s.io/cri-api v0.36.3` | Does not define those two RPCs. |
@@ -73,7 +74,7 @@ The script downloads the checksummed binaries, runs each probe in an isolated
 Docker container, captures revisions, hashes and gate errors, and removes its
 containers and temporary server data. It prints `AUDIT_LOGS` for the raw logs
 and receipt. Exit status 2 with
-`KUBERNETES_POD_CHECKPOINT_API_UNAVAILABLE` means both tested releases
+`KUBERNETES_POD_CHECKPOINT_API_UNAVAILABLE` means all three tested builds
 reject the required gate. A changed result needs discovery and kubelet
 verification; the script does not automatically claim full API support.
 

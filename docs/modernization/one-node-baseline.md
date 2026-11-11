@@ -35,5 +35,5 @@ checks its recorded Docker container ID and kind cluster label before removal.
 Existing clusters with the selected name are rejected by `create`.
 
 The separate `audit-interfaces.sh` checks the requested feature gate against
-k3s v1.37.2+k3s1 and the newer upstream v1.38.0-beta.0 binary. See
+k3s v1.37.2+k3s1, upstream v1.37.2, and the newer upstream v1.38.0-beta.0 binary. See
 [the API audit](step-3-api-audit.md) for the released-source and binary findings.
