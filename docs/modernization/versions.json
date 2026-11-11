@@ -280,5 +280,12 @@
     "date": "2026-11-11",
     "instruction": "Keep Step 3 incomplete and explicitly WIP, and proceed to Step 4.",
     "step_3_complete": false
+  },
+  "cache_eviction_test_maintenance": {
+    "tested_revision": "cef16a9d1f89bb18e77ff84cffef8543e30a6ed4",
+    "evidence": "evidence/step4-cache-test/verification.json",
+    "evidence_sha256": "666d90dbfd00ac03f609876f25164cc8ec3a2cc6f4e712f544c3ea4d13e47ca6",
+    "validation": "200 targeted repetitions with GOMAXPROCS=1, 50 targeted race repetitions, whole cache package race; all passed on designated worker with Go 1.26.11",
+    "scope": "Test-only synchronization fix; production code unchanged; no new VM acceptance or Step 3 completion claim."
   }
 }

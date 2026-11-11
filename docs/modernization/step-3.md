@@ -585,3 +585,16 @@ VMM with a vsock reset and attempts to adopt captured tasks and fresh I/O.
 Source compilation and lint passed on the worker; end-to-end restore acceptance
 has not been established. The standalone restore test is retained for later
 work. No CRI or Kubernetes Pod restore completion is claimed.
+
+## Cache eviction test maintenance
+
+Commit `cef16a9` fixes the timing-dependent eviction error test
+observed in [CI run 43079780458](https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43079780458).
+The test now waits for the reaper error log, checks its text, and verifies the
+entry was removed. Production code is unchanged. The clean committed worker
+checkout passed 200 targeted repetitions with one scheduler thread, 50 targeted
+race repetitions and the full cache package under the race detector.
+The [shared receipt](evidence/step4-cache-test/verification.json) records all four
+validated milestone backports, exact commands and raw hashes. The old failure
+was not reproduced in 30 baseline repetitions; these checks are test maintenance,
+not new full-stack acceptance. Step 3 CRI and Kubernetes restore remain WIP.
