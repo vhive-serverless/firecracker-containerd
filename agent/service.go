@@ -261,7 +261,11 @@ func (ts *TaskService) Create(requestCtx context.Context, req *taskAPI.CreateTas
 			return nil, fmt.Errorf("failed to update spec: %w", err)
 		}
 	}
-	specData, err = prepareCRIFiles(specData, extraData.CriFiles, bundleDir.RootPath())
+	volumeSources, err := ts.prepareCRIVolumes(requestCtx, taskExecID, specData, extraData.CriVolumes, bundleDir.RootPath())
+	if err != nil {
+		return nil, fmt.Errorf("failed to prepare CRI guest volumes: %w", err)
+	}
+	specData, err = prepareCRIFiles(specData, extraData.CriFiles, bundleDir.RootPath(), volumeSources)
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare CRI guest configuration: %w", err)
 	}

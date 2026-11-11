@@ -65,6 +65,7 @@ import (
 	"github.com/firecracker-microvm/firecracker-containerd/internal"
 	"github.com/firecracker-microvm/firecracker-containerd/internal/bundle"
 	"github.com/firecracker-microvm/firecracker-containerd/internal/vm"
+	"github.com/firecracker-microvm/firecracker-containerd/internal/volfs"
 	"github.com/firecracker-microvm/firecracker-containerd/proto"
 	drivemount "github.com/firecracker-microvm/firecracker-containerd/proto/service/drivemount/ttrpc"
 	fccontrolTtrpc "github.com/firecracker-microvm/firecracker-containerd/proto/service/fccontrol/ttrpc"
@@ -153,6 +154,10 @@ type service struct {
 	exitAfterAllTasksDeleted bool // exit the VM and shim when all tasks are deleted
 
 	blockDeviceTasks sync.Map
+	volumeTasks      sync.Map
+	volumeMu         sync.Mutex
+	volumeServer     *volfs.Server
+	volumesClosed    bool
 
 	cleanupErr  error
 	cleanupOnce sync.Once
@@ -1246,6 +1251,12 @@ func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTask
 		return nil, err
 	}
 	addressCreated, driveReserved := false, false
+	var volumeTokens []string
+	defer func() {
+		if retErr != nil {
+			retErr = errors.Join(retErr, s.revokeCRIVolumes(volumeTokens))
+		}
+	}()
 	defer func() {
 		if retErr == nil {
 			return
@@ -1315,7 +1326,13 @@ func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTask
 		logger.WithError(err).Error()
 		return nil, err
 	}
-	if err := prepareCRISpec(extraData); err != nil {
+	if err := prepareCRISpec(extraData, func(mount specs.Mount) (volfs.Descriptor, error) {
+		descriptor, err := s.registerCRIVolume(mount)
+		if err == nil {
+			volumeTokens = append(volumeTokens, descriptor.Token)
+		}
+		return descriptor, err
+	}); err != nil {
 		return nil, err
 	}
 
@@ -1363,6 +1380,9 @@ func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTask
 		return nil, err
 	}
 
+	if len(volumeTokens) > 0 {
+		s.volumeTasks.Store(request.ID, volumeTokens)
+	}
 	return resp, nil
 }
 
@@ -1409,11 +1429,16 @@ func (s *service) Delete(requestCtx context.Context, req *taskAPI.DeleteRequest)
 	}
 
 	var result *multierror.Error
+	if tokens, ok := s.volumeTasks.LoadAndDelete(req.ID); ok {
+		if err := s.revokeCRIVolumes(tokens.([]string)); err != nil {
+			result = multierror.Append(result, err)
+		}
+	}
 
 	if _, contains := s.blockDeviceTasks.Load(req.ID); contains {
 		// Trying to release stub drive for further reuse
 		if err := s.containerStubHandler.Release(requestCtx, req.ID, s.driveMountClient, s.machine); err != nil {
-			result = multierror.Append(fmt.Errorf("failed to release stub drive for container: %s: %w", req.ID, err))
+			result = multierror.Append(result, fmt.Errorf("failed to release stub drive for container: %s: %w", req.ID, err))
 		} else {
 			s.blockDeviceTasks.Delete(req.ID)
 		}
@@ -1871,6 +1896,9 @@ func (s *service) Cleanup(requestCtx context.Context) (*taskAPI.DeleteResponse, 
 func (s *service) cleanup() error {
 	s.cleanupOnce.Do(func() {
 		var result *multierror.Error
+		if err := s.closeCRIVolumes(); err != nil {
+			result = multierror.Append(result, err)
+		}
 		// we ignore the error here due to cleanup will only succeed if the jailing
 		// process was killed via SIGKILL
 		if err := s.jailer.Close(); err != nil {

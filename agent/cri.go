@@ -33,7 +33,7 @@ var criShmMu sync.Mutex
 
 // prepareCRIFiles materializes generated configuration in this task's bundle.
 // A payload's host source is only a lookup key, never a guest output path.
-func prepareCRIFiles(specData []byte, files []*proto.CRIFile, bundlePath string) ([]byte, error) {
+func prepareCRIFiles(specData []byte, files []*proto.CRIFile, bundlePath string, volumes map[int]string) ([]byte, error) {
 	var spec specs.Spec
 	if err := json.Unmarshal(specData, &spec); err != nil {
 		return nil, err
@@ -89,7 +89,11 @@ func prepareCRIFiles(specData []byte, files []*proto.CRIFile, bundlePath string)
 			}
 			mnt.Source = path
 		default:
-			return nil, fmt.Errorf("unsupported guest CRI bind mount %q", mnt.Destination)
+			path, ok := volumes[i]
+			if !ok {
+				return nil, fmt.Errorf("missing authorized guest CRI volume for %q", mnt.Destination)
+			}
+			mnt.Source = path
 		}
 	}
 	if err := applyCRINetworkSysctls(&spec); err != nil {

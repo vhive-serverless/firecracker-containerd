@@ -105,6 +105,26 @@ func OpenExport(source string, readOnly bool, limits Limits) (*Export, error) {
 	if err != nil {
 		return nil, err
 	}
+	return exportFD(fd, readOnly, limits)
+}
+
+// OpenMountExport pins a detached private bind view. Changes to file contents
+// remain coherent with the source, while future host mounts do not propagate.
+// Recursive selects whether existing submounts are included in that view.
+func OpenMountExport(source string, readOnly, recursive bool, limits Limits) (*Export, error) {
+	flags := uint(unix.OPEN_TREE_CLONE | unix.OPEN_TREE_CLOEXEC)
+	if recursive {
+		flags |= unix.AT_RECURSIVE
+	}
+	fd, err := unix.OpenTree(unix.AT_FDCWD, source, flags)
+	if err != nil {
+		return nil, err
+	}
+	return exportFD(fd, readOnly, limits)
+}
+
+// exportFD takes ownership of an already authorized source descriptor.
+func exportFD(fd int, readOnly bool, limits Limits) (*Export, error) {
 	var st unix.Stat_t
 	if err := unix.Fstat(fd, &st); err != nil {
 		_ = unix.Close(fd)

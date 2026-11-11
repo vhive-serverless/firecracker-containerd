@@ -36,7 +36,7 @@ func TestCRIFilesStayInsideGuestBundle(t *testing.T) {
 	data, err := json.Marshal(spec)
 	require.NoError(t, err)
 	bundle := filepath.Join(dir, "bundle")
-	updated, err := prepareCRIFiles(data, []*proto.CRIFile{{Source: original, Contents: []byte("guest-config"), Mode: 0644}}, bundle)
+	updated, err := prepareCRIFiles(data, []*proto.CRIFile{{Source: original, Contents: []byte("guest-config"), Mode: 0644}}, bundle, nil)
 	require.NoError(t, err)
 	require.NoError(t, json.Unmarshal(updated, &spec))
 	require.Equal(t, filepath.Join(bundle, "cri-files", "0"), spec.Mounts[0].Source)
@@ -46,7 +46,7 @@ func TestCRIFilesStayInsideGuestBundle(t *testing.T) {
 	contents, err = os.ReadFile(original)
 	require.NoError(t, err)
 	require.Equal(t, "unchanged", string(contents))
-	_, err = prepareCRIFiles(data, nil, t.TempDir())
+	_, err = prepareCRIFiles(data, nil, t.TempDir(), nil)
 	require.ErrorContains(t, err, "missing CRI generated configuration")
 }
 

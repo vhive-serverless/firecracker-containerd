@@ -31,8 +31,8 @@ runc creates the container.
 Generated `resolv.conf`, `hosts` and `hostname` bind files travel in the existing
 host-to-agent task protocol and are materialized inside the guest task bundle.
 Each file is limited to 64 KiB. Host source paths are lookup keys, not guest output
-paths. The Pod's containers share a guest tmpfs for `/dev/shm`. Other bind mounts
-are explicitly rejected until coherent volume sharing is implemented.
+paths. The Pod's containers share a guest tmpfs for `/dev/shm`. Other supported
+bind mounts use the descriptor-based host/guest volume service described below.
 
 The runtime configuration adds `cri_cni_conf_dir` (default `/etc/cni/net.d`),
 `cri_cni_cache_dir` (default `/var/lib/cni`) and `cri_container_count` (default 8,
@@ -42,7 +42,7 @@ rejected rather than interpreted as guest-host namespace requests.
 
 ## Host volume export layer
 
-`internal/volfs` supplies the host descriptor table for future guest volume
+`internal/volfs` supplies the host descriptor table for guest volume
 sharing. An export authorizes a directory or one regular file. Descendant
 operations take inode identifiers and single byte-sequence names, and never
 resolve a caller-supplied host path. Symlinks are returned for resolution by
@@ -74,13 +74,44 @@ visible even with ext3 timestamp granularity. Memory mapping is not enabled;
 coherent mapping invalidation still needs implementation. Host FIFOs and device
 nodes are rejected rather than acquiring unrelated guest-local behavior.
 
-The package is not connected to the shim or guest agent yet. Other host bind
-mounts remain rejected. The new mount tests use the worker's host kernel and a
-real TCP transport; they do not establish Firecracker guest volume acceptance.
-Shim/agent wiring, actual vsock validation, user namespace ID mapping, mount
-propagation, extended attributes, host/guest lock coherence and explicit
-checkpoint serialization remain pending. Reconnection against a live host table
-does not reconstruct that table for a new VM or shim.
+The shim registers bind exports per task and listens on the VMM backend's Unix
+socket with suffix `_10901`. The guest connects to host vsock CID 2, port 10901.
+An export carries a mount index and capability in the generated task protobuf;
+the guest mounts it under its own bundle and substitutes the resulting guest
+path into that OCI mount. No capability is added to Pod annotations. Single-file
+exports support mounts such as `/dev/termination-log`.
+
+Host exports use detached private mount views from `open_tree(2)`. `bind` and
+`rbind` select whether existing submounts are included; subsequent host mounts
+do not propagate. The shim revokes registrations after failed task creation,
+container deletion and VM shutdown. The agent closes its filesystem client
+before unmounting, with a detach fallback for borrowed file descriptors, then
+removes the task bundle.
+
+Shared/slave mount propagation, user namespace ID mapping, extended attributes,
+host/guest lock coherence and explicit checkpoint serialization remain pending.
+Read-only exports currently make their entire FUSE view read-only: they do not
+represent the writable child mounts required by non-recursive read-only bind
+semantics. Reconnection against a live host table does not reconstruct that
+table for a new VM or shim. These limitations still prevent unqualified CRI and
+filesystem compatibility claims.
+
+Worker development validation with the new shim and static guest agent passed
+ordinary bind mounts and symlink host sources through real VMMs. The optional
+`TestPodVolumes` check additionally verifies guest mount information for writable,
+read-only and termination-log mounts, immediate host/guest write visibility,
+hard links and open unlinked files. It repeats ten failed guest creates in the
+same sandbox and verifies the existing workload still runs. These development
+results do not establish acceptance of the committed runtime; committed results
+must identify the tested checkout and binaries.
+
+```sh
+CRI_INTEGRATION_TESTS=1 CRI_FOCUS='Runtime info|starting container with volume' \
+    tools/critest/test-cri.sh
+```
+
+The integration flag runs both the volume checks and the three Pod resource
+cases after the selected upstream CRI tests, then requires complete cleanup.
 
 Run the host filesystem checks on the worker:
 
@@ -115,7 +146,8 @@ passed all 19 tests, including four real kernel mount cases, with no skips.
 The [RPC/FUSE receipt](evidence/2057817-volfs-rpc-fuse-receipt.log) preserves
 the exact commands, dependency verification, binary/source hashes and raw
 log hashes. Its kernel mount tests use the worker host kernel `6.8.0-147-generic`;
-Firecracker guest and CRI volume acceptance remain pending.
+That receipt predates the shim/agent mount wiring and does not establish its
+Firecracker guest acceptance.
 
 ## VM capacity from Pod resources
 

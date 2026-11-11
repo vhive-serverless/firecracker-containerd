@@ -44,7 +44,7 @@ func TestPrepareCRISpec(t *testing.T) {
 	data, err := json.Marshal(spec)
 	require.NoError(t, err)
 	extra := &proto.ExtraData{JsonSpec: data}
-	require.NoError(t, prepareCRISpec(extra))
+	require.NoError(t, prepareCRISpec(extra, nil))
 	spec = specs.Spec{}
 	require.NoError(t, json.Unmarshal(extra.JsonSpec, &spec))
 	require.Equal(t, []specs.LinuxNamespace{{Type: specs.PIDNamespace}}, spec.Linux.Namespaces)
@@ -54,13 +54,13 @@ func TestPrepareCRISpec(t *testing.T) {
 	spec.Mounts = []specs.Mount{{Type: "bind", Source: "/host/data", Destination: "/data"}}
 	extra.JsonSpec, err = json.Marshal(spec)
 	require.NoError(t, err)
-	require.Equal(t, codes.Unimplemented, status.Code(prepareCRISpec(extra)))
+	require.Equal(t, codes.Unimplemented, status.Code(prepareCRISpec(extra, nil)))
 }
 
 func TestCRISpecLeavesOrdinaryOCIUnchanged(t *testing.T) {
 	data := []byte(`{"linux":{"namespaces":[{"type":"network","path":"/host/netns"}]}}`)
 	extra := &proto.ExtraData{JsonSpec: data}
-	require.NoError(t, prepareCRISpec(extra))
+	require.NoError(t, prepareCRISpec(extra, nil))
 	require.Equal(t, data, extra.JsonSpec)
 }
 

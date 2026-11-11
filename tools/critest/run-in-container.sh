@@ -92,7 +92,7 @@ if test "${CRI_WEBSOCKETS:-0}" = 1; then
 fi
 critest "${args[@]}"
 if test "${CRI_INTEGRATION_TESTS:-0}" = 1; then
-    FICD_CRI_RESOURCE_ENDPOINT="$cri_socket" /cri-runtime.test -test.v -test.run '^TestPodVMResources$'
+    FICD_CRI_RESOURCE_ENDPOINT="$cri_socket" /cri-runtime.test -test.v -test.run '^TestPod(VMResources|Volumes)$'
 fi
 for attempt in $(seq 1 30); do
     tasks=$(ctr --address "$socket" --namespace k8s.io tasks list --quiet)

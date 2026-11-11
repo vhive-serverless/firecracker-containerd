@@ -190,6 +190,31 @@ func TestGuestSingleFileAndReadOnlyMount(t *testing.T) {
 	require.ErrorIs(t, os.Chmod(readMount.Source(), 0777), unix.EROFS)
 }
 
+func TestGuestMountCloseDetachesBorrowedFile(t *testing.T) {
+	requireGuestMountTests(t)
+	_, descriptor, dial, root := rpcServer(t)
+	require.NoError(t, os.WriteFile(filepath.Join(root, "file"), []byte("contents"), 0600))
+	mount := testGuestMount(t, descriptor, dial)
+	file, err := os.Open(filepath.Join(mount.Source(), "file"))
+	require.NoError(t, err)
+	defer file.Close()
+	require.NoError(t, mount.Close())
+	_, err = os.Stat(filepath.Join(mount.Source(), "file"))
+	require.ErrorIs(t, err, os.ErrNotExist)
+	var data [8]byte
+	n, err := file.ReadAt(data[:], 0)
+	require.Error(t, err)
+	require.Zero(t, n)
+	require.NoError(t, file.Close())
+	done := make(chan struct{})
+	go func() { mount.server.Wait(); close(done) }()
+	select {
+	case <-done:
+	case <-time.After(3 * time.Second):
+		t.Fatal("FUSE server remained live after its last borrowed file closed")
+	}
+}
+
 func TestGuestKernelPermissionsAndOwnership(t *testing.T) {
 	requireGuestMountTests(t)
 	_, descriptor, dial, root := rpcServer(t)

@@ -106,6 +106,17 @@ func (m *GuestMount) Close() error {
 	m.once.Do(func() {
 		_ = m.fs.client.Close()
 		m.err = m.server.Unmount()
+		if m.err != nil {
+			// A process may still hold a file or cwd after its owner's task is
+			// removed. Revoke IO first, then detach this owned mount so bundle
+			// cleanup cannot walk through a still-mounted host export.
+			err := unix.Unmount(m.path, unix.MNT_DETACH|unix.UMOUNT_NOFOLLOW)
+			if err == nil || errors.Is(err, unix.EINVAL) || errors.Is(err, unix.ENOENT) {
+				m.err = nil
+			} else {
+				m.err = errors.Join(m.err, err)
+			}
+		}
 		<-m.fs.forgetDone
 	})
 	return m.err

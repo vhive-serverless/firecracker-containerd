@@ -466,7 +466,7 @@ func (j *runcJailer) bindMountFileToJail(src, dst string) error {
 		Destination: "/" + rel,
 		Source:      src,
 		Type:        "none",
-		Options:     []string{"bind"},
+		Options:     []string{bindMountType},
 	})
 
 	return nil

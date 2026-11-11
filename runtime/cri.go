@@ -23,6 +23,7 @@ import (
 	"github.com/containernetworking/cni/libcni"
 	"github.com/firecracker-microvm/firecracker-containerd/config"
 	crimeta "github.com/firecracker-microvm/firecracker-containerd/internal/cri"
+	"github.com/firecracker-microvm/firecracker-containerd/internal/volfs"
 	"github.com/firecracker-microvm/firecracker-containerd/proto"
 	"github.com/firecracker-microvm/firecracker-containerd/runtime/firecrackeroci"
 	"github.com/firecracker-microvm/firecracker-go-sdk/cni/vmconf"
@@ -118,10 +119,8 @@ func criVMRequest(spec *specs.Spec, cfg *config.Config) (*proto.CreateVMRequest,
 	return request, nil
 }
 
-// prepareCRISpec translates host-only namespace and generated-file references.
-// Arbitrary host bind mounts need a coherent sharing transport and are rejected
-// until implemented; copying writable volumes would violate their semantics.
-func prepareCRISpec(extra *proto.ExtraData) error {
+// prepareCRISpec translates host namespaces and authorizes bind exports.
+func prepareCRISpec(extra *proto.ExtraData, register func(specs.Mount) (volfs.Descriptor, error)) error {
 	var spec specs.Spec
 	if err := json.Unmarshal(extra.JsonSpec, &spec); err != nil {
 		return err
@@ -133,6 +132,9 @@ func prepareCRISpec(extra *proto.ExtraData) error {
 	if spec.Linux == nil {
 		return status.Error(codes.InvalidArgument, "CRI container has no Linux configuration")
 	}
+	if len(spec.Linux.UIDMappings) > 0 || len(spec.Linux.GIDMappings) > 0 {
+		return status.Error(codes.Unimplemented, "CRI volume user namespace ID mapping is not implemented")
+	}
 	namespaces := spec.Linux.Namespaces[:0]
 	for _, ns := range spec.Linux.Namespaces {
 		if ns.Type != specs.NetworkNamespace {
@@ -142,7 +144,7 @@ func prepareCRISpec(extra *proto.ExtraData) error {
 	spec.Linux.Namespaces = namespaces
 	for i := range spec.Mounts {
 		mnt := &spec.Mounts[i]
-		if mnt.Type != "bind" {
+		if mnt.Type != bindMountType {
 			continue
 		}
 		switch mnt.Destination {
@@ -158,7 +160,17 @@ func prepareCRISpec(extra *proto.ExtraData) error {
 			}
 			extra.CriFiles = append(extra.CriFiles, file)
 		default:
-			return status.Errorf(codes.Unimplemented, "Firecracker CRI bind mount %q is not yet supported", mnt.Destination)
+			if register == nil {
+				return status.Errorf(codes.Unimplemented, "CRI volume transport is unavailable for %q", mnt.Destination)
+			}
+			if len(extra.CriVolumes) >= 64 {
+				return status.Error(codes.ResourceExhausted, "CRI task exceeds 64 volume exports")
+			}
+			descriptor, err := register(*mnt)
+			if err != nil {
+				return err
+			}
+			extra.CriVolumes = append(extra.CriVolumes, &proto.CRIVolume{MountIndex: uint32(i), Token: descriptor.Token, FileOnly: descriptor.FileOnly, ReadOnly: descriptor.ReadOnly})
 		}
 	}
 	extra.JsonSpec, err = json.Marshal(&spec)
