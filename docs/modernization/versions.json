@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "vHive-compatible stack; worker acceptance procedure in step-2.md",
+  "status": "Step 2 worker acceptance passed; Step 3 Kubernetes/CRI interface audit underway",
   "step_1_validation": {
     "runtime_branch": "modernize-runtime",
     "completion_commit": "e7395acb2c88cfe8c5d32ba61ff65c17e031858c",
@@ -165,5 +165,14 @@
       "postgres_14_3": "sha256:2d1e636f07781d4799b3f2edbff78a0a5494f24c4512cb56a83ebfd0e04ec074",
       "alpine_3_23_0": "sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375"
     }
+  },
+  "step_2_validation": {
+    "runtime_branch": "vhive-compatible",
+    "completion_commit": "122d7084043a1e0b237fea9eb57de8d2eb48c486",
+    "worker_checkout": "/users/nehalem/fc-ctrd-mod/vhive-committed",
+    "install_prefix": "/users/nehalem/fc-ctrd-mod/install/122d7084043a",
+    "acceptance_receipt": "evidence/122d7084043a-acceptance-receipt.log",
+    "runtime_acceptance_log_sha256": "489c699a444eb729327f42e5957ee5708e4a8db74108c783e427db41cb22fa13",
+    "vhive_acceptance_log_sha256": "fa265494649a4a007430b397f32c3d1e16148df0af73de789461957d9f185b34"
   }
 }

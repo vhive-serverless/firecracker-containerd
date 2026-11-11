@@ -40,12 +40,12 @@ branch starts at the validated completion commit of its prerequisite.
 
 - [x] Create branch from validated Step 1 completion commit.
 - [x] Inspect integration behavior/dependencies, port SDK/runtime/network/storage/snapshot changes without downgrades.
-- [ ] Pin and deploy supported vHive on worker.
-- [ ] Demonstrate function deploy/invoke/repeated invoke/cleanup and applicable snapshot/restore.
-- [ ] Provide end-to-end regression script and rerun Step 1 acceptance.
-- [ ] Push compatible dependency/runtime commits, validate independent committed reconstruction and report revisions/commands/results/limitations.
+- [x] Pin and deploy supported vHive on worker.
+- [x] Demonstrate function deploy/invoke/repeated invoke/cleanup and applicable snapshot/restore.
+- [x] Provide end-to-end regression script and rerun Step 1 acceptance.
+- [x] Push compatible dependency/runtime commits, validate independent committed reconstruction and report revisions/commands/results/limitations.
 
-## Step 3: cri-native-snapshot-restore (not started)
+## Step 3: cri-native-snapshot-restore
 
 - [ ] Create branch from validated Step 2 completion commit.
 - [ ] Verify installed k3s v1.37.2+k3s1 binary/component versions and actual Pod checkpoint/restore alpha APIs/gates/RPCs; select newer compatible release only if required.
