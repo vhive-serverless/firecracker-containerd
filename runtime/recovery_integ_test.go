@@ -60,7 +60,7 @@ func TestForceStopDefaultFirecracker_Isolated(t *testing.T) {
 	_, err = control.PauseVM(ctx, &proto.PauseVMRequest{VMID: id})
 	require.NoError(t, err)
 	_, err = control.StopVM(ctx, &proto.StopVMRequest{VMID: id})
-	require.Equal(t, codes.Internal, status.Code(err))
+	require.Equal(t, codes.Internal, status.Code(err), "StopVM returned %v", err)
 	require.ErrorContains(t, err, "forcefully terminated")
 	alive, err := vm.IsProcessAlive(state.VMM)
 	require.NoError(t, err)

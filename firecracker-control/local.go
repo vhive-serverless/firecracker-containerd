@@ -254,6 +254,9 @@ func (s *local) StopVM(requestCtx context.Context, req *proto.StopVMRequest) (*t
 	defer client.Close()
 
 	resp, shimErr := client.StopVM(requestCtx, req)
+	// Closing acknowledges that the stop reply has been consumed. The shim
+	// drains controller connections before it exits.
+	_ = client.Close()
 	waitErr := s.waitForShimToExit(requestCtx, req.VMID)
 
 	// Assuming the shim is returning containerd's error code, return the error as is if possible.
