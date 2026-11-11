@@ -729,6 +729,25 @@ func (e *Export) fileForNode(handle, id uint64) (int, error) {
 	return dupFD(f.fd)
 }
 
+// SyncDir makes directory entry changes durable in the backing filesystem.
+func (e *Export) SyncDir(id uint64) error {
+	if e.fileOnly && id == Root {
+		_, err := e.Getattr(Root)
+		return err
+	}
+	pathFD, err := e.dirFD(id)
+	if err != nil {
+		return err
+	}
+	defer unix.Close(pathFD)
+	fd, err := unix.Open(procFD(pathFD), unix.O_RDONLY|unix.O_DIRECTORY|unix.O_CLOEXEC, 0)
+	if err != nil {
+		return err
+	}
+	defer unix.Close(fd)
+	return unix.Fsync(fd)
+}
+
 // Statfs reports the host backing filesystem for capacity checks in the guest.
 func (e *Export) Statfs() (unix.Statfs_t, error) {
 	id := Root

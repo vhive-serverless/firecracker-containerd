@@ -19,6 +19,7 @@ require (
 	github.com/containernetworking/plugins v1.9.1
 	github.com/firecracker-microvm/firecracker-go-sdk v1.0.1-0.20250818195323-ed6ff32aa924
 	github.com/gofrs/uuid v3.3.0+incompatible
+	github.com/hanwen/go-fuse/v2 v2.10.1
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/miekg/dns v1.1.62
 	github.com/moby/sys/user v0.4.0

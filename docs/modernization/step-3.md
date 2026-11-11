@@ -52,11 +52,35 @@ listing, hard links, ownership, mode, timestamps, truncation, synchronization
 and backing-filesystem capacity. Descriptor limits, read-only exports and
 cleanup apply independently of the transport.
 
-This layer is not connected to the shim or guest agent yet. Other host bind
-mounts remain rejected, and its filesystem tests do not establish guest volume
-support. Guest permission checks and ID mapping, the FUSE client, bounded
-reconnectable transport, cache coherence, mount propagation, extended attributes
-and checkpoint serialization still require implementation and validation.
+The package also supplies a reconnectable RPC client/server and a guest FUSE
+client using `github.com/hanwen/go-fuse/v2` v2.10.1 (source commit
+`1d16325e0693e4aeb40b3c899938e028cc8e538e`). The version manifest pins the module,
+source commit and both module checksums. Exports use random capabilities rather
+than caller-selected paths. Frames are limited to 2 MiB, file IO to 1 MiB,
+registered exports to 256 and concurrent connections to 64 per server.
+
+Each export has one ordered client session and caches its last response before
+delivery. A lost reply can be retried with identical request bytes and ID without
+repeating a create, append, rename or handle release. Changed replay contents,
+sequence gaps and another client's session are rejected. Request cancellation
+is honored before issue; an issued request resolves using the mount lifetime
+until it completes or the mount closes. Kernel lookup reference releases are
+queued without blocking the FUSE forget callback.
+
+The FUSE mount uses kernel `default_permissions` for DAC in the initial guest
+user namespace. Read-only policy is enforced by both the mount and the host.
+Regular-file IO bypasses the guest page cache so same-size host rewrites remain
+visible even with ext3 timestamp granularity. Memory mapping is not enabled;
+coherent mapping invalidation still needs implementation. Host FIFOs and device
+nodes are rejected rather than acquiring unrelated guest-local behavior.
+
+The package is not connected to the shim or guest agent yet. Other host bind
+mounts remain rejected. The new mount tests use the worker's host kernel and a
+real TCP transport; they do not establish Firecracker guest volume acceptance.
+Shim/agent wiring, actual vsock validation, user namespace ID mapping, mount
+propagation, extended attributes, host/guest lock coherence and explicit
+checkpoint serialization remain pending. Reconnection against a live host table
+does not reconstruct that table for a new VM or shim.
 
 Run the host filesystem checks on the worker:
 
@@ -64,11 +88,16 @@ Run the host filesystem checks on the worker:
 go test -mod=readonly -race -count=1 ./internal/volfs
 go test -mod=readonly -race -c -o bin/volfs.test ./internal/volfs
 sudo -n bin/volfs.test -test.v -test.timeout=120s
+sudo -n env VOLFS_MOUNT_TESTS=1 unshare --mount --propagation private \
+    bin/volfs.test -test.v -test.count=1 -test.timeout=120s
 ```
 
 The root invocation also checks the host service's hard-link capability and
-guest UID/GID ownership with setgid directory inheritance. All fixtures live
-in temporary directories; the tests do not mount a filesystem.
+guest UID/GID ownership with setgid directory inheritance. The final command
+also exercises real FUSE mounts in a private mount namespace: ordinary file IO,
+host coherence, open unlinked files, hard links, directory cookies, reconnection,
+single-file exports, read-only enforcement, permissions and ownership. Fixtures
+are confined to temporary directories and removed by test cleanup.
 
 Clean committed checkout `37f68f172a9f9994768ceb8fe2f01ad8cf1bbbed` passed
 both module linters and the host filesystem checks on the worker. The ordinary

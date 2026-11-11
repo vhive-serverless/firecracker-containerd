@@ -48,6 +48,20 @@ if vmm_schema != sdk_schema:
 print(f"SDK: {expected_path}@{expected_version}")
 print(f"VMM/SDK schema sha256: {hashlib.sha256(vmm_schema).hexdigest()}")
 
+volume_fs = selected["guest_volume_fs"]
+volume_module = json.loads(command("go", "mod", "download", "-json",
+                                   f'{volume_fs["module"]}@{volume_fs["version"]}'))
+for actual_key, expected_key in (("Version", "version"), ("Sum", "module_sum"),
+                                 ("GoModSum", "go_mod_sum")):
+    if volume_module.get(actual_key) != volume_fs[expected_key]:
+        raise SystemExit(f"guest volume filesystem input differs from its pin: {volume_module}")
+if volume_module.get("Origin", {}).get("Hash") != volume_fs["commit"]:
+    raise SystemExit(f"guest volume filesystem source commit differs from its pin: {volume_module}")
+resolved_volume = command("go", "list", "-mod=readonly", "-m", "-f", "{{.Version}}", volume_fs["module"])
+if resolved_volume != volume_fs["version"]:
+    raise SystemExit(f"guest volume filesystem resolved to unexpected version {resolved_volume}")
+print(f'Guest volume filesystem: {volume_fs["module"]}@{resolved_volume} ({volume_fs["commit"]})')
+
 cri = selected["cri_integration"]
 for directory, versions in (
     (root, {"k8s.io/cri-api": cri["backend_cri_api"]}),
