@@ -207,6 +207,17 @@
         "kvm_max_vcpus": 32,
         "validation": "optional CRI_INTEGRATION_TESTS=1 worker driver; initial sizing only, host Pod cgroup accounting and live changes pending"
       }
+    },
+    "kubernetes_runtimeclass_profile": {
+      "k3s": "v1.37.2+k3s1",
+      "k3s_sha256": "265b3ee6a3198ef14033c63ef46cbb32370d83795199fb6d1b01f21575eddbda",
+      "coredns_image": "docker.io/rancher/mirrored-coredns-coredns@sha256:7efd3c635b03efd68c4e8398fc45f0d993d0e9ab016f72c1cefb0fd6d01aa286",
+      "workload_image": "registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf",
+      "runtime_handler": "firecracker",
+      "default_runtime_handler": "runc",
+      "cluster_cidr": "198.20.0.0/16",
+      "node_subnet": "198.20.0.0/24",
+      "service_cidr": "10.43.0.0/16"
     }
   },
   "step_2_validation": {

@@ -1,8 +1,9 @@
 # Step 3 implementation status
 
 Step 3 is incomplete. Steps 1 and 2 retain their accepted branches. This branch
-currently adds a containerd CRI adapter and worker tests; it does not yet satisfy
-the full CRI, Kubernetes RuntimeClass, or native Pod checkpoint/restore gates.
+currently adds a containerd CRI adapter, RuntimeClass deployment tests and native
+snapshot transport primitives. Full CRI compliance and native/Kubernetes Pod
+checkpoint/restore remain incomplete.
 The [API audit](step-3-api-audit.md) records the v1.38 alpha target and the missing
 workflow in the released builds tested so far. Step 4 has not started.
 
@@ -150,6 +151,42 @@ the exact commands, dependency verification, binary/source hashes and raw
 log hashes. Its kernel mount tests use the worker host kernel `6.8.0-147-generic`;
 that receipt predates the shim/agent mount wiring and does not establish its
 Firecracker guest acceptance.
+
+## One-node k3s RuntimeClass profile
+
+The [deployment test](../../tools/kubernetes/test-firecracker-node.sh) starts
+the required released k3s `v1.37.2+k3s1` against this runtime's CRI endpoint,
+using its own privileged Docker container, private cgroup/network namespaces
+and disposable thin pool. The cluster is removed after the test. Its
+[RuntimeClass and workload manifest](../../tools/kubernetes/firecracker-smoke.yaml)
+runs two containers in one Firecracker VM with a shared `emptyDir` and the
+ordinary projected service-account volume.
+
+Ordinary system Pods use runc and a bridge CNI chain. The `firecracker` runtime
+handler selects a separate chain with `tc-redirect-tap`; both chains share
+their bridge and IPAM allocation name. Both configure a default route. The
+nested one-node profile uses kube-proxy service masquerading. CoreDNS and the
+workload images are pinned by digest in the scripts/manifest and version ledger.
+AppArmor is disabled in this profile; the conformance limitations below remain.
+
+After building the committed stack and test image on the designated worker:
+
+```sh
+tools/kubernetes/test-firecracker-node.sh
+```
+
+The test requires successful logs and exec, readable projected metadata, an
+explicit IPv4 DNS answer for the Kubernetes service, shared guest FUSE mounts,
+HTTP service access from an ordinary runc Pod, positive CPU/memory statistics
+for both Firecracker containers, and deletion without a remaining Firecracker
+VM or sandbox. It checks the Pod UID, CRI sandbox, two container IDs and actual
+VMM command line together. BusyBox's DNS exit status alone is insufficient:
+the test asserts the returned address, and queries the absolute name's A record.
+
+Development validation against the committed runtime image
+`20727f4002990a522c4d46bc174475959c28f93c` passed these checks. This is ordinary
+Pod lifecycle integration; it does not implement Kubernetes Pod checkpoint or
+restore. Committed deployment-test validation must still be recorded separately.
 
 ## Native snapshot transport
 
