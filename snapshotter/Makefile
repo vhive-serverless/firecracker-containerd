@@ -55,7 +55,7 @@ integ-test: test-deps
 
 integ-test-%: logs test-deps
 	$(CURDIR)/../tools/thinpool.sh reset "$(FICD_DM_POOL)"
-	docker run --rm \
+	$(CURDIR)/../tools/modernize/run-isolated-vm-test.sh "$(FICD_VM_STORAGE)" --rm \
 		--privileged \
 		--ipc=host \
 		--network=bridge \
@@ -63,7 +63,6 @@ integ-test-%: logs test-deps
 		--volume /run/udev/control:/run/udev/control \
 		--volume $(CURDIR)/logs:/var/log/firecracker-containerd-test \
 		--volume $(CURDIR)/..:/src \
-		--volume $(FICD_VM_STORAGE):/srv/firecracker_containerd_tests \
 		--volume $(GO_CACHE_VOLUME_NAME):/go \
 		--env ENABLE_ISOLATED_TESTS=1 \
 		--env GOPROXY=direct \
