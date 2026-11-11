@@ -51,6 +51,17 @@ from [Step 1](step-1.md) and [Step 2](step-2.md). The results below identify the
 tested source revisions; earlier results do not establish acceptance of the
 merged Step 3 runtime.
 
+## Restored process ownership
+
+The task manager's `AdoptProcess` operation checks the restored guest task ID
+and captured PID, creates fresh host lifetime contexts, attaches the supplied
+I/O proxy and monitors the existing process. Initial tasks must be adopted
+before execs. It preserves paused state and participates in ordinary deletion
+and shutdown bookkeeping. Failed adoption releases only new host ownership;
+it does not delete the guest process. Unit tests cover task/exec adoption,
+identity mismatch and an exec whose parent has not been adopted. Connecting
+this operation to the runtime's native restore coordinator remains pending.
+
 ## Pod mapping and the current CRI path
 
 The host shim recognizes containerd's standard `io.kubernetes.cri.sandbox-id`

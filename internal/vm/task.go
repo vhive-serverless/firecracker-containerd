@@ -56,6 +56,10 @@ type TaskManager interface {
 	// error will be returned.
 	ExecProcess(context.Context, *taskAPI.ExecProcessRequest, taskAPI.TTRPCTaskService, IOProxy) (*types.Empty, error)
 
+	// AdoptProcess manages a process already present in a restored guest. It
+	// verifies its captured PID and attaches I/O without creating or starting it.
+	AdoptProcess(context.Context, RestoredProcess, taskAPI.TTRPCTaskService, IOProxy) (*taskAPI.StateResponse, error)
+
 	// ShutdownIfEmpty will atomically check if there are no tasks left being managed and, if so,
 	// prevent any new tasks from being added going forward (future attempts will return an error).
 	// If any tasks are still in the TaskManager's map, no change will be made.
