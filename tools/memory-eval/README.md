@@ -74,3 +74,10 @@ process during observation to check exit handling. It samples its existing
 explicit cgroup if the v2 interface is available, changes no cgroups, and
 cleans its temporary input file. The produced JSONL remains in the new output
 directory for review. This check is validation, not an evaluation workload.
+
+The [committed worker receipt](evidence/dfb45bd-receipt.log) records twelve passing
+tests and a six-sample capture from source `dfb45bd7bdec2d59184f4fc077e654f8d3589857`.
+The owned process was observed alive and then exited. The explicit existing
+session cgroup exposed memory and CPU counters; its absent `io.stat` was
+recorded as unavailable, yielding partial cgroup observations. Raw JSONL and
+validation logs are retained alongside the receipt.
