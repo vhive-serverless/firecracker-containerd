@@ -26,7 +26,8 @@ def save_lines(path, values):
 def host_row(t):
     metrics = {'memory.current': 100 + 2 * t,
                'cpu.stat': {'usage_usec': 100 * t, 'user_usec': 60 * t, 'system_usec': 40 * t},
-               'memory.stat': {'anon': 20 + t, 'file': 10 + t, 'kernel': 8, 'shmem': 0},
+               'memory.stat': {'anon': 20 + t, 'file': 10 + t, 'kernel': 8, 'shmem': 0,
+                               'pgfault': 10 * t, 'pgmajfault': 2 * t},
                'io.stat': {'8:0': {'rbytes': 100 + 3 * t, 'wbytes': 200 + 5 * t},
                            '7:1': {'rbytes': 100 + 7 * t, 'wbytes': 200 + 11 * t}}}
     return {'type': 'sample', 'sequence': t, 'monotonic_ns': t * NS,
@@ -43,7 +44,11 @@ def vm_row(t):
     return {'type': 'sample', 'sequence': t - 6, 'monotonic_ns': t * NS,
             'processes': [{'pid': pid, 'status': 'ok', 'identity_verified': True,
                            'expected_starttime_ticks': pid + 100, 'observed_starttime_ticks': pid + 100,
-                           'stat': {'starttime': pid + 100}, 'stat_after': {'starttime': pid + 100},
+                           'stat': {'starttime': pid + 100, 'minflt': 3 * t, 'majflt': t},
+                           'stat_after': {'starttime': pid + 100},
+                           'io': {'status': 'ok', 'data': {'values': {
+                               key: 5 * t for key in ('read_bytes', 'write_bytes', 'rchar', 'wchar',
+                                                      'syscr', 'syscw', 'cancelled_write_bytes')}}},
                            'smaps_rollup': {'status': 'ok', 'data': {'values': {'Pss': pss, 'Rss': 99999},
                                                                  'units': {'Pss': 'kB', 'Rss': 'kB'}}}}
                           for pid, pss in ((11, 100), (12, 200))]}
@@ -161,8 +166,20 @@ class IOTests(unittest.TestCase):
         self.assertEqual(result['physical_io_delta']['wbytes'], 15)
         self.assertEqual(details['io_stat_layers_not_summed']['7:1']['status'], 'unavailable')
         self.assertNotIn('deltas', details['io_stat_layers_not_summed']['7:1'])
-        with self.assertRaises(analysis.AnalysisError):
-            analysis.cgroup_window(rows, 0, 3 * NS, 2 * NS, '7:1')
+        incomplete, _ = analysis.cgroup_window(rows, 0, 3 * NS, 2 * NS, '7:1')
+        self.assertEqual(incomplete['physical_io_delta']['status'], 'unavailable')
+        self.assertNotIn('rbytes', incomplete['physical_io_delta'])
+        self.assertEqual(incomplete['physical_io_cumulative_at_window_end']['counters']['rbytes'], 121)
+
+    def test_physical_io_read_error_does_not_erase_memory_cpu_measurements(self):
+        rows = [host_row(t) for t in range(4)]
+        rows[0]['cgroup']['metrics']['io.stat'] = {'status': 'permission_denied'}
+        result, details = analysis.cgroup_window(rows, 0, 3 * NS, 2 * NS, '8:0')
+        self.assertEqual(result['cpu_delta_usec']['usage_usec'], 300)
+        self.assertEqual(result['memory_current']['trapezoid_byte_seconds'], 309)
+        self.assertEqual(result['physical_io_delta']['status'], 'unavailable')
+        self.assertEqual(result['physical_io_cumulative_at_window_end']['counters']['wbytes'], 215)
+        self.assertEqual(len(details['io_stat_read_errors']), 1)
 
     def test_recorded_backing_precedes_current_analyzer_filesystem(self):
         result = analysis.backing_device(Path('/does-not-exist'), {'backing_device': {
@@ -202,8 +219,13 @@ class MatrixTests(unittest.TestCase):
         self.assertEqual(full['memory_current']['trapezoid_byte_seconds'], 3696)
         self.assertEqual(idle['memory_current']['trapezoid_byte_seconds'], 252)
         self.assertEqual(full['cpu_delta_usec']['usage_usec'], 2800)
+        self.assertEqual(full['memory_fault_deltas'], {'pgfault': 280, 'pgmajfault': 56})
+        self.assertEqual(idle['memory_fault_deltas'], {'pgfault': 20, 'pgmajfault': 4})
         self.assertEqual(idle['physical_io_delta']['rbytes'], 6)
         self.assertEqual(trial['metrics']['common_idle']['vm_aggregate_pss_mapped_view']['mean_bytes'], 300 * 1024)
+        own = trial['metrics']['common_idle']['vmm_own_process_deltas']['vm0']
+        self.assertEqual(own['stat_faults']['deltas'], {'minflt': 6, 'majflt': 2})
+        self.assertEqual(own['proc_io']['deltas']['read_bytes'], 10)
         self.assertNotIn('vm_aggregate_pss_mapped_view', trial['metrics']['full_trial'])
         self.assertIn('full_trial.vm_aggregate_pss_mapped_view', trial['details']['unavailable'])
         self.assertEqual(trial['details']['windows']['common_idle']['start_host_monotonic_ns'], 12 * NS)
@@ -270,6 +292,20 @@ class MatrixTests(unittest.TestCase):
         save_lines(path, rows)
         with self.assertRaisesRegex(analysis.AnalysisError, 'missing sample sequence'):
             self.analyze()
+
+    def test_optional_vmm_io_permission_failure_is_explicit_not_zero(self):
+        path = self.trial / 'vm-processes.jsonl'
+        rows = analysis.lines(path)
+        for record in rows[1:-1]:
+            record['processes'][0]['status'] = 'partial'
+            record['processes'][0]['io'] = {'status': 'permission_denied'}
+        save_lines(path, rows)
+        result = self.analyze()
+        own = result['trials'][0]['metrics']['common_idle']['vmm_own_process_deltas']['vm0']
+        self.assertEqual(own['proc_io']['status'], 'unavailable')
+        self.assertNotIn('deltas', own['proc_io'])
+        missing = analysis.unavailable_fields(result['trials'][0]['metrics'])
+        self.assertIn('common_idle.vmm_own_process_deltas.vm0.proc_io', missing)
 
     def test_idle_vm_pss_gap_rejected(self):
         path = self.trial / 'vm-processes.jsonl'
