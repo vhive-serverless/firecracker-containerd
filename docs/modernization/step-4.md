@@ -61,7 +61,7 @@ virtio-blk control; otherwise filesystem/compression effects would be mixed
 into the claimed pmem result. Additional controls may supplement the five
 requested configurations for this reason.
 
-## Disk upper configuration (development)
+## Disk upper configuration (development validation passed)
 
 `guest_root_mode` defaults to `disk`; `guest_root_size_mib` defaults to 512.
 `CreateVMRequest.GuestRoot` can select `disk` or the measured original `ram`
@@ -84,6 +84,29 @@ The legacy vHive snapshot API supports only the explicit RAM layout; it cannot
 silently omit the new upper. Native capture must include the upper alongside
 the other disks. Native restore remains unaccepted. Pmem/DAMON and the five-arm
 evaluation remain pending.
+
+The development worker passed disk upper inspection, write/copy-up/rename/delete,
+guest ENOSPC recovery, ownership and cleanup, with and without the runc jailer
+(10.09 s). The explicit RAM-layout audit also passed (7.51 s). Native capture
+passed both jailer configurations (88.05 s), including independent upper and
+container disks, repeated capture, and source writes after capture. These runs
+used a dirty development checkout and do not establish committed acceptance.
+The earlier invalid drive ID and early-boot UUID lookup failures were retained.
+UUID lookup now probes devtmpfs block nodes directly, before proc/udev startup.
+
+From a clean checkout on the designated worker, reproduce the storage component
+with the pinned toolchain prepared as described in Step 1:
+
+```sh
+tools/modernize/build-stack.sh
+tools/modernize/install-stack.sh
+tools/modernize/test-storage.sh
+```
+
+The storage script also tests a real host allocation failure inside a private
+32 MiB loop-backed ext4 filesystem, without filling the shared worker disk.
+Its final marker covers storage and native **capture**, not native restore,
+Kubernetes Pod checkpoint/restore, pmem/DAX or DAMON acceptance.
 
 Native capture already copies every configured virtio-blk drive after guest
 quiescing and VMM pause. New disks need capture regression coverage. Pmem backing

@@ -1,0 +1,130 @@
+Step 4 guest storage development validation; not clean committed acceptance
+f52d26c2d08bdefc762bfa0b99eb9e1ad41da4dd
+ M .gitignore
+ M config/config.go
+ M proto/firecracker.pb.go
+ M proto/firecracker.proto
+ M runtime/Makefile
+ M runtime/native_checkpoint_integ_test.go
+ M runtime/runc_jailer.go
+ M runtime/service.go
+ M runtime/storage_baseline_integ_test.go
+ M tools/image-builder/Makefile
+ M tools/image-builder/files_debootstrap/sbin/overlay-init
+?? runtime/guest_storage.go
+?? runtime/guest_storage_integ_test.go
+?? runtime/guest_storage_test.go
+ ce86b117d59ca93b1c04b791a251b445ace76703 _submodules/firecracker (v1.18.0-2-gce86b117d)
+ c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e _submodules/runc (v1.4.2)
+ 3070538befb5a6c09f93e99164762b3a76310357 _submodules/stargz-snapshotter (cmd/v0.18.2)
+cc1dfb449b7743332d9eba5398a6129b83a1092bb0fd607a51ecee5df83b0027  runtime/containerd-shim-aws-firecracker
+03e3972a5e895cb7de87226a770783549eb857a0258f376922fa22de64004f65  agent/agent
+ce15b3d35a4811fbf164371b72f57757cce5e846ad5959b547a471fd564a6e89  bin/firecracker
+f7c763775c948bd8b779e432e5f4d418463a96a3e222b959df2d648c5b798dac  default-vmlinux.bin
+27f74a42eabc916a753e0efdc4977e75b09137a0b410ac71457df486924e5235  tools/image-builder/rootfs.img
+99a8e0278ca886cdf72a9bed2619301972e3290b734aab46716ebc007d5c0b4a  /users/nehalem/fc-ctrd-mod/evidence/step4-storage-unit.log
+e0c14069986723a8a011f7c5bd5b1744e3baa5dbd4da21305f7b1598e0886ee1  /users/nehalem/fc-ctrd-mod/evidence/step4-storage-race.log
+e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47  /users/nehalem/fc-ctrd-mod/evidence/step4-storage-lint.log
+675c13c5e16b450e7c57545b8a0259fb6707d628c6552319026d070619b7d033  /users/nehalem/fc-ctrd-mod/evidence/step4-storage-GuestDiskStorage.log
+03ad9b134ed9ba9c6ce1e12c16a1946ff4cc828ac6e595756af03c39b5f39c48  /users/nehalem/fc-ctrd-mod/evidence/step4-storage-StorageBaseline.log
+aea6f19864aa425ae80811e513eb358dec4b58e92f8cfe0539b7918387e82e4a  /users/nehalem/fc-ctrd-mod/evidence/step4-storage-NativeCheckpoint.log
+b25afa8178846a694ecd1df36345cd2edf599935628510656ad0d92fab7984a9  /users/nehalem/fc-ctrd-mod/evidence/step4-storage-drive-id-failure.log
+4af06910359b875c8cbfc7919bca19b11b9a99b1a0f22c9b0ae97ec5ae87b018  /users/nehalem/fc-ctrd-mod/evidence/step4-storage-uuid-failure.log
+536112cebce4730acc4c6f47b3441f2a0238d145cc4b4ed26785766c56ceca23  /users/nehalem/fc-ctrd-mod/evidence/step4-storage-reservation-failure.log
+sha256:ddd5a19465cbde0e7c40e146a0ab0d40d69e8a98ade2771ef65c7ed467b93915
+TARGET SOURCE    FSTYPE OPTIONS
+/      /dev/sda3 ext3   rw,relatime
+runtime/containerd-shim-aws-firecracker: go1.26.11
+	path	github.com/firecracker-microvm/firecracker-containerd/runtime
+	mod	github.com/firecracker-microvm/firecracker-containerd	(devel)	
+	dep	github.com/asaskevich/govalidator	v0.0.0-20230301143203-a9d515a09cc2	h1:DklsrG3dyBCFEj5IhUbnKptjxatkF07cF2ak3yi77so=
+	dep	github.com/cespare/xxhash/v2	v2.3.0	h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
+	dep	github.com/containerd/console	v1.0.5	h1:R0ymNeydRqH2DmakFNdmjR2k0t7UPuiOV/N/27/qqsc=
+	dep	github.com/containerd/containerd/api	v1.11.1	h1:h8nfoDW9+fNsC/9TwiAHj8B1GzXKtR4eFtkhi/X5RLU=
+	dep	github.com/containerd/containerd/v2	v2.3.7	h1:7PGbgAVKE4ieQjFPv7+kwAv7f9dCtRpExZwjExHD/Fk=
+	dep	github.com/containerd/continuity	v0.5.0	h1:7a85HZpCSs+1Zps0Ee3DPSuAWY+0SJM1JNM51nlEVDg=
+	dep	github.com/containerd/errdefs	v1.0.0	h1:tg5yIfIlQIrxYtu9ajqY42W3lpS19XqdxRQeEwYG8PI=
+	dep	github.com/containerd/errdefs/pkg	v0.3.0	h1:9IKJ06FvyNlexW690DXuQNx2KA2cUJXx151Xdx3ZPPE=
+	dep	github.com/containerd/fifo	v1.1.0	h1:4I2mbh5stb1u6ycIABlBw9zgtlK8viPI9QkQNRQEEmY=
+	dep	github.com/containerd/go-runc	v1.1.0	h1:OX4f+/i2y5sUT7LhmcJH7GYrjjhHa1QI4e8yO0gGleA=
+	dep	github.com/containerd/log	v0.1.0	h1:TCJt7ioM2cr/tfR8GPbGf9/VRAX8D2B4PjzCpfX540I=
+	dep	github.com/containerd/platforms	v1.0.0-rc.5	h1:vXd569rDrz8LeMXzAnBsy6LADV5YtsD8oyaRarxdmSU=
+	dep	github.com/containerd/plugin	v1.1.0	h1:O+7lczNJVMy8rz0YNx3xGB8tTf5qY4i5abF041Ew19U=
+	dep	github.com/containerd/ttrpc	v1.2.8	h1:xbVu6D4qF2jihdh9rDVOKqUMiFBQk6YctTdo1zk087Y=
+	dep	github.com/containerd/typeurl/v2	v2.2.3	h1:yNA/94zxWdvYACdYO8zofhrTVuQY73fFU1y++dYSw40=
+	dep	github.com/containernetworking/cni	v1.3.0	h1:v6EpN8RznAZj9765HhXQrtXgX+ECGebEYEmnuFjskwo=
+	dep	github.com/containernetworking/plugins	v1.9.1	h1:8oU6WsIsU3bpnNZuvHp74a6cE1MJwbj2P7s4/yTUNlA=
+	dep	github.com/davecgh/go-spew	v1.1.2-0.20180830191138-d8f796af33cc	h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
+	dep	github.com/distribution/reference	v0.6.0	h1:0IXCQ5g4/QMHHkarYzh5l+u8T3t73zM5QvfrDyIgxBk=
+	dep	github.com/docker/go-events	v0.0.0-20190806004212-e31b211e4f1c	h1:+pKlWGMw7gf6bQ+oDZB4KHQFypsfjYlq/C4rfL7D3g8=
+	dep	github.com/felixge/httpsnoop	v1.0.4	h1:NFTV2Zj1bL4mc9sqWACXbQFVBBg2W3GPvqp8/ESS2Wg=
+	dep	github.com/firecracker-microvm/firecracker-go-sdk	v1.0.1-0.20250818195323-ed6ff32aa924
+	=>	github.com/JooyoungPark73/firecracker-go-sdk	v0.0.0-20261111093432-832b1a5132e0	h1:ZtzehkvEl/RfFFMq0UwXyONM35MUqRDyA5P+BnFQEhY=
+	
+	dep	github.com/go-logr/logr	v1.4.3	h1:CjnDlHq8ikf6E492q6eKboGOC0T8CDaOvkHCIg8idEI=
+	dep	github.com/go-logr/stdr	v1.2.2	h1:hSWxHoqTgW2S2qGc0LTAI563KZ5YKYRhT3MFKZMbjag=
+	dep	github.com/go-openapi/analysis	v0.23.0	h1:aGday7OWupfMs+LbmLZG4k0MYXIANxcuBTYUC03zFCU=
+	dep	github.com/go-openapi/errors	v0.22.1	h1:kslMRRnK7NCb/CvR1q1VWuEQCEIsBGn5GgKD9e+HYhU=
+	dep	github.com/go-openapi/jsonpointer	v0.21.0	h1:YgdVicSA9vH5RiHs9TZW5oyafXZFc6+2Vc1rr/O9oNQ=
+	dep	github.com/go-openapi/jsonreference	v0.21.0	h1:Rs+Y7hSXT83Jacb7kFyjn4ijOuVGSvOdF2+tg1TRrwQ=
+	dep	github.com/go-openapi/loads	v0.22.0	h1:ECPGd4jX1U6NApCGG1We+uEozOAvXvJSF4nnwHZ8Aco=
+	dep	github.com/go-openapi/runtime	v0.24.0	h1:vTgDijpGLCgJOJTdAp5kG+O+nRsVCbH417YQ3O0iZo0=
+	dep	github.com/go-openapi/spec	v0.21.0	h1:LTVzPc3p/RzRnkQqLRndbAzjY0d0BCL72A6j3CdL9ZY=
+	dep	github.com/go-openapi/strfmt	v0.23.0	h1:nlUS6BCqcnAk0pyhi9Y+kdDVZdZMHfEKQiS4HaMgO/c=
+	dep	github.com/go-openapi/swag	v0.23.0	h1:vsEVJDUo2hPJ2tu0/Xc+4noaxyEffXNIs3cOULZ+GrE=
+	dep	github.com/go-openapi/validate	v0.24.0	h1:LdfDKwNbpB6Vn40xhTdNZAnfLECL81w+VX3BumrGD58=
+	dep	github.com/gofrs/uuid	v3.3.0+incompatible	h1:8K4tyRfvU1CYPgJsveYFQMhpFd/wXNM7iK6rR7UHz84=
+	dep	github.com/gogo/protobuf	v1.3.2	h1:Ov1cvc58UF3b5XjBnZv7+opcTcQFZebYjWzi34vdm4Q=
+	dep	github.com/google/uuid	v1.6.0	h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
+	dep	github.com/hanwen/go-fuse/v2	v2.10.1	h1:QAqZuc9+aBtTou+OPruU/hkYQYCkgPtQd2QaepHkTTs=
+	dep	github.com/hashicorp/errwrap	v1.1.0	h1:OxrOeh75EUXMY8TBjag2fzXGZ40LB6IKw45YeGUDY2I=
+	dep	github.com/hashicorp/go-multierror	v1.1.1	h1:H5DkEtf6CXdFp0N0Em5UCwQpXMWke8IA0+lD48awMYo=
+	dep	github.com/josharian/intern	v1.0.0	h1:vlS4z54oSdjm0bgjRigI+G1HpF+tI+9rE5LLzOg8HmY=
+	dep	github.com/klauspost/compress	v1.18.5	h1:/h1gH5Ce+VWNLSWqPzOVn6XBO+vJbCNGvjoaGBFW2IE=
+	dep	github.com/mailru/easyjson	v0.7.7	h1:UGYAvKxe3sBsEDzO8ZeWOSlIQfWFlxbzLZe7hwFURr0=
+	dep	github.com/mdlayher/socket	v0.5.1	h1:VZaqt6RkGkt2OE9l3GcC6nZkqD3xKeQLyfleW/uBcos=
+	dep	github.com/mdlayher/vsock	v1.2.1	h1:pC1mTJTvjo1r9n9fbm7S1j04rCgCzhCOS5DY0zqHlnQ=
+	dep	github.com/miekg/dns	v1.1.62	h1:cN8OuEF1/x5Rq6Np+h1epln8OiyPWV+lROx9LxcGgIQ=
+	dep	github.com/mitchellh/mapstructure	v1.5.0	h1:jeMsZIYE/09sWLaz43PL7Gy6RuMjD2eJVyuac5Z2hdY=
+	dep	github.com/moby/locker	v1.0.1	h1:fOXqR41zeveg4fFODix+1Ch4mj/gT0NE1XJbp/epuBg=
+	dep	github.com/moby/sys/mountinfo	v0.7.2	h1:1shs6aH5s4o5H2zQLn796ADW1wMrIwHsyJ2v9KouLrg=
+	dep	github.com/moby/sys/signal	v0.7.1	h1:PrQxdvxcGijdo6UXXo/lU/TvHUWyPhj7UOpSo8tuvk0=
+	dep	github.com/moby/sys/user	v0.4.0	h1:jhcMKit7SA80hivmFJcbB1vqmw//wU61Zdui2eQXuMs=
+	dep	github.com/moby/sys/userns	v0.1.0	h1:tVLXkFOxVu9A64/yh59slHVv9ahO9UIev4JZusOLG/g=
+	dep	github.com/oklog/ulid	v1.3.1	h1:EGfNDEx6MqHz8B3uNV6QAib1UR2Lm97sHi3ocA6ESJ4=
+	dep	github.com/opencontainers/go-digest	v1.0.0	h1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=
+	dep	github.com/opencontainers/image-spec	v1.1.1	h1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=
+	dep	github.com/opencontainers/runtime-spec	v1.3.0	h1:YZupQUdctfhpZy3TM39nN9Ika5CBWT5diQ8ibYCRkxg=
+	dep	github.com/opentracing/opentracing-go	v1.2.0	h1:uEJPy/1a5RIPAJ0Ov+OIO8OxWu77jEv+1B0VhjKrZUs=
+	dep	github.com/pmezard/go-difflib	v1.0.1-0.20181226105442-5d4384ee4fb2	h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=
+	dep	github.com/shirou/gopsutil	v2.18.12+incompatible	h1:1eaJvGomDnH74/5cF4CTmTbLHAriGFsTZppLXDX93OM=
+	dep	github.com/sirupsen/logrus	v1.9.4	h1:TsZE7l11zFCLZnZ+teH4Umoq5BhEIfIzfRDZ1Uzql2w=
+	dep	github.com/stretchr/testify	v1.11.1	h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
+	dep	github.com/vishvananda/netlink	v1.3.1	h1:3AEMt62VKqz90r0tmNhog0r/PpWKmrEShJU0wJW6bV0=
+	dep	github.com/vishvananda/netns	v0.0.5	h1:DfiHV+j8bA32MFM7bfEunvT8IAqQ/NzSJHtcmW5zdEY=
+	dep	go.mongodb.org/mongo-driver	v1.14.0	h1:P98w8egYRjYe3XDjxhYJagTokP/H6HzlsnojRgZRd80=
+	dep	go.opentelemetry.io/auto/sdk	v1.2.1	h1:jXsnJ4Lmnqd11kwkBV2LgLoFMZKizbCi5fNZ/ipaZ64=
+	dep	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp	v0.68.0	h1:CqXxU8VOmDefoh0+ztfGaymYbhdB/tT3zs79QaZTNGY=
+	dep	go.opentelemetry.io/otel	v1.44.0	h1:JjwHmHpA4iZ3wBxluu2fbbE7j4kqlE8jXyAyPXH7HqU=
+	dep	go.opentelemetry.io/otel/metric	v1.44.0	h1:1w0gILTcHdr3YI+ixLyjemwrVnsMURbTZFrSYCdDdmc=
+	dep	go.opentelemetry.io/otel/trace	v1.44.0	h1:jxF5CsGYCe74MCRx2X4g7WsY/VBKRqqpNvXlX/6gtIk=
+	dep	golang.org/x/net	v0.58.0	h1:ynWG7rqYi4ccpTEuPZ2QGWHktVEM9DMCj9yzDE0Q7To=
+	dep	golang.org/x/sync	v0.22.0	h1:SZjpbeLmrCk4xhRSZFNZW5gFUeCeFgjekvI/+gfScek=
+	dep	golang.org/x/sys	v0.47.0	h1:o7XGOvZQCADBQQ4Y7VNq2dRWQR7JmOUW8Kxx4ZsNgWs=
+	dep	golang.org/x/text	v0.41.0	h1:vz/seA0lnX87Othu2f/0L24RcgrXD9/YFTSuGjj3rH8=
+	dep	google.golang.org/genproto/googleapis/rpc	v0.0.0-20260526163538-3dc84a4a5aaa	h1:mZHHdPZl0dbGHCflZgAq/Q468DWVFcU2whhB2KAo8fk=
+	dep	google.golang.org/grpc	v1.83.2	h1:EManeRomTObA0BU7I8vXgg/78uE5MJ9M8B39EX2WscU=
+	dep	google.golang.org/protobuf	v1.36.12-0.20260120151049-f2248ac996af	h1:+5/Sw3GsDNlEmu7TfklWKPdQ0Ykja5VEmq2i817+jbI=
+	dep	gopkg.in/yaml.v2	v2.4.0	h1:D8xgwECY7CYvx+Y2n4sBz93Jn9JRvxdiyyo8CTfuKaY=
+	dep	gopkg.in/yaml.v3	v3.0.1	h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
+	build	-buildmode=exe
+	build	-compiler=gc
+	build	-ldflags="-X main.revision=f52d26c2d08bdefc762bfa0b99eb9e1ad41da4dd"
+	build	CGO_ENABLED=1
+	build	CGO_CFLAGS=
+	build	CGO_CPPFLAGS=
+	build	CGO_CXXFLAGS=
+	build	CGO_LDFLAGS=
+	build	GOARCH=amd64
+	build	GOOS=linux
+	build	GOAMD64=v1

@@ -289,7 +289,7 @@
     "sdk_commit": "832b1a5132e06f5e2167b64b97b5cd8946604005"
   },
   "step_4_guest_storage": {
-    "status": "WIP; worker component/race/lint checks pass, VM boot validation in progress",
+    "status": "WIP; development storage and native capture passed; committed revalidation pending",
     "default_mode": "disk",
     "default_capacity_mib": 512,
     "capacity_range_mib": [

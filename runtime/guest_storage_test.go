@@ -57,3 +57,15 @@ func TestGuestOverlayRejectsRAMAndCleansFailure(t *testing.T) {
 	_, err = os.Stat(path)
 	require.ErrorIs(t, err, os.ErrNotExist, "failure after formatting must release the allocated capacity")
 }
+
+func TestGuestOverlayHostENOSPC(t *testing.T) {
+	root := os.Getenv("FICD_OVERLAY_ENOSPC_DIR")
+	if root == "" {
+		t.Skip("test-storage.sh supplies a private, disk-backed 32 MiB filesystem")
+	}
+	path := filepath.Join(root, guestOverlayFile)
+	_, err := createGuestOverlay(context.Background(), path, 64)
+	require.ErrorIs(t, err, syscall.ENOSPC)
+	_, err = os.Stat(path)
+	require.ErrorIs(t, err, os.ErrNotExist, "failed allocation must remove its partial image")
+}
