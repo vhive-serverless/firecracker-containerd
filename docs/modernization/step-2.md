@@ -1,5 +1,12 @@
 # Step 2: vHive compatibility
 
+Task-test synchronization maintenance at
+`b2df9bc08aa38bc6a2072dc59f50cbae35a7a20b` passed 200 targeted worker
+repetitions across root/nonroot, single/default concurrency and plain/race modes.
+The [maintenance receipt](evidence/b2df9bc-task-wait-sync-receipt.log) records
+the commands and hashes. The scope was host unit tests; the runtime/vHive acceptance
+results below retain their original source revisions, dependency pins and receipts.
+
 Install-loop maintenance at `46b2fa204da23508271e921fd14ad2dc03eb1dbe` passed the
 worker fixture: a failing first component stops installation before the second,
 and a successful component still installs. The [maintenance receipt](evidence/46b2fa2-install-guard-receipt.log)
