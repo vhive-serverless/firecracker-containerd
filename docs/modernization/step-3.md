@@ -180,3 +180,11 @@ hashes and raw log/report hashes. The remaining failures cover volumes,
 unsupported host namespaces and nine AppArmor setup failures due to missing
 `sudo`; they prevent a claim of CRI compliance. This result predates the merged
 task creation cleanup correction and remains a baseline for subsequent changes.
+
+The merged cleanup correction at
+`06bb03ff16bae291d071e6f7b583def117b14dde` passed source checks, build,
+installation and the same-VMM drive-reuse regression. Its unfiltered CRI run
+again recorded 92 passes, 21 failures and 29 skips. The
+[merged-run receipt](evidence/06bb03f-cri-full-receipt.log) preserves the actual
+image binary hashes and all failed/skipped cases. This verifies the correction's
+propagation while retaining the remaining CRI failures explicitly.
