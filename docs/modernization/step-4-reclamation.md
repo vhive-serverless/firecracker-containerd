@@ -1,12 +1,24 @@
 # Reclamation integration notes — WIP
 
 Step 4 is incomplete, and Step 3 remains WIP by explicit user instruction.
-The runtime configuration below has passed worker component/race/lint checks
-and one real-VM development test. Clean committed validation remains pending.
+The runtime configuration below passed clean committed worker acceptance at
+`97062314463adb53ee6534afc5d8eafd82bbf509`: full build, private installation,
+lint, race units, forced protobuf regeneration, and isolated reporting, DAMON
+and ordinary balloon tests. The
+[receipt](evidence/9706231-damon-acceptance-receipt.log) and
+[raw acceptance log](evidence/9706231-damon-acceptance.log) identify the source,
+dependencies, actual binaries and image. The checkout stayed clean.
 The first clean run at `fe2562f` completed build and private installation but
 stopped at lint because the integration test needed gofmt. The
 [failure log](evidence/fe2562f-damon-acceptance-failed.log) is retained; this
 attempt does not count as acceptance.
+
+The corrected committed run reclaimed 41943040 bytes while retaining the
+128 MiB cold file. VMM RSS fell from 287388 to 251532 KiB and returned to
+286208 KiB after reread. Reporting processed 76 descriptors without failures,
+with balloon target/actual zero. Both the file checksum and memory-only token
+survived reuse. This accepts the mechanism, while the controlled evaluation
+and pmem integration remain pending.
 
 `CreateVMRequest.Reclamation` overrides administrator `guest_reclamation`
 configuration. Nil inherits the administrator value; explicit `Enabled=false`
@@ -58,6 +70,6 @@ can disable reporting when the VMM lacks the required poison feature.
 The runtime's reporting development test compares enabled/disabled VMs with
 balloon target zero, processes VMM metrics, checks RSS release after freeing
 resident pages, then verifies retained data after fresh allocations. A separate
-DAMON test must retain a cold disk file across idle, observe reclaim/reporting
-and a host release, and verify its checksum after refault. Neither test replaces
+DAMON test retains a cold disk file across idle, observes reclaim/reporting
+and a host release, and verifies its checksum after refault. Neither test replaces
 the controlled five-configuration memory/performance evaluation.

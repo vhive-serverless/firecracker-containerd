@@ -312,9 +312,9 @@
     "test_state_directory": "FICD_VM_STORAGE; defaults to ../.ficd-test-vms/<checkout-name>, outside source/build contexts"
   },
   "step_4_memory": {
-    "status": "WIP milestone; free-page reporting component passed committed worker acceptance; DAMON/pmem/evaluation pending",
+    "status": "WIP milestone; free-page reporting and DAMON components passed committed worker acceptance; pmem/evaluation pending",
     "free_page_reporting": "FirecrackerBalloonDevice.FreePageReporting; independent of target amount",
-    "damon": "Implemented bounded startup controls; component/race/lint and cold-file development VM passed; clean committed acceptance pending",
+    "damon": "Bounded non-anonymous reclamation and reporting passed clean committed worker acceptance at 9706231",
     "pmem_dax": "Optional reproducible ext4 image validated; runtime pmem integration/guest DAX activation pending",
     "evaluation": "five requested configurations plus matching filesystem controls pending",
     "free_page_reporting_validation": {
@@ -359,6 +359,22 @@
       "filesystem": "ext4, 4096-byte blocks, clean, no journal, immutable mode0444",
       "evidence": "../../tools/image-builder/evidence/e76967b-dax-image-receipt.log",
       "guest_dax_activation_verified": false
+    },
+    "damon_validation": {
+      "tested_runtime_commit": "97062314463adb53ee6534afc5d8eafd82bbf509",
+      "worker_checkout": "/users/nehalem/fc-ctrd-mod/step4-memory-dev",
+      "install_prefix": "/users/nehalem/fc-ctrd-mod/install/97062314463a",
+      "receipt": "evidence/9706231-damon-acceptance-receipt.log",
+      "receipt_sha256": "2d948136c4549e330c349833e50d6915f6755c5d65204be2857a0b921637c02e",
+      "result": "PASS; full build/private install/lint/race/forced proto, reporting/DAMON/ordinary balloon isolated VMs; clean source",
+      "filled_rss_kib": 287388,
+      "idle_rss_kib": 251532,
+      "reloaded_rss_kib": 286208,
+      "reclaimed_delta_bytes": 41943040,
+      "report_descriptors": 76,
+      "reporting_failures": 0,
+      "file_checksum_and_ram_token_preserved": true,
+      "scope": "mechanism acceptance, not five-arm evaluation or native restore"
     }
   },
   "shared_jailer_telemetry_validation": {

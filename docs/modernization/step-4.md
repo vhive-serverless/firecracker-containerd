@@ -154,11 +154,14 @@ The broader committed storage check exposed the jailer's hard-link assumption
 for external telemetry FIFOs: putting the jail on disk made `/tmp` a different
 filesystem in the test container. Commit `c7d73c7` prepares runc bind mounts for
 that case before startup. Its development cross-filesystem, VM creation and
-race checks pass; full committed storage revalidation remains pending. The
-shared correction is also being validated on earlier branches.
+race checks pass, and committed storage revalidation passed at `8f8d00f` above.
+The shared correction also passed bounded checks on Steps 1–3; Step 3 remains WIP.
 
 [Reclamation integration notes](step-4-reclamation.md) record the exact pinned
-kernel controls and remaining DAMON activation/evaluation work.
+kernel controls and clean committed DAMON acceptance at `9706231`. That run
+passed full build/private installation, lint, race units, forced protobuf
+regeneration, reporting, DAMON and ordinary balloon regression tests. Pmem/DAX
+integration and the controlled evaluation remain pending.
 
 Native capture already copies every configured virtio-blk drive after guest
 quiescing and VMM pause. New disks need capture regression coverage. Pmem backing
