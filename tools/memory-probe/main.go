@@ -20,7 +20,11 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-const maxMapping = 256 << 20
+const (
+	maxMapping    = 256 << 20
+	bytesField    = "bytes"
+	verifiedField = "verified"
+)
 
 type options struct {
 	file      string
@@ -242,7 +246,7 @@ func execute(args []string, out io.Writer) error {
 	}
 	defer unix.Munmap(mapped)
 	before := sha256.Sum256(mapped)
-	if err := r.emit("file_touch", map[string]any{"sha256": hex.EncodeToString(before[:]), "bytes": length}); err != nil {
+	if err := r.emit("file_touch", map[string]any{"sha256": hex.EncodeToString(before[:]), bytesField: length}); err != nil {
 		return err
 	}
 	anonymous, err := unix.Mmap(-1, 0, opts.anonMiB<<20, unix.PROT_READ|unix.PROT_WRITE, unix.MAP_PRIVATE|unix.MAP_ANON)
@@ -253,7 +257,7 @@ func execute(args []string, out io.Writer) error {
 	for i := range anonymous {
 		anonymous[i] = canaryByte(i)
 	}
-	if err := r.emit("anon_fill", map[string]any{"bytes": len(anonymous)}); err != nil {
+	if err := r.emit("anon_fill", map[string]any{bytesField: len(anonymous)}); err != nil {
 		return err
 	}
 	if err := r.emit("idle_start", map[string]any{}); err != nil {
@@ -264,7 +268,7 @@ func execute(args []string, out io.Writer) error {
 		return err
 	}
 	after := sha256.Sum256(mapped)
-	if err := r.emit("file_retouch", map[string]any{"sha256": hex.EncodeToString(after[:]), "bytes": length, "verified": before == after}); err != nil {
+	if err := r.emit("file_retouch", map[string]any{"sha256": hex.EncodeToString(after[:]), bytesField: length, verifiedField: before == after}); err != nil {
 		return err
 	}
 	if before != after {
@@ -273,10 +277,10 @@ func execute(args []string, out io.Writer) error {
 	if err := verifyCanary(anonymous); err != nil {
 		return err
 	}
-	if err := r.emit("anon_verify", map[string]any{"bytes": len(anonymous), "verified": true}); err != nil {
+	if err := r.emit("anon_verify", map[string]any{bytesField: len(anonymous), verifiedField: true}); err != nil {
 		return err
 	}
-	return r.emit("complete", map[string]any{"verified": true})
+	return r.emit("complete", map[string]any{verifiedField: true})
 }
 
 func main() {
