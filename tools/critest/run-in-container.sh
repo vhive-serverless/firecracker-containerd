@@ -91,6 +91,9 @@ if test "${CRI_WEBSOCKETS:-0}" = 1; then
     args+=(--websocket-exec --websocket-attach --websocket-portforward)
 fi
 critest "${args[@]}"
+if test "${CRI_INTEGRATION_TESTS:-0}" = 1; then
+    FICD_CRI_RESOURCE_ENDPOINT="$cri_socket" /cri-runtime.test -test.v -test.run '^TestPodVMResources$'
+fi
 for attempt in $(seq 1 30); do
     tasks=$(ctr --address "$socket" --namespace k8s.io tasks list --quiet)
     if test -z "$tasks" && ! pgrep -x firecracker >/dev/null; then break; fi

@@ -14,6 +14,12 @@ fi
 image=${CRI_BASE_IMAGE:-"localhost/firecracker-containerd-test:${revision:0:12}"}
 runtime_revision=${CRI_RUNTIME_REVISION:-$revision}
 image_id=$(docker image inspect --format '{{.Id}}' "$image")
+extra_mounts=()
+if test "${CRI_INTEGRATION_TESTS:-0}" = 1; then
+    export PATH="$stack_dir/toolchains/go1.26.11/bin:$PATH"
+    make -C cri cri-runtime.test
+    extra_mounts+=(--volume "$repo_dir/cri/cri-runtime.test:/cri-runtime.test:ro")
+fi
 mkdir -p "$stack_dir/evidence"
 logs=$(mktemp -d "$stack_dir/evidence/cri-${revision:0:12}.XXXXXXXX")
 suffix=$(basename "$logs")
@@ -40,6 +46,8 @@ printf 'CRI_LOGS=%s\n' "$logs"
         "$revision" "$runtime_revision" "$image_id" "${CRI_FOCUS:-all}"
     printf 'source_dirty=%s\nimage_override=%s\n' "$dirty" "${CRI_BASE_IMAGE:+true}"
     printf 'websocket_streaming=%s\n' "${CRI_WEBSOCKETS:-0}"
+    printf 'runtime_integration_tests=%s\n' "${CRI_INTEGRATION_TESTS:-0}"
+    if test "${CRI_INTEGRATION_TESTS:-0}" = 1; then sha256sum cri/cri-runtime.test; fi
     sha256sum tools/critest/test-cri.sh tools/critest/run-in-container.sh
 } > "$logs/inputs.log"
 tools/thinpool.sh create "$FICD_DM_POOL"
@@ -51,6 +59,7 @@ docker create --init --name "$name" --privileged --network bridge --ipc=host \
     --env FICD_DM_POOL --env "CRI_RUNTIME_REVISION=$runtime_revision" \
     --env "CRI_FOCUS=${CRI_FOCUS:-}" --entrypoint /bin/bash \
     --env "CRI_WEBSOCKETS=${CRI_WEBSOCKETS:-0}" \
+    --env "CRI_INTEGRATION_TESTS=${CRI_INTEGRATION_TESTS:-0}" "${extra_mounts[@]}" \
     "$image" /run-cri > "$logs/container-id"
 container_owned=1
 set +e

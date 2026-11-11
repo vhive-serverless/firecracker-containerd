@@ -37,10 +37,49 @@ are explicitly rejected until coherent volume sharing is implemented.
 The runtime configuration adds `cri_cni_conf_dir` (default `/etc/cni/net.d`),
 `cri_cni_cache_dir` (default `/var/lib/cni`) and `cri_container_count` (default 8,
 including the sandbox). The x86 MMIO profile permits 2–14 slots, reserving
-interrupts for root, network, vsock and ACPI devices. VM CPU and memory currently
-use the existing defaults; deriving VM capacity from Pod resources remains work
-before Kubernetes acceptance. Host network, host PID and host IPC requests are
+interrupts for root, network, vsock and ACPI devices. Host network, host PID and host IPC requests are
 rejected rather than interpreted as guest-host namespace requests.
+
+## VM capacity from Pod resources
+
+The shim reads containerd 2.3.7's standard `io.kubernetes.cri.sandbox-cpu-period`,
+`sandbox-cpu-quota`, `sandbox-cpu-shares` and `sandbox-memory` OCI annotations.
+Containerd derives these from `LinuxPodSandboxConfig.Resources`; the pause
+container's own cgroup is not the Pod resource envelope. Kubelet annotations
+are preserved unchanged.
+
+The VM gets enough whole vCPUs for a positive CPU quota divided by its period.
+An omitted period uses Linux's 100 ms default. With an unlimited quota, CPU
+shares supply the requested CPU capacity, with a one-vCPU fallback. SMT rounds
+multi-vCPU capacity to an even count. Requests exceeding the selected
+Firecracker KVM backend's 32-vCPU ceiling fail explicitly.
+
+A positive Pod memory limit is rounded up to MiB and receives guest headroom
+from `cri_memory_overhead_mib` (default 128 MiB). An unbounded or missing memory
+limit uses the total `cri_default_memory_mib` capacity (default 512 MiB). Zero
+configuration values select these defaults. The headroom is for the guest
+kernel and agent; RuntimeClass scheduling overhead must also account for host
+shim and VMM costs. The pinned kubelet calculates sandbox resources without
+Pod overhead, which is supplied separately in CRI and is not included in these
+containerd OCI annotations.
+
+This implements initial VM sizing. Charging the host VMM to the Pod cgroup,
+aggregate resource accounting and live resource changes still require work.
+A Pod with no positive memory limit receives the configured finite fallback,
+and the VMM cannot grow beyond its boot capacity. These limits must be resolved
+or made explicit in the eventual Kubernetes deployment profile.
+
+The optional worker check compiles a static test client on the worker and
+mounts it into the driver's private test container:
+
+```sh
+CRI_INTEGRATION_TESTS=1 CRI_FOCUS='Runtime info' tools/critest/test-cri.sh
+```
+
+It checks the actual VMM machine configuration, the CPU and memory visible to
+a container, unchanged Pod annotations, and cleanup. Development runs do not
+establish acceptance of a committed stack; committed results are recorded in
+the worker receipts.
 
 ## CRI endpoint and guest port forwarding
 

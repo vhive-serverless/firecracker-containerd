@@ -58,6 +58,10 @@ func criVMRequest(spec *specs.Spec, cfg *config.Config) (*proto.CreateVMRequest,
 	if spec.Linux == nil {
 		return nil, status.Error(codes.InvalidArgument, "CRI sandbox has no Linux configuration")
 	}
+	request.MachineCfg, err = criMachineConfiguration(spec.Annotations, cfg)
+	if err != nil {
+		return nil, err
+	}
 	var podPID, podIPC bool
 	for _, ns := range spec.Linux.Namespaces {
 		switch ns.Type {

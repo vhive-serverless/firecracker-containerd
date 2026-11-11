@@ -31,11 +31,14 @@ install: firecracker-cri
 test:
 	GOWORK=off go test -mod=readonly -count=1 ./... $(EXTRAGOARGS)
 
+cri-runtime.test: $(SOURCES) go.mod go.sum
+	CGO_ENABLED=0 GOWORK=off go test -mod=readonly -c -o $@ .
+
 integ-test:
 	cd .. && tools/critest/test-cri.sh
 
 clean:
-	rm -f firecracker-cri
+	rm -f firecracker-cri cri-runtime.test
 
 distclean: clean
 

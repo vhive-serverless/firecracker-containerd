@@ -189,7 +189,14 @@
       "frontend_cri_streaming": "v0.37.2",
       "module_manifest": "cri-modules.txt",
       "port_forward_vsock_port": 10900,
-      "checkpoint_restore_status": "RPC definitions present; native whole-Pod implementation pending"
+      "checkpoint_restore_status": "RPC definitions present; native whole-Pod implementation pending",
+      "initial_vm_resources": {
+        "source": "containerd 2.3.7 standard sandbox CPU/memory OCI annotations",
+        "default_memory_mib": 512,
+        "guest_memory_overhead_mib": 128,
+        "kvm_max_vcpus": 32,
+        "validation": "optional CRI_INTEGRATION_TESTS=1 worker driver; initial sizing only, host Pod cgroup accounting and live changes pending"
+      }
     }
   },
   "step_2_validation": {

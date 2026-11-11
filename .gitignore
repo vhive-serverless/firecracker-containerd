@@ -5,4 +5,5 @@ runtime/logs
 *stamp
 default-vmlinux.bin
 /cri/firecracker-cri
+/cri/cri-runtime.test
 __pycache__/
