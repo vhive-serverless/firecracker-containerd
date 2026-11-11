@@ -1,0 +1,24 @@
+runtime_revision=579da231cefb7771a57f3bb06e4b07fe1b17f579
+base_image=sha256:9a605deddf567c421e04d46acb16382725adb949dfb94c8e3fba125ada1b1593
+k3s version v1.37.2+k3s1 (f6973cb8)
+go version go1.26.10
+Kubernetes v1.38.0-beta.0
+265b3ee6a3198ef14033c63ef46cbb32370d83795199fb6d1b01f21575eddbda  /users/nehalem/fc-ctrd-mod/toolchains/k3s-v1.37.2/k3s
+24c8161f0e983a3134002c7f32866dc8fe36f706a4e645a94bb2c0c81984afa0  /users/nehalem/fc-ctrd-mod/toolchains/kubernetes-v1.38.0-beta.0/kube-apiserver
+44b5a1ecd40c9124bd9b4903c1a1e83395e5658f68d179909dc480506001405c  tools/kubernetes/audit-interfaces.sh
+
+k3s gate result:
+time="2026-11-11T02:37:33Z" level=warning msg="Failed to set feature-gates PodLevelCheckpointRestore=true: unrecognized feature gate: PodLevelCheckpointRestore"
+Error: unrecognized feature gate: PodLevelCheckpointRestore
+time="2026-11-11T02:37:33Z" level=error msg="Shutdown request received: \"apiserver exited: unrecognized feature gate: PodLevelCheckpointRestore\""
+
+upstream beta gate result:
+E1111 02:37:34.336143       7 run.go:72] "command failed" err="unrecognized feature gate: PodLevelCheckpointRestore"
+exit_code=1
+4988868eee51218eb5b345b270aadb4ec79548db90430401de496d29fb6ab386  /users/nehalem/fc-ctrd-mod/evidence/kubernetes-api-audit.d2dvrq4p/k3s.log
+54975b596ea92447f55389bcdaa9881177eb80eb8a4234d131be6de0b29cfdc5  /users/nehalem/fc-ctrd-mod/evidence/kubernetes-api-audit.d2dvrq4p/upstream-beta.log
+
+Audit command: tools/kubernetes/audit-interfaces.sh
+Tested audit commit: 579da231cefb7771a57f3bb06e4b07fe1b17f579
+Audit exit status: 2 (required feature unavailable)
+51efe1fa49a7c797099eb90240438b5f4008f526382edca2f799332edee61213  evidence/579da231cefb-api-audit.log

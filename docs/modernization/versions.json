@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "Step 2 worker acceptance passed; Step 3 Kubernetes/CRI interface audit underway",
+  "status": "Steps 1 and 2 accepted; Step 3 released Kubernetes Pod API prerequisite unavailable",
   "step_1_validation": {
     "runtime_branch": "modernize-runtime",
     "completion_commit": "e7395acb2c88cfe8c5d32ba61ff65c17e031858c",
@@ -174,5 +174,27 @@
     "acceptance_receipt": "evidence/122d7084043a-acceptance-receipt.log",
     "runtime_acceptance_log_sha256": "489c699a444eb729327f42e5957ee5708e4a8db74108c783e427db41cb22fa13",
     "vhive_acceptance_log_sha256": "fa265494649a4a007430b397f32c3d1e16148df0af73de789461957d9f185b34"
+  },
+  "kubernetes_capability_audit": {
+    "receipt": "evidence/579da231cefb-kubernetes-api-audit.log",
+    "audit_commit": "579da231cefb7771a57f3bb06e4b07fe1b17f579",
+    "feature_gate": "PodLevelCheckpointRestore",
+    "k3s": {
+      "version": "v1.37.2+k3s1",
+      "commit": "f6973cb850e9b245585363d15bde80904ac862fd",
+      "binary_sha256": "265b3ee6a3198ef14033c63ef46cbb32370d83795199fb6d1b01f21575eddbda",
+      "result": "API server rejects required feature gate"
+    },
+    "newer_release": {
+      "version": "v1.38.0-beta.0",
+      "commit": "1ca7499c9a5669c1f025dbe14f1da7dd9a0eb58a",
+      "apiserver_sha256": "24c8161f0e983a3134002c7f32866dc8fe36f706a4e645a94bb2c0c81984afa0",
+      "result": "API server rejects required feature gate"
+    },
+    "open_upstream_candidates": {
+      "checkpoint_pr_140186": "27d02988e4fb3008c4d29e9db6ad844f58cb8d1b",
+      "restore_pr_143579": "5533040d9fce30bc30ed3c07e8b187ed788c2f8a",
+      "status": "unmerged, not released; no substitution made"
+    }
   }
 }
