@@ -1,8 +1,9 @@
-# Pmem/DAX integration — WIP
+# Pmem/DAX integration
 
 Step 3 remains explicitly WIP. This component adds an optional immutable guest
-root through the pinned VMM/SDK's virtio-pmem support. It does not complete
-native restore or the five-configuration evaluation.
+root through the pinned VMM/SDK's virtio-pmem support. Component acceptance is
+separate from the later native runtime restore and controlled evaluation
+results linked below; Kubernetes/CRI restore remains incomplete.
 
 Clean commit `438c2cb6ea0c7de719bed8eef08b3ba0db1d31b8` passed the complete
 worker procedure below: full build, private installation, lint, race units,
@@ -58,8 +59,8 @@ writable, mismatched or unsupported pmem layouts. The file-clone path verifies
 and republishes the immutable lower before snapshot load. Firecracker currently
 has no pmem-path override on load: jailed snapshots require the same digest
 basename; unjailed snapshots require the same absolute cache pathname. A changed
-pathname is rejected. This path contract is implemented and unit-tested; it is
-not evidence that the inherited end-to-end native restore prototype works.
+pathname is rejected. The later native runtime restore acceptance exercises
+both jailer modes within this path contract; it does not accept path relocation.
 
 Worker component checks, after a clean build and private install:
 

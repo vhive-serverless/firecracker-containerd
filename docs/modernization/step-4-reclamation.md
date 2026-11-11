@@ -1,6 +1,8 @@
-# Reclamation integration notes — WIP
+# Reclamation integration notes
 
-Step 4 is incomplete, and Step 3 remains WIP by explicit user instruction.
+Step 3 remains WIP by explicit user instruction. Reclamation component,
+controlled evaluation and direct runtime restore results are recorded below;
+they do not complete the inherited Kubernetes/CRI integration gates.
 The runtime configuration below passed clean committed worker acceptance at
 `97062314463adb53ee6534afc5d8eafd82bbf509`: full build, private installation,
 lint, race units, forced protobuf regeneration, and isolated reporting, DAMON
@@ -17,8 +19,8 @@ The corrected committed run reclaimed 41943040 bytes while retaining the
 128 MiB cold file. VMM RSS fell from 287388 to 251532 KiB and returned to
 286208 KiB after reread. Reporting processed 76 descriptors without failures,
 with balloon target/actual zero. Both the file checksum and memory-only token
-survived reuse. This accepts the mechanism, while the controlled evaluation
-and pmem integration remain pending.
+survived reuse. This run accepts the mechanism; the later controlled evaluation,
+pmem integration and restore checks have separate acceptance records below.
 
 `CreateVMRequest.Reclamation` overrides administrator `guest_reclamation`
 configuration. Nil inherits the administrator value; explicit `Enabled=false`

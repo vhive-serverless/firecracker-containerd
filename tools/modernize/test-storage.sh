@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Run after build-stack.sh/install-stack.sh on the designated worker.
-# This validates disk storage and native capture; inherited restore remains WIP.
+# This validates disk storage and native capture; test-native-restore.sh covers restore.
 set -euo pipefail
 repo_dir=$(cd "$(dirname "$0")/../.." && pwd)
 stack_dir=${STACK_DIR:-"$HOME/fc-ctrd-mod"}

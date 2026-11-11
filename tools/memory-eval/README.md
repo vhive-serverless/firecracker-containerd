@@ -152,7 +152,10 @@ No full-trial PSS integral is extrapolated over the unsampled boot interval.
 Probe phase timings include hashing and instrumentation; they are not pure
 storage request latency. VM creation and workload-readback RPC timings are
 recorded separately. Snapshot/capture checks run separately from these trials.
-Native restore remains the inherited Step 3 WIP limitation.
+Direct native runtime restore subsequently passed separate
+[storage restore acceptance](../../docs/modernization/step-4.md#native-runtime-storage-restore)
+at `72f4fc9`. The frozen evaluation does not test restore, and Kubernetes/CRI
+Pod restore remains the inherited Step 3 WIP limitation.
 
 Analyze a completed committed matrix using the separately worker-tested analyzer:
 
