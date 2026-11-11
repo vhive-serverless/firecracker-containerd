@@ -30,11 +30,13 @@ import (
 	"time"
 
 	containerd "github.com/containerd/containerd/v2/client"
+	"github.com/containerd/containerd/v2/core/mount"
 	"github.com/containerd/containerd/v2/pkg/cio"
 	"github.com/containerd/containerd/v2/pkg/namespaces"
 	"github.com/containerd/containerd/v2/pkg/oci"
 	crimeta "github.com/firecracker-microvm/firecracker-containerd/internal/cri"
 	"github.com/firecracker-microvm/firecracker-containerd/internal/integtest"
+	"github.com/firecracker-microvm/firecracker-containerd/internal/vm"
 	"github.com/firecracker-microvm/firecracker-containerd/internal/volfs"
 	"github.com/firecracker-microvm/firecracker-containerd/proto"
 	"github.com/firecracker-microvm/firecracker-containerd/runtime/firecrackeroci"
@@ -108,6 +110,7 @@ func TestNativeCheckpoint_Isolated(t *testing.T) {
 				require.Equal(t, "before", nativeExec(ctx, t, process, "while ! test -e /state; do sleep .01; done; sync; cat /state"))
 				tasks = append(tasks, process)
 			}
+			writeGuestUpperState(ctx, t, client, id, "before")
 			artifact := filepath.Join(t.TempDir(), "checkpoint")
 			resumeCount := 2
 			if jailed {
@@ -125,7 +128,7 @@ func TestNativeCheckpoint_Isolated(t *testing.T) {
 			require.Len(t, manifest.Tasks, 2)
 			require.Len(t, manifest.ContainerSlots, 2)
 			require.Len(t, manifest.ResumeTasks, resumeCount)
-			require.Len(t, manifest.Drives, 3)
+			require.Len(t, manifest.Drives, 4, "capture includes the private guest upper")
 			require.Positive(t, manifest.VsockPortCount, "restore must retain the allocator offset to allocate beyond captured listeners")
 			if jailed {
 				state, err := tasks[1].Status(ctx)
@@ -136,6 +139,7 @@ func TestNativeCheckpoint_Isolated(t *testing.T) {
 			for _, process := range tasks {
 				require.Equal(t, "after", nativeExec(ctx, t, process, "echo after >/state; echo shared-after >/shared/state; sync; cat /state"), "source must retain exec, I/O and independent writes after capture")
 			}
+			writeGuestUpperState(ctx, t, client, id, "after")
 			for _, task := range manifest.Tasks {
 				require.Len(t, task.VolumeTokens, 1)
 			}
@@ -159,7 +163,11 @@ func TestNativeCheckpoint_Isolated(t *testing.T) {
 				if drive.ReadOnly {
 					continue
 				}
-				output, err := exec.CommandContext(ctx, "debugfs", "-R", "cat /state", filepath.Join(artifact, drive.File.Path)).Output()
+				path := "/state"
+				if drive.ID == guestOverlayDrive {
+					path = "/root/native-upper-state"
+				}
+				output, err := exec.CommandContext(ctx, "debugfs", "-R", "cat "+path, filepath.Join(artifact, drive.File.Path)).Output()
 				require.NoError(t, err)
 				require.Equal(t, "before\n", string(output), "captured ext4 data must remain at the checkpoint even after source sync")
 			}
@@ -171,7 +179,11 @@ func TestNativeCheckpoint_Isolated(t *testing.T) {
 				if drive.ReadOnly {
 					continue
 				}
-				output, err := exec.CommandContext(ctx, "debugfs", "-R", "cat /state", filepath.Join(repeated, drive.File.Path)).Output()
+				path := "/state"
+				if drive.ID == guestOverlayDrive {
+					path = "/root/native-upper-state"
+				}
+				output, err := exec.CommandContext(ctx, "debugfs", "-R", "cat "+path, filepath.Join(repeated, drive.File.Path)).Output()
 				require.NoError(t, err)
 				require.Equal(t, "after\n", string(output), "a fresh capture must reflect the advanced source")
 			}
@@ -189,6 +201,17 @@ func TestNativeCheckpoint_Isolated(t *testing.T) {
 			}
 		})
 	}
+}
+
+func writeGuestUpperState(ctx context.Context, t *testing.T, client *containerd.Client, vmID, value string) {
+	t.Helper()
+	container, err := client.NewContainer(ctx, vmID+"-upper-"+value,
+		containerd.WithNewSpec(firecrackeroci.WithVMID(vmID), oci.WithDefaultPathEnv,
+			oci.WithProcessArgs("/bin/sh", "-ec", "printf '%s\\n' \"$1\" >/native-upper-state; sync", "--", value)))
+	require.NoError(t, err)
+	defer func() { require.NoError(t, container.Delete(ctx)) }()
+	runStorageAudit(ctx, t, container, containerd.WithRootFS([]mount.Mount{
+		vm.AddLocalMountIdentifier(mount.Mount{Type: "bind", Source: "/", Options: []string{"bind"}})}))
 }
 
 func checkNativeVolumes(ctx context.Context, t *testing.T, artifact, expected string) {

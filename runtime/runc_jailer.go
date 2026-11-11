@@ -258,7 +258,9 @@ func (j *runcJailer) BuildJailedRootHandler(cfg *config.Config, machineConfig *f
 				// call close down below.
 				defer f.Close()
 
-				if !internal.IsStubDrive(f) {
+				// Runtime-owned writable disks are allocated inside the jail and
+				// already have its ownership. Copying a file onto itself destroys it.
+				if filepath.Clean(drivePath) != filepath.Clean(newDrivePath) && !internal.IsStubDrive(f) {
 					mode := 0600
 					if d.IsReadOnly {
 						mode = 0400

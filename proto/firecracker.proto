@@ -55,6 +55,16 @@ message CreateVMRequest {
 
     // Restore a native checkpoint, including its existing guest processes.
     string NativeCheckpointDirectory = 22;
+
+    // Private writable guest root. Nil uses administrator defaults.
+    GuestRootStorage GuestRoot = 23;
+}
+
+message GuestRootStorage {
+    // "disk" (default) or "ram" (original-layout measurement only).
+    string Mode = 1;
+    // Capacity of the per-VM ext4 upper, in MiB; zero uses the default.
+    uint32 SizeMib = 2;
 }
 
 message CreateVMResponse {

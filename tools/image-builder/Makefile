@@ -18,7 +18,7 @@ IMAGE_DIRS := /dev /bin /etc /etc/init.d /tmp /var /run /proc /sys /container/ro
 DIRS       := $(foreach dir,$(IMAGE_DIRS),"$(WORKDIR)$(dir)")
 DEBMIRROR  ?= https://snapshot.debian.org/archive/debian/20261110T000000Z/
 DEBIAN_RELEASE ?= trixie
-PACKAGES   := udev systemd systemd-sysv procps libseccomp2 haveged
+PACKAGES   := udev systemd systemd-sysv procps libseccomp2 haveged util-linux
 
 COMMA      := ,
 EMPTY      :=

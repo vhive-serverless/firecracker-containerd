@@ -287,5 +287,20 @@
     "step_3_status": "WIP; no whole-Pod or Kubernetes restore acceptance",
     "firecracker_commit": "ce86b117d59ca93b1c04b791a251b445ace76703",
     "sdk_commit": "832b1a5132e06f5e2167b64b97b5cd8946604005"
+  },
+  "step_4_guest_storage": {
+    "status": "WIP; worker component/race/lint checks pass, VM boot validation in progress",
+    "default_mode": "disk",
+    "default_capacity_mib": 512,
+    "capacity_range_mib": [
+      64,
+      65536
+    ],
+    "original_baseline_mode": "ram",
+    "request_field": "CreateVMRequest.GuestRoot",
+    "host_backing": "direct ext3/ext4, XFS or Btrfs filesystem required",
+    "ownership": "private file inside each VM jail; removed on VM cleanup",
+    "boot_device_selection": "filesystem UUID; direct device probing before proc/udev startup",
+    "native_restore": "inherited Step 3 WIP; no restore acceptance claimed"
   }
 }

@@ -44,7 +44,7 @@ func TestStorageBaseline_Isolated(t *testing.T) {
 	require.NoError(t, err)
 	defer control.Close()
 	const id = "storage-baseline"
-	_, err = control.CreateVM(ctx, &proto.CreateVMRequest{VMID: id, ContainerCount: 2, MachineCfg: &proto.FirecrackerMachineConfiguration{MemSizeMib: 512}})
+	_, err = control.CreateVM(ctx, &proto.CreateVMRequest{VMID: id, ContainerCount: 2, GuestRoot: &proto.GuestRootStorage{Mode: "ram"}, MachineCfg: &proto.FirecrackerMachineConfiguration{MemSizeMib: 512}})
 	require.NoError(t, err)
 	defer func() { _, err := control.StopVM(ctx, &proto.StopVMRequest{VMID: id}); require.NoError(t, err) }()
 	guest, err := client.NewContainer(ctx, id+"-guest-root", containerd.WithNewSpec(firecrackeroci.WithVMID(id), oci.WithDefaultPathEnv,

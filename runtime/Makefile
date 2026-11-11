@@ -62,6 +62,7 @@ integ-test-%: logs test-deps
 		--volume /run/udev/control:/run/udev/control \
 		--volume $(CURDIR)/logs:/var/log/firecracker-containerd-test \
 		--volume $(CURDIR)/..:/src \
+		--volume $(CURDIR)/vm-storage:/srv/firecracker_containerd_tests \
 		--volume $(GO_CACHE_VOLUME_NAME):/go \
 		--env ENABLE_ISOLATED_TESTS=1 \
 		--env FICD_DM_VOLUME_GROUP=$(FICD_DM_VOLUME_GROUP) \
@@ -84,6 +85,7 @@ benchmark-%: logs
 		--volume /run/udev/control:/run/udev/control \
 		--volume $(CURDIR)/logs:/var/log/firecracker-containerd-test \
 		--volume $(CURDIR)/..:/src \
+		--volume $(CURDIR)/vm-storage:/srv/firecracker_containerd_tests \
 		--volume $(GO_CACHE_VOLUME_NAME):/go \
 		--env ENABLE_ISOLATED_TESTS=1 \
 		--env FICD_DM_VOLUME_GROUP=$(FICD_DM_VOLUME_GROUP) \

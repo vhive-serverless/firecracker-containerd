@@ -55,6 +55,36 @@ guest anon/cache, shared backing, CPU, faults, I/O, capacity and latency. Shared
 RSS and guest cache must not be added together as independent physical memory.
 No evaluation results or savings are claimed yet.
 
+Pmem comparisons must hold the read-only filesystem format and image contents
+constant. Converting SquashFS to a DAX-capable format requires a matching
+virtio-blk control; otherwise filesystem/compression effects would be mixed
+into the claimed pmem result. Additional controls may supplement the five
+requested configurations for this reason.
+
+## Disk upper configuration (development)
+
+`guest_root_mode` defaults to `disk`; `guest_root_size_mib` defaults to 512.
+`CreateVMRequest.GuestRoot` can select `disk` or the measured original `ram`
+layout and override capacity from 64 to 65536 MiB. The administrator must place
+`shim_base_dir` on ext3/ext4, XFS or Btrfs disk storage; unidentifiable backing,
+including an OverlayFS host path, is rejected. Integration runners bind an
+explicit worker disk directory into the test container for this reason.
+
+Each VM owns `guest-overlay.ext4` in its jail directory. It has an independent
+ext4 UUID; boot locates that UUID instead of assuming a block-device number.
+Mount failure stops boot. Allocation reserves the entire capacity after mkfs;
+ext3 uses a byte-preserving rewrite because it cannot preallocate extents.
+The worker test exposed holes left by mkfs, which is why reservation follows
+formatting. Initialization failure removes the file, and VM cleanup removes
+its directory. Guest ENOSPC must be reported and recover after files are removed.
+This reservation is not a host-wide storage quota or a guarantee against later
+administrator truncation or unrelated hardware failure.
+
+The legacy vHive snapshot API supports only the explicit RAM layout; it cannot
+silently omit the new upper. Native capture must include the upper alongside
+the other disks. Native restore remains unaccepted. Pmem/DAMON and the five-arm
+evaluation remain pending.
+
 Native capture already copies every configured virtio-blk drive after guest
 quiescing and VMM pause. New disks need capture regression coverage. Pmem backing
 is referenced by pathname in VMM snapshots, so relocation and immutable lifetime

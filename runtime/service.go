@@ -650,6 +650,16 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 	if err != nil {
 		return fmt.Errorf("failed to build VM configuration: %w", err)
 	}
+	if err := s.configureGuestRoot(requestCtx, request); err != nil {
+		return fmt.Errorf("configure guest writable root: %w", err)
+	}
+	defer func() {
+		if err != nil && s.nativeRestore == nil {
+			// This fixed-name file is created exclusively for this VM. Later
+			// initialization failures must release its reserved disk capacity.
+			_ = os.Remove(filepath.Join(s.jailer.JailPath().RootPath(), guestOverlayFile))
+		}
+	}()
 	s.vmRequest, err = json.Marshal(request)
 	if err != nil {
 		return fmt.Errorf("record VM creation request: %w", err)
