@@ -51,6 +51,7 @@ import (
 	"github.com/containerd/typeurl/v2"
 	"github.com/firecracker-microvm/firecracker-go-sdk"
 	"github.com/firecracker-microvm/firecracker-go-sdk/client/models"
+	ops "github.com/firecracker-microvm/firecracker-go-sdk/client/operations"
 	"github.com/firecracker-microvm/firecracker-go-sdk/vsock"
 	"github.com/gofrs/uuid"
 	"github.com/hashicorp/go-multierror"
@@ -941,6 +942,7 @@ func (s *service) createBalloon(_ context.Context, request *proto.CreateVMReques
 
 	balloonDevice := firecracker.NewBalloonDevice(amountMiB, deflateOnOom, firecracker.WithStatsPollingIntervals(statsPollingIntervals))
 	balloon := balloonDevice.Build()
+	balloon.FreePageReporting = request.BalloonDevice.FreePageReporting
 	if balloon.AmountMib == nil || balloon.DeflateOnOom == nil {
 		return balloon, fmt.Errorf("one of balloon properties is nil, please check %+v: ", balloon)
 	}
@@ -949,7 +951,13 @@ func (s *service) createBalloon(_ context.Context, request *proto.CreateVMReques
 }
 
 func (s *service) buildBalloonDeviceOpt(balloon models.Balloon) ([]firecracker.Opt, error) {
-	handler := firecracker.NewCreateBalloonHandler(*balloon.AmountMib, *balloon.DeflateOnOom, balloon.StatsPollingIntervals)
+	handler := firecracker.Handler{
+		Name: firecracker.CreateBalloonHandlerName,
+		Fn: func(ctx context.Context, machine *firecracker.Machine) error {
+			return machine.CreateBalloon(ctx, *balloon.AmountMib, *balloon.DeflateOnOom, balloon.StatsPollingIntervals,
+				func(params *ops.PutBalloonParams) { params.Body.FreePageReporting = balloon.FreePageReporting })
+		},
+	}
 	opt := []firecracker.Opt{
 		func(m *firecracker.Machine) {
 			m.Handlers.FcInit = m.Handlers.FcInit.AppendAfter(firecracker.CreateMachineHandlerName, handler)
@@ -977,6 +985,7 @@ func (s *service) GetBalloonConfig(requestCtx context.Context, _ *proto.GetBallo
 		AmountMib:             *balloon.AmountMib,
 		DeflateOnOom:          *balloon.DeflateOnOom,
 		StatsPollingIntervals: balloon.StatsPollingIntervals,
+		FreePageReporting:     balloon.FreePageReporting,
 	}
 	return &proto.GetBalloonConfigResponse{BalloonConfig: balloonConfig}, err
 }

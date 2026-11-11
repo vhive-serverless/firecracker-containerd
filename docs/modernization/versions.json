@@ -302,5 +302,12 @@
     "ownership": "private file inside each VM jail; removed on VM cleanup",
     "boot_device_selection": "filesystem UUID; direct device probing before proc/udev startup",
     "native_restore": "inherited Step 3 WIP; no restore acceptance claimed"
+  },
+  "step_4_memory": {
+    "status": "WIP; reporting plumbing compiled and linted on worker; real VM test in progress",
+    "free_page_reporting": "FirecrackerBalloonDevice.FreePageReporting; independent of target amount",
+    "damon": "pinned source controls audited; activation implementation pending",
+    "pmem_dax": "capabilities audited; runtime/image implementation pending",
+    "evaluation": "five requested configurations plus matching filesystem controls pending"
   }
 }

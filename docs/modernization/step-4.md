@@ -108,6 +108,19 @@ The storage script also tests a real host allocation failure inside a private
 Its final marker covers storage and native **capture**, not native restore,
 Kubernetes Pod checkpoint/restore, pmem/DAX or DAMON acceptance.
 
+## Free-page reporting — WIP
+
+`FirecrackerBalloonDevice.FreePageReporting` now reaches the VMM and is returned
+by the control API. The runtime uses the pinned SDK's optional balloon request
+field; no dependency change is needed. Ordinary balloon targets remain separate.
+The development test `TestFreePageReporting_Isolated` requires target/actual
+balloon size zero, positive reporting counters, a physical VMM RSS drop after
+resident pages are freed, and correct retained data after fresh allocations.
+Compilation and lint pass on the worker; real-VM validation is pending.
+
+[Reclamation integration notes](step-4-reclamation.md) record the exact pinned
+kernel controls and remaining DAMON activation/evaluation work.
+
 Native capture already copies every configured virtio-blk drive after guest
 quiescing and VMM pause. New disks need capture regression coverage. Pmem backing
 is referenced by pathname in VMM snapshots, so relocation and immutable lifetime

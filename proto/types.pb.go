@@ -953,6 +953,7 @@ type FirecrackerBalloonDevice struct {
 	AmountMib             int64                  `protobuf:"varint,1,opt,name=AmountMib,proto3" json:"AmountMib,omitempty"`                         //Target balloon size in MiB.
 	DeflateOnOom          bool                   `protobuf:"varint,2,opt,name=DeflateOnOom,proto3" json:"DeflateOnOom,omitempty"`                   // Whether the balloon should deflate when the guest has memory pressure.
 	StatsPollingIntervals int64                  `protobuf:"varint,3,opt,name=StatsPollingIntervals,proto3" json:"StatsPollingIntervals,omitempty"` // Interval in seconds between refreshing statistics.
+	FreePageReporting     bool                   `protobuf:"varint,4,opt,name=FreePageReporting,proto3" json:"FreePageReporting,omitempty"`         // Return free guest pages without balloon inflation.
 	unknownFields         protoimpl.UnknownFields
 	sizeCache             protoimpl.SizeCache
 }
@@ -1006,6 +1007,13 @@ func (x *FirecrackerBalloonDevice) GetStatsPollingIntervals() int64 {
 		return x.StatsPollingIntervals
 	}
 	return 0
+}
+
+func (x *FirecrackerBalloonDevice) GetFreePageReporting() bool {
+	if x != nil {
+		return x.FreePageReporting
+	}
+	return false
 }
 
 type MemoryBackend struct {
@@ -1202,11 +1210,12 @@ const file_types_proto_rawDesc = "" +
 	"\n" +
 	"RefillTime\x18\x02 \x01(\x03R\n" +
 	"RefillTime\x12\x1a\n" +
-	"\bCapacity\x18\x03 \x01(\x03R\bCapacity\"\x92\x01\n" +
+	"\bCapacity\x18\x03 \x01(\x03R\bCapacity\"\xc0\x01\n" +
 	"\x18FirecrackerBalloonDevice\x12\x1c\n" +
 	"\tAmountMib\x18\x01 \x01(\x03R\tAmountMib\x12\"\n" +
 	"\fDeflateOnOom\x18\x02 \x01(\bR\fDeflateOnOom\x124\n" +
-	"\x15StatsPollingIntervals\x18\x03 \x01(\x03R\x15StatsPollingIntervals\"S\n" +
+	"\x15StatsPollingIntervals\x18\x03 \x01(\x03R\x15StatsPollingIntervals\x12,\n" +
+	"\x11FreePageReporting\x18\x04 \x01(\bR\x11FreePageReporting\"S\n" +
 	"\rMemoryBackend\x12 \n" +
 	"\vBackendType\x18\x01 \x01(\tR\vBackendType\x12 \n" +
 	"\vBackendPath\x18\x02 \x01(\tR\vBackendPathB\tZ\a.;protob\x06proto3"
