@@ -146,6 +146,11 @@ message FirecrackerRootDrive {
   // (Optional) CacheType specifies the caching strategy for the block device.
   // The supported caching strategies are: "Unsafe"(default) and "Writeback".
   string CacheType = 5;
+
+  // Explicit immutable virtio-pmem root sharing. Requires ImageSha256.
+  bool UsePmem = 6;
+  // Expected immutable image content. Also enables the same cache for a block control.
+  string ImageSha256 = 7;
 }
 
 message FirecrackerDriveMount {

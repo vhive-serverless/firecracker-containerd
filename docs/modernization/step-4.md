@@ -82,8 +82,8 @@ administrator truncation or unrelated hardware failure.
 
 The legacy vHive snapshot API supports only the explicit RAM layout; it cannot
 silently omit the new upper. Native capture must include the upper alongside
-the other disks. Native restore remains unaccepted. Pmem/DAMON and the five-arm
-evaluation remain pending.
+the other disks. Native restore remains unaccepted. Pmem and the five-arm
+evaluation remain pending; DAMON component acceptance is recorded below.
 
 The development worker passed disk upper inspection, write/copy-up/rename/delete,
 guest ENOSPC recovery, ownership and cleanup, with and without the runc jailer
@@ -167,3 +167,8 @@ Native capture already copies every configured virtio-blk drive after guest
 quiescing and VMM pause. New disks need capture regression coverage. Pmem backing
 is referenced by pathname in VMM snapshots, so relocation and immutable lifetime
 need an explicit contract. End-to-end native restore remains WIP from Step 3.
+
+[Pmem integration notes](step-4-pmem.md) describe the optional immutable ext4
+root, digest-pinned sharing, matching virtio-blk control, artifact handling and
+pending guest DAX validation. The static observation probe has passed committed
+host validation; that result alone does not establish guest DAX activation.

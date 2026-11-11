@@ -315,7 +315,7 @@
     "status": "WIP milestone; free-page reporting and DAMON components passed committed worker acceptance; pmem/evaluation pending",
     "free_page_reporting": "FirecrackerBalloonDevice.FreePageReporting; independent of target amount",
     "damon": "Bounded non-anonymous reclamation and reporting passed clean committed worker acceptance at 9706231",
-    "pmem_dax": "Optional reproducible ext4 image validated; runtime pmem integration/guest DAX activation pending",
+    "pmem_dax": "Optional reproducible ext4 image and static probe validated; runtime pmem/cache/jailer/capture implementation in worker development validation; actual guest DAX and clean committed acceptance pending",
     "evaluation": "five requested configurations plus matching filesystem controls pending",
     "free_page_reporting_validation": {
       "tested_runtime_commit": "020f85b7c137be6989d96fbf4d63c1a3b3e9b71e",

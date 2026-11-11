@@ -51,6 +51,8 @@ type Config struct {
 	KernelImagePath       string                  `json:"kernel_image_path"`
 	KernelArgs            string                  `json:"kernel_args"`
 	RootDrive             string                  `json:"root_drive"`
+	RootDriveUsePmem      bool                    `json:"root_drive_use_pmem"`
+	RootDriveSHA256       string                  `json:"root_drive_sha256"`
 	GuestRootMode         string                  `json:"guest_root_mode"`
 	GuestRootSizeMiB      uint32                  `json:"guest_root_size_mib"`
 	GuestReclamation      *proto.GuestReclamation `json:"guest_reclamation,omitempty"`

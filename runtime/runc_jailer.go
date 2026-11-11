@@ -262,7 +262,11 @@ func (j *runcJailer) BuildJailedRootHandler(cfg *config.Config, machineConfig *f
 
 				// Runtime-owned writable disks are allocated inside the jail and
 				// already have its ownership. Copying a file onto itself destroys it.
-				if filepath.Clean(drivePath) != filepath.Clean(newDrivePath) && !internal.IsStubDrive(f) {
+				if d.IsReadOnly && filepath.Dir(drivePath) == filepath.Join(cfg.ShimBaseDir, ".pmem-images") {
+					if err := j.bindImmutableImageToJail(drivePath, newDrivePath); err != nil {
+						return err
+					}
+				} else if filepath.Clean(drivePath) != filepath.Clean(newDrivePath) && !internal.IsStubDrive(f) {
 					mode := 0600
 					if d.IsReadOnly {
 						mode = 0400
@@ -278,6 +282,19 @@ func (j *runcJailer) BuildJailedRootHandler(cfg *config.Config, machineConfig *f
 
 				j.logger.WithField("drive", newDrivePath).Debug("Adding drive")
 				m.Cfg.Drives[i].PathOnHost = fileName
+			}
+
+			// Immutable pmem images share a verified inode across jails. Copying
+			// or chowning this backing would defeat explicit read-only sharing.
+			for i, device := range m.Cfg.PmemDevices {
+				if !device.ReadOnly || device.PathOnHost == nil {
+					return fmt.Errorf("jailed pmem requires immutable read-only backing")
+				}
+				name := filepath.Base(*device.PathOnHost)
+				if err := j.bindImmutableImageToJail(*device.PathOnHost, filepath.Join(rootPath, name)); err != nil {
+					return err
+				}
+				m.Cfg.PmemDevices[i].PathOnHost = firecracker.String(name)
 			}
 
 			// Setting the proper path to where the vsock path should be
@@ -503,6 +520,25 @@ func (j *runcJailer) bindMountFileToJail(src, dst string) error {
 		Options:     []string{bindMountType},
 	})
 
+	return nil
+}
+
+func (j *runcJailer) bindImmutableImageToJail(src, dst string) error {
+	info, err := os.Stat(src)
+	if err != nil {
+		return err
+	}
+	if j.started || !info.Mode().IsRegular() || info.Mode().Perm()&0222 != 0 {
+		return fmt.Errorf("immutable image binding requires read-only regular backing before jail startup")
+	}
+	if _, err := os.Lstat(dst); !os.IsNotExist(err) {
+		return fmt.Errorf("immutable image jail destination already exists: %s", dst)
+	}
+	if err := j.bindMountFileToJail(src, dst); err != nil {
+		return err
+	}
+	mount := &j.configSpec.Mounts[len(j.configSpec.Mounts)-1]
+	mount.Options = append(mount.Options, "ro")
 	return nil
 }
 

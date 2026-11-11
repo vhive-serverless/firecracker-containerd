@@ -135,7 +135,7 @@ func (s *service) prepareNativeRestore(ctx context.Context, incoming *proto.Crea
 }
 
 func validateNativeRestore(manifest *nativeCheckpoint) error {
-	if manifest.Version != 1 || manifest.VMConfig == nil || manifest.RuntimeConfig == nil || len(manifest.CreateRequest) == 0 || len(manifest.Drives) != len(manifest.VMConfig.Drives) || len(manifest.Drives) > 256 {
+	if manifest.Version != 1 || manifest.VMConfig == nil || manifest.RuntimeConfig == nil || len(manifest.CreateRequest) == 0 || len(manifest.Drives) != len(manifest.VMConfig.Drives) || len(manifest.Drives) > 256 || len(manifest.Pmem) != len(manifest.VMConfig.Pmem) || len(manifest.Pmem) > 1 {
 		return syscall.EINVAL
 	}
 	files := []nativeFile{manifest.Memory, manifest.State}
@@ -151,6 +151,19 @@ func validateNativeRestore(manifest *nativeCheckpoint) error {
 			rootCount++
 		}
 		files = append(files, drive.File)
+	}
+	if len(manifest.Pmem) != 0 {
+		request := &proto.CreateVMRequest{}
+		if err := json.Unmarshal(manifest.CreateRequest, request); err != nil {
+			return syscall.EINVAL
+		}
+		root := request.GetRootDrive()
+		device, saved := manifest.VMConfig.Pmem[0], manifest.Pmem[0]
+		if device == nil || device.ID == nil || *device.ID != pmemRootID || saved.ID != pmemRootID || !device.ReadOnly || !device.RootDevice || device.PathOnHost == nil || device.RateLimiter != nil || !root.GetUsePmem() || root.GetIsWritable() || root.GetImageSha256() != saved.File.SHA256 || saved.File.Path != "pmem/00000000" || saved.File.Size < 2<<20 || saved.File.Size%(2<<20) != 0 {
+			return syscall.EINVAL
+		}
+		rootCount++
+		files = append(files, saved.File)
 	}
 	if rootCount != 1 || manifest.Memory.Path != "memory" || manifest.State.Path != "state" {
 		return syscall.EINVAL
@@ -216,6 +229,11 @@ func (s *service) cloneNativeRestore(ctx context.Context, request *proto.CreateV
 	if err := os.Mkdir(filepath.Join(restore.workspace, "drives"), 0700); err != nil {
 		return err
 	}
+	if len(restore.manifest.Pmem) > 0 {
+		if err := os.Mkdir(filepath.Join(restore.workspace, "pmem"), 0700); err != nil {
+			return err
+		}
+	}
 	for _, path := range []string{restore.workspace, filepath.Join(restore.workspace, "drives")} {
 		if err := s.nativeFileOwner(path); err != nil {
 			return err
@@ -229,6 +247,9 @@ func (s *service) cloneNativeRestore(ctx context.Context, request *proto.CreateV
 	files := []nativeFile{restore.manifest.Memory, restore.manifest.State}
 	for _, drive := range restore.manifest.Drives {
 		files = append(files, drive.File)
+	}
+	for _, device := range restore.manifest.Pmem {
+		files = append(files, device.File)
 	}
 	for _, saved := range files {
 		input, err := root.Open(saved.Path)
@@ -259,6 +280,10 @@ func (s *service) cloneNativeRestore(ctx context.Context, request *proto.CreateV
 		if live.IsRootDevice != nil && *live.IsRootDevice {
 			request.RootDrive = &proto.FirecrackerRootDrive{HostPath: restore.files[drive.File.Path], IsWritable: !drive.ReadOnly}
 		}
+	}
+	if len(restore.manifest.Pmem) > 0 {
+		file := restore.manifest.Pmem[0].File
+		request.RootDrive = &proto.FirecrackerRootDrive{HostPath: restore.files[file.Path], UsePmem: true, ImageSha256: file.SHA256}
 	}
 	if len(request.DriveMounts) != len(restore.manifest.MountSlots) {
 		return syscall.EINVAL

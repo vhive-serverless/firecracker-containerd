@@ -651,6 +651,9 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 	if err != nil {
 		return fmt.Errorf("failed to build VM configuration: %w", err)
 	}
+	if err := s.configureImmutableRoot(requestCtx, request); err != nil {
+		return fmt.Errorf("configure immutable root: %w", err)
+	}
 	if err := s.configureGuestRoot(requestCtx, request); err != nil {
 		return fmt.Errorf("configure guest writable root: %w", err)
 	}

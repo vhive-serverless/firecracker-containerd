@@ -655,7 +655,11 @@ type FirecrackerRootDrive struct {
 	RateLimiter *FirecrackerRateLimiter `protobuf:"bytes,4,opt,name=RateLimiter,proto3" json:"RateLimiter,omitempty"`
 	// (Optional) CacheType specifies the caching strategy for the block device.
 	// The supported caching strategies are: "Unsafe"(default) and "Writeback".
-	CacheType     string `protobuf:"bytes,5,opt,name=CacheType,proto3" json:"CacheType,omitempty"`
+	CacheType string `protobuf:"bytes,5,opt,name=CacheType,proto3" json:"CacheType,omitempty"`
+	// Explicit immutable virtio-pmem root sharing. Requires ImageSha256.
+	UsePmem bool `protobuf:"varint,6,opt,name=UsePmem,proto3" json:"UsePmem,omitempty"`
+	// Expected immutable image content. Also enables the same cache for a block control.
+	ImageSha256   string `protobuf:"bytes,7,opt,name=ImageSha256,proto3" json:"ImageSha256,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -721,6 +725,20 @@ func (x *FirecrackerRootDrive) GetRateLimiter() *FirecrackerRateLimiter {
 func (x *FirecrackerRootDrive) GetCacheType() string {
 	if x != nil {
 		return x.CacheType
+	}
+	return ""
+}
+
+func (x *FirecrackerRootDrive) GetUsePmem() bool {
+	if x != nil {
+		return x.UsePmem
+	}
+	return false
+}
+
+func (x *FirecrackerRootDrive) GetImageSha256() string {
+	if x != nil {
+		return x.ImageSha256
 	}
 	return ""
 }
@@ -1183,7 +1201,7 @@ const file_types_proto_rawDesc = "" +
 	"\n" +
 	"MemSizeMib\x18\x03 \x01(\rR\n" +
 	"MemSizeMib\x12\x1c\n" +
-	"\tVcpuCount\x18\x04 \x01(\rR\tVcpuCount\"\xc7\x01\n" +
+	"\tVcpuCount\x18\x04 \x01(\rR\tVcpuCount\"\x83\x02\n" +
 	"\x14FirecrackerRootDrive\x12\x1a\n" +
 	"\bHostPath\x18\x01 \x01(\tR\bHostPath\x12\x1a\n" +
 	"\bPartuuid\x18\x02 \x01(\tR\bPartuuid\x12\x1e\n" +
@@ -1191,7 +1209,9 @@ const file_types_proto_rawDesc = "" +
 	"IsWritable\x18\x03 \x01(\bR\n" +
 	"IsWritable\x129\n" +
 	"\vRateLimiter\x18\x04 \x01(\v2\x17.FirecrackerRateLimiterR\vRateLimiter\x12\x1c\n" +
-	"\tCacheType\x18\x05 \x01(\tR\tCacheType\"\x86\x02\n" +
+	"\tCacheType\x18\x05 \x01(\tR\tCacheType\x12\x18\n" +
+	"\aUsePmem\x18\x06 \x01(\bR\aUsePmem\x12 \n" +
+	"\vImageSha256\x18\a \x01(\tR\vImageSha256\"\x86\x02\n" +
 	"\x15FirecrackerDriveMount\x12\x1a\n" +
 	"\bHostPath\x18\x01 \x01(\tR\bHostPath\x12\x16\n" +
 	"\x06VMPath\x18\x02 \x01(\tR\x06VMPath\x12&\n" +
