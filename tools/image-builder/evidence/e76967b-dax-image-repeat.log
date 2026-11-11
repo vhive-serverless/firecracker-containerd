@@ -1,0 +1,35 @@
+Parallel unsquashfs: Using 32 processors
+6422 inodes (6404 blocks) to write
+
+
+created 5444 files
+created 791 directories
+created 969 symlinks
+created 8 devices
+created 0 fifos
+created 0 sockets
+created 1 hardlink
+mke2fs 1.47.2 (1-Jan-2025)
+Discarding device blocks:      0/131072             done                            
+Creating filesystem with 131072 4k blocks and 32768 inodes
+Filesystem UUID: 30b5df10-6ad9-4c79-9d64-06b319188e41
+Superblock backups stored on blocks: 
+	32768, 98304
+
+Allocating group tables: 0/4   done                            
+Writing inode tables: 0/4   done                            
+Copying files into the device: done
+Writing superblocks and filesystem accounting information: 0/4   done
+
+debugfs 1.47.2 (1-Jan-2025)
+
+e2fsck 1.47.2 (1-Jan-2025)
+Pass 1: Checking inodes, blocks, and sizes
+Pass 2: Checking directory structure
+Pass 3: Checking directory connectivity
+Pass 4: Checking reference counts
+Pass 5: Checking group summary information
+fc-root-dax: 7221/32768 files (0.1% non-contiguous), 53930/131072 blocks
+dumpe2fs 1.47.2 (1-Jan-2025)
+DAX_ROOT_IMAGE_READY bytes=536870912 block_size=4096 nominal_pmem_metadata_bytes=8388608
+IDENTICAL_EXT4_CONVERSION_BYTES_OK

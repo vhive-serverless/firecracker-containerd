@@ -122,3 +122,10 @@ Image construction and a host ext4 mount do not prove guest DAX activation.
 The runtime must select the pmem root, pass `rootfstype=ext4 rootflags=dax`,
 use an independent disk-backed writable upper/work pair, and verify guest
 `STATX_ATTR_DAX`. Writable state must never share this immutable image.
+
+The [worker receipt](evidence/e76967b-dax-image-receipt.log) records validation
+of source `e76967bf13111a4818b4e57868fe2d1cc38de9ba` on Cloudlab: two conversions
+of the same SquashFS produced identical ext4 bytes; the mounted image matched
+the source tree digest and rejected writes. Image SHA256:
+`fddd6a51d06feeaf41f65d879b52f81062e5b92f027f7f5e0e197d78d2882b3c`.
+This run allocated 214065152 host disk bytes for the 536870912-byte sparse image.
