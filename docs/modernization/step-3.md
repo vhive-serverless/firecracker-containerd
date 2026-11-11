@@ -70,6 +70,14 @@ The root invocation also checks the host service's hard-link capability and
 guest UID/GID ownership with setgid directory inheritance. All fixtures live
 in temporary directories; the tests do not mount a filesystem.
 
+Clean committed checkout `37f68f172a9f9994768ceb8fe2f01ad8cf1bbbed` passed
+both module linters and the host filesystem checks on the worker. The ordinary
+race run passed eight tests and skipped the root-only ownership case; the
+privileged invocation passed all nine tests with no skips. The
+[host receipt](evidence/37f68f1-volfs-host-receipt.log) records source and test
+binary hashes, build metadata and raw log hashes. This validates the export
+layer independently; it does not establish guest mount support.
+
 ## VM capacity from Pod resources
 
 The shim reads containerd 2.3.7's standard `io.kubernetes.cri.sandbox-cpu-period`,

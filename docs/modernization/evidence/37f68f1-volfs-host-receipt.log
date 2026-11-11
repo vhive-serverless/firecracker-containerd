@@ -1,0 +1,69 @@
+Committed host filesystem export validation: PASSED; Step 3 remains incomplete.
+Runtime branch: cri-native-snapshot-restore
+Tested commit: 37f68f172a9f9994768ceb8fe2f01ad8cf1bbbed
+Worker: nehalem@amd218.utah.cloudlab.us
+Worker checkout: /users/nehalem/fc-ctrd-mod/cri-volumes-committed
+Source after validation: clean
+Kernel: 6.8.0-147-generic
+Toolchain: go version go1.26.11 linux/amd64
+make lint: license headers, DCO/subject checks and both parent/CRI module linters passed (0 issues).
+Unprivileged race-enabled filesystem tests: 8 passed, 1 explicit ownership skip; hard-link subsection reserved for the privileged run.
+Privileged invocation of the same compiled race-enabled test package: 9 passed, 0 skipped, 0 failed.
+Fixtures: actual worker temporary files/directories, no mounts and no mock filesystem.
+Scope: host descriptor table only, not connected to the shim or guest. Other host binds remain rejected. No Kubernetes Pod volume, snapshot/restore or new full-suite CRI acceptance is claimed.
+Required follow-up: guest FUSE client and permission/ID handling, reconnectable bounded transport, cache coherence, mount propagation, extended attributes, explicit checkpoint metadata serialization and actual Pod validation.
+
+Commands (on worker):
+export PATH=/users/nehalem/fc-ctrd-mod/toolchains/go1.26.11/bin:$PATH
+cd /users/nehalem/fc-ctrd-mod/cri-volumes-committed
+make lint
+go test -mod=readonly -race -count=1 -timeout=120s -v ./internal/volfs
+go test -mod=readonly -race -c -o bin/volfs.test ./internal/volfs
+sudo -n bin/volfs.test -test.v -test.count=1 -test.timeout=120s
+
+Privileged result:
+=== RUN   TestRenameAndUnlinkPreserveOpenInode
+--- PASS: TestRenameAndUnlinkPreserveOpenInode (0.02s)
+=== RUN   TestNamesAndSymlinksStayInGuestNamespace
+--- PASS: TestNamesAndSymlinksStayInGuestNamespace (0.00s)
+=== RUN   TestHandleLimitPrecedesTruncationOrCreation
+--- PASS: TestHandleLimitPrecedesTruncationOrCreation (0.00s)
+=== RUN   TestSpecialFileCannotBlockOrOpenOnHost
+--- PASS: TestSpecialFileCannotBlockOrOpenOnHost (0.00s)
+=== RUN   TestGuestOwnershipAndSetgidInheritance
+--- PASS: TestGuestOwnershipAndSetgidInheritance (0.00s)
+=== RUN   TestSingleFileExportAndReadOnly
+--- PASS: TestSingleFileExportAndReadOnly (0.00s)
+=== RUN   TestMetadataAndHardLinkIdentity
+--- PASS: TestMetadataAndHardLinkIdentity (0.00s)
+=== RUN   TestDescriptorLimitsAndForget
+--- PASS: TestDescriptorLimitsAndForget (0.00s)
+=== RUN   TestConcurrentCloseAndForgetReleaseDescriptors
+--- PASS: TestConcurrentCloseAndForgetReleaseDescriptors (0.00s)
+PASS
+
+Actual test binary build metadata:
+/users/nehalem/fc-ctrd-mod/cri-volumes-committed/bin/volfs.test: go1.26.11
+	path	github.com/firecracker-microvm/firecracker-containerd/internal/volfs.test
+	mod	github.com/firecracker-microvm/firecracker-containerd	(devel)	
+	build	-buildmode=exe
+	build	-compiler=gc
+	build	-race=true
+	build	CGO_ENABLED=1
+	build	CGO_CFLAGS=
+	build	CGO_CPPFLAGS=
+	build	CGO_CXXFLAGS=
+	build	CGO_LDFLAGS=
+	build	GOARCH=amd64
+	build	GOOS=linux
+	build	GOAMD64=v1
+
+SHA-256:
+6ca9974fea781403252dbde58cce57eaa91f09414880c06d9ce69d6dcb6c23db  /users/nehalem/fc-ctrd-mod/cri-volumes-committed/internal/volfs/export_linux.go
+bbc371cd0f220e8e06d1b38854e6a30a295a1b81702b3ef1ddb40f5ac8374ce1  /users/nehalem/fc-ctrd-mod/cri-volumes-committed/internal/volfs/export_linux_test.go
+5f0134bb0c7a7d9d3a12e96dd747fcadf3d9e18b64d07216222b22ecb32e1751  /users/nehalem/fc-ctrd-mod/cri-volumes-committed/go.mod
+0596da076fb61f39d20f5ffe8ef549386b3ae7cadcc2ad465959fc30e44471bc  /users/nehalem/fc-ctrd-mod/cri-volumes-committed/go.sum
+51c779ac003fbb3483acf0c84e4c417d222089b2fa6af4e3a715b5f230ae260f  /users/nehalem/fc-ctrd-mod/cri-volumes-committed/bin/volfs.test
+3f247df12fa29112e9e8861cf8eab8090268ec420f6063c62f71b9e99a0f233c  /users/nehalem/fc-ctrd-mod/evidence/37f68f1-lint.log
+21b08f55d71ac424654ad83e44afeb7d781126aec2388b4d1b4f32b77dcff863  /users/nehalem/fc-ctrd-mod/evidence/37f68f1-volfs-unit.log
+a6b6fc69c18a60bc541ebacff6266a76dad95f2e48a4a9edbe2c73cb10f06c87  /users/nehalem/fc-ctrd-mod/evidence/37f68f1-volfs-root.log
