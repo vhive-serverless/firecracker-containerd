@@ -271,3 +271,16 @@ The guest storage layout is intentionally unchanged. CRI, Kubernetes Pod
 checkpoint/restore, and the memory experiments belong to subsequent milestones.
 The original baseline and its actual Linux 4.14.174 kernel are documented in
 `baseline-audit.md` with a separate storage trace.
+
+## Cache eviction test maintenance
+
+Commit `1a56f6a` fixes the timing-dependent eviction error test
+observed in [CI run 43079780458](https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43079780458).
+The test now waits for the reaper error log, checks its text, and verifies the
+entry was removed. Production code is unchanged. The clean committed worker
+checkout passed 200 targeted repetitions with one scheduler thread, 50 targeted
+race repetitions and the full cache package under the race detector.
+The [shared receipt](evidence/step4-cache-test/verification.json) records all four
+validated milestone backports, exact commands and raw hashes. The old failure
+was not reproduced in 30 baseline repetitions; these checks are test maintenance,
+not new full-stack acceptance. Step 3 CRI and Kubernetes restore remain WIP.
