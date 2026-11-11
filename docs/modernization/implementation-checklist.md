@@ -49,6 +49,7 @@ branch starts at the validated completion commit of its prerequisite.
 
 - [x] Create branch from validated Step 2 completion commit.
 - [x] Independently validate a released upstream v1.37.2 single-node stock-runtime baseline: Pods, exec, logs, filesystem writes, DNS and API discovery; record that this does not satisfy the Firecracker or Pod restore gates below.
+- [x] Validate ordinary Firecracker RuntimeClass Pods on required k3s v1.37.2+k3s1 from a clean deployment checkout: two containers in one VMM, shared/projected volumes, exec/logs, exact IPv4 DNS answer, Service networking from a runc Pod, positive container statistics and cleanup; receipt 1085202. This does not satisfy the remaining CRI or restore gates.
 - [ ] Verify installed k3s v1.37.2+k3s1 binary/component versions and actual Pod checkpoint/restore alpha APIs/gates/RPCs; select newer compatible release only if required.
 - [ ] Define Pod-to-VM mapping; reuse containerd CRI for sandbox/container lifecycle with Firecracker integration.
 - [ ] Connect supported Kubernetes Pod checkpoint/restore and applicable CheckpointPod/RestorePod CRI RPCs to native VM implementation.

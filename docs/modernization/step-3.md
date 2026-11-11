@@ -183,10 +183,14 @@ VM or sandbox. It checks the Pod UID, CRI sandbox, two container IDs and actual
 VMM command line together. BusyBox's DNS exit status alone is insufficient:
 the test asserts the returned address, and queries the absolute name's A record.
 
-Development validation against the committed runtime image
-`20727f4002990a522c4d46bc174475959c28f93c` passed these checks. This is ordinary
-Pod lifecycle integration; it does not implement Kubernetes Pod checkpoint or
-restore. Committed deployment-test validation must still be recorded separately.
+Clean deployment-test checkout
+`1085202018904cff880eb7901e470a23c80cf5a9`, using committed runtime image
+`20727f4002990a522c4d46bc174475959c28f93c`, passed all these checks. The
+[RuntimeClass receipt](evidence/1085202-k3s-runtimeclass-receipt.log) records
+both revisions, exact inputs, Pod/CRI/VMM identities, positive statistics,
+image binary hashes and raw evidence hashes. This establishes ordinary Pod
+lifecycle integration; native Pod restore and Kubernetes checkpoint/restore
+remain incomplete.
 
 ## Native snapshot transport
 
@@ -436,5 +440,19 @@ the previously documented SDK metrics skip. The initial aggregate invocation
 is therefore not reported as an uninterrupted passing run. The
 [volume receipt](evidence/6b3cf8f-cri-volume-receipt.log) records these outcomes,
 all full-suite failed/skipped names, exact binary hashes and raw evidence
-hashes. CRI compliance, native whole-Pod restore and Kubernetes RuntimeClass
-acceptance remain incomplete.
+hashes. These volume checks did not establish CRI compliance, native whole-Pod
+restore or Kubernetes RuntimeClass acceptance; subsequent RuntimeClass results
+are recorded above.
+
+The subsequent native VMM/SDK pin at
+`20727f4002990a522c4d46bc174475959c28f93c` passed an uninterrupted committed
+build, installation and base acceptance run: all 35 runtime, five snapshotter
+and 79 SDK cases passed. The two SDK skips are the pre-existing metrics test and
+the gated native snapshot fixture. That fixture passed all four cases separately
+against the actual runtime-built VMM, whose hash matches the test image. The
+four selected upstream CRI checks, three resource cases and guest volume check
+also passed. The full CRI result remained **97 passed, 16 failed and 29 skipped**.
+The [native pin receipt](evidence/20727f4-native-pin-receipt.log) preserves
+the complete evidence and failed/skipped names. Ordinary RuntimeClass acceptance
+was subsequently demonstrated as described above; full CRI compliance and Pod
+checkpoint/restore remain incomplete.

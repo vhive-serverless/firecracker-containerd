@@ -95,8 +95,10 @@ build has been substituted. The Kubernetes acceptance portion of Step 3 remains
 unavailable until a compatible release exists or the user changes that
 requirement explicitly.
 
-Work can continue on CRI integration, ordinary Firecracker RuntimeClass Pods
-and the native VM checkpoint/restore engine independently of that release gate.
+Work can continue on CRI integration and the native VM checkpoint/restore engine
+independently of that release gate. Ordinary Firecracker RuntimeClass Pod
+lifecycle now has a [committed k3s worker receipt](evidence/1085202-k3s-runtimeclass-receipt.log);
+it does not establish Kubernetes checkpoint/restore.
 Checkpoint/restore has not been removed from Step 3. Runtime-level restoration
 must work, and Kubernetes must initiate Pod checkpoint and restore through the
 supported interfaces before this milestone is complete. The current runtime
