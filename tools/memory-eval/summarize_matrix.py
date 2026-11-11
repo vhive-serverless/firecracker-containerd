@@ -159,6 +159,22 @@ def counter(samples, start, end, getter, max_gap_ns):
     return points[-1][1] - points[0][1]
 
 
+def counter_at(samples, at, getter, max_gap_ns):
+    """One cumulative counter endpoint from its immediate local brackets."""
+    times = [r['monotonic_ns'] for r in samples]
+    right = bisect_left(times, at)
+    check(right < len(times), 'counter endpoint lacks right bracket')
+    left = right if times[right] == at else right - 1
+    check(left >= 0, 'counter endpoint lacks left bracket')
+    a, b = samples[left], samples[right]
+    check(times[right] - times[left] <= max_gap_ns, 'counter endpoint sample gap')
+    first, last = number(getter(a), 'counter endpoint'), number(getter(b), 'counter endpoint')
+    check(last >= first, 'counter endpoint decreased/reset')
+    value = first if left == right else first + (last - first) * (at - times[left]) / (times[right] - times[left])
+    return value, {'left_sample_ns': times[left], 'right_sample_ns': times[right],
+                   'left_raw': first, 'right_raw': last}
+
+
 def metric(row, key):
     group = row.get('cgroup', {})
     check(group.get('status') in ('ok', 'partial'), 'cgroup identity/read unavailable')
@@ -204,7 +220,10 @@ def cgroup_window(samples, start, end, gap, selected):
     result = {'memory_current': gauge(samples, start, end, lambda r: metric(r, 'memory.current'), gap),
               'cpu_delta_usec': {key: counter(samples, start, end,
                    lambda r, key=key: metric(r, 'cpu.stat').get(key), gap)
-                   for key in ('usage_usec', 'user_usec', 'system_usec')}}
+                   for key in ('usage_usec', 'user_usec', 'system_usec')},
+              'memory_fault_deltas': {key: counter(samples, start, end,
+                   lambda r, key=key: metric(r, 'memory.stat').get(key), gap)
+                   for key in ('pgfault', 'pgmajfault')}}
     memory_endpoints = {}
     for label, point in (('start', points[0][0]), ('end', points[-1][0])):
         memory_endpoints[label] = {}
@@ -215,24 +234,48 @@ def cgroup_window(samples, start, end, gap, selected):
             except AnalysisError as exc:
                 memory_endpoints[label][key] = {'status': 'unavailable', 'reason': str(exc)}
     result['memory_stat_bytes'] = memory_endpoints
-    devices = sorted({name for r in segment for name in metric(r, 'io.stat')})
+    io_readings, io_errors = [], []
+    for row in segment:
+        try:
+            io_readings.append(metric(row, 'io.stat'))
+        except AnalysisError as exc:
+            io_readings.append(None)
+            io_errors.append({'sample_ns': row['monotonic_ns'], 'error': str(exc),
+                              'raw': row.get('cgroup', {}).get('metrics', {}).get('io.stat')})
+    devices = sorted({selected} | {name for reading in io_readings if reading is not None for name in reading})
     layers = {}
     for device in devices:
-        observed = [metric(r, 'io.stat').get(device) for r in segment]
+        observed = [reading.get(device) if reading is not None else None for reading in io_readings]
         keys = sorted({key for value in observed if value is not None for key in value})
-        entry = {'observed_start': observed[0], 'observed_end': observed[-1]}
+        entry = {'observed_start': observed[0], 'observed_end': observed[-1],
+                 'observed_start_sample_ns': segment[0]['monotonic_ns'],
+                 'observed_end_sample_ns': segment[-1]['monotonic_ns']}
         try:
+            check(keys, 'device absent in observations')
             entry['deltas'] = {key: counter(samples, start, end,
                 lambda r, key=key, device=device: metric(r, 'io.stat').get(device, {}).get(key), gap) for key in keys}
             entry['status'] = 'ok'
         except AnalysisError as exc:
             entry.update(status='unavailable', reason=str(exc))
         layers[device] = entry
-    check(selected in layers and layers[selected]['status'] == 'ok',
-          f'selected physical io.stat device {selected} lacks complete counter brackets')
-    check({'rbytes', 'wbytes'} <= layers[selected]['deltas'].keys(), 'selected physical I/O byte counters missing')
-    result['physical_io_delta'] = layers[selected]['deltas']
+    selected_layer = layers[selected]
+    if selected_layer['status'] == 'ok' and {'rbytes', 'wbytes'} <= selected_layer['deltas'].keys():
+        result['physical_io_delta'] = selected_layer['deltas']
+    else:
+        result['physical_io_delta'] = {'status': 'unavailable', 'reason': selected_layer.get('reason', 'physical I/O byte counters missing')}
+    end_brackets = {}
+    try:
+        selected_keys = sorted({key for reading in io_readings if reading is not None for key in reading.get(selected, {})})
+        check({'rbytes', 'wbytes'} <= set(selected_keys), 'physical I/O end byte counters absent')
+        cumulative = {}
+        for key in selected_keys:
+            cumulative[key], end_brackets[key] = counter_at(samples, end,
+                lambda r, key=key: metric(r, 'io.stat').get(selected, {}).get(key), gap)
+        result['physical_io_cumulative_at_window_end'] = {'status': 'ok', 'counters': cumulative}
+    except AnalysisError as exc:
+        result['physical_io_cumulative_at_window_end'] = {'status': 'unavailable', 'reason': str(exc)}
     return result, {'io_stat_layers_not_summed': layers,
+                    'io_stat_read_errors': io_errors, 'physical_io_end_counter_brackets': end_brackets,
                     'max_read_duration_ns': max(r['read_finished_monotonic_ns'] - r['read_started_monotonic_ns'] for r in segment)}
 
 
@@ -257,6 +300,32 @@ def vm_window(samples, start, end, pids, gap):
     identities = [{p['pid']: p['expected_starttime_ticks'] for p in row['processes']} for row in segment]
     check(all(identity == identities[0] for identity in identities), 'VMM process identity changed across samples')
     return gauge(samples, start, end, lambda r: vm_pss(r, pids), gap)
+
+
+def vmm_own_deltas(samples, start, end, pids, gap):
+    """Per-VMM process counters, never combined with physical-device io.stat."""
+    result = {}
+    for index, pid in enumerate(pids):
+        def process(row):
+            return next(p for p in row['processes'] if p['pid'] == pid)
+        groups = {}
+        for label, keys in (('stat_faults', ('minflt', 'majflt')),
+                            ('proc_io', ('read_bytes', 'write_bytes', 'rchar', 'wchar',
+                                         'syscr', 'syscw', 'cancelled_write_bytes'))):
+            def value(row, key):
+                item = process(row)
+                if label == 'stat_faults':
+                    return item.get('stat', {}).get(key)
+                io = item.get('io', {})
+                check(io.get('status') == 'ok', 'VMM own /proc/io read unavailable')
+                return io.get('data', {}).get('values', {}).get(key)
+            try:
+                groups[label] = {'status': 'ok', 'deltas': {key: counter(samples, start, end,
+                    lambda row, key=key: value(row, key), gap) for key in keys}}
+            except AnalysisError as exc:
+                groups[label] = {'status': 'unavailable', 'reason': str(exc)}
+        result[f'vm{index}'] = groups
+    return result
 
 
 def guest_mem(record):
@@ -365,6 +434,7 @@ def trial_summary(directory, manifest, physical, offset_ns, window_ns, gap, allo
           host_meta['boot_id']['data'] == vm_meta['boot_id']['data'], 'samplers have different/unverified boot identity')
     selected = physical['physical_major_minor']
     metrics, details = {}, {'io_stat': {}, 'windows': {}, 'guest': {}, 'physical_device': physical}
+    details['vmm_pids'] = pids
     for label, a, b in (('full_trial', start, end), ('common_idle', idle_start, idle_end)):
         primary, extra = cgroup_window(host, a, b, gap, selected)
         metrics[label] = {'duration_ns': b - a, 'dedicated_cgroup': primary}
@@ -384,6 +454,8 @@ def trial_summary(directory, manifest, physical, offset_ns, window_ns, gap, allo
             if label == 'common_idle':
                 raise AnalysisError(f'common idle PSS rejected: {exc}') from exc
             details.setdefault('unavailable', {})[label + '.vm_aggregate_pss_mapped_view'] = str(exc)
+        if label == 'common_idle':
+            metrics[label]['vmm_own_process_deltas'] = vmm_own_deltas(vms, a, b, pids, gap)
     metrics['guest'] = {}
     for i, (probe, dax) in enumerate(probes):
         metrics['guest'][f'vm{i}'], details['guest'][f'vm{i}'] = guest_summary(probe)
@@ -434,6 +506,16 @@ def flatten(value, prefix=''):
             result.update(flatten(item, name))
         elif isinstance(item, (int, float)) and not isinstance(item, bool):
             result[name] = number(item, name)
+    return result
+
+
+def unavailable_fields(value, prefix=''):
+    if value.get('status') == 'unavailable':
+        return {prefix: value.get('reason', 'unavailable')}
+    result = {}
+    for key, item in value.items():
+        if isinstance(item, dict):
+            result.update(unavailable_fields(item, f'{prefix}.{key}' if prefix else key))
     return result
 
 
@@ -533,7 +615,11 @@ def analyze(inputs, idle_offset=5, idle_window=20, max_gap=1.5, allow_developmen
                           'pss': 'sum of identity-verified VMM PSS only; mapped-memory view, no RSS sum',
                           'host_meminfo': 'whole host; includes unrelated workloads; never added to cgroup or PSS',
                           'io_stat': 'per-device layers never summed; physical device selected independently',
+                          'io_cumulative': 'selected endpoint counters are since fresh cgroup creation, including pre-phase setup; local bracket interpolation',
                           'guest_endpoints': 'whole guest phase endpoints; not interpolated into common idle window',
+                          'probe_phase_timing': 'instrumented intervals include sampling, mmap/hash and canary work; not pure storage latency',
+                          'vmm_process_io': 'per-VMM own /proc/io counters; not physical backing I/O and never added to io.stat',
+                          'vmm_process_faults': 'own-process stat counters, a separate view; never added to cgroup or guest faults',
                           'disk_allocation': 'sum of per-file st_blocks by role; not unique physical extents',
                           'reporting': 'descriptor/traffic counters are not unique freed bytes or memory savings'},
             'manifests': manifests, 'trials': trials, 'arms': aggregate(trials), 'paired': paired(trials)}
@@ -567,7 +653,7 @@ def write_outputs(output, summary):
             writer.writerow({**{key: trial[key] for key in keys}, **values,
                              'physical_device': detail['physical_device']['physical_major_minor'],
                              'physical_device_selection': detail['physical_device']['selection'],
-                             'unavailable_json': json.dumps(detail.get('unavailable', {}), sort_keys=True),
+                             'unavailable_json': json.dumps({**detail.get('unavailable', {}), **unavailable_fields(trial['metrics'])}, sort_keys=True),
                              'unavailable_io_layers_json': json.dumps(unavailable_io, sort_keys=True),
                              'development_issues_json': json.dumps(trial['development_issues']),
                              'full_start_host_ns': full['start_host_monotonic_ns'],
