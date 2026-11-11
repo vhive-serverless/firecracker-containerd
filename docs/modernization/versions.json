@@ -168,6 +168,17 @@
   },
   "step_2_validation": {
     "runtime_branch": "vhive-compatible",
+    "completion_commit": "2780f2e92d8a376e6514d1e099b2c03b0e1847ed",
+    "tested_runtime_commit": "2780f2e92d8a376e6514d1e099b2c03b0e1847ed",
+    "worker_checkout": "/users/nehalem/fc-ctrd-mod/vhive-io-committed",
+    "install_prefix": "/users/nehalem/fc-ctrd-mod/install/2780f2e92d8a",
+    "acceptance_receipt": "evidence/2780f2e-metrics-acceptance-receipt.log",
+    "previous_completion_commit": "122d7084043a1e0b237fea9eb57de8d2eb48c486",
+    "previous_acceptance_receipt": "evidence/122d7084043a-acceptance-receipt.log",
+    "result": "119 top-level acceptance cases passed; one existing SDK metrics skip; two vHive end-to-end runs passed"
+  },
+  "step_2_previous_validation": {
+    "runtime_branch": "vhive-compatible",
     "completion_commit": "d959a78de45faf1d8d13fea282b7fb980b629789",
     "tested_runtime_commit": "d959a78de45faf1d8d13fea282b7fb980b629789",
     "worker_checkout": "/users/nehalem/fc-ctrd-mod/vhive-failed-create-committed",

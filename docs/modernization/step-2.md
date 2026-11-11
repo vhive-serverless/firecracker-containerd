@@ -1,12 +1,21 @@
 # Step 2: vHive compatibility
 
-The latest validated runtime is `d959a78de45faf1d8d13fea282b7fb980b629789`
+Latest committed revalidation: `2780f2e92d8a376e6514d1e099b2c03b0e1847ed`. The clean worker checkout
+`/users/nehalem/fc-ctrd-mod/vhive-io-committed` passed build, private installation,
+35 runtime, five snapshotter and 79 SDK tests (one existing metrics skip).
+Two independent vHive deploy/invoke/snapshot/source-stop/restore/cleanup runs also passed.
+The [latest receipt](evidence/2780f2e-metrics-acceptance-receipt.log) records exact artifact and log
+hashes. This includes the I/O replacement correction and a metrics teardown
+correction that returns ports under a mutex and makes shutdown idempotent.
+Earlier acceptance records below retain their original tested revisions.
+
+The earlier validated runtime is `d959a78de45faf1d8d13fea282b7fb980b629789`
 on `vhive-compatible`. Its clean worker checkout
 `/users/nehalem/fc-ctrd-mod/vhive-failed-create-committed` passed build,
 installation, 35 runtime and 5 snapshotter isolated tests, and 79 SDK tests
 with the existing SDK log/metrics skip. Two independent vHive deployment,
 invocation, snapshot, source-stop, new-VMM restore and cleanup runs also passed.
-The [current receipt](evidence/d959a78-acceptance-receipt.log) records inputs,
+The [earlier receipt](evidence/d959a78-acceptance-receipt.log) records inputs,
 process identities, artifact hashes, log hashes and cleanup.
 
 The supported deployment is the pinned vHive standalone orchestrator with
