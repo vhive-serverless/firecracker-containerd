@@ -2,3 +2,5 @@ files_ephemeral
 *.img
 rootfs
 *stamp
+
+rootfs-dax.img.*
