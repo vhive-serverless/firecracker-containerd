@@ -22,6 +22,7 @@ require (
 	github.com/hanwen/go-fuse/v2 v2.10.1
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/mdlayher/socket v0.5.1
+	github.com/mdlayher/vsock v1.2.1
 	github.com/miekg/dns v1.1.62
 	github.com/moby/sys/user v0.4.0
 	github.com/opencontainers/image-spec v1.1.1
@@ -106,7 +107,6 @@ require (
 	github.com/klauspost/compress v1.18.5 // indirect
 	github.com/knqyf263/go-plugin v0.9.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/mdlayher/vsock v1.2.1 // indirect
 	github.com/miekg/pkcs11 v1.1.1 // indirect
 	github.com/mistifyio/go-zfs/v3 v3.0.1 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
