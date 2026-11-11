@@ -1,13 +1,23 @@
 # Step 1: modernized runtime
 
 Branch: `modernize-runtime`. The latest validated implementation is
-`6585eba92db4f8c55f6567cf8d2c8d695adcba05`. Its clean worker checkout
-`/users/nehalem/fc-ctrd-mod/step1-failed-create-committed` passed build,
+`b7e5c426e2f91ad90adb67dbbbe4ecb91dc62e9f`. Its clean worker checkout
+`/users/nehalem/fc-ctrd-mod/step1-io-committed` passed build,
 installation and full acceptance: 35 isolated runtime tests, 5 snapshotter
 tests and 79 SDK tests, with the existing SDK log/metrics skip. The
-[current receipt](evidence/6585eba-acceptance-receipt.log) records revisions,
+[current receipt](evidence/b7e5c42-io-acceptance-receipt.log) records revisions,
 artifact hashes, raw log hashes and cleanup. Earlier acceptance and native
 deployment evidence remain below.
+
+The latest correction closes blocked proxy streams, cancels pending vsock
+accepts and drains replaced readers before reconnecting I/O. An older proxy's
+completion can no longer close its replacement. The
+[regression before correction](evidence/step1-io-close-before.log) reproduced
+the blocked reader; [committed race tests](evidence/b7e5c42-io-race.log) also
+exercise repeated replacement against a real FIFO. The full base acceptance
+passed 119 top-level cases (35 runtime, five snapshotter and 79 SDK), with only
+the existing SDK metrics skip. The earlier task creation recovery acceptance
+remains in its [receipt](evidence/6585eba-acceptance-receipt.log).
 
 The installed stack pulled an OCI image and ran it inside Firecracker, where
 it wrote and read back a file on its ext4 container root. A second native test
