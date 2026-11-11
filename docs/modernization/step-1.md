@@ -1,15 +1,23 @@
 # Step 1: modernized runtime
 
-Branch: `modernize-runtime`. The latest validated implementation is
+Latest committed revalidation: `3adc9f64ebc0fd623f8072b53084c8b8eebcdef4`. The clean worker checkout
+`/users/nehalem/fc-ctrd-mod/step1-io-committed` passed build, private installation,
+35 runtime, five snapshotter and 79 SDK tests (one existing metrics skip).
+The [latest receipt](evidence/3adc9f6-metrics-acceptance-receipt.log) records exact artifact and log
+hashes. This includes the I/O replacement correction and a metrics teardown
+correction that returns ports under a mutex and makes shutdown idempotent.
+Earlier acceptance records below retain their original tested revisions.
+
+Branch: `modernize-runtime`. The earlier validated implementation is
 `b7e5c426e2f91ad90adb67dbbbe4ecb91dc62e9f`. Its clean worker checkout
 `/users/nehalem/fc-ctrd-mod/step1-io-committed` passed build,
 installation and full acceptance: 35 isolated runtime tests, 5 snapshotter
 tests and 79 SDK tests, with the existing SDK log/metrics skip. The
-[current receipt](evidence/b7e5c42-io-acceptance-receipt.log) records revisions,
+[earlier receipt](evidence/b7e5c42-io-acceptance-receipt.log) records revisions,
 artifact hashes, raw log hashes and cleanup. Earlier acceptance and native
 deployment evidence remain below.
 
-The latest correction closes blocked proxy streams, cancels pending vsock
+The I/O correction closes blocked proxy streams, cancels pending vsock
 accepts and drains replaced readers before reconnecting I/O. An older proxy's
 completion can no longer close its replacement. The
 [regression before correction](evidence/step1-io-close-before.log) reproduced

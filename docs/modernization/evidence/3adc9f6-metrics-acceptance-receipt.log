@@ -1,0 +1,73 @@
+2026-11-11T12:50:01Z
+3adc9f64ebc0fd623f8072b53084c8b8eebcdef4
+Make remote snapshotter metrics shutdown safe before and after serve
+Signed-off-by: JooYoung Park <jooyoung.park73@gmail.com>
+
+Result: PASS; clean committed build, installation and complete base acceptance
+Worker: nehalem@amd218.utah.cloudlab.us
+Checkout: /users/nehalem/fc-ctrd-mod/step1-metrics-committed
+Commands: tools/modernize/build-stack.sh; tools/modernize/install-stack.sh; tools/modernize/test-stack.sh
+9d6c1876564e6cafefaade17cbc3e415cf243c520613f3e388e32154ab562e89  bin/firecracker
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  _submodules/runc/runc
+017c96b29ff58ebacb4fd881d0d31fa8c1e93dfe78f88ae929597f7e9e37f07b  agent/agent
+3dd9ea4a0c2bc1eda0aafcc751447a9ef8511281065335e0aebc569ef14dab1b  _submodules/stargz-snapshotter/out/containerd-stargz-grpc
+d95c75225530d7378a39c140953a9854d77f0ba7d6c077b2abb7e3184d610e64  volume/volume-init
+b856de716b3406a0bf4dabf280d9b6ef41340ef1b83a9281040109628eb0c1f5  runtime/containerd-shim-aws-firecracker
+a7987af3a88516deb6812b4ab1da15eba59f065e11c8e62769ae84f497865d0d  firecracker-control/cmd/containerd/firecracker-containerd
+7370c9fa53eab132560e731b72deaab002502b858583bbb39904ceb7b670cc03  firecracker-control/cmd/containerd/firecracker-ctr
+ab4650aeef3188318704e55a6149c99a4ca66663630d824f3853826bcdd0954a  default-vmlinux.bin
+f6ca18b8bd43ccbf2b10ee6778554cda28311b83c5482191a05a37e4a1883f04  tools/image-builder/rootfs.img
+ba4d27ff481b2fc58e9ea43d370201baf79ad5c62414d5bccefc29e068478f62  tools/image-builder/rootfs-stargz.img
+ eaf83bb718a559d324613d566eaf776b31a62340 _submodules/firecracker (v1.18.0)
+ c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e _submodules/runc (v1.4.2)
+ 3070538befb5a6c09f93e99164762b3a76310357 _submodules/stargz-snapshotter (cmd/v0.18.2)
+
+Evidence: 3adc9f6-build.log
+f937035890b0dc35c472f851e54eaad5ba11c9298d4c79828c7ee881baa30ca3  /users/nehalem/fc-ctrd-mod/evidence/3adc9f6-build.log
+runc version 1.4.2
+spec: 1.3.0
+go: go1.26.11
+libseccomp: 2.5.4
+containerd github.com/containerd/containerd/v2 2.3.7+unknown 3adc9f64ebc0fd623f8072b53084c8b8eebcdef4
+
+Evidence: 3adc9f6-install.log
+c34847799fb9332f31ef291accd41ff418c773f14a6c1a349453709bf235cb5e  /users/nehalem/fc-ctrd-mod/evidence/3adc9f6-install.log
+9d6c1876564e6cafefaade17cbc3e415cf243c520613f3e388e32154ab562e89  /users/nehalem/fc-ctrd-mod/install/3adc9f64ebc0/bin/firecracker
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  /users/nehalem/fc-ctrd-mod/install/3adc9f64ebc0/bin/runc
+ab4650aeef3188318704e55a6149c99a4ca66663630d824f3853826bcdd0954a  /users/nehalem/fc-ctrd-mod/install/3adc9f64ebc0/share/runtime/default-vmlinux.bin
+893e5b1f5cac11d8b5d55ba829487a4baa7d4262bebd0c72d1d4f12e1fd19464  /users/nehalem/fc-ctrd-mod/install/3adc9f64ebc0/share/runtime/default-rootfs.img
+INSTALL_DIR=/users/nehalem/fc-ctrd-mod/install/3adc9f64ebc0
+
+Evidence: 3adc9f6-acceptance.log
+b0339bcd2d7514ac83049566f16bdc895af952a6fe1a7756249b8a082e05d42d  /users/nehalem/fc-ctrd-mod/evidence/3adc9f6-acceptance.log
+--- PASS: TestTemporaryNetErr (0.00s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-go-sdk/vsock	0.003s
+PINNED_SDK_PRIVILEGED_SUITE_OK
+COMMITTED_STACK_ACCEPTANCE_OK
+
+Evidence: metrics-stop-before.log
+e1272289b845762f533417cab1731a6f2877969f3875c7afefacd90ce2fe1c16  /users/nehalem/fc-ctrd-mod/evidence/metrics-stop-before.log
+	/users/nehalem/fc-ctrd-mod/toolchains/go1.26.11/src/testing/testing.go:2036 +0x21d
+created by testing.(*T).Run in goroutine 1
+	/users/nehalem/fc-ctrd-mod/toolchains/go1.26.11/src/testing/testing.go:2101 +0xb13
+FAIL	github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/metrics	0.021s
+FAIL
+
+Evidence: metrics-stop-fixed-race.log
+ccebf0007ca78c5e85f239578e3b1d1e2675afb2a9e849e28e2480ef8fb19cf3  /users/nehalem/fc-ctrd-mod/evidence/metrics-stop-fixed-race.log
+time="2026-11-11T05:15:46-07:00" level=error msg="error reading response body: http: Handler timeout"
+time="2026-11-11T05:15:46-07:00" level=error msg="error writing response body: io: read/write on closed pipe"
+--- PASS: TestMetricsGet (0.00s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/metrics	1.067s
+
+Evidence: metrics-stop-lint.log
+c4d54a2af3137674f41da8b2e6106628666e4b0f74ecfb167be2f5173e735591  /users/nehalem/fc-ctrd-mod/evidence/metrics-stop-lint.log
+No template file for bash scripts, shall skip all bash scripts
+/users/nehalem/fc-ctrd-mod/step1-metrics-dev/bin/git-validation -run DCO,short-subject -range HEAD~1..HEAD
+ * 7eabef3d "Record committed I/O reconnection regression acceptance" ... PASS
+/users/nehalem/fc-ctrd-mod/step1-metrics-dev/bin/golangci-lint run
+0 issues.
+{"PASS": 119, "FAIL": 0, "SKIP": 1}
+{"skipped": ["TestLogAndMetrics"]}
