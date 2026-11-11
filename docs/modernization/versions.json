@@ -289,7 +289,7 @@
     "sdk_commit": "832b1a5132e06f5e2167b64b97b5cd8946604005"
   },
   "step_4_guest_storage": {
-    "status": "WIP; development storage and native capture passed; committed revalidation pending",
+    "status": "WIP; committed allocation/capture checks passed but complete storage run exposed cross-filesystem jailer FIFO failure; correction c7d73c7 development-tested, committed revalidation pending",
     "default_mode": "disk",
     "default_capacity_mib": 512,
     "capacity_range_mib": [
@@ -304,10 +304,27 @@
     "native_restore": "inherited Step 3 WIP; no restore acceptance claimed"
   },
   "step_4_memory": {
-    "status": "WIP; reporting plumbing compiled and linted on worker; real VM test in progress",
+    "status": "WIP milestone; free-page reporting component passed committed worker acceptance; DAMON/pmem/evaluation pending",
     "free_page_reporting": "FirecrackerBalloonDevice.FreePageReporting; independent of target amount",
     "damon": "pinned source controls audited; activation implementation pending",
     "pmem_dax": "capabilities audited; runtime/image implementation pending",
-    "evaluation": "five requested configurations plus matching filesystem controls pending"
+    "evaluation": "five requested configurations plus matching filesystem controls pending",
+    "free_page_reporting_validation": {
+      "tested_runtime_commit": "020f85b7c137be6989d96fbf4d63c1a3b3e9b71e",
+      "worker_checkout": "/users/nehalem/fc-ctrd-mod/step4-memory-dev",
+      "install_prefix": "/users/nehalem/fc-ctrd-mod/install/020f85b7c137",
+      "receipt": "evidence/020f85b-reporting-acceptance-receipt.log",
+      "receipt_sha256": "1689987625ae03a2902e0ad66d1cabf80e85b83087c6207e273a775e91b76f8f",
+      "tests": [
+        "TestFreePageReporting_Isolated",
+        "TestMemoryBalloon_Isolated"
+      ],
+      "result": "PASS; target and actual balloon 0; report handling and RSS release; retained-data checksum after reallocation; ordinary balloon behavior",
+      "enabled_filled_rss_kib": 237780,
+      "enabled_idle_rss_kib": 174536,
+      "disabled_filled_rss_kib": 236700,
+      "disabled_idle_rss_kib": 237260,
+      "interpretation": "single mechanism acceptance run, not five-arm evaluation"
+    }
   }
 }

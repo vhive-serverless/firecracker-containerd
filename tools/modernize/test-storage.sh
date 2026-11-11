@@ -51,7 +51,7 @@ cleanup
 
 make test-images
 tools/thinpool.sh create "$pool"
-for name in GuestDiskStorage StorageBaseline NativeCheckpoint CreateVM; do
+for name in GuestDiskStorage StorageBaseline NativeCheckpoint JailerTelemetryCrossFilesystem CreateVM; do
     FICD_DM_POOL="$pool" make -C runtime "integ-test-Test${name}_Isolated" \
         EXTRAGOARGS='-v -count=1 -timeout=360s'
 done

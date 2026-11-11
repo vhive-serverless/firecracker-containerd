@@ -108,7 +108,7 @@ The storage script also tests a real host allocation failure inside a private
 Its final marker covers storage and native **capture**, not native restore,
 Kubernetes Pod checkpoint/restore, pmem/DAX or DAMON acceptance.
 
-## Free-page reporting — WIP
+## Free-page reporting — component validation passed
 
 `FirecrackerBalloonDevice.FreePageReporting` now reaches the VMM and is returned
 by the control API. The runtime uses the pinned SDK's optional balloon request
@@ -116,7 +116,31 @@ field; no dependency change is needed. Ordinary balloon targets remain separate.
 The development test `TestFreePageReporting_Isolated` requires target/actual
 balloon size zero, positive reporting counters, a physical VMM RSS drop after
 resident pages are freed, and correct retained data after fresh allocations.
-Compilation and lint pass on the worker; real-VM validation is pending.
+Clean worker commit `020f85b7c137be6989d96fbf4d63c1a3b3e9b71e` passed full
+build, private installation, lint, forced protobuf regeneration and both the
+reporting test and ordinary balloon regression. The
+[receipt](evidence/020f85b-reporting-acceptance-receipt.log) identifies source,
+dependencies, actual binaries, image and log hashes. The checkout remained clean.
+
+| Reporting | Balloon target/actual | RSS after filling / after freeing (KiB) | Report descriptors | Reported bytes | Failures |
+| --- | --- | --- | --- | --- | --- |
+| Disabled | 0 / 0 MiB | 236700 / 237260 | 0 | 0 | 0 |
+| Enabled | 0 / 0 MiB | 237780 / 174536 | 82 | 337641472 | 0 |
+
+The enabled case released about 61.8 MiB of VMM RSS after a 64 MiB resident
+file was removed. Both cases retained a separate file's checksum after fresh
+allocations. Reported bytes count cumulative descriptor traffic, including
+initially free pages; they are not net or unique physical savings. This is a
+mechanism acceptance check, not the five-configuration workload evaluation.
+See the [raw reporting run](evidence/020f85b-FreePageReporting.log) and
+[ordinary balloon regression](evidence/020f85b-MemoryBalloon.log).
+
+The broader committed storage check exposed the jailer's hard-link assumption
+for external telemetry FIFOs: putting the jail on disk made `/tmp` a different
+filesystem in the test container. Commit `c7d73c7` prepares runc bind mounts for
+that case before startup. Its development cross-filesystem, VM creation and
+race checks pass; full committed storage revalidation remains pending. The
+shared correction is also being validated on earlier branches.
 
 [Reclamation integration notes](step-4-reclamation.md) record the exact pinned
 kernel controls and remaining DAMON activation/evaluation work.
