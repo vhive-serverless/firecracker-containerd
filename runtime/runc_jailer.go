@@ -16,6 +16,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -64,13 +65,14 @@ var cacheTopologyFiles = []string{
 
 // runcJailer uses runc to set up a jailed environment for the Firecracker VM.
 type runcJailer struct {
-	ctx        context.Context
-	logger     *logrus.Entry
-	Config     runcJailerConfig
-	vmID       string
-	configSpec specs.Spec
-	runcClient runc.Runc
-	started    bool
+	ctx           context.Context
+	logger        *logrus.Entry
+	Config        runcJailerConfig
+	vmID          string
+	configSpec    specs.Spec
+	runcClient    runc.Runc
+	started       bool
+	preparedFifos map[string]string
 }
 
 const firecrackerFileName = "firecracker"
@@ -290,6 +292,18 @@ func (j *runcJailer) BuildJailedRootHandler(cfg *config.Config, machineConfig *f
 			if err := j.setupCacheTopology(rootPath); err != nil {
 				return err
 			}
+			// Cross-filesystem FIFOs need bind mounts in runc's initial
+			// namespace. The runtime creates their source nodes before Start.
+			for _, fifo := range []struct{ source, name string }{
+				{m.Cfg.LogPath, internal.FirecrackerLogFifoName},
+				{m.Cfg.MetricsPath, internal.FirecrackerMetricsFifoName},
+			} {
+				if fifo.source != "" {
+					if _, err := j.makeLinkInJail(fifo.source, fifo.name); err != nil {
+						return fmt.Errorf("prepare jailed telemetry: %w", err)
+					}
+				}
+			}
 
 			j.logger.Debugf("Writing %q for runc", rootPathToConfig)
 			// we pass m.Cfg as opposed to machineConfig as we want the populated
@@ -306,12 +320,18 @@ func (j *runcJailer) BuildJailedRootHandler(cfg *config.Config, machineConfig *f
 	}
 }
 
-// makeLinkInJail creates a hard link to `src` inside the jail directory.
+// makeLinkInJail exposes telemetry using a hard link or an initial runc bind.
 func (j *runcJailer) makeLinkInJail(src, base string) (string, error) {
 	root := j.RootPath()
 
 	if strings.ContainsRune(base, os.PathSeparator) {
 		return "", fmt.Errorf("%q must not contain %q", base, os.PathSeparator)
+	}
+	if previous, ok := j.preparedFifos[base]; ok {
+		if previous != src {
+			return "", fmt.Errorf("telemetry source changed after jail preparation")
+		}
+		return base, nil
 	}
 
 	dst := filepath.Join(root, base)
@@ -320,8 +340,20 @@ func (j *runcJailer) makeLinkInJail(src, base string) (string, error) {
 	// what owner/group to set this as when creating, we will manually have
 	// to adjust the permission bits ourselves
 	if err := linkAndChown(src, dst, j.Config.UID, j.Config.GID); err != nil {
-		return "", err
+		if !errors.Is(err, syscall.EXDEV) {
+			return "", err
+		}
+		if err := os.Chown(src, int(j.Config.UID), int(j.Config.GID)); err != nil {
+			return "", err
+		}
+		if err := j.bindMountFileToJail(src, dst); err != nil {
+			return "", err
+		}
 	}
+	if j.preparedFifos == nil {
+		j.preparedFifos = make(map[string]string)
+	}
+	j.preparedFifos[base] = src
 
 	// this path needs to be relative to the root path, and since we are
 	// placing the file in the root path the value should just be the file name.
