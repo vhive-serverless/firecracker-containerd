@@ -290,11 +290,6 @@ func (s *service) serveFCControl(sd shutdown.Service) error {
 		return nil
 	}
 
-	fcServer, err := ttrpc.NewServer(ttrpc.WithServerHandshaker(ttrpc.UnixSocketRequireSameUser()))
-	if err != nil {
-		return err
-	}
-
 	socketFD, err := strconv.Atoi(fcSocketFDEnvVal)
 	if err != nil {
 		err = fmt.Errorf("failed to parse fccontrol socket FD value: %w", err)
@@ -302,18 +297,28 @@ func (s *service) serveFCControl(sd shutdown.Service) error {
 		return err
 	}
 
-	fccontrolTtrpc.RegisterFirecrackerService(fcServer, s)
 	fcListener, err := net.FileListener(os.NewFile(uintptr(socketFD), "fccontrol"))
 	if err != nil {
 		return err
 	}
 
-	// Let in-flight replies reach the controller before RunShim exits. In
-	// particular the VM monitor may initiate shutdown during StopVM.
-	sd.RegisterCallback(fcServer.Shutdown)
+	drain := newFCControlDrain(fcListener)
+	fcServer, err := ttrpc.NewServer(ttrpc.WithServerHandshaker(drain))
+	if err != nil {
+		_ = fcListener.Close()
+		return err
+	}
+	fccontrolTtrpc.RegisterFirecrackerService(fcServer, s)
+
+	// The controller closes each connection after consuming its reply.
+	// Wait for that acknowledgement before RunShim can exit.
+	sd.RegisterCallback(func(ctx context.Context) error {
+		drainErr := drain.Drain(ctx)
+		return errors.Join(drainErr, fcServer.Close())
+	})
 	go func() {
-		defer fcListener.Close()
-		err := fcServer.Serve(s.shimCtx, fcListener)
+		defer drain.Close()
+		err := fcServer.Serve(s.shimCtx, drain)
 		if err != nil && !errors.Is(err, ttrpc.ErrServerClosed) && !errors.Is(err, net.ErrClosed) {
 			s.logger.WithError(err).Error("fccontrol ttrpc server error")
 		}

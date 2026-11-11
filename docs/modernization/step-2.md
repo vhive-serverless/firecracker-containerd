@@ -9,10 +9,11 @@ vHive's legacy CRI proxy expects runs in the test container with separate state
 and socket paths. This is the vHive milestone; Kubernetes and Pod checkpoint
 integration are separate.
 
-The base is the validated Step 1 completion commit
-`207899bf3c45ad83d07b06d161b4dcec4a0c338b`; its
-[worker receipt](evidence/207899bf3c45-acceptance-receipt.log) includes
-the forced-stop correction and all 39 isolated integration results.
+This branch started from Step 1 completion commit
+`207899bf3c45ad83d07b06d161b4dcec4a0c338b` and includes the later validated
+shutdown correction `e7395acb2c88cfe8c5d32ba61ff65c17e031858c`. Its
+[worker receipt](evidence/e7395acb2c88-acceptance-receipt.log) records clean
+build/install, all 39 isolated tests, the privileged SDK suite, and cleanup.
 
 ## Port and inputs
 

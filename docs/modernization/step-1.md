@@ -181,6 +181,12 @@ output copy. A Go client that needs all foreground output should call
 cancels the client FIFO readers. The binary output test follows that sequence
 and checks the byte count and SHA-256 through a slow reader.
 
+The FCControl listener also drains controller connections before the shim
+exits. The controller closes its per-call connection after consuming the stop
+reply and before waiting for shim exit. This acknowledgement prevents a
+paused VM's forced-stop status from racing with transport shutdown; the
+shutdown context still bounds a client that keeps its connection open.
+
 The runtime branch is pushed to `vhive-serverless/firecracker-containerd`, and
 the SDK branch and pinned revision are pushed to `JooyoungPark73/firecracker-go-sdk`.
 The Firecracker gitlink uses the existing upstream release tag and needs no VMM

@@ -3,15 +3,15 @@
   "status": "vHive-compatible stack; worker acceptance procedure in step-2.md",
   "step_1_validation": {
     "runtime_branch": "modernize-runtime",
-    "completion_commit": "207899bf3c45ad83d07b06d161b4dcec4a0c338b",
-    "completion_log_sha256": "9d8c24c37f42ac148cdfff98c8600b8d440ea6d0889b0b7b63df93e899abc1d8",
-    "tested_runtime_commit": "207899bf3c45ad83d07b06d161b4dcec4a0c338b",
+    "completion_commit": "e7395acb2c88cfe8c5d32ba61ff65c17e031858c",
+    "completion_log_sha256": "9c6f32f0521ce841fc83ff17cbf188685d32c3f4b800ec4e4f0dc6096c0aa6ab",
+    "tested_runtime_commit": "e7395acb2c88cfe8c5d32ba61ff65c17e031858c",
     "worker_checkout": "/users/nehalem/fc-ctrd-mod/step1-repro.SwuCJ3fv",
-    "install_prefix": "/users/nehalem/fc-ctrd-mod/install/207899bf3c45",
-    "acceptance_receipt": "evidence/207899bf3c45-acceptance-receipt.log",
+    "install_prefix": "/users/nehalem/fc-ctrd-mod/install/e7395acb2c88",
+    "acceptance_receipt": "evidence/e7395acb2c88-acceptance-receipt.log",
     "worker_toolchains": "evidence/e666612819bc-worker-toolchains.log",
-    "previous_completion_commit": "0d8e700f68881516637778c57dbc9ee12ac48b10",
-    "previous_completion_log_sha256": "4c09141c78b07953a9708334a81f0e60912d3f0410a4f17cce55c84e9cd81dce"
+    "previous_completion_commit": "207899bf3c45ad83d07b06d161b4dcec4a0c338b",
+    "previous_completion_log_sha256": "9d8c24c37f42ac148cdfff98c8600b8d440ea6d0889b0b7b63df93e899abc1d8"
   },
   "worker": {
     "ssh": "nehalem@amd218.utah.cloudlab.us",

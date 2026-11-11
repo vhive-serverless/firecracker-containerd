@@ -1,0 +1,67 @@
+Worker: amd218.utah.cloudlab.us
+Checkout: /users/nehalem/fc-ctrd-mod/step1-repro.SwuCJ3fv
+Revision: e7395acb2c88cfe8c5d32ba61ff65c17e031858c
+Commands: tools/modernize/build-stack.sh, tools/modernize/install-stack.sh, tools/modernize/test-stack.sh
+INSTALL_DIR=/users/nehalem/fc-ctrd-mod/install/e7395acb2c88
+--- PASS: TestCNISupport_Isolated (7.17s)
+--- PASS: TestAutomaticCNISupport_Isolated (3.71s)
+--- PASS: TestJailer_Isolated (16.20s)
+--- PASS: TestAttachBlockDevice_Isolated (16.24s)
+--- PASS: TestJailerCPUSet_Isolated (6.01s)
+--- PASS: TestNewJailer_Isolated (0.00s)
+--- PASS: TestDiskLimit_Isolated (10.37s)
+--- PASS: TestForceStopDefaultFirecracker_Isolated (2.15s)
+--- PASS: TestCrashRecovery_Isolated (9.46s)
+--- PASS: TestCNIGracefulCleanup_Isolated (16.73s)
+--- PASS: TestResourceAccounting_Isolated (4.32s)
+--- PASS: TestBinaryOutput_Isolated (3.32s)
+--- PASS: TestShimExitsUponContainerDelete_Isolated (5.29s)
+--- PASS: TestMultipleVMs_Isolated (20.64s)
+--- PASS: TestLongUnixSocketPath_Isolated (5.60s)
+--- PASS: TestStubBlockDevices_Isolated (5.01s)
+--- PASS: TestCreateContainerWithSameName_Isolated (10.91s)
+--- PASS: TestStubDriveReserveAndReleaseByContainers_Isolated (6.33s)
+--- PASS: TestDriveMount_Isolated (5.54s)
+--- PASS: TestDriveMountFails_Isolated (2.26s)
+--- PASS: TestUpdateVMMetadata_Isolated (7.20s)
+--- PASS: TestMemoryBalloon_Isolated (2.19s)
+--- PASS: TestRandomness_Isolated (3.43s)
+--- PASS: TestStopVM_Isolated (32.75s)
+--- PASS: TestStopVMFailFast_Isolated (3.83s)
+--- PASS: TestExec_Isolated (8.22s)
+--- PASS: TestEvents_Isolated (5.24s)
+--- PASS: TestOOM_Isolated (2.94s)
+--- PASS: TestCreateVM_Isolated (123.23s)
+--- PASS: TestPauseResume_Isolated (76.13s)
+--- PASS: TestAttach_Isolated (6.03s)
+--- PASS: TestBrokenPipe_Isolated (23.59s)
+--- PASS: TestVolumes_Isolated (9.96s)
+--- PASS: TestVolumeFrom_Isolated (17.38s)
+--- PASS: TestSnapshotterMetrics_Isolated (6.57s)
+--- PASS: TestSnapshotterMetricsMultipleVMs_Isolated (5.33s)
+--- PASS: TestLaunchContainerWithRemoteSnapshotter_Isolated (7.09s)
+--- PASS: TestLaunchMultipleContainersWithRemoteSnapshotter_Isolated (8.09s)
+--- PASS: TestGuestVolumeFrom_Isolated (18.22s)
+--- SKIP: TestLogAndMetrics (0.00s)
+PINNED_SDK_PRIVILEGED_SUITE_OK
+COMMITTED_STACK_ACCEPTANCE_OK
+
+Raw worker log hashes:
+cee085f69ed8748feecde7f391848901d7bbef2dfd469d661e33d24f152065fc  ../evidence/e7395acb2c88-build-stack.log
+20aadc4ebd7daa104f125d0ed56bc8b0650d835c76fbca9c500a0c9df8677b68  ../evidence/e7395acb2c88-install-stack.log
+9c6f32f0521ce841fc83ff17cbf188685d32c3f4b800ec4e4f0dc6096c0aa6ab  ../evidence/e7395acb2c88-acceptance.log
+
+Selected build hashes:
+9d6c1876564e6cafefaade17cbc3e415cf243c520613f3e388e32154ab562e89  bin/firecracker
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  _submodules/runc/runc
+dfdb0893d36de150725ebf9a610d297dc4e447850c520d55a59120b316d5f651  agent/agent
+25930d46d72ef0578a1652bad862455e8e6853ae7317c94260d399ce6539b2f9  _submodules/stargz-snapshotter/out/containerd-stargz-grpc
+d70bfd9eac85f63c7ab1392e1cefa44e0a3bd18dfa83ec9f3b07674e53c27e15  volume/volume-init
+27b609f9ba385631c4bb507a7847e9df0b4ac566716a76926783194275df5c41  runtime/containerd-shim-aws-firecracker
+d415c7adf11bd2e7dbbda799f49d5b3f8cf8c6ecc6c53abbd8aba5953a2df1c4  firecracker-control/cmd/containerd/firecracker-containerd
+967a0b999aee4303b262af79b6bd55d3dd5b627b0b52ea8108848582f5467570  firecracker-control/cmd/containerd/firecracker-ctr
+7567b324c11d2dc5321c90a340c6aece98d82f4cbbeb1723a45b2c2c844b3150  default-vmlinux.bin
+3321c9b3b0d6e05b00c374ca0580583b2d0c7b702dd714c84e157efe0928c8a1  tools/image-builder/rootfs.img
+d72f06134ac4a73dfe194348ee433d588e35e6aea2b00c5d87e328cc6a8cefeb  tools/image-builder/rootfs-stargz.img
+
+Acceptance pools and SDK test cgroup removed. Tracked checkout clean.
