@@ -2,6 +2,7 @@
 set -euo pipefail
 logs=/var/log/firecracker-containerd-test
 socket=/run/firecracker-containerd/containerd.sock
+cri_socket=/run/firecracker-containerd/cri.sock
 test -x /opt/cni/bin/portmap
 mkdir -p /etc/cni/net.d "$logs"
 rm -f /etc/cni/net.d/10-fcnet.conflist
@@ -52,6 +53,10 @@ daemon=$!
 cleanup() {
     ctr --address "$socket" --namespace k8s.io images list > "$logs/images.log" 2>&1 || true
     ctr --address "$socket" --namespace k8s.io tasks list > "$logs/tasks-at-exit.log" 2>&1 || true
+    if test -n "${gateway_pid:-}"; then
+        kill "$gateway_pid" 2>/dev/null || true
+        wait "$gateway_pid" || true
+    fi
     kill "$daemon" 2>/dev/null || true
     wait "$daemon" || true
 }
@@ -63,15 +68,28 @@ for attempt in $(seq 1 30); do
 done
 cat "$logs/runtime-version.log"
 test "$(awk -v rev="$CRI_RUNTIME_REVISION" '$1 == "Revision:" && $2 == rev {n++} END {print n+0}' "$logs/runtime-version.log")" = 2
+firecracker-cri --version | tee "$logs/cri-version.log"
+grep -qx "firecracker-cri $CRI_RUNTIME_REVISION" "$logs/cri-version.log"
+firecracker-cri --backend "$socket" --address "$cri_socket" > "$logs/cri-gateway.out" 2>&1 &
+gateway_pid=$!
+for attempt in $(seq 1 30); do
+    if test -S "$cri_socket"; then break; fi
+    if ! kill -0 "$gateway_pid" 2>/dev/null; then cat "$logs/cri-gateway.out"; exit 1; fi
+    sleep 1
+done
+test -S "$cri_socket"
 ctr --address "$socket" plugins list > "$logs/plugins.log"
 cat > /tmp/test-images.yaml <<'YAML'
 defaultTestContainerImage: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf
 YAML
-args=(--runtime-endpoint "unix://$socket" --image-endpoint "unix://$socket"
+args=(--runtime-endpoint "unix://$cri_socket" --image-endpoint "unix://$cri_socket"
     --runtime-handler firecracker --test-images-file /tmp/test-images.yaml
     --ginkgo.no-color --ginkgo.v --ginkgo.fail-on-empty
     --ginkgo.json-report "$logs/report.json")
 if test -n "$CRI_FOCUS"; then args+=(--ginkgo.focus "$CRI_FOCUS"); fi
+if test "${CRI_WEBSOCKETS:-0}" = 1; then
+    args+=(--websocket-exec --websocket-attach --websocket-portforward)
+fi
 critest "${args[@]}"
 for attempt in $(seq 1 30); do
     tasks=$(ctr --address "$socket" --namespace k8s.io tasks list --quiet)

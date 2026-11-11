@@ -180,6 +180,16 @@
       "default_test_image": "registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf",
       "source": "https://github.com/kubernetes-sigs/cri-tools/blob/v1.37.0/pkg/framework/util.go",
       "sandbox_image": "registry.k8s.io/pause:3.10.2@sha256:f548e0e8e3dc1896ca956272154dde3314e8cc4fde0a57577ee9fa1c63f5baf4"
+    },
+    "cri_integration": {
+      "binary": "cri/firecracker-cri",
+      "source": "cri/ module in the same committed runtime checkout; parent replacement => ..",
+      "backend_cri_api": "v0.36.3",
+      "frontend_cri_api": "v0.37.2",
+      "frontend_cri_streaming": "v0.37.2",
+      "module_manifest": "cri-modules.txt",
+      "port_forward_vsock_port": 10900,
+      "checkpoint_restore_status": "RPC definitions present; native whole-Pod implementation pending"
     }
   },
   "step_2_validation": {

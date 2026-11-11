@@ -39,6 +39,7 @@ printf 'CRI_LOGS=%s\n' "$logs"
     printf 'script_revision=%s\nruntime_revision=%s\nimage=%s\nfocus=%s\n' \
         "$revision" "$runtime_revision" "$image_id" "${CRI_FOCUS:-all}"
     printf 'source_dirty=%s\nimage_override=%s\n' "$dirty" "${CRI_BASE_IMAGE:+true}"
+    printf 'websocket_streaming=%s\n' "${CRI_WEBSOCKETS:-0}"
     sha256sum tools/critest/test-cri.sh tools/critest/run-in-container.sh
 } > "$logs/inputs.log"
 tools/thinpool.sh create "$FICD_DM_POOL"
@@ -49,6 +50,7 @@ docker create --init --name "$name" --privileged --network bridge --ipc=host \
     --volume "$logs:/var/log/firecracker-containerd-test" \
     --env FICD_DM_POOL --env "CRI_RUNTIME_REVISION=$runtime_revision" \
     --env "CRI_FOCUS=${CRI_FOCUS:-}" --entrypoint /bin/bash \
+    --env "CRI_WEBSOCKETS=${CRI_WEBSOCKETS:-0}" \
     "$image" /run-cri > "$logs/container-id"
 container_owned=1
 set +e

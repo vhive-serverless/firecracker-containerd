@@ -11,7 +11,7 @@
 # express or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-SUBDIRS:=agent runtime examples firecracker-control/cmd/containerd snapshotter docker-credential-mmds volume
+SUBDIRS:=agent runtime examples firecracker-control/cmd/containerd snapshotter docker-credential-mmds volume cri
 TEST_SUBDIRS:=$(addprefix test-,$(SUBDIRS))
 INTEG_TEST_SUBDIRS:=$(addprefix integ-test-,$(SUBDIRS))
 
@@ -123,6 +123,7 @@ lint: $(deps)
 # https://github.com/firecracker-microvm/firecracker-containerd/commit/9711138b150ac9133ca01379ac19a2e7884c251d
 	$(BINPATH)/git-validation -run DCO,short-subject -range HEAD~1..HEAD
 	$(BINPATH)/golangci-lint run
+	cd cri && $(BINPATH)/golangci-lint run --config ../.golangci.yml
 
 tidy:
 	./tools/tidy.sh

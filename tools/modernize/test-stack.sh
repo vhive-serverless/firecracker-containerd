@@ -25,11 +25,13 @@ python3 tools/modernize/verify-inputs.py
 make lint
 make test-images
 env -u ENABLE_ISOLATED_TESTS DISABLE_ROOT_TESTS=1 go test -short -timeout=180s ./...
+(cd cri && go test -mod=readonly -race -count=1 -timeout=180s ./...)
 sudo -n env -u ENABLE_ISOLATED_TESTS PATH="$PATH" GOMODCACHE="$(go env GOMODCACHE)" \
     GOCACHE="$(go env GOCACHE)" go test -timeout=180s ./...
 make tidy
 make -C proto clean
 make proto
+make -C cri generate
 git diff --exit-code
 FICD_DM_POOL="$runtime_pool" make -k -C runtime integ-test EXTRAGOARGS='-v -count=1 -timeout=300s'
 FICD_DM_POOL="$snapshotter_pool" make -k -C snapshotter integ-test EXTRAGOARGS='-v -count=1 -timeout=300s'
@@ -40,12 +42,15 @@ test -z "$(git status --porcelain)"
 mkdir -p bin/receipts/acceptance
 git rev-parse HEAD > bin/receipts/acceptance/runtime-revision
 go list -m -json all > bin/receipts/acceptance/go-modules.json
+(cd cri && go list -m -json all) > bin/receipts/acceptance/cri-go-modules.json
 go version -m agent/agent > bin/receipts/acceptance/agent-build-info
+go version -m cri/firecracker-cri > bin/receipts/acceptance/cri-build-info
 sha256sum bin/firecracker _submodules/runc/runc agent/agent \
     _submodules/stargz-snapshotter/out/containerd-stargz-grpc volume/volume-init \
     runtime/containerd-shim-aws-firecracker \
     firecracker-control/cmd/containerd/firecracker-containerd \
     firecracker-control/cmd/containerd/firecracker-ctr \
+    cri/firecracker-cri \
     default-vmlinux.bin tools/image-builder/rootfs.img tools/image-builder/rootfs-stargz.img \
     > bin/receipts/acceptance/binaries.sha256
 docker image inspect "localhost/firecracker-containerd-test:$DOCKER_IMAGE_TAG" \

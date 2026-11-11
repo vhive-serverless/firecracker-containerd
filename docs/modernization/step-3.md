@@ -36,6 +36,72 @@ use the existing defaults; deriving VM capacity from Pod resources remains work
 before Kubernetes acceptance. Host network, host PID and host IPC requests are
 rejected rather than interpreted as guest-host namespace requests.
 
+## CRI endpoint and guest port forwarding
+
+`firecracker-cri` is a runtime component built and installed from this branch.
+Kubelet's runtime and image endpoints must both select its Unix socket. It
+forwards ordinary CRI operations to the private containerd socket, retaining
+containerd's sandbox/container stores, image management and lifecycle behavior.
+It preserves gRPC deadlines, application metadata, response headers/trailers,
+status errors and cancellation of server streams. Exec and attach retain
+containerd's streaming URLs.
+
+For a Firecracker Pod, `PortForward` checks containerd's ready sandbox and runtime
+type, issues a single-use upstream CRI streaming URL, and connects the stream
+through that Pod's VMM vsock socket to the guest agent on port 10900. The agent
+connects only to guest loopback at the requested TCP port. Entering the host Pod
+network namespace cannot reach a service bound to guest loopback, which is why
+containerd's default port-forward callback cannot serve this VM layout. Other
+runtimes retain containerd's callback. The guest listener starts only for CRI
+tasks; ordinary OCI containers retain their existing agent behavior.
+
+For example, after starting containerd with the documented runtime configuration:
+
+```sh
+firecracker-cri \
+    --address /run/firecracker-containerd/cri.sock \
+    --backend /run/firecracker-containerd/containerd.sock \
+    --runtime-config /etc/containerd/firecracker-runtime.json \
+    --stream-address 127.0.0.1:0
+```
+
+The frontend refuses to replace an existing socket, creates its socket mode 0600,
+and defaults to loopback streaming. This command describes the component's
+configuration; Kubernetes RuntimeClass acceptance remains pending. The worker
+test driver starts both components in its private test container automatically.
+
+The `cri/` Go module pins CRI API and streaming v0.37.2, while containerd 2.3.7
+retains its compatible CRI API v0.36.3 dependency. CRI 1.37 renamed the generated
+Signal enum constants, breaking compilation of containerd 2.3.7 if imposed on
+the parent module; its wire numbers remain unchanged. This separate module uses
+parent source from the same Git checkout through the explicit `=> ..`
+replacement. It repeats the exact pinned SDK replacement because Go does not
+inherit replacements from dependencies. `verify-inputs.py` checks both module
+selections and that the parent source resolves to this checkout. The resolved
+frontend module versions are in [cri-modules.txt](cri-modules.txt).
+
+Typed forwarders are generated from the pinned API proto with
+`make -C cri generate`; descriptor coverage tests check every RuntimeService and
+ImageService method. Although the frontend exposes the new `CheckpointPod` and
+`RestorePod` method definitions, it currently forwards them to an unimplemented
+backend. Their presence does not provide native Pod snapshot/restore.
+
+Worker development validation passed the normal SPDY streaming selection,
+including exec, attach and port forwarding through a real VMM. Protocol tests
+also check a 4 MiB response after a request half-close and cancellation of both
+relay directions. These are development results, not acceptance of a committed
+milestone. Direct CRI WebSocket diagnostics (`CRI_WEBSOCKETS=1`) still fail all
+four streaming checks with HTTP 403 during protocol negotiation; the pinned
+streaming server and modern client do not negotiate a common protocol. The
+default tests use SPDY. Kubernetes API server streaming has not yet been tested
+with this runtime, so no claim about `kubectl` streaming is made.
+
+The broader development selection in the reproduction command below ran 20
+checks: 19 passed and the host-network port-forward check failed because host
+networking is explicitly unsupported. The raw worker log is
+`~/fc-ctrd-mod/evidence/cri-portforward-focused19-worker.log`. This preserves the
+known failure; it is not a successful full conformance result.
+
 ## Worker reproduction
 
 The VMM and SDK remain pinned to the accepted Step 2 revisions in `versions.json`.
@@ -46,7 +112,7 @@ worker checkout:
 tools/modernize/build-stack.sh
 export DOCKER_IMAGE_TAG=$(git rev-parse --short=12 HEAD)
 make test-images
-CRI_FOCUS='Multiple Containers|Networking|PodSandbox runtime should support basic operations|PodSandbox runtime should support sysctls|Runtime info' \
+CRI_FOCUS='Multiple Containers|Networking|PodSandbox runtime should support basic operations|PodSandbox runtime should support sysctls|Runtime info|Streaming' \
     tools/critest/test-cri.sh
 # The unfiltered suite is also required; the selection above is a focused check.
 tools/critest/test-cri.sh

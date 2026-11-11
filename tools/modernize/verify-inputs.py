@@ -47,4 +47,32 @@ if vmm_schema != sdk_schema:
     raise SystemExit("SDK API schema differs from the pinned VMM source")
 print(f"SDK: {expected_path}@{expected_version}")
 print(f"VMM/SDK schema sha256: {hashlib.sha256(vmm_schema).hexdigest()}")
+
+cri = selected["cri_integration"]
+for directory, versions in (
+    (root, {"k8s.io/cri-api": cri["backend_cri_api"]}),
+    (root / "cri", {
+        "k8s.io/cri-api": cri["frontend_cri_api"],
+        "k8s.io/cri-streaming": cri["frontend_cri_streaming"],
+        "github.com/containerd/containerd/v2": selected["containerd"]["version"],
+    }),
+):
+    for module, version in versions.items():
+        actual = command("go", "list", "-mod=readonly", "-m", "-f", "{{.Version}}", module,
+                         cwd=directory)
+        if actual != version:
+            raise SystemExit(f"{directory}: {module}: expected {version}, found {actual}")
+        print(f"{directory.name}: {module}@{actual}")
+
+parent = json.loads(command("go", "list", "-mod=readonly", "-m", "-json",
+                            "github.com/firecracker-microvm/firecracker-containerd", cwd=root / "cri"))
+local = parent.get("Replace", {})
+if local.get("Path") != ".." or Path(local.get("Dir", "")).resolve() != root:
+    raise SystemExit(f"CRI frontend must use parent source in this same checkout: {parent}")
+child_sdk = json.loads(command("go", "list", "-mod=readonly", "-m", "-json",
+                               "github.com/firecracker-microvm/firecracker-go-sdk", cwd=root / "cri"))
+child_replacement = child_sdk.get("Replace", {})
+if (child_replacement.get("Path"), child_replacement.get("Version")) != (expected_path, expected_version):
+    raise SystemExit(f"CRI frontend SDK differs from pinned parent SDK: {child_sdk}")
+print("CRI frontend: co-versioned parent source and exact pinned SDK verified")
 print(command("go", "version"))
