@@ -15,6 +15,30 @@ from [Step 1](step-1.md) and [Step 2](step-2.md). The results below identify the
 tested source revisions; earlier results do not establish acceptance of the
 merged Step 3 runtime.
 
+## FIFO maintenance while Step 3 remains WIP
+
+The shared runc-jailer telemetry correction is backported from Step 4 source
+`c7d73c703d18d33e07b39c2785dbcb1f77af039f`. The runtime previously tried to
+hard-link log and metrics FIFOs after runc startup. A FIFO on a different
+filesystem failed with `EXDEV`. The correction prepares the hard links, or
+initial runc bind mounts when necessary, before the jail starts and preserves
+the caller's original FIFO readers.
+
+This is bounded runtime maintenance. The native restore prototype, full CRI
+compliance, whole-Pod restore and Kubernetes checkpoint/restore remain **WIP and
+incomplete**. This maintenance does not change the pinned SDK
+`832b1a5132e06f5e2167b64b97b5cd8946604005` or Firecracker
+`ce86b117d59ca93b1c04b791a251b445ace76703`.
+
+Clean committed source `3c0d1ce5ce8fc47e80607a8a9a11330746c2972b` passed
+full worker build and installation, SHA-tagged test-image creation, lint and the
+three targeted privileged race tests. The real-VM cross-filesystem telemetry
+regression and all eight `TestCreateVM_Isolated` cases passed without skips,
+with private thin-pool cleanup and a clean source checkout. The
+[maintenance receipt](evidence/3c0d1ce-step3-fifo-maintenance-receipt.log) records
+exact inputs, binaries, raw-log hashes and two preserved cwd harness errors.
+These results validate this correction only; **Step 3 remains WIP**.
+
 ## Restorable host volumes
 
 `internal/volfs` can freeze RPC execution and capture its exported files together
