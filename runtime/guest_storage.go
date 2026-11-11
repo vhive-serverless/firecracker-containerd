@@ -104,8 +104,24 @@ func createGuestOverlay(ctx context.Context, path string, sizeMiB uint32, option
 	if err := ctx.Err(); err != nil {
 		return "", err
 	}
+	root, err := os.OpenRoot(filepath.Dir(path))
+	if err != nil {
+		return "", err
+	}
+	defer root.Close()
+	name := filepath.Base(path)
+	file, err := root.OpenFile(name, os.O_CREATE|os.O_EXCL|os.O_RDWR, 0600)
+	if err != nil {
+		return "", err
+	}
+	defer func() {
+		err = errors.Join(err, file.Close())
+		if err != nil {
+			_ = root.Remove(name)
+		}
+	}()
 	var backing unix.Statfs_t
-	if err := unix.Statfs(filepath.Dir(path), &backing); err != nil {
+	if err := unix.Fstatfs(int(file.Fd()), &backing); err != nil {
 		return "", err
 	}
 	// Require a directly identifiable disk filesystem. Overlay, network and
@@ -115,16 +131,6 @@ func createGuestOverlay(ctx context.Context, path string, sizeMiB uint32, option
 	default:
 		return "", fmt.Errorf("guest upper requires ext4/ext3, XFS or Btrfs host storage (filesystem magic %#x)", backing.Type)
 	}
-	file, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL|os.O_RDWR, 0600)
-	if err != nil {
-		return "", err
-	}
-	defer func() {
-		err = errors.Join(err, file.Close())
-		if err != nil {
-			_ = os.Remove(path)
-		}
-	}()
 	capacity := int64(sizeMiB) << 20
 	if err := file.Truncate(capacity); err != nil {
 		return "", err
@@ -139,7 +145,9 @@ func createGuestOverlay(ctx context.Context, path string, sizeMiB uint32, option
 	// Avoid discard operations. Eager metadata/journal initialization
 	// keeps first-boot writes and benchmark timing out of lazy format workers.
 	command := exec.CommandContext(ctx, "mkfs.ext4", "-q", "-F", "-m", "0", "-U", uuid,
-		"-E", "nodiscard,lazy_itable_init=0,lazy_journal_init=0", path)
+		"-E", "nodiscard,lazy_itable_init=0,lazy_journal_init=0", "/proc/self/fd/3")
+	// Format the already-owned inode; a replacement pathname cannot redirect mkfs.
+	command.ExtraFiles = []*os.File{file}
 	if output, err := command.CombinedOutput(); err != nil {
 		return "", fmt.Errorf("format guest upper: %w: %s", err, output)
 	}

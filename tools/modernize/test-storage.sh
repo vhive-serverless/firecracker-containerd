@@ -33,6 +33,7 @@ python3 tools/modernize/verify-inputs.py
 make lint
 go test -mod=readonly -race -count=1 -run '^TestGuestOverlay' -v ./runtime
 sh -n tools/image-builder/files_debootstrap/sbin/overlay-init
+make -C proto clean
 make proto
 git diff --exit-code
 

@@ -66,6 +66,9 @@ func TestGuestOverlayHostENOSPC(t *testing.T) {
 	path := filepath.Join(root, guestOverlayFile)
 	_, err := createGuestOverlay(context.Background(), path, 64)
 	require.ErrorIs(t, err, syscall.ENOSPC)
-	_, err = os.Stat(path)
+	fixture, err := os.OpenRoot(root)
+	require.NoError(t, err)
+	defer fixture.Close()
+	_, err = fixture.Stat(guestOverlayFile)
 	require.ErrorIs(t, err, os.ErrNotExist, "failed allocation must remove its partial image")
 }
