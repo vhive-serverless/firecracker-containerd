@@ -475,5 +475,24 @@
     "step_2_result": "120 pass, one existing SDK skip; two vHive runs",
     "step_3_tested": "3c0d1ce5ce8fc47e80607a8a9a11330746c2972b",
     "step_3_result": "bounded FIFO/CreateVM maintenance passed; Step3 remains WIP"
+  },
+  "step_4_kubernetes_pod_validation": {
+    "script_source": "06936f6b2167386321755acca65100f84c40ddf2",
+    "runtime_source": "72f4fc9173bef33cc1c981ad285758716f635e02",
+    "runtime_image": "sha256:0ed23833cf6043e6f2e0fa6ef3e590cfd9626c03e69d66303f9a693b079021b5",
+    "worker": "nehalem@amd218.utah.cloudlab.us",
+    "k3s": "v1.37.2+k3s1",
+    "scope": "Ordinary Kubernetes Pods only; no CRI conformance or Kubernetes checkpoint/restore acceptance.",
+    "verification": "evidence/06936f6-k3s/verification.json",
+    "verification_sha256": "ec6a560f5038d003726970731ba6af3e45716287a251bf24f70693557b11563f",
+    "profiles_passed": [
+      "disk",
+      "pmem",
+      "reclaim",
+      "combined"
+    ],
+    "raw_artifacts_verified": 92,
+    "source_clean": true,
+    "private_storage_pools_and_containers_removed": true
   }
 }

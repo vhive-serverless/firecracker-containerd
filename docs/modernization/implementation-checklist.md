@@ -73,6 +73,7 @@ branch starts at the validated completion commit of its prerequisite.
 - [x] Integrate consistent disks with memory/VMM snapshots; quiesce/flush/snapshot/restore ordering, private copied writable disks, full cloned-upper reservation and actual VMM-open inode checks passed clean 72f4fc9 across six storage profiles and both jailers.
 - [x] Worker write/copy-up/rename/delete/writeback/exhaustion tests and idle-reclaim/reactivation correctness passed in storage/mechanism acceptance and all 21 controlled trials.
 - [x] Worker direct runtime restore/lifecycle checks passed at 72f4fc9: fourteen cases, original VMM terminated, memory/filesystem state, matched logs, exec/stats/kill/wait/delete and six actual post-restore reporting/reuse checks.
+- [x] Ordinary Kubernetes Pod lifecycle passed all four disk/pmem/reclaim/combined profiles with clean 06936f6 harness and pinned 72f4fc9 runtime image; raw evidence and cleanup verified. See step-4.md.
 - [ ] Full inherited Step 3 integration acceptance: CRI failures and Kubernetes Pod checkpoint/restore remain explicitly WIP; direct runtime tests do not satisfy those gates.
 - [x] Run identical workloads/resources for original baseline, disk baseline, pmem only, reclamation only and combined, plus matching ext4 block controls: clean 0a268c5, 21 trials, three randomized blocks.
 - [x] Measure peak/integrated host memory, guest anonymous/page cache, shared backing, CPU, faults/I/O, disk, latency and correctness; separate accounting domains and retain missing metrics and reporting-counter freshness limitations.

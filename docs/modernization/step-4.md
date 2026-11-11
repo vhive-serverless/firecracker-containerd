@@ -283,3 +283,53 @@ resources. The later [385aca4 run](evidence/385aca4-native-acceptance.log) expos
 an empty source response after checkpoint: the shell created `/response` before
 writing it. The fixture now publishes a complete response by atomic rename.
 Neither earlier run is relabeled as acceptance of the final commit.
+
+## Ordinary Kubernetes Pod regression
+
+Clean harness commit `06936f6b2167386321755acca65100f84c40ddf2` passed all four
+profiles (`disk`, `pmem`, `reclaim`, `combined`) on the designated worker using
+k3s `v1.37.2+k3s1`. The runtime image was the already built and validated
+`72f4fc9` image, pinned by ID
+`sha256:0ed23833cf6043e6f2e0fa6ef3e590cfd9626c03e69d66303f9a693b079021b5`.
+The harness checkout's Go sources, module files and submodule pins match that
+runtime revision. This is validation of the committed harness against that
+pinned runtime image, not a new runtime build.
+
+The [verification record](evidence/06936f6-k3s/verification.json) identifies each
+profile's raw logs, SHA-256 hashes, Pod and sandbox identities and live container
+statistics. All four exercised two containers in one Firecracker VM, exec,
+logs, shared/projected volumes, DNS and Service networking. Each used a fully
+allocated 512 MiB guest upper on host disk and removed it during Pod deletion.
+DAMON's enabled state matched each profile, and pmem profiles mapped their
+hash-pinned immutable image read-only. Actual DAX and post-restore reporting
+remain covered by the separate mechanism and restore tests above.
+
+On session continuation, all 92 raw artifacts were copied without modification
+and verified against the recorded hashes; the harness's evidence validator
+passed for each profile. Worker inspection confirmed the harness checkout was
+clean and the private storage directories, device-mapper pools and node
+containers were absent. These checks preserve the earlier completed runs;
+they do not represent four additional Pod runs.
+
+To reproduce the recorded test with the retained worker image and DAX image,
+use the clean `06936f6` harness checkout (`/users/nehalem/fc-ctrd-mod/step4-k3s-dev`):
+
+```sh
+export STACK_DIR=/users/nehalem/fc-ctrd-mod
+export RUNTIMECLASS_BASE_IMAGE=sha256:0ed23833cf6043e6f2e0fa6ef3e590cfd9626c03e69d66303f9a693b079021b5
+export RUNTIMECLASS_RUNTIME_REVISION=72f4fc9173bef33cc1c981ad285758716f635e02
+for profile in disk pmem reclaim combined; do
+    KUBE_MEMORY_PROFILE="$profile" tools/kubernetes/test-firecracker-node.sh
+done
+```
+
+For a fresh reconstruction, build/install the pinned stack as above, run
+`make image-dax` and `make test-images` with `DOCKER_IMAGE_TAG` set to the first
+12 characters of the checkout revision, and omit the two `RUNTIMECLASS_*`
+overrides so the harness selects that checkout's image. The runtime image and
+DAX image hashes may differ from the historical receipt; retain the new inputs.
+
+**Step 3 remains WIP:** these are ordinary Pod lifecycle regressions, not CRI
+conformance or Kubernetes Pod checkpoint/restore acceptance. The inherited
+integration gate remains open even though Step 4's storage, memory evaluation,
+direct runtime restore and ordinary Pod checks have passed.
