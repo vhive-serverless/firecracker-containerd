@@ -11,7 +11,9 @@
 # express or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
+ifeq ($(origin REVISION),undefined)
 REVISION := $(shell git rev-parse HEAD)
+endif
 SOURCES := $(shell find . ../config ../internal ../proto -name '*.go')
 
 all: firecracker-cri

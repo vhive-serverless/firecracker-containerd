@@ -79,6 +79,9 @@ replacement. It repeats the exact pinned SDK replacement because Go does not
 inherit replacements from dependencies. `verify-inputs.py` checks both module
 selections and that the parent source resolves to this checkout. The resolved
 frontend module versions are in [cri-modules.txt](cri-modules.txt).
+Docker builds receive the source revision explicitly from the host, because a
+worktree's Git metadata path may be outside its container bind mount. The test
+image build verifies both daemon and frontend revisions before proceeding.
 
 Typed forwarders are generated from the pinned API proto with
 `make -C cri generate`; descriptor coverage tests check every RuntimeService and

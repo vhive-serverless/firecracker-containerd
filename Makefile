@@ -82,7 +82,7 @@ $(SUBDIRS):
 		--env GOPROXY=$(shell go env GOPROXY) \
 		--workdir /src \
 		$(FIRECRACKER_CONTAINERD_BUILDER_IMAGE) \
-		$(MAKE) $(subst -in-docker,,$@)
+		$(MAKE) $(subst -in-docker,,$@) REVISION=$(shell git rev-parse HEAD)
 
 proto:
 	DOCKER_BUILDKIT=1 docker build \
@@ -208,6 +208,7 @@ firecracker-containerd-test-image: all-in-docker firecracker runc test-cni-bins 
 		--progress=plain \
 		--file tools/docker/Dockerfile.integ-test \
 		--build-arg FIRECRACKER_TARGET=$(FIRECRACKER_TARGET) \
+		--build-arg RUNTIME_REVISION=$(shell git rev-parse HEAD) \
 		--tag $(FIRECRACKER_CONTAINERD_TEST_IMAGE):${DOCKER_IMAGE_TAG} .
 
 .PHONY: all $(SUBDIRS) clean proto lint install image test-images firecracker-container-test-image firecracker-containerd-integ-test-image test test-in-docker $(TEST_SUBDIRS) integ-test $(INTEG_TEST_SUBDIRS) tidy
