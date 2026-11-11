@@ -25,7 +25,7 @@ import (
 // that are dialed from the host to a guest listener.
 func VSockDialConnector(timeout time.Duration, udsPath string, port uint32) IOConnector {
 	return func(procCtx context.Context, logger *logrus.Entry) <-chan IOConnectorResult {
-		returnCh := make(chan IOConnectorResult)
+		returnCh := make(chan IOConnectorResult, 1)
 
 		go func() {
 			defer close(returnCh)
@@ -47,7 +47,7 @@ func VSockDialConnector(timeout time.Duration, udsPath string, port uint32) IOCo
 // on the provided guest-side vsock port and accepting the first connection that comes in.
 func VSockAcceptConnector(port uint32) IOConnector {
 	return func(procCtx context.Context, logger *logrus.Entry) <-chan IOConnectorResult {
-		returnCh := make(chan IOConnectorResult)
+		returnCh := make(chan IOConnectorResult, 1)
 
 		listener, err := vsock.Listener(procCtx, logger, port)
 		if err != nil {
@@ -57,8 +57,10 @@ func VSockAcceptConnector(port uint32) IOConnector {
 			close(returnCh)
 			return returnCh
 		}
+		stopClose := context.AfterFunc(procCtx, func() { _ = listener.Close() })
 
 		go func() {
+			defer stopClose()
 			defer close(returnCh)
 			defer listener.Close()
 
