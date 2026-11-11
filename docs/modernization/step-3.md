@@ -39,6 +39,9 @@ VMM and host server restore counter 41, both shared views, an open unlinked file
 and the original logical inode. The clone can then advance to counter 42.
 This component test does not exercise OCI task adoption, block-device capture,
 runtime checkpoint RPCs or Kubernetes checkpoint/restore.
+The [committed volume receipt](evidence/e21b3f6-volume-receipt.log) records the
+clean `e21b3f6a29da715382a5feeb60be005b08b36226` checkout, race tests, privileged
+mount checks, lint, real VM result and exact binary/log hashes.
 The [API audit](step-3-api-audit.md) records the v1.38 alpha target and the missing
 workflow in the released builds tested so far. Step 4 has not started.
 
