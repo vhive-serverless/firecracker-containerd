@@ -227,3 +227,15 @@ again recorded 92 passes, 21 failures and 29 skips. The
 [merged-run receipt](evidence/06bb03f-cri-full-receipt.log) preserves the actual
 image binary hashes and all failed/skipped cases. This verifies the correction's
 propagation while retaining the remaining CRI failures explicitly.
+
+The Pod resource-sizing change at
+`200d7ec7294f04aa585f240defd2701a8a2c6a46` passed a clean worker build,
+installation, source checks, nine selected CRI checks and three actual-VMM
+resource cases. The cases verified 2-vCPU VMs with 384, 256 and 512 MiB,
+including an unspecified CPU period and an unbounded Pod resource envelope.
+They checked the guest's reported resources, unchanged Pod annotations and
+cleanup. The unfiltered suite again recorded **92 passes, 21 failures and
+29 skips**. The [resource receipt](evidence/200d7ec-cri-resource-receipt.log)
+records both selections, actual image binary hashes and raw evidence hashes.
+These results validate initial sizing; they do not establish host Pod resource
+accounting or completion of the remaining Step 3 requirements.
