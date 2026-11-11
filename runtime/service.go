@@ -957,6 +957,13 @@ func (s *service) createBalloon(_ context.Context, request *proto.CreateVMReques
 }
 
 func (s *service) buildBalloonDeviceOpt(balloon models.Balloon) ([]firecracker.Opt, error) {
+	if s.nativeRestore != nil {
+		// The snapshot restores the balloon, including its reporting and stats
+		// configuration. PUT /balloon would configure boot resources before
+		// LoadSnapshot, which Firecracker rejects. Control methods query the
+		// restored VMM directly and need no separate host-side initialization.
+		return nil, nil
+	}
 	handler := firecracker.Handler{
 		Name: firecracker.CreateBalloonHandlerName,
 		Fn: func(ctx context.Context, machine *firecracker.Machine) error {
