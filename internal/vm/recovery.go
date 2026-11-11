@@ -172,9 +172,9 @@ func WaitProcessExit(ctx context.Context, identity ProcessIdentity) error {
 	}
 }
 
-// killOwnedProcess opens a pidfd before checking identity, so even PID reuse
-// between verification and signalling cannot redirect SIGKILL to another task.
-func killOwnedProcess(identity ProcessIdentity) error {
+// StopProcess signals the recorded process and waits up to five seconds for
+// exit. A pidfd prevents PID reuse from redirecting the signal.
+func StopProcess(identity ProcessIdentity, signal unix.Signal) error {
 	if identity.PID == 0 {
 		return nil
 	}
@@ -211,7 +211,7 @@ func killOwnedProcess(identity ProcessIdentity) error {
 	if actual != identity {
 		return fmt.Errorf("refusing to signal reused PID %d", identity.PID)
 	}
-	if err := unix.PidfdSendSignal(fd, unix.SIGKILL, nil, 0); err != nil && !errors.Is(err, unix.ESRCH) {
+	if err := unix.PidfdSendSignal(fd, signal, nil, 0); err != nil && !errors.Is(err, unix.ESRCH) {
 		return err
 	}
 	poll := []unix.PollFd{{Fd: int32(fd), Events: unix.POLLIN}}
@@ -250,7 +250,7 @@ func RecoverVM(ctx context.Context, dir Dir) error {
 	} else if alive {
 		return fmt.Errorf("shim %d is still alive", state.Shim.PID)
 	}
-	if err := killOwnedProcess(state.VMM); err != nil {
+	if err := StopProcess(state.VMM, unix.SIGKILL); err != nil {
 		return err
 	}
 	if state.RuncBinary != "" {

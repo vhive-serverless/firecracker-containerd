@@ -31,12 +31,42 @@ import (
 	"github.com/containerd/containerd/v2/pkg/oci"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/sys/unix"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
+	"github.com/firecracker-microvm/firecracker-containerd/config"
 	"github.com/firecracker-microvm/firecracker-containerd/internal/integtest"
 	"github.com/firecracker-microvm/firecracker-containerd/internal/vm"
 	"github.com/firecracker-microvm/firecracker-containerd/proto"
 	"github.com/firecracker-microvm/firecracker-containerd/runtime/firecrackeroci"
 )
+
+// The default SDK binary path must retain the VMM identity for forced StopVM.
+func TestForceStopDefaultFirecracker_Isolated(t *testing.T) {
+	integtest.Prepare(t, func(cfg *config.Config) { cfg.FirecrackerBinaryPath = "" })
+	ctx, cancel := context.WithTimeout(namespaces.WithNamespace(context.Background(), defaultNamespace), time.Minute)
+	defer cancel()
+	control, err := integtest.NewFCControlClient(integtest.ContainerdSockPath)
+	require.NoError(t, err)
+	defer control.Close()
+	const id = "force-stop-default"
+	_, err = control.CreateVM(ctx, &proto.CreateVMRequest{VMID: id})
+	require.NoError(t, err)
+	directory, err := vm.ShimDir(integtest.ShimBaseDir(), defaultNamespace, id)
+	require.NoError(t, err)
+	state, err := vm.ReadRecoveryState(directory)
+	require.NoError(t, err)
+	require.NotZero(t, state.VMM.PID)
+	_, err = control.PauseVM(ctx, &proto.PauseVMRequest{VMID: id})
+	require.NoError(t, err)
+	_, err = control.StopVM(ctx, &proto.StopVMRequest{VMID: id})
+	require.Equal(t, codes.Internal, status.Code(err))
+	require.ErrorContains(t, err, "forcefully terminated")
+	alive, err := vm.IsProcessAlive(state.VMM)
+	require.NoError(t, err)
+	require.False(t, alive, "VMM must be gone when StopVM returns")
+	require.NoDirExists(t, directory.RootPath())
+}
 
 func TestCrashRecovery_Isolated(t *testing.T) {
 	testVMRecovery(t, true)

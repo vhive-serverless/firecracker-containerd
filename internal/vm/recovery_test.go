@@ -20,6 +20,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"syscall"
 	"testing"
 
 	runc "github.com/containerd/go-runc"
@@ -48,7 +49,7 @@ func TestRecoveryRefusesReusedPID(t *testing.T) {
 	_, identity := recoveryProcess(t)
 	stale := identity
 	stale.StartTicks += "0"
-	require.ErrorContains(t, killOwnedProcess(stale), "reused PID")
+	require.ErrorContains(t, StopProcess(stale, syscall.SIGKILL), "reused PID")
 	alive, err := IsProcessAlive(identity)
 	require.NoError(t, err)
 	require.True(t, alive, "unrelated process must survive stale metadata")

@@ -933,6 +933,27 @@ vdf  254:80   0        512B  0 |  214 244 216 245 215 177 177 177`
 	}
 }
 
+// Drain the client-side FIFO readers before Delete cancels them. Process exit
+// and completion of the client's IO copy are separate containerd operations.
+func waitTaskOutput(ctx context.Context, t testing.TB, task containerd.Task) {
+	t.Helper()
+	io := task.IO()
+	if io == nil {
+		return
+	}
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		io.Wait()
+	}()
+	select {
+	case <-done:
+	case <-ctx.Done():
+		io.Cancel()
+		t.Fatalf("timed out draining task output: %v", ctx.Err())
+	}
+}
+
 func startAndWaitTask(ctx context.Context, t testing.TB, c containerd.Container) string {
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
@@ -954,6 +975,7 @@ func startAndWaitTask(ctx context.Context, t testing.TB, c containerd.Container)
 		assert.NoError(t, exitStatus.Error(), "failed to retrieve exitStatus")
 		assert.Equal(t, uint32(0), exitStatus.ExitCode())
 
+		waitTaskOutput(ctx, t, task)
 		status, err := task.Delete(ctx)
 		assert.NoErrorf(t, err, "failed to delete task %q after exit", c.ID())
 		if status != nil {
@@ -2258,21 +2280,56 @@ loop:
 	require.Equal(t, expected, actual)
 }
 
-func requireNonEmptyFifo(t testing.TB, path string) {
-	file, err := os.Open(path)
-	require.NoError(t, err)
-	defer file.Close()
+// Start watching before CreateVM. Startup can fail and close the VMM's
+// writer before the caller receives the error, so opening afterward can hang.
+func watchVMFifos(ctx context.Context, paths ...string) *errgroup.Group {
+	group := &errgroup.Group{}
+	for _, path := range paths {
+		group.Go(func() error {
+			if err := readVMFifo(ctx, path); err != nil {
+				return fmt.Errorf("read VM telemetry from %s: %w", path, err)
+			}
+			return nil
+		})
+	}
+	return group
+}
 
-	reader := bufio.NewReader(file)
-
-	// Since this is a FIFO, reading till EOF would block if its writer-end is still open.
-	line, err := reader.ReadString('\n')
-	require.NoError(t, err)
-	require.NotEqualf(t, "", line, "%s must not be empty", path)
-
-	info, err := os.Stat(path)
-	require.NoError(t, err)
-	require.Equal(t, os.ModeNamedPipe, info.Mode()&os.ModeType, "%s is a FIFO file", path)
+func readVMFifo(ctx context.Context, path string) error {
+	ticker := time.NewTicker(10 * time.Millisecond)
+	defer ticker.Stop()
+	for {
+		// Keeping a writer open on the test descriptor lets us read past an
+		// early writer close until the deadline, even if the VMM has exited.
+		file, err := os.OpenFile(path, os.O_RDWR|syscall.O_NONBLOCK, 0)
+		if err == nil {
+			defer file.Close()
+			info, err := file.Stat()
+			if err != nil {
+				return err
+			}
+			if info.Mode()&os.ModeNamedPipe == 0 {
+				return fmt.Errorf("expected a named pipe")
+			}
+			deadline, ok := ctx.Deadline()
+			if !ok {
+				return fmt.Errorf("missing FIFO read deadline")
+			}
+			if err := file.SetReadDeadline(deadline); err != nil {
+				return err
+			}
+			_, err = bufio.NewReader(file).ReadString('\n')
+			return err
+		}
+		if !os.IsNotExist(err) {
+			return err
+		}
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
+		}
+	}
 }
 
 func TestCreateVM_Isolated(t *testing.T) {
@@ -2378,11 +2435,9 @@ func TestCreateVM_Isolated(t *testing.T) {
 		request.LogFifoPath = logFile
 		request.MetricsFifoPath = metricsFile
 
+		telemetry := watchVMFifos(ctx, logFile, metricsFile)
 		resp, createVMErr := fcClient.CreateVM(ctx, request)
-
-		// Even CreateVM fails, the log file and the metrics file must have some data.
-		requireNonEmptyFifo(t, logFile)
-		requireNonEmptyFifo(t, metricsFile)
+		require.NoError(t, telemetry.Wait(), "expected VMM log and metrics even when startup fails")
 
 		// Some test cases are expected to have an error, some are not.
 		s.validate(t, ctx, createVMErr)
@@ -2511,11 +2566,9 @@ func TestPauseResume_Isolated(t *testing.T) {
 		request.LogFifoPath = logFile
 		request.MetricsFifoPath = metricsFile
 
+		telemetry := watchVMFifos(ctx, logFile, metricsFile)
 		resp, createVMErr := fcClient.CreateVM(ctx, request)
-
-		// Even CreateVM fails, the log file and the metrics file must have some data.
-		requireNonEmptyFifo(t, logFile)
-		requireNonEmptyFifo(t, metricsFile)
+		require.NoError(t, telemetry.Wait(), "expected VMM log and metrics even when startup fails")
 
 		// Run test case
 		state(ctx, fcClient, resp)

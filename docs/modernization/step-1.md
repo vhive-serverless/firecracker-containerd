@@ -161,6 +161,26 @@ the new attachment receives the guest's echo, then closes stdin. The volume
 helper also decodes a complete JSON request without requiring the caller to
 close stdin before the asynchronous copy finishes.
 
+The resulting `0d8e700f68881516637778c57dbc9ee12ac48b10` passed clean
+build, install, native lifecycle and recovery, and the full acceptance suite
+in `/users/nehalem/fc-ctrd-mod/step1-repro.SwuCJ3fv`. The full acceptance log
+is `evidence/0d8e700f6888-acceptance.log` in the worker workspace; SHA-256
+`4c09141c78b07953a9708334a81f0e60912d3f0410a4f17cce55c84e9cd81dce`.
+
+Later vHive testing found that a forced stop could return while an unjailed
+VMM was still running when the SDK selected the default binary. The shim now
+records the VMM's process identity for both binary selection paths and waits
+for the owned process to exit before removing its state. The regression test
+pauses a VM and checks that forced stop removes it. The startup tests open
+their log and metrics readers before calling CreateVM, so an early VM exit
+cannot leave a blocking FIFO open behind.
+
+Containerd reports process exit separately from completion of the client's
+output copy. A Go client that needs all foreground output should call
+`task.IO().Wait()` before deleting the task: containerd 2.3.7's Delete
+cancels the client FIFO readers. The binary output test follows that sequence
+and checks the byte count and SHA-256 through a slow reader.
+
 The runtime branch is pushed to `vhive-serverless/firecracker-containerd`, and
 the SDK branch and pinned revision are pushed to `JooyoungPark73/firecracker-go-sdk`.
 The Firecracker gitlink uses the existing upstream release tag and needs no VMM

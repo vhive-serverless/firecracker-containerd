@@ -133,9 +133,10 @@ printf 'end\n' >&2`)))
 	case <-ctx.Done():
 		t.Fatal(ctx.Err())
 	}
+	waitTaskOutput(ctx, t, task)
 	_, err = task.Delete(ctx)
 	require.NoError(t, err)
-	require.Len(t, output.Bytes(), 4*1024*1024, "binary output truncated: %s", stderr.String())
+	require.Equal(t, 4*1024*1024, output.Len(), "binary output truncated: %s", stderr.String())
 	require.Equal(t, sha256.Sum256(make([]byte, 4*1024*1024)), sha256.Sum256(output.Bytes()))
 	require.Equal(t, "begin\nend\n", stderr.String())
 	t.Logf("slow consumer received %d bytes without corruption", output.Len())

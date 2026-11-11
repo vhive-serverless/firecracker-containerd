@@ -15,7 +15,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"os"
 	"syscall"
 
@@ -32,7 +31,7 @@ type noopJailer struct {
 	logger  *logrus.Entry
 	shimDir vm.Dir
 	ctx     context.Context
-	pid     int
+	process vm.ProcessIdentity
 }
 
 func newNoopJailer(ctx context.Context, logger *logrus.Entry, shimDir vm.Dir) *noopJailer {
@@ -40,15 +39,28 @@ func newNoopJailer(ctx context.Context, logger *logrus.Entry, shimDir vm.Dir) *n
 		logger:  logger,
 		shimDir: shimDir,
 		ctx:     ctx,
-		pid:     0,
 	}
 }
 
 func (j *noopJailer) BuildJailedMachine(cfg *config.Config, _ *firecracker.Config, vmID string) ([]firecracker.Opt, error) {
-	if len(cfg.FirecrackerBinaryPath) == 0 {
-		return []firecracker.Opt{}, nil
+	pidHandler := firecracker.Handler{
+		Name: "firecracker-containerd-jail-pid-handler",
+		Fn: func(_ context.Context, m *firecracker.Machine) error {
+			pid, err := m.PID()
+			if err != nil {
+				return err
+			}
+			j.process, err = vm.ReadProcessIdentity(pid)
+			return err
+		},
 	}
 
+	trackProcess := func(m *firecracker.Machine) {
+		m.Handlers.FcInit = m.Handlers.FcInit.AppendAfter(firecracker.StartVMMHandlerName, pidHandler)
+	}
+	if cfg.FirecrackerBinaryPath == "" {
+		return []firecracker.Opt{trackProcess}, nil
+	}
 	relSocketPath, err := j.shimDir.FirecrackerSockRelPath()
 	if err != nil {
 		return nil, err
@@ -65,25 +77,7 @@ func (j *noopJailer) BuildJailedMachine(cfg *config.Config, _ *firecracker.Confi
 		cmd.Stderr = j.logger.WithField("vmm_stream", "stderr").WriterLevel(logrus.DebugLevel)
 	}
 
-	pidHandler := firecracker.Handler{
-		Name: "firecracker-containerd-jail-pid-handler",
-		Fn: func(_ context.Context, m *firecracker.Machine) error {
-			pid, err := m.PID()
-			if err != nil {
-				return err
-			}
-			j.pid = pid
-			return nil
-		},
-	}
-
-	j.logger.Debug("noop operation for BuildJailedMachine")
-	return []firecracker.Opt{
-		firecracker.WithProcessRunner(cmd),
-		func(m *firecracker.Machine) {
-			m.Handlers.FcInit = m.Handlers.FcInit.Append(pidHandler)
-		},
-	}, nil
+	return []firecracker.Opt{trackProcess, firecracker.WithProcessRunner(cmd)}, nil
 }
 
 func (j *noopJailer) JailPath() vm.Dir {
@@ -102,25 +96,11 @@ func (j *noopJailer) StubDrivesOptions() []FileOpt {
 }
 
 func (j *noopJailer) Stop(force bool) error {
-	if j.pid == 0 {
-		return errors.New("the machine has not been started")
-	}
-
 	signal := syscall.SIGTERM
 	if force {
 		signal = syscall.SIGKILL
 	}
-	j.logger.Debugf("sending signal %d to %d", signal, j.pid)
-	p, err := os.FindProcess(j.pid)
-	if err != nil {
-		return err
-	}
-
-	err = p.Signal(signal)
-	if err == nil || err.Error() == "os: process already finished" {
-		return nil
-	}
-	return err
+	return vm.StopProcess(j.process, signal)
 }
 
 func (j *noopJailer) Close() error {
