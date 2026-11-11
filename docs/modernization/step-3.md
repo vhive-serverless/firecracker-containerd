@@ -1,5 +1,12 @@
 # Step 3 — WIP
 
+Install-loop maintenance at `a5a2cb84a503338884692c1387fa2b1b3d5a3c72` passed the
+worker fixture: a failing first component stops installation before the second,
+and a successful component still installs. The [maintenance receipt](evidence/a5a2cb8-install-guard-receipt.log)
+records source and log hashes. This one-line build-system check did not rerun
+runtime acceptance; the prior functional results below retain their original
+source revisions and dependency pins. **Step 3 remains WIP and incomplete.**
+
 Step 3 is explicitly **WIP and incomplete**. On 2026-11-11 the user authorized
 starting Step 4 without completing this milestone. Steps 1 and 2 retain their accepted branches. This branch
 currently adds a containerd CRI adapter, RuntimeClass deployment tests and native
