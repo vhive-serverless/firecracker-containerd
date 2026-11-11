@@ -1,0 +1,235 @@
+Static guest memory probe: committed host validation PASS; guest DAX validation pending.
+Date: 2026-11-11
+Topic branch: work/step4-memory-probe
+Base: fe2562f0d61db01d6e92e29e2ac4e966cd327954
+Implementation: 09b196e25183af6fbb662d61f2840117720a1420
+Lint correction and exact tested source: c2f54652a3a1c20beb114a31e0bddaf1486f8675
+Worker: nehalem@amd218.utah.cloudlab.us
+Worker checkout: /users/nehalem/fc-ctrd-mod/step4-memory-probe-committed
+Worker checkout clean before/after final validation.
+Binary: tools/memory-probe/fc-memory-probe
+Binary SHA-256: 08ac35524118fb259b229415889b64e2c5c100a4dc15c93ad87d03f706fcf827
+
+All compilation and tests ran on the designated worker. No local Go/Rust build.
+The implementation changes only the new tools/memory-probe directory and the top
+Makefile's helper build, files_ephemeral copy and clean integration. Runtime,
+configuration, protobuf, kernel and image-builder scripts are unchanged. Parent
+module dependency pins are unchanged; x/sys v0.47.0 is selected from that module.
+SquashFS remains the default; the DAX image target remains opt-in.
+
+Actual passing checks:
+- Native static build using Go 1.26.11, CGO_ENABLED=0, -trimpath and -buildvcs=false.
+- Five unit tests (round trip, stat-only empty file, malformed arguments, rejection
+  of invalid file mappings including FIFO, and detection of anonymous corruption).
+  No skips. go vet and scoped golangci-lint both passed; gofmt was clean.
+- Actual CLI stat-only on an ordinary worker filesystem file returned DAX support
+  true and DAX value false, with metadata matching the fixture size.
+- Two actual CLI mmap/idle/readback runs verified the selected file SHA-256 and
+  full anonymous canary: a 65536-byte prefix with 2 MiB anonymous mmap and 20 ms
+  idle, and the entire 221184-byte file with 2 MiB anonymous mmap and zero idle.
+  All eight expected phases, monotonic timing, meminfo, rusage totals/deltas and
+  positive anonymous minor faults were checked. Available DAMON maps were empty
+  on this host; guest DAMON counter sampling has not been validated by this run.
+- Fifteen actual CLI malformed/invalid-file cases returned nonzero with JSON
+  errors, including size/duration bounds, missing/empty/non-regular paths, FIFO,
+  an overlong prefix and unexpected options/positional arguments.
+- ELF inspection found no interpreter. The pinned Docker builder's actual
+  memory-probe-in-docker target produced bytes identical to the native build.
+  Thus both checked builds have the same binary hash above.
+
+An initial committed run at 09b196e compiled and passed unit tests/vet, but lint
+reported repeated JSON keys "bytes" and "verified" (goconst). The c2f5465 correction
+names these keys as constants. The initial failing log is preserved with its
+hash below; all final checks were rerun from the clean corrected commit.
+
+No guest image was built and no guest DAX, PMEM, DAMON reclaim or host-memory
+improvement claim is made. Shared files_ephemeral staging supplies the probe to
+standard/debug/stargz image inputs; the DAX image is derived from the same standard
+rootfs. Each later actual image/guest arm must verify the installed probe hash and
+run -stat-only against the file whose mapping is evaluated. Keep that file immutable
+during the probe: truncation can cause SIGBUS. The probe does not drop caches,
+request reclaim, lock pages, change DAMON settings or freeze other writers.
+Step 3 remains WIP; its branches, dependency references and receipts are untouched.
+
+Exact worker commands (from the clean tested checkout):
+export PATH=/users/nehalem/fc-ctrd-mod/toolchains/go1.26.11/bin:$PATH
+export GOTOOLCHAIN=local
+test -z "$(git status --porcelain)"
+test -z "$(gofmt -l tools/memory-probe/*.go)"
+make -B memory-probe
+go test -mod=readonly -count=1 -timeout=60s -v ./tools/memory-probe
+go vet ./tools/memory-probe
+/users/nehalem/fc-ctrd-mod/step3-fifo-committed/bin/golangci-lint run ./tools/memory-probe/...
+file tools/memory-probe/fc-memory-probe
+readelf -l tools/memory-probe/fc-memory-probe
+go version -m tools/memory-probe/fc-memory-probe
+mkdir -p tmp
+python3 /users/nehalem/fc-ctrd-mod/evidence/memory-probe-host-validation.py \
+  tools/memory-probe/fc-memory-probe /users/nehalem/fc-ctrd-mod/evidence/c2f5465-memory-probe
+# Driver retains stat.json, prefix.jsonl, whole.jsonl and malformed.jsonl and
+# asserts their fields and subprocess exit codes; temporary fixture is removed.
+cp tools/memory-probe/fc-memory-probe /users/nehalem/fc-ctrd-mod/evidence/c2f5465-memory-probe/fc-memory-probe.host
+rm tools/memory-probe/fc-memory-probe
+DOCKER_IMAGE_TAG=c2f54652a3a1 make memory-probe-in-docker
+cmp /users/nehalem/fc-ctrd-mod/evidence/c2f5465-memory-probe/fc-memory-probe.host tools/memory-probe/fc-memory-probe
+test -z "$(git status --porcelain)"
+
+Actual ordinary-host stat-only output:
+{"path":"/users/nehalem/fc-ctrd-mod/step4-memory-probe-committed/tmp/memory-probe.ta7rffch/ordinary-file","statx_mask":6143,"attributes":0,"attributes_mask":3160180,"statx_dax_supported":true,"statx_dax":false,"size_bytes":221184,"mode":33188,"uid":20005,"gid":3763,"inode":9324150,"links":1,"blocks_512_bytes":440,"block_size_bytes":4096,"device_major":8,"device_minor":3,"mount_id":29,"mtime_unix_sec":1794409641,"mtime_nsec":349369794}
+
+Actual host CLI result:
+{"result": "HOST_MEMORY_PROBE_PASS", "statx_dax_supported": true, "statx_dax": false, "round_trips": 2, "malformed_cases": 15, "elf_interpreter_present": false, "binary_sha256": "08ac35524118fb259b229415889b64e2c5c100a4dc15c93ad87d03f706fcf827"}
+
+Actual prefix-run phase samples (duration ns, minor faults delta, major faults delta):
+stat 9878 2 0
+file_touch 354367 35 0
+anon_fill 3304328 516 0
+idle_start 85180 5 0
+idle_end 20226681 13 0
+file_retouch 234662 39 0
+anon_verify 2019901 2 0
+complete 82255 4 0
+
+Actual build, unit, vet, lint and binary metadata log:
+Embedded log lines have trailing whitespace removed; hashes refer to raw worker files.
+From https://github.com/vhive-serverless/firecracker-containerd
+ * branch              work/step4-memory-probe -> FETCH_HEAD
+Could not access submodule '_submodules/firecracker' at commit 20727f40
+Previous HEAD position was 09b196e2 Add static guest memory and DAX observation probe
+HEAD is now at c2f54652 Name repeated memory probe output fields
+Wed Nov 11 15:07:19 UTC 2026
+c2f54652a3a1c20beb114a31e0bddaf1486f8675
+go version go1.26.11 linux/amd64
+golang.org/x/sys v0.47.0
+make -C tools/memory-probe
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/step4-memory-probe-committed/tools/memory-probe'
+CGO_ENABLED=0 go build -mod=readonly -trimpath -buildvcs=false -o fc-memory-probe .
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/step4-memory-probe-committed/tools/memory-probe'
+=== RUN   TestRoundTrip
+--- PASS: TestRoundTrip (0.01s)
+=== RUN   TestStatOnlyEmptyFile
+--- PASS: TestStatOnlyEmptyFile (0.00s)
+=== RUN   TestMalformedArguments
+=== RUN   TestMalformedArguments/#00
+=== RUN   TestMalformedArguments/-file_/unused_extra
+=== RUN   TestMalformedArguments/-file_/unused_-unknown
+=== RUN   TestMalformedArguments/-file_/unused_-file-bytes_-1
+=== RUN   TestMalformedArguments/-file_/unused_-file-bytes_268435457
+=== RUN   TestMalformedArguments/-file_/unused_-anon-mib_0
+=== RUN   TestMalformedArguments/-file_/unused_-anon-mib_257
+=== RUN   TestMalformedArguments/-file_/unused_-idle_-1s
+=== RUN   TestMalformedArguments/-file_/unused_-idle_1h1s
+=== RUN   TestMalformedArguments/-file_/unused_-idle_invalid
+--- PASS: TestMalformedArguments (0.00s)
+    --- PASS: TestMalformedArguments/#00 (0.00s)
+    --- PASS: TestMalformedArguments/-file_/unused_extra (0.00s)
+    --- PASS: TestMalformedArguments/-file_/unused_-unknown (0.00s)
+    --- PASS: TestMalformedArguments/-file_/unused_-file-bytes_-1 (0.00s)
+    --- PASS: TestMalformedArguments/-file_/unused_-file-bytes_268435457 (0.00s)
+    --- PASS: TestMalformedArguments/-file_/unused_-anon-mib_0 (0.00s)
+    --- PASS: TestMalformedArguments/-file_/unused_-anon-mib_257 (0.00s)
+    --- PASS: TestMalformedArguments/-file_/unused_-idle_-1s (0.00s)
+    --- PASS: TestMalformedArguments/-file_/unused_-idle_1h1s (0.00s)
+    --- PASS: TestMalformedArguments/-file_/unused_-idle_invalid (0.00s)
+=== RUN   TestRejectInvalidMapping
+--- PASS: TestRejectInvalidMapping (0.00s)
+=== RUN   TestCanaryDetectsCorruption
+--- PASS: TestCanaryDetectsCorruption (0.00s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/tools/memory-probe	0.010s
+0 issues.
+tools/memory-probe/fc-memory-probe: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, Go BuildID=WaC3s6mmvmdn2sLvCtS6/SZZZK6fbvbb7ejuQahvY/oK4wxuR4cr-G2dAj1bkV/jsBXtl1iSJolnPxyt1bJ, BuildID[sha1]=80c93161c32c7170e2a9acd0fd2c26f48c9bd2cd, with debug_info, not stripped
+
+Elf file type is EXEC (Executable file)
+Entry point 0x483520
+There are 6 program headers, starting at offset 64
+
+Program Headers:
+  Type           Offset             VirtAddr           PhysAddr
+                 FileSiz            MemSiz              Flags  Align
+  PHDR           0x0000000000000040 0x0000000000400040 0x0000000000400040
+                 0x0000000000000150 0x0000000000000150  R      0x1000
+  NOTE           0x0000000000000f78 0x0000000000400f78 0x0000000000400f78
+                 0x0000000000000064 0x0000000000000064  R      0x4
+  LOAD           0x0000000000000000 0x0000000000400000 0x0000000000400000
+                 0x00000000000f2051 0x00000000000f2051  R E    0x1000
+  LOAD           0x00000000000f3000 0x00000000004f3000 0x00000000004f3000
+                 0x0000000000120d28 0x0000000000120d28  R      0x1000
+  LOAD           0x0000000000214000 0x0000000000614000 0x0000000000614000
+                 0x00000000000111e0 0x0000000002047200  RW     0x1000
+  GNU_STACK      0x0000000000000000 0x0000000000000000 0x0000000000000000
+                 0x0000000000000000 0x0000000000000000  RW     0x8
+
+ Section to Segment mapping:
+  Segment Sections...
+   00
+   01     .note.go.buildid
+   02     .note.go.buildid .note.gnu.build-id .text
+   03     .rodata .gopclntab .typelink .itablink
+   04     .go.buildinfo .go.fipsinfo .go.module .noptrdata .data .bss .noptrbss
+   05
+tools/memory-probe/fc-memory-probe: go1.26.11
+	path	github.com/firecracker-microvm/firecracker-containerd/tools/memory-probe
+	mod	github.com/firecracker-microvm/firecracker-containerd	(devel)
+	dep	golang.org/x/sys	v0.47.0	h1:o7XGOvZQCADBQQ4Y7VNq2dRWQR7JmOUW8Kxx4ZsNgWs=
+	build	-buildmode=exe
+	build	-compiler=gc
+	build	-trimpath=true
+	build	CGO_ENABLED=0
+	build	GOARCH=amd64
+	build	GOOS=linux
+	build	GOAMD64=v1
+08ac35524118fb259b229415889b64e2c5c100a4dc15c93ad87d03f706fcf827  tools/memory-probe/fc-memory-probe
+HOST_BUILD_TEST_VET_LINT_OK
+
+Actual container build log:
+docker run --rm \
+	--user 20005:3763 \
+	--volume /users/nehalem/fc-ctrd-mod/step4-memory-probe-committed:/src \
+	--volume gocache:/go \
+	--env HOME=/tmp \
+	--env GOPATH=/go \
+	--env GO111MODULES=on \
+	--env STATIC_AGENT=on \
+	--env STATIC_DOCKER_CREDENTIAL_MMDS=on \
+	--env GOPROXY=https://proxy.golang.org,direct \
+	--workdir /src \
+	public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 \
+	make memory-probe REVISION=c2f54652a3a1c20beb114a31e0bddaf1486f8675
+make -C tools/memory-probe
+make[1]: Entering directory '/src/tools/memory-probe'
+CGO_ENABLED=0 go build -mod=readonly -trimpath -buildvcs=false -o fc-memory-probe .
+make[1]: Leaving directory '/src/tools/memory-probe'
+08ac35524118fb259b229415889b64e2c5c100a4dc15c93ad87d03f706fcf827  /users/nehalem/fc-ctrd-mod/evidence/c2f5465-memory-probe/fc-memory-probe.host
+08ac35524118fb259b229415889b64e2c5c100a4dc15c93ad87d03f706fcf827  tools/memory-probe/fc-memory-probe
+NATIVE_CONTAINER_BINARY_IDENTICAL
+source_clean=true
+
+Final source audit and raw log SHA-256:
+Wed Nov 11 15:08:48 UTC 2026
+worker_checkout=/users/nehalem/fc-ctrd-mod/step4-memory-probe-committed
+c2f54652a3a1c20beb114a31e0bddaf1486f8675
+source_clean=true
+Makefile
+tools/memory-probe/.gitignore
+tools/memory-probe/Makefile
+tools/memory-probe/README.md
+tools/memory-probe/main.go
+tools/memory-probe/main_test.go
+bd9dee65fc79910d62fc1780523326fdf0666e6b231cd2e5799bad1ee68af8d0  Makefile
+7cb6760d1af31b0aacca7abbac1c1d9b001b15f5a910ccc5dbfa7116760e1ec8  go.mod
+aac0e33917a99bbb36b0496c8dd646eb936e11348ba08a24f2f6812d8f504a52  go.sum
+97c75e1ee44921a3ccf4055996012a9055a5a4ca6a95357b1e913e4ac697a2c2  tools/memory-probe/main.go
+bd13aa4e122e2b75beaaca41d32c40805c090d79ff052a81e617b34e90ddfb5b  tools/memory-probe/main_test.go
+12951c4107893dbbd283af53ba45948ed201be4f9897bc7b19e29f58ca789f19  tools/memory-probe/Makefile
+08ac35524118fb259b229415889b64e2c5c100a4dc15c93ad87d03f706fcf827  tools/memory-probe/fc-memory-probe
+f5c4e910be5c93a8cf9061987b5c358ea92b2b5fa178d10bd380fbc9df2e0de1  /users/nehalem/fc-ctrd-mod/evidence/c2f5465-memory-probe/build-checks.log
+0c2afa0407a22e6f90c9e768dbdd9eb26ecec9d3d5fd4979b4abfa98940ba422  /users/nehalem/fc-ctrd-mod/evidence/c2f5465-memory-probe/container-build.log
+d70c405b26bd644faa70749ed51a420074ad731a4bed6b18cef2a14448cd6582  /users/nehalem/fc-ctrd-mod/evidence/c2f5465-memory-probe/host-validation.log
+688a4d83e52cd59231c7efe6c1490ed91645811eb41d12384cebe7f11a89a3ae  /users/nehalem/fc-ctrd-mod/evidence/c2f5465-memory-probe/stat.json
+d232eabe3a95564f70cca0c7a29078dfa579147501d9fba9cb901fcd5ed784be  /users/nehalem/fc-ctrd-mod/evidence/c2f5465-memory-probe/prefix.jsonl
+0749811c2c587bf2b3b87f2c810470e98a27c0ef1799b83e06e5ae6b83cc5008  /users/nehalem/fc-ctrd-mod/evidence/c2f5465-memory-probe/whole.jsonl
+c5661a21fec220d26279dbe36fb20e5a209618059208e4c15c7aef983f97b8ec  /users/nehalem/fc-ctrd-mod/evidence/c2f5465-memory-probe/malformed.jsonl
+6e63008f5d6813062e318c137257559e54ea78959fb0835001f7a58aead246b9  /users/nehalem/fc-ctrd-mod/evidence/memory-probe-host-validation.py
+48acb6371a3eff6e85a80c3f1ac5303e538399bc6ef461e65f9334e187f8798b  /users/nehalem/fc-ctrd-mod/evidence/09b196e-memory-probe/build-checks.log
+12cfa4c1ab2f4dbdd663584b42ce943a58219a6efe2b87c01bd5760f138929b3  /users/nehalem/fc-ctrd-mod/evidence/c2f5465-memory-probe/final-audit.log
