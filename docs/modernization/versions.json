@@ -312,10 +312,10 @@
     "test_state_directory": "FICD_VM_STORAGE; defaults to ../.ficd-test-vms/<checkout-name>, outside source/build contexts"
   },
   "step_4_memory": {
-    "status": "WIP milestone; free-page reporting and DAMON components passed committed worker acceptance; pmem/evaluation pending",
+    "status": "WIP milestone; disk storage, free-page reporting, DAMON and pmem/DAX components passed committed worker acceptance; controlled evaluation pending",
     "free_page_reporting": "FirecrackerBalloonDevice.FreePageReporting; independent of target amount",
     "damon": "Bounded non-anonymous reclamation and reporting passed clean committed worker acceptance at 9706231",
-    "pmem_dax": "Runtime pmem/DAX, both jailers, shared immutable backing, private writes and combined DAMON capture passed dirty development VM checks; clean committed validation at 438c2cb running",
+    "pmem_dax": "Clean committed pmem/DAX, both jailers, shared immutable backing, private writes, combined DAMON capture and matching block capture passed at 438c2cb",
     "evaluation": "five requested configurations plus matching filesystem controls pending",
     "free_page_reporting_validation": {
       "tested_runtime_commit": "020f85b7c137be6989d96fbf4d63c1a3b3e9b71e",
@@ -358,7 +358,8 @@
       "nominal_page_metadata_bytes": 8388608,
       "filesystem": "ext4, 4096-byte blocks, clean, no journal, immutable mode0444",
       "evidence": "../../tools/image-builder/evidence/e76967b-dax-image-receipt.log",
-      "guest_dax_activation_verified": false
+      "guest_dax_activation_verified": false,
+      "scope": "historical image-builder-only validation; actual guest-validated image is identified in pmem_validation"
     },
     "damon_validation": {
       "tested_runtime_commit": "97062314463adb53ee6534afc5d8eafd82bbf509",
@@ -389,7 +390,23 @@
       "both_jailer_modes": true,
       "root_checks_seconds": 52.25,
       "combined_capture_seconds": 112.04,
-      "scope": "development only; repeated combined pmem/DAMON native capture, no restore or controlled savings evaluation; final 438c2cb corrections await clean acceptance"
+      "scope": "historical dirty development run; final corrected implementation subsequently passed clean acceptance in pmem_validation"
+    },
+    "pmem_validation": {
+      "tested_runtime_commit": "438c2cb6ea0c7de719bed8eef08b3ba0db1d31b8",
+      "worker_checkout": "/users/nehalem/fc-ctrd-mod/step4-pmem-dev",
+      "install_prefix": "/users/nehalem/fc-ctrd-mod/install/438c2cb6ea0c",
+      "receipt": "evidence/438c2cb-pmem-acceptance-receipt.log",
+      "receipt_sha256": "5cb678cafff5905d9d73112e4e4bee3092c4331112537ed2603513f302ee7050",
+      "dax_image_sha256": "64101f4e112cb6e0eb1c2ab70093d4dc86e8498094d402d851c62a1a5116f57b",
+      "probe_sha256": "08ac35524118fb259b229415889b64e2c5c100a4dc15c93ad87d03f706fcf827",
+      "actual_lower_file_dax_verified": true,
+      "both_jailer_modes": true,
+      "root_checks_seconds": 52.03,
+      "combined_capture_seconds": 112.23,
+      "block_capture_seconds": 97.31,
+      "result": "PASS; full build/private install/lint/race/forced proto; eight root VMs; same immutable inode, private writes, canary/refault, probe hash, both repeated capture profiles; clean source and private pool removed",
+      "scope": "component acceptance; no native restore or controlled memory savings claim"
     }
   },
   "shared_jailer_telemetry_validation": {

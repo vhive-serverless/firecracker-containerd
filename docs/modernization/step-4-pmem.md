@@ -4,6 +4,17 @@ Step 3 remains explicitly WIP. This component adds an optional immutable guest
 root through the pinned VMM/SDK's virtio-pmem support. It does not complete
 native restore or the five-configuration evaluation.
 
+Clean commit `438c2cb6ea0c7de719bed8eef08b3ba0db1d31b8` passed the complete
+worker procedure below: full build, private installation, lint, race units,
+forced protobuf regeneration, real DAX/control VMs and native capture. The
+[receipt](evidence/438c2cb-pmem-acceptance-receipt.log) and
+[raw acceptance](evidence/438c2cb-pmem-acceptance.log) record the clean source,
+dependencies, actual binaries/image and pool cleanup. Eight root VM cases
+passed in 52.03 s; combined pmem/DAMON capture passed both jailer modes in
+112.23 s, and matching ext4 block-control capture passed both in 97.31 s.
+Repeated capture retained independent upper/container/FUSE state while the
+source advanced. This accepts the component, not native restore or savings.
+
 Build the ordinary guest image and `make image-dax` on the worker. The latter
 converts exactly that image tree into a 512 MiB ext4 image with 4 KiB blocks,
 no journal and mode 0444. The default remains SquashFS. Both image paths receive
@@ -72,7 +83,7 @@ copy-up/rename/delete, mmap/reread and anonymous canary checks passed.
 The [development receipt](evidence/pmem-dev-vm-receipt.log) identifies the dirty
 source patch/archive, binaries, image and raw logs. These runs precede the final
 artifact-directory fsync and block-control capture corrections in `438c2cb`.
-Clean committed validation of that revision is running; it remains required.
+Clean committed validation of that revision subsequently passed, as recorded above.
 The raw [root checks](evidence/pmem-dev-PmemRoot_Isolated.log) and
 [combined capture checks](evidence/pmem-dev-PmemNativeCheckpoint_Isolated.log)
 do not establish native restore or measured memory savings.

@@ -83,7 +83,7 @@ administrator truncation or unrelated hardware failure.
 The legacy vHive snapshot API supports only the explicit RAM layout; it cannot
 silently omit the new upper. Native capture must include the upper alongside
 the other disks. Native restore remains unaccepted. Pmem and the five-arm
-evaluation remain pending; DAMON component acceptance is recorded below.
+evaluation remains pending; DAMON and pmem component acceptance are recorded below.
 
 The development worker passed disk upper inspection, write/copy-up/rename/delete,
 guest ENOSPC recovery, ownership and cleanup, with and without the runc jailer
@@ -160,8 +160,8 @@ The shared correction also passed bounded checks on Steps 1–3; Step 3 remains 
 [Reclamation integration notes](step-4-reclamation.md) record the exact pinned
 kernel controls and clean committed DAMON acceptance at `9706231`. That run
 passed full build/private installation, lint, race units, forced protobuf
-regeneration, reporting, DAMON and ordinary balloon regression tests. Pmem/DAX
-integration and the controlled evaluation remain pending.
+regeneration, reporting, DAMON and ordinary balloon regression tests. The
+controlled evaluation remains pending.
 
 Native capture already copies every configured virtio-blk drive after guest
 quiescing and VMM pause. New disks need capture regression coverage. Pmem backing
@@ -170,5 +170,7 @@ need an explicit contract. End-to-end native restore remains WIP from Step 3.
 
 [Pmem integration notes](step-4-pmem.md) describe the optional immutable ext4
 root, digest-pinned sharing, matching virtio-blk control and artifact handling.
-Development guest DAX and combined capture tests passed both jailer modes;
-clean committed pmem acceptance and the controlled evaluation remain pending.
+Clean pmem acceptance passed at `438c2cb`, including actual lower-file DAX,
+matched block controls, shared read-only backing, private writable state and
+both native capture profiles across both jailers. The controlled evaluation
+and inherited end-to-end native restore remain incomplete.
