@@ -218,6 +218,9 @@ class MatrixTests(unittest.TestCase):
             rows = list(csv.DictReader(stream))
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0]['label'], 'COMMITTED OBSERVATIONS')
+        self.assertEqual(rows[0]['physical_device'], '8:0')
+        self.assertIn('full_trial.vm_aggregate_pss_mapped_view', json.loads(rows[0]['unavailable_json']))
+        self.assertEqual(int(rows[0]['idle_start_host_ns']), 12 * NS)
         self.assertEqual(float(rows[0]['common_idle.dedicated_cgroup.memory_current.trapezoid_byte_seconds']), 252)
 
     def test_default_window_and_equal_guest_end_are_rejected(self):
