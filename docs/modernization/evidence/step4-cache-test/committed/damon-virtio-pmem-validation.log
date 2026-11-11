@@ -1,0 +1,24 @@
+branch=damon-virtio-pmem
+expected_revision=a67e5e6c1e270b199d5b8493ef04d7f2a0fa5401
+actual_revision=a67e5e6c1e270b199d5b8493ef04d7f2a0fa5401
+go=go version go1.26.11 linux/amd64
+test_file_sha256=ac89ecd2bfe416a6b8aeeb6fe462e06925bd0651f84ca31926f48d1c1dc5ae23  snapshotter/demux/cache/evict_test.go
+parent=907fc268ea85f60dfcdae2b1471b5ffb28811003
+commit_changed_paths:
+snapshotter/demux/cache/evict_test.go
+source_clean_before=true
+production_unchanged_from_parent=true
+
+COMMAND: env GOMAXPROCS=1 go test ./snapshotter/demux/cache -run ^TestLogErrorOnEvictionFailure$ -count=200 -timeout=2m
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/cache	0.395s
+RESULT normal-200 exit=0 duration_ms=1862
+
+COMMAND: go test -race ./snapshotter/demux/cache -run ^TestLogErrorOnEvictionFailure$ -count=50 -timeout=2m
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/cache	1.116s
+RESULT race-target-50 exit=0 duration_ms=2376
+
+COMMAND: go test -race ./snapshotter/demux/cache -count=1 -timeout=2m
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/cache	1.113s
+RESULT race-package-1 exit=0 duration_ms=1969
+
+source_clean_after=true
