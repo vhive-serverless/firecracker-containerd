@@ -1,5 +1,12 @@
 # Step 2: vHive compatibility
 
+Install-loop maintenance at `46b2fa204da23508271e921fd14ad2dc03eb1dbe` passed the
+worker fixture: a failing first component stops installation before the second,
+and a successful component still installs. The [maintenance receipt](evidence/46b2fa2-install-guard-receipt.log)
+records source and log hashes. This one-line build-system check did not rerun
+runtime acceptance; the prior functional results below retain their original
+source revisions and dependency pins.
+
 Latest committed revalidation: `4e0033b81a17d9a32c2861263c2792ebcfe37ebd`.
 The clean worker checkout `/users/nehalem/fc-ctrd-mod/vhive-io-committed`
 passed build, private installation, 36 runtime, five snapshotter and 79 SDK
