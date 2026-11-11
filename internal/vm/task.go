@@ -217,7 +217,7 @@ func (m *taskManager) CreateTask(
 	proc.logger.WithField("pid_in_vm", createResp.Pid).Info("successfully created task")
 
 	go m.monitorExit(proc, taskService)
-	go monitorIO(copyDone, proc)
+	go monitorIO(copyDone, proc, ioProxy)
 
 	return createResp, nil
 }
@@ -261,7 +261,7 @@ func (m *taskManager) ExecProcess(
 	}
 
 	go m.monitorExit(proc, taskService)
-	go monitorIO(copyDone, proc)
+	go monitorIO(copyDone, proc, ioProxy)
 
 	return execResp, nil
 }
@@ -346,13 +346,27 @@ func (m *taskManager) findProc(taskID, execID string) (*vmProc, error) {
 	return proc, nil
 }
 
-func (m *taskManager) AttachIO(_ context.Context, taskID, execID string, proxy IOProxy) error {
+func (m *taskManager) AttachIO(ctx context.Context, taskID, execID string, proxy IOProxy) error {
+	if err := ctx.Err(); err != nil {
+		proxy.Close()
+		return err
+	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
 	proc, err := m.findProc(taskID, execID)
 	if err != nil {
 		return err
+	}
+
+	// Stop the old FIFO readers before installing new ones. Otherwise two
+	// generations can consume the same process output after reconnection.
+	proc.proxy.Close()
+	select {
+	case <-proc.ioCopyDone:
+	case <-ctx.Done():
+		proxy.Close()
+		return ctx.Err()
 	}
 
 	initDone, copyDone := proxy.start(proc)
@@ -367,13 +381,13 @@ func (m *taskManager) AttachIO(_ context.Context, taskID, execID string, proxy I
 			proxy.Close()
 		}
 	}()
-	go monitorIO(copyDone, proc)
+	go monitorIO(copyDone, proc, proxy)
 
 	return nil
 }
 
-func monitorIO(done <-chan error, proc *vmProc) {
+func monitorIO(done <-chan error, proc *vmProc, proxy IOProxy) {
 	<-done
-	proc.proxy.Close()
+	proxy.Close()
 	proc.logger.Debug("closed proxy")
 }

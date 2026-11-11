@@ -75,14 +75,28 @@ type IOConnectorPair struct {
 
 func (connectorPair *IOConnectorPair) proxy(
 	ctx context.Context,
+	closeCtx context.Context,
 	logger *logrus.Entry,
 	timeoutAfterExit time.Duration,
 ) (ioInitDone <-chan error, ioCopyDone <-chan error) {
 	// initDone might not have to be buffered. We only send ioInitErr once.
 	initDone := make(chan error, 2)
-	copyDone := make(chan error)
+	copyDone := make(chan error, 1)
 
-	ioCtx, ioCancel := context.WithCancel(context.Background())
+	ioCtx, ioCancel := context.WithCancel(closeCtx)
+	go func() {
+		select {
+		case <-ctx.Done():
+			timer := time.NewTimer(timeoutAfterExit)
+			defer timer.Stop()
+			select {
+			case <-timer.C:
+				ioCancel()
+			case <-ioCtx.Done():
+			}
+		case <-ioCtx.Done():
+		}
+	}()
 
 	// Start the initialization process. Any synchronous setup made by the connectors will
 	// be completed after these lines. Async setup will be done once initDone is closed in
@@ -119,6 +133,7 @@ func (connectorPair *IOConnectorPair) proxy(
 				ioInitErr = fmt.Errorf("error initializing io: %w", err)
 				logger.WithError(ioInitErr).Error()
 				initDone <- ioInitErr
+				ioCancel()
 			}
 		}
 
@@ -130,14 +145,11 @@ func (connectorPair *IOConnectorPair) proxy(
 
 		// IO streams have been initialized successfully
 
-		// Once the proc exits, wait the provided time before forcibly closing io streams.
-		// If the io streams close on their own before the timeout, the Close calls here
-		// should just be no-ops.
+		// Process exit allows a bounded flush. Explicit proxy closure cancels
+		// immediately, including reads blocked on a still-live process's FIFO.
 		go func() {
-			<-ctx.Done()
-			time.AfterFunc(timeoutAfterExit, func() {
-				logClose(logger, reader, writer)
-			})
+			<-ioCtx.Done()
+			logClose(logger, reader, writer)
 		}()
 
 		logger.Debug("begin copying io")
@@ -154,7 +166,6 @@ func (connectorPair *IOConnectorPair) proxy(
 			}
 			copyDone <- err
 		}
-		defer logClose(logger, reader, writer)
 	}()
 
 	return initDone, copyDone
@@ -168,6 +179,7 @@ type ioConnectorSet struct {
 	// closeMu is needed since Close() will be called from different goroutines.
 	closeMu sync.Mutex
 	closed  bool
+	cancel  context.CancelFunc
 }
 
 // NewIOConnectorProxy implements the IOProxy interface for a set of
@@ -185,9 +197,12 @@ func NewIOConnectorProxy(stdin, stdout, stderr *IOConnectorPair) IOProxy {
 
 func (ioConnectorSet *ioConnectorSet) Close() {
 	ioConnectorSet.closeMu.Lock()
-	defer ioConnectorSet.closeMu.Unlock()
-
 	ioConnectorSet.closed = true
+	cancel := ioConnectorSet.cancel
+	ioConnectorSet.closeMu.Unlock()
+	if cancel != nil {
+		cancel()
+	}
 }
 
 func (ioConnectorSet *ioConnectorSet) IsOpen() bool {
@@ -200,6 +215,14 @@ func (ioConnectorSet *ioConnectorSet) IsOpen() bool {
 // start starts goroutines to copy stdio and returns two channels.
 // The first channel returns its initialization error. The second channel returns errors from copying.
 func (ioConnectorSet *ioConnectorSet) start(proc *vmProc) (ioInitDone <-chan error, ioCopyDone <-chan error) {
+	ioConnectorSet.closeMu.Lock()
+	closeCtx, closeCancel := context.WithCancel(context.Background())
+	ioConnectorSet.cancel = closeCancel
+	if ioConnectorSet.closed {
+		closeCancel()
+	}
+	ioConnectorSet.closeMu.Unlock()
+
 	var initErrG errgroup.Group
 
 	// When one of the goroutines returns an error, we will cancel
@@ -214,34 +237,34 @@ func (ioConnectorSet *ioConnectorSet) start(proc *vmProc) (ioInitDone <-chan err
 	if ioConnectorSet.stdin != nil {
 		// For Stdin only, provide 0 as the timeout to wait after the proc exits before closing IO streams.
 		// There's no reason to send stdin data to a proc that's already dead.
-		waitErrs(ioConnectorSet.stdin.proxy(ctx, proc.logger.WithField("stream", "stdin"), 0))
+		waitErrs(ioConnectorSet.stdin.proxy(ctx, closeCtx, proc.logger.WithField("stream", "stdin"), 0))
 	} else {
 		proc.logger.Debug("skipping proxy io for unset stdin")
 	}
 
 	if ioConnectorSet.stdout != nil {
-		waitErrs(ioConnectorSet.stdout.proxy(ctx, proc.logger.WithField("stream", "stdout"), defaultIOFlushTimeout))
+		waitErrs(ioConnectorSet.stdout.proxy(ctx, closeCtx, proc.logger.WithField("stream", "stdout"), defaultIOFlushTimeout))
 	} else {
 		proc.logger.Debug("skipping proxy io for unset stdout")
 	}
 
 	if ioConnectorSet.stderr != nil {
-		waitErrs(ioConnectorSet.stderr.proxy(ctx, proc.logger.WithField("stream", "stderr"), defaultIOFlushTimeout))
+		waitErrs(ioConnectorSet.stderr.proxy(ctx, closeCtx, proc.logger.WithField("stream", "stderr"), defaultIOFlushTimeout))
 	} else {
 		proc.logger.Debug("skipping proxy io for unset stderr")
 	}
 
-	// These channels are not buffered, since we will close them right after having one error.
-	// Callers must read the channels.
-	initDone := make(chan error)
+	// A failed task creation may return before observing these results.
+	initDone := make(chan error, 1)
 	go func() {
 		defer close(initDone)
 		initDone <- initErrG.Wait()
 	}()
 
-	copyDone := make(chan error)
+	copyDone := make(chan error, 1)
 	go func() {
 		defer close(copyDone)
+		defer closeCancel()
 		copyDone <- copyErrG.Wait()
 	}()
 
