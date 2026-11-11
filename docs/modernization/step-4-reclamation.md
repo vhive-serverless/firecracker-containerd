@@ -3,6 +3,10 @@
 Step 4 is incomplete, and Step 3 remains WIP by explicit user instruction.
 The runtime configuration below has passed worker component/race/lint checks
 and one real-VM development test. Clean committed validation remains pending.
+The first clean run at `fe2562f` completed build and private installation but
+stopped at lint because the integration test needed gofmt. The
+[failure log](evidence/fe2562f-damon-acceptance-failed.log) is retained; this
+attempt does not count as acceptance.
 
 `CreateVMRequest.Reclamation` overrides administrator `guest_reclamation`
 configuration. Nil inherits the administrator value; explicit `Enabled=false`
