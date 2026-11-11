@@ -83,6 +83,10 @@ func (s *service) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotR
 	return s.local.CreateSnapshot(ctx, req)
 }
 
+func (s *service) CheckpointVM(ctx context.Context, req *proto.CheckpointVMRequest) (*types.Empty, error) {
+	return s.local.CheckpointVM(ctx, req)
+}
+
 func (s *service) StopVM(ctx context.Context, req *proto.StopVMRequest) (*types.Empty, error) {
 	log.G(ctx).Debugf("stop VM: %+v", req)
 	return s.local.StopVM(ctx, req)

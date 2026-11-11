@@ -166,6 +166,9 @@ type service struct {
 	machineConfig    *firecracker.Config
 	vsockIOPortCount uint32
 	vsockPortMu      sync.Mutex
+	nativeMu         sync.RWMutex
+	vmRequest        json.RawMessage
+	apiSocketPath    string
 
 	// fifos have stdio FIFOs containerd passed to the shim. The key is [taskID][execID].
 	fifos   map[string]map[string]cio.Config
@@ -519,6 +522,8 @@ func (s *service) waitVMReady() error {
 // CreateVM will attempt to create the VM as specified in the provided request, but only on the first request
 // received. Any subsequent requests will be ignored and get an AlreadyExists error response.
 func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRequest) (*proto.CreateVMResponse, error) {
+	s.nativeMu.RLock()
+	defer s.nativeMu.RUnlock()
 	defer logPanicAndDie(s.logger)
 
 	if err := validateOrchestratorNetNS(request); err != nil {
@@ -628,6 +633,10 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 	if err != nil {
 		return fmt.Errorf("failed to build VM configuration: %w", err)
 	}
+	s.vmRequest, err = json.Marshal(request)
+	if err != nil {
+		return fmt.Errorf("record VM creation request: %w", err)
+	}
 
 	opts := []firecracker.Opt{}
 
@@ -645,6 +654,8 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 	if err != nil {
 		return fmt.Errorf("failed to build jailed machine options: %w", err)
 	}
+	// Keep the host-side API path before initialization rewrites jailed paths.
+	s.apiSocketPath = s.machineConfig.SocketPath
 
 	if request.BalloonDevice == nil {
 		s.logger.Debug("No balloon device is setup")
@@ -724,6 +735,8 @@ func (s *service) mountDrives(requestCtx context.Context) error {
 // but the shim will continue to shutdown. Similarly if we detect that the VM is in pause state, then
 // we are unable to communicate to the in-VM agent. In this case, we do a forceful shutdown.
 func (s *service) StopVM(requestCtx context.Context, request *proto.StopVMRequest) (_ *types.Empty, err error) {
+	s.nativeMu.RLock()
+	defer s.nativeMu.RUnlock()
 	defer logPanicAndDie(s.logger)
 	s.logger.WithFields(logrus.Fields{"timeout_seconds": request.TimeoutSeconds}).Debug("StopVM")
 
@@ -743,6 +756,8 @@ func (s *service) StopVM(requestCtx context.Context, request *proto.StopVMReques
 
 // ResumeVM resumes a VM
 func (s *service) ResumeVM(ctx context.Context, _ *proto.ResumeVMRequest) (*types.Empty, error) {
+	s.nativeMu.RLock()
+	defer s.nativeMu.RUnlock()
 	defer logPanicAndDie(s.logger)
 
 	err := s.waitVMReady()
@@ -761,6 +776,8 @@ func (s *service) ResumeVM(ctx context.Context, _ *proto.ResumeVMRequest) (*type
 
 // PauseVM pauses a VM
 func (s *service) PauseVM(ctx context.Context, _ *proto.PauseVMRequest) (*types.Empty, error) {
+	s.nativeMu.RLock()
+	defer s.nativeMu.RUnlock()
 	defer logPanicAndDie(s.logger)
 
 	err := s.waitVMReady()
@@ -806,6 +823,8 @@ func (s *service) GetVMInfo(_ context.Context, _ *proto.GetVMInfoRequest) (*prot
 // SetVMMetadata will update the VM being managed by this shim with the provided metadata. If the VM has not been created yet, this
 // method will wait for up to a hardcoded timeout for it to exist, returning an error if the timeout is reached.
 func (s *service) SetVMMetadata(requestCtx context.Context, request *proto.SetVMMetadataRequest) (*types.Empty, error) {
+	s.nativeMu.RLock()
+	defer s.nativeMu.RUnlock()
 	defer logPanicAndDie(s.logger)
 
 	err := s.waitVMReady()
@@ -829,6 +848,8 @@ func (s *service) SetVMMetadata(requestCtx context.Context, request *proto.SetVM
 // If the vm has not been created yet, this method will wait for up to the hardcoded timeout for it
 // to exist, returning an error if the timeout is reached.
 func (s *service) UpdateVMMetadata(requestCtx context.Context, request *proto.UpdateVMMetadataRequest) (*types.Empty, error) {
+	s.nativeMu.RLock()
+	defer s.nativeMu.RUnlock()
 
 	defer logPanicAndDie(s.logger)
 
@@ -921,6 +942,8 @@ func (s *service) GetBalloonConfig(requestCtx context.Context, _ *proto.GetBallo
 
 // UpdateBalloon will update an existing balloon device, before or after machine startup
 func (s *service) UpdateBalloon(requestCtx context.Context, req *proto.UpdateBalloonRequest) (*types.Empty, error) {
+	s.nativeMu.RLock()
+	defer s.nativeMu.RUnlock()
 	defer logPanicAndDie(s.logger)
 
 	err := s.waitVMReady()
@@ -988,6 +1011,8 @@ func (s *service) GetBalloonStats(requestCtx context.Context, _ *proto.GetBalloo
 
 // UpdateBalloonStats will update an existing balloon device statistics interval, before or after machine startup.
 func (s *service) UpdateBalloonStats(requestCtx context.Context, req *proto.UpdateBalloonStatsRequest) (*types.Empty, error) {
+	s.nativeMu.RLock()
+	defer s.nativeMu.RUnlock()
 	defer logPanicAndDie(s.logger)
 
 	err := s.waitVMReady()
@@ -1225,6 +1250,8 @@ func (s *service) deleteFIFOs(taskID, execID string) error {
 }
 
 func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTaskRequest) (_ *taskAPI.CreateTaskResponse, retErr error) {
+	s.nativeMu.RLock()
+	defer s.nativeMu.RUnlock()
 	logger := s.logger.WithField(logTaskID, request.ID)
 	defer logPanicAndDie(logger)
 
@@ -1387,6 +1414,8 @@ func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTask
 }
 
 func (s *service) Start(requestCtx context.Context, req *taskAPI.StartRequest) (*taskAPI.StartResponse, error) {
+	s.nativeMu.RLock()
+	defer s.nativeMu.RUnlock()
 	defer logPanicAndDie(log.G(requestCtx))
 
 	log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, logExecID: req.ExecID}).Debug("start")
@@ -1403,6 +1432,8 @@ func (s *service) Start(requestCtx context.Context, req *taskAPI.StartRequest) (
 }
 
 func (s *service) Delete(requestCtx context.Context, req *taskAPI.DeleteRequest) (*taskAPI.DeleteResponse, error) {
+	s.nativeMu.RLock()
+	defer s.nativeMu.RUnlock()
 	defer logPanicAndDie(log.G(requestCtx))
 	logger := log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, logExecID: req.ExecID})
 
@@ -1464,6 +1495,8 @@ func (s *service) Delete(requestCtx context.Context, req *taskAPI.DeleteRequest)
 
 // Exec an additional process inside the container
 func (s *service) Exec(requestCtx context.Context, req *taskAPI.ExecProcessRequest) (*types.Empty, error) {
+	s.nativeMu.RLock()
+	defer s.nativeMu.RUnlock()
 	defer logPanicAndDie(log.G(requestCtx))
 	logger := s.logger.WithField(logTaskID, req.ID).WithField(logExecID, req.ExecID)
 	logger.Debug("exec")
@@ -1513,6 +1546,8 @@ func (s *service) Exec(requestCtx context.Context, req *taskAPI.ExecProcessReque
 
 // ResizePty of a process
 func (s *service) ResizePty(requestCtx context.Context, req *taskAPI.ResizePtyRequest) (*types.Empty, error) {
+	s.nativeMu.RLock()
+	defer s.nativeMu.RUnlock()
 	defer logPanicAndDie(log.G(requestCtx))
 
 	log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, logExecID: req.ExecID}).Debug("resize_pty")
@@ -1530,6 +1565,8 @@ func (s *service) ResizePty(requestCtx context.Context, req *taskAPI.ResizePtyRe
 
 // State returns runtime state information for a process
 func (s *service) State(requestCtx context.Context, req *taskAPI.StateRequest) (*taskAPI.StateResponse, error) {
+	s.nativeMu.RLock()
+	defer s.nativeMu.RUnlock()
 	defer logPanicAndDie(log.G(requestCtx))
 
 	logger := log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, logExecID: req.ExecID})
@@ -1613,6 +1650,8 @@ func (s *service) attachNewProxy(
 
 // Pause the container
 func (s *service) Pause(requestCtx context.Context, req *taskAPI.PauseRequest) (*types.Empty, error) {
+	s.nativeMu.RLock()
+	defer s.nativeMu.RUnlock()
 	defer logPanicAndDie(log.G(requestCtx))
 
 	log.G(requestCtx).WithField(logTaskID, req.ID).Debug("pause")
@@ -1630,6 +1669,8 @@ func (s *service) Pause(requestCtx context.Context, req *taskAPI.PauseRequest) (
 
 // Resume the container
 func (s *service) Resume(requestCtx context.Context, req *taskAPI.ResumeRequest) (*types.Empty, error) {
+	s.nativeMu.RLock()
+	defer s.nativeMu.RUnlock()
 	defer logPanicAndDie(log.G(requestCtx))
 
 	log.G(requestCtx).WithField(logTaskID, req.ID).Debug("resume")
@@ -1647,6 +1688,8 @@ func (s *service) Resume(requestCtx context.Context, req *taskAPI.ResumeRequest)
 
 // Kill a process with the provided signal
 func (s *service) Kill(requestCtx context.Context, req *taskAPI.KillRequest) (*types.Empty, error) {
+	s.nativeMu.RLock()
+	defer s.nativeMu.RUnlock()
 	defer logPanicAndDie(log.G(requestCtx))
 
 	log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, logExecID: req.ExecID}).Debug("kill")
@@ -1680,6 +1723,8 @@ func (s *service) Pids(requestCtx context.Context, req *taskAPI.PidsRequest) (*t
 
 // CloseIO of a process
 func (s *service) CloseIO(requestCtx context.Context, req *taskAPI.CloseIORequest) (*types.Empty, error) {
+	s.nativeMu.RLock()
+	defer s.nativeMu.RUnlock()
 	defer logPanicAndDie(log.G(requestCtx))
 
 	log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, logExecID: req.ExecID}).Debug("close_io")
@@ -1697,6 +1742,8 @@ func (s *service) CloseIO(requestCtx context.Context, req *taskAPI.CloseIOReques
 
 // Checkpoint the container
 func (s *service) Checkpoint(requestCtx context.Context, req *taskAPI.CheckpointTaskRequest) (*types.Empty, error) {
+	s.nativeMu.RLock()
+	defer s.nativeMu.RUnlock()
 	defer logPanicAndDie(log.G(requestCtx))
 
 	log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, "path": req.Path}).Info("checkpoint")
@@ -1739,6 +1786,8 @@ func (s *service) Connect(requestCtx context.Context, req *taskAPI.ConnectReques
 // * After any task is deleted via containerd's API
 // * After any task Create call returns an error
 func (s *service) Shutdown(requestCtx context.Context, req *taskAPI.ShutdownRequest) (*types.Empty, error) {
+	s.nativeMu.RLock()
+	defer s.nativeMu.RUnlock()
 	defer logPanicAndDie(log.G(requestCtx))
 	s.logger.WithFields(logrus.Fields{logTaskID: req.ID, "now": req.Now}).Debug("Shutdown")
 
@@ -1848,6 +1897,8 @@ func (s *service) Stats(requestCtx context.Context, req *taskAPI.StatsRequest) (
 
 // Update a running container
 func (s *service) Update(requestCtx context.Context, req *taskAPI.UpdateTaskRequest) (*types.Empty, error) {
+	s.nativeMu.RLock()
+	defer s.nativeMu.RUnlock()
 	defer logPanicAndDie(log.G(requestCtx))
 	log.G(requestCtx).WithField(logTaskID, req.ID).Debug("update")
 

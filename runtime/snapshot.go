@@ -109,6 +109,8 @@ var populateRestoreTaps = firecracker.Handler{
 // CreateSnapshot saves a paused vHive VM. vHive separately captures the
 // devmapper disk and passes its independent backing on restore.
 func (s *service) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotRequest) (*types.Empty, error) {
+	s.nativeMu.RLock()
+	defer s.nativeMu.RUnlock()
 	if !filepath.IsAbs(req.MemFilePath) || !filepath.IsAbs(req.SnapshotPath) ||
 		filepath.Clean(req.MemFilePath) == filepath.Clean(req.SnapshotPath) {
 		return nil, status.Error(codes.InvalidArgument, "memory and snapshot paths must be distinct absolute paths")

@@ -294,6 +294,16 @@ func (s *local) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotReq
 	return client.CreateSnapshot(ctx, req)
 }
 
+// CheckpointVM captures native VM state through its owning shim.
+func (s *local) CheckpointVM(ctx context.Context, req *proto.CheckpointVMRequest) (*types.Empty, error) {
+	client, err := s.shimFirecrackerClient(ctx, req.VMID)
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+	return client.CheckpointVM(ctx, req)
+}
+
 // ResumeVM resumes a VM
 func (s *local) ResumeVM(ctx context.Context, req *proto.ResumeVMRequest) (*types.Empty, error) {
 	client, err := s.shimFirecrackerClient(ctx, req.VMID)

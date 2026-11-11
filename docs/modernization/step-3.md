@@ -2,8 +2,17 @@
 
 Step 3 is incomplete. Steps 1 and 2 retain their accepted branches. This branch
 currently adds a containerd CRI adapter, RuntimeClass deployment tests and native
-snapshot transport primitives. Full CRI compliance and native/Kubernetes Pod
-checkpoint/restore remain incomplete.
+snapshot capture and restore components. Full CRI compliance, whole-Pod restore
+and Kubernetes checkpoint/restore remain incomplete.
+
+The [API audit](step-3-api-audit.md) records the v1.38 alpha target and the missing
+workflow in the released builds tested so far. Step 4 has not started.
+
+This branch also carries the validated task creation cleanup correction from
+Step 1 commit `6585eba` through Step 2 commit `d959a78`. Their receipts are linked
+from [Step 1](step-1.md) and [Step 2](step-2.md). The results below identify their
+tested source revisions; earlier results do not establish acceptance of the
+merged Step 3 runtime.
 
 ## Restorable host volumes
 
@@ -42,14 +51,34 @@ runtime checkpoint RPCs or Kubernetes checkpoint/restore.
 The [committed volume receipt](evidence/e21b3f6-volume-receipt.log) records the
 clean `e21b3f6a29da715382a5feeb60be005b08b36226` checkout, race tests, privileged
 mount checks, lint, real VM result and exact binary/log hashes.
-The [API audit](step-3-api-audit.md) records the v1.38 alpha target and the missing
-workflow in the released builds tested so far. Step 4 has not started.
 
-This branch also carries the validated task creation cleanup correction from
-Step 1 commit `6585eba` through Step 2 commit `d959a78`. Their receipts are linked
-from [Step 1](step-1.md) and [Step 2](step-2.md). The results below identify their
-tested source revisions; earlier results do not establish acceptance of the
-merged Step 3 runtime.
+## Native checkpoint coordinator
+
+The control service's `CheckpointVM` RPC captures an existing VM into a new
+absolute directory. It serializes task/device mutations, records task and exec
+state, pauses running container cgroups and then pauses vCPUs. It freezes and
+captures host volume exports, saves full VMM/memory state with source vsock
+connections retained, and copies every live drive into independent sparse
+files with SHA-256 digests. The manifest also records OCI specifications, FIFO
+configuration, volume capabilities, drive-slot ownership, the I/O port allocator,
+resolved network configuration, MMDS data when initialized and the VM creation
+request. Initially paused containers remain paused.
+
+The coordinator thaws its volume server, resumes the VM and resumes only the
+containers it paused before publishing the artifact by atomic directory rename.
+Request cancellation and failed capture run bounded cleanup with an uncancelled
+context. An existing destination is never replaced. Destinations inside VM or
+task cleanup directories are rejected. Every external writer of an exported
+host volume must be quiescent for the capture's duration.
+
+`TestNativeCheckpoint_Isolated` exercises two OCI containers sharing a FUSE
+volume in both unjailed and runc-jailed VMs. It checks source exec and writes
+after capture, independent raw ext4 contents with `debugfs`, reconstruction of
+captured volume contents after source advancement, a second capture of the new
+data, preservation of an initially paused container, destination rejection and
+an already-cancelled request. It runs as part of the runtime acceptance suite.
+These capture checks do not establish whole-Pod restore or the Kubernetes API
+integration. The coordinator still needs the native restore and CRI paths.
 
 ## Restored process ownership
 
@@ -60,7 +89,9 @@ before execs. It preserves paused state and participates in ordinary deletion
 and shutdown bookkeeping. Failed adoption releases only new host ownership;
 it does not delete the guest process. Unit tests cover task/exec adoption,
 identity mismatch and an exec whose parent has not been adopted. Connecting
-this operation to the runtime's native restore coordinator remains pending.
+this operation to the runtime's native restore coordinator remains pending. The
+[committed adoption receipt](evidence/40b4ca7-adopt-receipt.log) records unit/race
+and lint checks from clean commit `40b4ca7c92cb872454c96e2325f3a44242795d3e`.
 
 ## Pod mapping and the current CRI path
 

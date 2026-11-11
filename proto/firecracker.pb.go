@@ -511,6 +511,60 @@ func (x *CreateSnapshotRequest) GetSnapshotPath() string {
 	return ""
 }
 
+// CheckpointVMRequest captures the complete VM with independent drive and
+// volume data. Directory must be an absolute, previously nonexistent path.
+type CheckpointVMRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	VMID          string                 `protobuf:"bytes,1,opt,name=VMID,proto3" json:"VMID,omitempty"`
+	Directory     string                 `protobuf:"bytes,2,opt,name=Directory,proto3" json:"Directory,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CheckpointVMRequest) Reset() {
+	*x = CheckpointVMRequest{}
+	mi := &file_firecracker_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CheckpointVMRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CheckpointVMRequest) ProtoMessage() {}
+
+func (x *CheckpointVMRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_firecracker_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CheckpointVMRequest.ProtoReflect.Descriptor instead.
+func (*CheckpointVMRequest) Descriptor() ([]byte, []int) {
+	return file_firecracker_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *CheckpointVMRequest) GetVMID() string {
+	if x != nil {
+		return x.VMID
+	}
+	return ""
+}
+
+func (x *CheckpointVMRequest) GetDirectory() string {
+	if x != nil {
+		return x.Directory
+	}
+	return ""
+}
+
 type StopVMRequest struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	VMID           string                 `protobuf:"bytes,1,opt,name=VMID,proto3" json:"VMID,omitempty"`
@@ -521,7 +575,7 @@ type StopVMRequest struct {
 
 func (x *StopVMRequest) Reset() {
 	*x = StopVMRequest{}
-	mi := &file_firecracker_proto_msgTypes[5]
+	mi := &file_firecracker_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -533,7 +587,7 @@ func (x *StopVMRequest) String() string {
 func (*StopVMRequest) ProtoMessage() {}
 
 func (x *StopVMRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_firecracker_proto_msgTypes[5]
+	mi := &file_firecracker_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -546,7 +600,7 @@ func (x *StopVMRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StopVMRequest.ProtoReflect.Descriptor instead.
 func (*StopVMRequest) Descriptor() ([]byte, []int) {
-	return file_firecracker_proto_rawDescGZIP(), []int{5}
+	return file_firecracker_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *StopVMRequest) GetVMID() string {
@@ -572,7 +626,7 @@ type GetVMInfoRequest struct {
 
 func (x *GetVMInfoRequest) Reset() {
 	*x = GetVMInfoRequest{}
-	mi := &file_firecracker_proto_msgTypes[6]
+	mi := &file_firecracker_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -584,7 +638,7 @@ func (x *GetVMInfoRequest) String() string {
 func (*GetVMInfoRequest) ProtoMessage() {}
 
 func (x *GetVMInfoRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_firecracker_proto_msgTypes[6]
+	mi := &file_firecracker_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -597,7 +651,7 @@ func (x *GetVMInfoRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetVMInfoRequest.ProtoReflect.Descriptor instead.
 func (*GetVMInfoRequest) Descriptor() ([]byte, []int) {
-	return file_firecracker_proto_rawDescGZIP(), []int{6}
+	return file_firecracker_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *GetVMInfoRequest) GetVMID() string {
@@ -621,7 +675,7 @@ type GetVMInfoResponse struct {
 
 func (x *GetVMInfoResponse) Reset() {
 	*x = GetVMInfoResponse{}
-	mi := &file_firecracker_proto_msgTypes[7]
+	mi := &file_firecracker_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -633,7 +687,7 @@ func (x *GetVMInfoResponse) String() string {
 func (*GetVMInfoResponse) ProtoMessage() {}
 
 func (x *GetVMInfoResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_firecracker_proto_msgTypes[7]
+	mi := &file_firecracker_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -646,7 +700,7 @@ func (x *GetVMInfoResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetVMInfoResponse.ProtoReflect.Descriptor instead.
 func (*GetVMInfoResponse) Descriptor() ([]byte, []int) {
-	return file_firecracker_proto_rawDescGZIP(), []int{7}
+	return file_firecracker_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *GetVMInfoResponse) GetVMID() string {
@@ -701,7 +755,7 @@ type SetVMMetadataRequest struct {
 
 func (x *SetVMMetadataRequest) Reset() {
 	*x = SetVMMetadataRequest{}
-	mi := &file_firecracker_proto_msgTypes[8]
+	mi := &file_firecracker_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -713,7 +767,7 @@ func (x *SetVMMetadataRequest) String() string {
 func (*SetVMMetadataRequest) ProtoMessage() {}
 
 func (x *SetVMMetadataRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_firecracker_proto_msgTypes[8]
+	mi := &file_firecracker_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -726,7 +780,7 @@ func (x *SetVMMetadataRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetVMMetadataRequest.ProtoReflect.Descriptor instead.
 func (*SetVMMetadataRequest) Descriptor() ([]byte, []int) {
-	return file_firecracker_proto_rawDescGZIP(), []int{8}
+	return file_firecracker_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *SetVMMetadataRequest) GetVMID() string {
@@ -753,7 +807,7 @@ type UpdateVMMetadataRequest struct {
 
 func (x *UpdateVMMetadataRequest) Reset() {
 	*x = UpdateVMMetadataRequest{}
-	mi := &file_firecracker_proto_msgTypes[9]
+	mi := &file_firecracker_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -765,7 +819,7 @@ func (x *UpdateVMMetadataRequest) String() string {
 func (*UpdateVMMetadataRequest) ProtoMessage() {}
 
 func (x *UpdateVMMetadataRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_firecracker_proto_msgTypes[9]
+	mi := &file_firecracker_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -778,7 +832,7 @@ func (x *UpdateVMMetadataRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateVMMetadataRequest.ProtoReflect.Descriptor instead.
 func (*UpdateVMMetadataRequest) Descriptor() ([]byte, []int) {
-	return file_firecracker_proto_rawDescGZIP(), []int{9}
+	return file_firecracker_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *UpdateVMMetadataRequest) GetVMID() string {
@@ -804,7 +858,7 @@ type GetVMMetadataRequest struct {
 
 func (x *GetVMMetadataRequest) Reset() {
 	*x = GetVMMetadataRequest{}
-	mi := &file_firecracker_proto_msgTypes[10]
+	mi := &file_firecracker_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -816,7 +870,7 @@ func (x *GetVMMetadataRequest) String() string {
 func (*GetVMMetadataRequest) ProtoMessage() {}
 
 func (x *GetVMMetadataRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_firecracker_proto_msgTypes[10]
+	mi := &file_firecracker_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -829,7 +883,7 @@ func (x *GetVMMetadataRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetVMMetadataRequest.ProtoReflect.Descriptor instead.
 func (*GetVMMetadataRequest) Descriptor() ([]byte, []int) {
-	return file_firecracker_proto_rawDescGZIP(), []int{10}
+	return file_firecracker_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *GetVMMetadataRequest) GetVMID() string {
@@ -848,7 +902,7 @@ type GetVMMetadataResponse struct {
 
 func (x *GetVMMetadataResponse) Reset() {
 	*x = GetVMMetadataResponse{}
-	mi := &file_firecracker_proto_msgTypes[11]
+	mi := &file_firecracker_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -860,7 +914,7 @@ func (x *GetVMMetadataResponse) String() string {
 func (*GetVMMetadataResponse) ProtoMessage() {}
 
 func (x *GetVMMetadataResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_firecracker_proto_msgTypes[11]
+	mi := &file_firecracker_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -873,7 +927,7 @@ func (x *GetVMMetadataResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetVMMetadataResponse.ProtoReflect.Descriptor instead.
 func (*GetVMMetadataResponse) Descriptor() ([]byte, []int) {
-	return file_firecracker_proto_rawDescGZIP(), []int{11}
+	return file_firecracker_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *GetVMMetadataResponse) GetMetadata() string {
@@ -921,7 +975,7 @@ type JailerConfig struct {
 
 func (x *JailerConfig) Reset() {
 	*x = JailerConfig{}
-	mi := &file_firecracker_proto_msgTypes[12]
+	mi := &file_firecracker_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -933,7 +987,7 @@ func (x *JailerConfig) String() string {
 func (*JailerConfig) ProtoMessage() {}
 
 func (x *JailerConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_firecracker_proto_msgTypes[12]
+	mi := &file_firecracker_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -946,7 +1000,7 @@ func (x *JailerConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JailerConfig.ProtoReflect.Descriptor instead.
 func (*JailerConfig) Descriptor() ([]byte, []int) {
-	return file_firecracker_proto_rawDescGZIP(), []int{12}
+	return file_firecracker_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *JailerConfig) GetNetNS() string {
@@ -1008,7 +1062,7 @@ type UpdateBalloonRequest struct {
 
 func (x *UpdateBalloonRequest) Reset() {
 	*x = UpdateBalloonRequest{}
-	mi := &file_firecracker_proto_msgTypes[13]
+	mi := &file_firecracker_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1020,7 +1074,7 @@ func (x *UpdateBalloonRequest) String() string {
 func (*UpdateBalloonRequest) ProtoMessage() {}
 
 func (x *UpdateBalloonRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_firecracker_proto_msgTypes[13]
+	mi := &file_firecracker_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1033,7 +1087,7 @@ func (x *UpdateBalloonRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateBalloonRequest.ProtoReflect.Descriptor instead.
 func (*UpdateBalloonRequest) Descriptor() ([]byte, []int) {
-	return file_firecracker_proto_rawDescGZIP(), []int{13}
+	return file_firecracker_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *UpdateBalloonRequest) GetVMID() string {
@@ -1059,7 +1113,7 @@ type GetBalloonConfigRequest struct {
 
 func (x *GetBalloonConfigRequest) Reset() {
 	*x = GetBalloonConfigRequest{}
-	mi := &file_firecracker_proto_msgTypes[14]
+	mi := &file_firecracker_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1071,7 +1125,7 @@ func (x *GetBalloonConfigRequest) String() string {
 func (*GetBalloonConfigRequest) ProtoMessage() {}
 
 func (x *GetBalloonConfigRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_firecracker_proto_msgTypes[14]
+	mi := &file_firecracker_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1084,7 +1138,7 @@ func (x *GetBalloonConfigRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetBalloonConfigRequest.ProtoReflect.Descriptor instead.
 func (*GetBalloonConfigRequest) Descriptor() ([]byte, []int) {
-	return file_firecracker_proto_rawDescGZIP(), []int{14}
+	return file_firecracker_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *GetBalloonConfigRequest) GetVMID() string {
@@ -1103,7 +1157,7 @@ type GetBalloonConfigResponse struct {
 
 func (x *GetBalloonConfigResponse) Reset() {
 	*x = GetBalloonConfigResponse{}
-	mi := &file_firecracker_proto_msgTypes[15]
+	mi := &file_firecracker_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1115,7 +1169,7 @@ func (x *GetBalloonConfigResponse) String() string {
 func (*GetBalloonConfigResponse) ProtoMessage() {}
 
 func (x *GetBalloonConfigResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_firecracker_proto_msgTypes[15]
+	mi := &file_firecracker_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1128,7 +1182,7 @@ func (x *GetBalloonConfigResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetBalloonConfigResponse.ProtoReflect.Descriptor instead.
 func (*GetBalloonConfigResponse) Descriptor() ([]byte, []int) {
-	return file_firecracker_proto_rawDescGZIP(), []int{15}
+	return file_firecracker_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *GetBalloonConfigResponse) GetBalloonConfig() *FirecrackerBalloonDevice {
@@ -1147,7 +1201,7 @@ type GetBalloonStatsRequest struct {
 
 func (x *GetBalloonStatsRequest) Reset() {
 	*x = GetBalloonStatsRequest{}
-	mi := &file_firecracker_proto_msgTypes[16]
+	mi := &file_firecracker_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1159,7 +1213,7 @@ func (x *GetBalloonStatsRequest) String() string {
 func (*GetBalloonStatsRequest) ProtoMessage() {}
 
 func (x *GetBalloonStatsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_firecracker_proto_msgTypes[16]
+	mi := &file_firecracker_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1172,7 +1226,7 @@ func (x *GetBalloonStatsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetBalloonStatsRequest.ProtoReflect.Descriptor instead.
 func (*GetBalloonStatsRequest) Descriptor() ([]byte, []int) {
-	return file_firecracker_proto_rawDescGZIP(), []int{16}
+	return file_firecracker_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *GetBalloonStatsRequest) GetVMID() string {
@@ -1219,7 +1273,7 @@ type GetBalloonStatsResponse struct {
 
 func (x *GetBalloonStatsResponse) Reset() {
 	*x = GetBalloonStatsResponse{}
-	mi := &file_firecracker_proto_msgTypes[17]
+	mi := &file_firecracker_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1231,7 +1285,7 @@ func (x *GetBalloonStatsResponse) String() string {
 func (*GetBalloonStatsResponse) ProtoMessage() {}
 
 func (x *GetBalloonStatsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_firecracker_proto_msgTypes[17]
+	mi := &file_firecracker_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1244,7 +1298,7 @@ func (x *GetBalloonStatsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetBalloonStatsResponse.ProtoReflect.Descriptor instead.
 func (*GetBalloonStatsResponse) Descriptor() ([]byte, []int) {
-	return file_firecracker_proto_rawDescGZIP(), []int{17}
+	return file_firecracker_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *GetBalloonStatsResponse) GetActualMib() int64 {
@@ -1355,7 +1409,7 @@ type UpdateBalloonStatsRequest struct {
 
 func (x *UpdateBalloonStatsRequest) Reset() {
 	*x = UpdateBalloonStatsRequest{}
-	mi := &file_firecracker_proto_msgTypes[18]
+	mi := &file_firecracker_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1367,7 +1421,7 @@ func (x *UpdateBalloonStatsRequest) String() string {
 func (*UpdateBalloonStatsRequest) ProtoMessage() {}
 
 func (x *UpdateBalloonStatsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_firecracker_proto_msgTypes[18]
+	mi := &file_firecracker_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1380,7 +1434,7 @@ func (x *UpdateBalloonStatsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateBalloonStatsRequest.ProtoReflect.Descriptor instead.
 func (*UpdateBalloonStatsRequest) Descriptor() ([]byte, []int) {
-	return file_firecracker_proto_rawDescGZIP(), []int{18}
+	return file_firecracker_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *UpdateBalloonStatsRequest) GetVMID() string {
@@ -1448,7 +1502,10 @@ const file_firecracker_proto_rawDesc = "" +
 	"\x15CreateSnapshotRequest\x12\x12\n" +
 	"\x04VMID\x18\x01 \x01(\tR\x04VMID\x12 \n" +
 	"\vMemFilePath\x18\x02 \x01(\tR\vMemFilePath\x12\"\n" +
-	"\fSnapshotPath\x18\x03 \x01(\tR\fSnapshotPath\"K\n" +
+	"\fSnapshotPath\x18\x03 \x01(\tR\fSnapshotPath\"G\n" +
+	"\x13CheckpointVMRequest\x12\x12\n" +
+	"\x04VMID\x18\x01 \x01(\tR\x04VMID\x12\x1c\n" +
+	"\tDirectory\x18\x02 \x01(\tR\tDirectory\"K\n" +
 	"\rStopVMRequest\x12\x12\n" +
 	"\x04VMID\x18\x01 \x01(\tR\x04VMID\x12&\n" +
 	"\x0eTimeoutSeconds\x18\x02 \x01(\rR\x0eTimeoutSeconds\"&\n" +
@@ -1534,7 +1591,7 @@ func file_firecracker_proto_rawDescGZIP() []byte {
 }
 
 var file_firecracker_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_firecracker_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
+var file_firecracker_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
 var file_firecracker_proto_goTypes = []any{
 	(DriveExposePolicy)(0),                  // 0: DriveExposePolicy
 	(*CreateVMRequest)(nil),                 // 1: CreateVMRequest
@@ -1542,37 +1599,38 @@ var file_firecracker_proto_goTypes = []any{
 	(*PauseVMRequest)(nil),                  // 3: PauseVMRequest
 	(*ResumeVMRequest)(nil),                 // 4: ResumeVMRequest
 	(*CreateSnapshotRequest)(nil),           // 5: CreateSnapshotRequest
-	(*StopVMRequest)(nil),                   // 6: StopVMRequest
-	(*GetVMInfoRequest)(nil),                // 7: GetVMInfoRequest
-	(*GetVMInfoResponse)(nil),               // 8: GetVMInfoResponse
-	(*SetVMMetadataRequest)(nil),            // 9: SetVMMetadataRequest
-	(*UpdateVMMetadataRequest)(nil),         // 10: UpdateVMMetadataRequest
-	(*GetVMMetadataRequest)(nil),            // 11: GetVMMetadataRequest
-	(*GetVMMetadataResponse)(nil),           // 12: GetVMMetadataResponse
-	(*JailerConfig)(nil),                    // 13: JailerConfig
-	(*UpdateBalloonRequest)(nil),            // 14: UpdateBalloonRequest
-	(*GetBalloonConfigRequest)(nil),         // 15: GetBalloonConfigRequest
-	(*GetBalloonConfigResponse)(nil),        // 16: GetBalloonConfigResponse
-	(*GetBalloonStatsRequest)(nil),          // 17: GetBalloonStatsRequest
-	(*GetBalloonStatsResponse)(nil),         // 18: GetBalloonStatsResponse
-	(*UpdateBalloonStatsRequest)(nil),       // 19: UpdateBalloonStatsRequest
-	(*FirecrackerMachineConfiguration)(nil), // 20: FirecrackerMachineConfiguration
-	(*FirecrackerRootDrive)(nil),            // 21: FirecrackerRootDrive
-	(*FirecrackerDriveMount)(nil),           // 22: FirecrackerDriveMount
-	(*FirecrackerNetworkInterface)(nil),     // 23: FirecrackerNetworkInterface
-	(*FirecrackerBalloonDevice)(nil),        // 24: FirecrackerBalloonDevice
-	(*MemoryBackend)(nil),                   // 25: MemoryBackend
+	(*CheckpointVMRequest)(nil),             // 6: CheckpointVMRequest
+	(*StopVMRequest)(nil),                   // 7: StopVMRequest
+	(*GetVMInfoRequest)(nil),                // 8: GetVMInfoRequest
+	(*GetVMInfoResponse)(nil),               // 9: GetVMInfoResponse
+	(*SetVMMetadataRequest)(nil),            // 10: SetVMMetadataRequest
+	(*UpdateVMMetadataRequest)(nil),         // 11: UpdateVMMetadataRequest
+	(*GetVMMetadataRequest)(nil),            // 12: GetVMMetadataRequest
+	(*GetVMMetadataResponse)(nil),           // 13: GetVMMetadataResponse
+	(*JailerConfig)(nil),                    // 14: JailerConfig
+	(*UpdateBalloonRequest)(nil),            // 15: UpdateBalloonRequest
+	(*GetBalloonConfigRequest)(nil),         // 16: GetBalloonConfigRequest
+	(*GetBalloonConfigResponse)(nil),        // 17: GetBalloonConfigResponse
+	(*GetBalloonStatsRequest)(nil),          // 18: GetBalloonStatsRequest
+	(*GetBalloonStatsResponse)(nil),         // 19: GetBalloonStatsResponse
+	(*UpdateBalloonStatsRequest)(nil),       // 20: UpdateBalloonStatsRequest
+	(*FirecrackerMachineConfiguration)(nil), // 21: FirecrackerMachineConfiguration
+	(*FirecrackerRootDrive)(nil),            // 22: FirecrackerRootDrive
+	(*FirecrackerDriveMount)(nil),           // 23: FirecrackerDriveMount
+	(*FirecrackerNetworkInterface)(nil),     // 24: FirecrackerNetworkInterface
+	(*FirecrackerBalloonDevice)(nil),        // 25: FirecrackerBalloonDevice
+	(*MemoryBackend)(nil),                   // 26: MemoryBackend
 }
 var file_firecracker_proto_depIdxs = []int32{
-	20, // 0: CreateVMRequest.MachineCfg:type_name -> FirecrackerMachineConfiguration
-	21, // 1: CreateVMRequest.RootDrive:type_name -> FirecrackerRootDrive
-	22, // 2: CreateVMRequest.DriveMounts:type_name -> FirecrackerDriveMount
-	23, // 3: CreateVMRequest.NetworkInterfaces:type_name -> FirecrackerNetworkInterface
-	13, // 4: CreateVMRequest.JailerConfig:type_name -> JailerConfig
-	24, // 5: CreateVMRequest.BalloonDevice:type_name -> FirecrackerBalloonDevice
-	25, // 6: CreateVMRequest.MemBackend:type_name -> MemoryBackend
+	21, // 0: CreateVMRequest.MachineCfg:type_name -> FirecrackerMachineConfiguration
+	22, // 1: CreateVMRequest.RootDrive:type_name -> FirecrackerRootDrive
+	23, // 2: CreateVMRequest.DriveMounts:type_name -> FirecrackerDriveMount
+	24, // 3: CreateVMRequest.NetworkInterfaces:type_name -> FirecrackerNetworkInterface
+	14, // 4: CreateVMRequest.JailerConfig:type_name -> JailerConfig
+	25, // 5: CreateVMRequest.BalloonDevice:type_name -> FirecrackerBalloonDevice
+	26, // 6: CreateVMRequest.MemBackend:type_name -> MemoryBackend
 	0,  // 7: JailerConfig.DriveExposePolicy:type_name -> DriveExposePolicy
-	24, // 8: GetBalloonConfigResponse.BalloonConfig:type_name -> FirecrackerBalloonDevice
+	25, // 8: GetBalloonConfigResponse.BalloonConfig:type_name -> FirecrackerBalloonDevice
 	9,  // [9:9] is the sub-list for method output_type
 	9,  // [9:9] is the sub-list for method input_type
 	9,  // [9:9] is the sub-list for extension type_name
@@ -1592,7 +1650,7 @@ func file_firecracker_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_firecracker_proto_rawDesc), len(file_firecracker_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   19,
+			NumMessages:   20,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

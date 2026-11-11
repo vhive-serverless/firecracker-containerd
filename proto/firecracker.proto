@@ -76,6 +76,13 @@ message CreateSnapshotRequest {
     string SnapshotPath = 3;
 }
 
+// CheckpointVMRequest captures the complete VM with independent drive and
+// volume data. Directory must be an absolute, previously nonexistent path.
+message CheckpointVMRequest {
+    string VMID = 1;
+    string Directory = 2;
+}
+
 message StopVMRequest {
     string VMID = 1;
     uint32 TimeoutSeconds = 2;
