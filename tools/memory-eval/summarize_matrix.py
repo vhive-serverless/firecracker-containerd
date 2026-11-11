@@ -493,12 +493,17 @@ def analyze(inputs, idle_offset=5, idle_window=20, max_gap=1.5, allow_developmen
         manifest, result = load(directory / 'manifest.json'), load(directory / 'matrix-result.json')
         check(result.get('status') == 'pass', 'matrix result did not pass')
         issues = provenance(manifest, result, allow_development)
+        device = backing_device(directory, manifest, physical_device)
         identity = {key: manifest.get(key) for key in ('source_revision', 'runtime_revision', 'runtime_image',
                     'builder_image', 'test_binary_sha256', 'sampler_sha256', 'evaluation_build')}
         identity['image_sha256'] = {key: value.get('sha256') for key, value in manifest.get('images', {}).items()}
+        identity['measurement_protocol'] = {
+            'idle_seconds': manifest.get('arguments', {}).get('idle'),
+            'sampling_interval_s': manifest.get('arguments', {}).get('interval'),
+            'host_uname': manifest.get('host_uname'), 'cache_state': manifest.get('cache_state'),
+            'ksm_run': manifest.get('ksm_run'), 'physical_device': device['physical_major_minor']}
         identity_id = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
         identities.add(identity_id)
-        device = backing_device(directory, manifest, physical_device)
         directories = sorted(path.parent for path in directory.glob('*/trial.json'))
         check(len(directories) == result.get('trials') and directories, 'matrix trial count mismatch')
         own = [trial_summary(path, manifest, device, int(idle_offset * NS), int(idle_window * NS),
@@ -518,7 +523,8 @@ def analyze(inputs, idle_offset=5, idle_window=20, max_gap=1.5, allow_developmen
                           'result_sha256': sha(directory / 'matrix-result.json')})
     check(allow_development or len(identities) == 1, 'mixed matrix provenance rejected')
     check(len({t['probe_sha256'] for t in trials}) == 1, 'mixed probe bytes across matrices')
-    return {'schema_version': 1, 'label': 'DEVELOPMENT ONLY' if allow_development else 'COMMITTED OBSERVATIONS',
+    return {'schema_version': 1, 'analyzer_sha256': sha(Path(__file__)),
+            'label': 'DEVELOPMENT ONLY' if allow_development else 'COMMITTED OBSERVATIONS',
             'configuration': {'idle_offset_s': idle_offset, 'idle_window_s': idle_window, 'max_gap_s': max_gap,
                               'boundary_estimate': 'linear interpolation; no extrapolation or zero fill'},
             'semantics': {'primary': 'dedicated cgroup memory.current; sampled peak and trapezoid byte-seconds',
