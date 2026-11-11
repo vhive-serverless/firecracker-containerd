@@ -49,11 +49,28 @@ Container writable roots already use disk, so the storage comparison applies
 to the guest upper. Writable files must be private to each VM and allocated on
 verified disk storage; immutable sharing must be explicit.
 
-Evaluation will preserve resource/workload parity and include read/idle/reread
-and write/idle/readback correctness. Measure host physical peak and memory-time,
-guest anon/cache, shared backing, CPU, faults, I/O, capacity and latency. Shared
-RSS and guest cache must not be added together as independent physical memory.
-No evaluation results or savings are claimed yet.
+The committed evaluation at `0a268c5589c37832e1c3dc89a7b60ed2701e0b9e`
+passed all 21 trials: seven configurations in three randomized blocks, with two
+512 MiB VMs per trial. It measures dedicated-cgroup memory peak and memory-time,
+guest anon/cache, mapped PSS, CPU, faults, I/O, allocation and instrumented
+latency. Shared RSS and guest cache are not added to cgroup memory. The
+[receipt](evidence/0a268c5-evaluation-receipt.log) records clean source,
+dependencies, commands and evidence hashes.
+
+Results are mixed. Against the matching ext4 block-device control, pmem reduces
+common-idle cgroup memory by about 100.55 MiB across two VMs (4.59%). The combined
+configuration still uses more total memory than the SquashFS configurations;
+filesystem/cache and startup costs outweigh that saving. Reclamation alone
+reduces idle memory by about 14.18 MiB (0.81%) while adding approximately three
+CPU-seconds per trial. The [results and raw observations](../../tools/memory-eval/results/0a268c5589c3/REPORT.md)
+retain the individual trials and costs. These are observations from one worker
+and workload, with verified/warmed host backing, rather than a general estimate
+of application savings.
+
+Recorded reporting counters may precede consumption of the final metrics flush.
+They do not certify complete reporting traffic or failures through trial end.
+The cgroup/PSS/CPU observations and guest correctness checks are independent of
+that limitation. Reporting traffic is never used as a physical-memory saving.
 
 Pmem comparisons must hold the read-only filesystem format and image contents
 constant. Converting SquashFS to a DAX-capable format requires a matching
@@ -81,9 +98,9 @@ This reservation is not a host-wide storage quota or a guarantee against later
 administrator truncation or unrelated hardware failure.
 
 The legacy vHive snapshot API supports only the explicit RAM layout; it cannot
-silently omit the new upper. Native capture must include the upper alongside
-the other disks. Native restore remains unaccepted. The five-arm evaluation
-remains pending; DAMON and pmem component acceptance are recorded below.
+silently omit the new upper. Native capture includes the upper alongside the
+other disks. Native restore validation is recorded separately; DAMON and pmem
+component acceptance are recorded below.
 
 The development worker passed disk upper inspection, write/copy-up/rename/delete,
 guest ENOSPC recovery, ownership and cleanup, with and without the runc jailer
@@ -161,7 +178,8 @@ The shared correction also passed bounded checks on Steps 1–3; Step 3 remains 
 kernel controls and clean committed DAMON acceptance at `9706231`. That run
 passed full build/private installation, lint, race units, forced protobuf
 regeneration, reporting, DAMON and ordinary balloon regression tests. The
-controlled evaluation remains pending.
+controlled evaluation is recorded above, including the matching filesystem
+controls and costs.
 
 Native capture already copies every configured virtio-blk drive after guest
 quiescing and VMM pause. New disks need capture regression coverage. Pmem backing
@@ -172,5 +190,6 @@ need an explicit contract. End-to-end native restore remains WIP from Step 3.
 root, digest-pinned sharing, matching virtio-blk control and artifact handling.
 Clean pmem acceptance passed at `438c2cb`, including actual lower-file DAX,
 matched block controls, shared read-only backing, private writable state and
-both native capture profiles across both jailers. The controlled evaluation
-and inherited end-to-end native restore remain incomplete.
+both native capture profiles across both jailers. The controlled evaluation is
+recorded above; native restore and Kubernetes/CRI integration have separate
+acceptance requirements.

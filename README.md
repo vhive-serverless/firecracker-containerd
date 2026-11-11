@@ -4,6 +4,11 @@ This branch pins Firecracker v1.18.0 and containerd v2.3.7. See the
 [modernization procedure and validation status](docs/modernization/step-1.md)
 for the complete worker build, installation, tests, and dependency revisions.
 
+On `damon-virtio-pmem`, see [Step 4 status](docs/modernization/step-4.md) and the
+[21-trial memory evaluation](tools/memory-eval/results/0a268c5589c3/REPORT.md).
+Step 3 remains explicitly WIP: Kubernetes Pod checkpoint/restore and full CRI
+conformance have not been accepted.
+
 [![BuildKite](https://badge.buildkite.com/aab4ae547d5e5079a5915522e8cdb18492349aef67aae5a8c5.svg?branch=main)](https://buildkite.com/firecracker-microvm/firecracker-containerd)
 [![GitHub Actions](https://github.com/firecracker-microvm/firecracker-containerd/actions/workflows/build.yaml/badge.svg)](https://github.com/firecracker-microvm/firecracker-containerd/actions)
 

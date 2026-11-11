@@ -68,11 +68,11 @@ branch starts at the validated completion commit of its prerequisite.
 - [x] Read arXiv 2609.22978; verify running host/guest/container storage before changes (f52d26c audit).
 - [x] Private disk-backed ext4 guest upper/work; immutable base; container writable roots already ext4; explicitly ephemeral tmpfs retained. Clean storage/capture component validation at 8f8d00f.
 - [x] Host disk/device/mount inspection, bounded capacity/reservation, jail ownership, cleanup, and real host/guest ENOSPC checks passed at 8f8d00f.
-- [ ] Independently configurable virtio-pmem/DAX and DAMON plus actual balloon free-page reporting; verify/implement VMM/SDK/kernel support and document deviations.
-- [ ] Account for pmem metadata, cold accesses, filesystem/DAX compatibility and explicit immutable sharing; never share writable state.
+- [x] Independently configurable virtio-pmem/DAX and DAMON plus actual balloon free-page reporting; component acceptance at 020f85b, 9706231 and 438c2cb records pinned VMM/SDK/kernel support and deviations.
+- [x] Account for pmem metadata, cold accesses, filesystem/DAX compatibility and explicit immutable sharing; matching ext4 block controls and measured configuration costs are retained in the 0a268c5 evaluation.
 - [ ] Integrate consistent disks with memory/VMM snapshots; quiesce/flush/snapshot/restore ordering, no advanced disks or writable sharing.
-- [ ] Worker write/copy-up/rename/delete/writeback/exhaustion tests and idle-reclaim/reactivation correctness.
+- [x] Worker write/copy-up/rename/delete/writeback/exhaustion tests and idle-reclaim/reactivation correctness passed in storage/mechanism acceptance and all 21 controlled trials.
 - [ ] Worker Step 3 lifecycle/snapshot suite for supported optimization combinations.
-- [ ] Run identical workloads/resources for original baseline, disk baseline, pmem only, reclamation only and combined (omit redundant original comparison if Step 3 already disk-backed).
-- [ ] Measure peak/integrated host memory, guest anonymous/page cache, shared backing, CPU, faults/I/O, disk, latency and correctness; avoid shared-memory double counting and conflating storage savings.
-- [ ] Commit/push scripts/config/results; independently reconstruct and report measured savings/costs, revisions, worker, commands and limitations.
+- [x] Run identical workloads/resources for original baseline, disk baseline, pmem only, reclamation only and combined, plus matching ext4 block controls: clean 0a268c5, 21 trials, three randomized blocks.
+- [x] Measure peak/integrated host memory, guest anonymous/page cache, shared backing, CPU, faults/I/O, disk, latency and correctness; separate accounting domains and retain missing metrics and reporting-counter freshness limitations.
+- [x] Commit/push evaluation scripts/config/results; frozen 0a268c5 observations, strict summaries, independently checked integrals, plots, commands and limitations are preserved. Runtime restore acceptance remains a separate gate above.

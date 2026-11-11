@@ -169,3 +169,18 @@ labeled **DEVELOPMENT ONLY**. The short smoke protocol uses `--idle-offset 2
 20-second common idle window. Counter layers are retained separately. Host and
 guest faults, guest memory endpoints, instrumented probe timings and VMM
 process I/O remain distinct from primary cgroup memory and physical-device I/O.
+
+The [committed 21-trial results](results/0a268c5589c3/REPORT.md) preserve raw
+observations, matching filesystem comparisons, costs and missing-data reasons.
+That revision waited for any metrics frame after requesting the final flush,
+so its reporting counters may omit the final frame. They must not be used as
+complete-through-flush traffic or failure totals. Host memory/CPU and guest
+correctness observations use independent data sources.
+
+Subsequent runs use a FIFO byte watermark taken after the synchronous
+`FlushMetrics` response and wait until every byte through that point belongs
+to a fully parsed and aggregated record. This includes scanner-buffered bytes
+and avoids treating an earlier frame or a partial record as acknowledgment.
+It uses neither timestamps nor a settling delay. The reader's readiness poll
+only bounds cancellation latency. Reporting counters still represent cumulative
+descriptor traffic, rather than unique physical-memory savings.

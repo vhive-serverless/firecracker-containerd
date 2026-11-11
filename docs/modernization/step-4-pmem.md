@@ -95,3 +95,8 @@ and test-fixture findings were corrected and full lint passed before the VM run.
 The immutable cache currently rehashes the full image for every VM creation.
 This warms host backing pages and adds image-sized CPU/I/O work. Evaluation
 must include that startup cost and distinguish this cache state from cold I/O.
+
+The later [controlled evaluation](../../tools/memory-eval/results/0a268c5589c3/REPORT.md)
+passed 21 trials. Pmem saved memory against matched ext4 block controls, while
+the full ext4/pmem configurations remained larger than the SquashFS baselines.
+The report retains startup, cache, CPU, I/O and reactivation costs.

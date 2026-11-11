@@ -73,3 +73,9 @@ resident pages, then verifies retained data after fresh allocations. A separate
 DAMON test retains a cold disk file across idle, observes reclaim/reporting
 and a host release, and verifies its checksum after refault. Neither test replaces
 the controlled five-configuration memory/performance evaluation.
+
+The later [controlled evaluation](../../tools/memory-eval/results/0a268c5589c3/REPORT.md)
+passed all 21 trials. Reclamation's fixed-window host-memory benefit was small
+in this workload and added CPU/readback costs. Its report distinguishes guest
+cache endpoints, mapped PSS and cgroup memory, and discloses the original
+reporting-frame freshness limitation.
