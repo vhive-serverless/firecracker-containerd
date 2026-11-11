@@ -1,9 +1,13 @@
 # Step 1: modernized runtime
 
-Branch: `modernize-runtime`. The implementation at
-`e666612819bc1efa71c645434bc36385f92e6423` passed all Step 1 acceptance gates
-from the clean checkout `/users/nehalem/fc-ctrd-mod/validated-runtime` on the
-designated worker. This branch preserves that runtime and the evidence below.
+Branch: `modernize-runtime`. The latest validated implementation is
+`6585eba92db4f8c55f6567cf8d2c8d695adcba05`. Its clean worker checkout
+`/users/nehalem/fc-ctrd-mod/step1-failed-create-committed` passed build,
+installation and full acceptance: 35 isolated runtime tests, 5 snapshotter
+tests and 79 SDK tests, with the existing SDK log/metrics skip. The
+[current receipt](evidence/6585eba-acceptance-receipt.log) records revisions,
+artifact hashes, raw log hashes and cleanup. Earlier acceptance and native
+deployment evidence remain below.
 
 The installed stack pulled an OCI image and ran it inside Firecracker, where
 it wrote and read back a file on its ext4 container root. A second native test
@@ -94,6 +98,7 @@ checkout=$(mktemp -d "$STACK_DIR/step1-repro.XXXXXXXX")
 git clone --branch modernize-runtime --recurse-submodules \
   https://github.com/vhive-serverless/firecracker-containerd.git "$checkout"
 cd "$checkout"
+git checkout --detach 6585eba92db4f8c55f6567cf8d2c8d695adcba05
 tools/modernize/prepare-worker.sh
 # If provisioning added the Docker group, reconnect and return to this checkout.
 revision=$(git rev-parse --short=12 HEAD)
@@ -126,7 +131,7 @@ The install script uses a dedicated prefix and does not replace the worker's Doc
 runtime binaries. Dedicated systemd units, sockets, state and thin pools isolate
 these tests from the distro containerd and baseline runtime.
 
-## Worker results
+## Initial worker results and subsequent corrections
 
 The worker ran Ubuntu 24.04.5 LTS and Linux 6.8.0-147-generic on an AMD EPYC 7302P
 with 32 logical CPUs, about 125 GiB RAM, and KVM. The tested installation is
@@ -186,6 +191,24 @@ exits. The controller closes its per-call connection after consuming the stop
 reply and before waiting for shim exit. This acknowledgement prevents a
 paused VM's forced-stop status from racing with transport shutdown; the
 shutdown context still bounds a client that keeps its connection open.
+
+Later CRI testing exposed a failure path in the earlier runtime: after a guest
+runc create failed, an explicitly retained VM kept the reserved root drive. A
+healthy container could then fail because the VM had no free drive slot. The
+host now rolls back that drive and its owned bundle links with a separate,
+bounded cleanup context. Guest unmount tolerates a bundle already removed by
+the failed runc create. Drive tracking is synchronized and completed entries
+are removed.
+
+The new regression uses the same one-slot VMM for three failed and healthy
+create cycles, checks application output and task deletion, verifies that the
+VMM identity is unchanged and checks removal of the failed bundle link. The
+same test fails against the earlier `e7395ac` image with no remaining drives.
+Commit `6585eba` passed the complete committed acceptance procedure, including
+that regression. Its installation is
+`/users/nehalem/fc-ctrd-mod/install/6585eba92db4`; the VMM and SDK pins are
+unchanged. The current receipt records both the negative control and the full
+acceptance evidence.
 
 The runtime branch is pushed to `vhive-serverless/firecracker-containerd`, and
 the SDK branch and pinned revision are pushed to `JooyoungPark73/firecracker-go-sdk`.

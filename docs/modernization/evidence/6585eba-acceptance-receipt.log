@@ -1,0 +1,95 @@
+Step 1 failure-cleanup correction: committed worker acceptance PASSED.
+Worker: nehalem@amd218.utah.cloudlab.us
+Checkout: /users/nehalem/fc-ctrd-mod/step1-failed-create-committed
+Revision: 6585eba92db4f8c55f6567cf8d2c8d695adcba05
+Commands: tools/modernize/build-stack.sh; tools/modernize/install-stack.sh; tools/modernize/test-stack.sh
+Install prefix: /users/nehalem/fc-ctrd-mod/install/6585eba92db4
+Source status after acceptance: clean
+Results: 35 runtime + 5 snapshotter isolated tests passed; 79 SDK tests passed, with existing TestLogAndMetrics skip.
+New regression: three rejected relative-CWD creates followed by healthy container execution/deletion in the same one-slot VMM, plus removal of failed bundle links.
+Unchanged SDK: 0d7a093c9b0cee5b93d0b9551888a571bb478154
+Unchanged VMM: eaf83bb718a559d324613d566eaf776b31a62340
+Test image: localhost/firecracker-containerd-test:6585eba92db4 sha256:bf3635c0f266e156bd0ae18c6427ccc46a2c7c0369c9dbf867a63b88d53ebcc3
+containerd github.com/containerd/containerd/v2 2.3.7+unknown 6585eba92db4f8c55f6567cf8d2c8d695adcba05
+
+Isolated test passes:
+TestCNISupport_Isolated
+TestAutomaticCNISupport_Isolated
+TestJailer_Isolated
+TestAttachBlockDevice_Isolated
+TestJailerCPUSet_Isolated
+TestNewJailer_Isolated
+TestDiskLimit_Isolated
+TestForceStopDefaultFirecracker_Isolated
+TestCrashRecovery_Isolated
+TestCNIGracefulCleanup_Isolated
+TestResourceAccounting_Isolated
+TestBinaryOutput_Isolated
+TestShimExitsUponContainerDelete_Isolated
+TestMultipleVMs_Isolated
+TestLongUnixSocketPath_Isolated
+TestStubBlockDevices_Isolated
+TestCreateContainerWithSameName_Isolated
+TestStubDriveReserveAndReleaseByContainers_Isolated
+TestDriveMount_Isolated
+TestDriveMountFails_Isolated
+TestUpdateVMMetadata_Isolated
+TestMemoryBalloon_Isolated
+TestRandomness_Isolated
+TestStopVM_Isolated
+TestStopVMFailFast_Isolated
+TestExec_Isolated
+TestEvents_Isolated
+TestOOM_Isolated
+TestCreateVM_Isolated
+TestPauseResume_Isolated
+TestAttach_Isolated
+TestBrokenPipe_Isolated
+TestFailedCreateReleasesDrive_Isolated
+TestVolumes_Isolated
+TestVolumeFrom_Isolated
+TestSnapshotterMetrics_Isolated
+TestSnapshotterMetricsMultipleVMs_Isolated
+TestLaunchContainerWithRemoteSnapshotter_Isolated
+TestLaunchMultipleContainersWithRemoteSnapshotter_Isolated
+TestGuestVolumeFrom_Isolated
+
+SDK skipped tests:
+TestLogAndMetrics
+PINNED_SDK_PRIVILEGED_SUITE_OK
+COMMITTED_STACK_ACCEPTANCE_OK
+
+Runtime/snapshotter pools and SDK cgroup b removed; checkout clean.
+
+Acceptance binary hashes:
+9d6c1876564e6cafefaade17cbc3e415cf243c520613f3e388e32154ab562e89  bin/firecracker
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  _submodules/runc/runc
+a9a9a7ff96a1faa7030caf349fe30c5c59b988bbfb9a0282dcac71a934613c87  agent/agent
+3dd9ea4a0c2bc1eda0aafcc751447a9ef8511281065335e0aebc569ef14dab1b  _submodules/stargz-snapshotter/out/containerd-stargz-grpc
+d95c75225530d7378a39c140953a9854d77f0ba7d6c077b2abb7e3184d610e64  volume/volume-init
+6422dcf2596ebdc764573c1e2527553a0ace24d8c08d50eaa7ef8644d89459f1  runtime/containerd-shim-aws-firecracker
+0416ff5531f80b37cbc2045f701ec12f82c38464ed7d943cecda88a930a3402d  firecracker-control/cmd/containerd/firecracker-containerd
+c52ed4f99c548bfbbdd024b666b3d2d77b6944c4171aaa61946c0585066e4ae5  firecracker-control/cmd/containerd/firecracker-ctr
+43607b6c1d768b880a5c183af8449e0880206db165d7556bfe86a57e556da61e  default-vmlinux.bin
+6426e7d1bd219a1fc9fc1911abc10988434e64ac4254404827259df2ec3dbe2e  tools/image-builder/rootfs.img
+6a6a2b5c62bd16684ef1db1af097582def6b2208536c8c907c1ffe7bd9a024b7  tools/image-builder/rootfs-stargz.img
+
+Actual image binaries:
+0416ff5531f80b37cbc2045f701ec12f82c38464ed7d943cecda88a930a3402d  /usr/local/bin/firecracker-containerd
+6422dcf2596ebdc764573c1e2527553a0ace24d8c08d50eaa7ef8644d89459f1  /usr/local/bin/containerd-shim-aws-firecracker
+9d6c1876564e6cafefaade17cbc3e415cf243c520613f3e388e32154ab562e89  /usr/local/bin/firecracker
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  /usr/local/bin/runc
+6426e7d1bd219a1fc9fc1911abc10988434e64ac4254404827259df2ec3dbe2e  /var/lib/firecracker-containerd/runtime/default-rootfs.img
+43607b6c1d768b880a5c183af8449e0880206db165d7556bfe86a57e556da61e  /var/lib/firecracker-containerd/runtime/default-vmlinux.bin
+
+Negative-control/development evidence (not a substitute for the committed acceptance above):
+The same test against the accepted e7395ac image failed because the healthy create had no remaining drive. The development patch passed all three cycles.
+
+Raw evidence SHA-256:
+73b53de1b184f4faf036ccad72b53cefc0cf55c0bb7eca339d3d6370486f7453  /users/nehalem/fc-ctrd-mod/evidence/6585eba-build-stack.log
+a0263bd684c7842d24ae71e34538c1ddd758f6c861ea58af941b07e9e4b4318b  /users/nehalem/fc-ctrd-mod/evidence/6585eba-install-stack.log
+9b5310e6e36b5e893ba49a987d9c9d5f003aecb366d9df95c39db4086b3b2dd1  /users/nehalem/fc-ctrd-mod/evidence/6585eba-acceptance.log
+d7fd52a66679a1ba0db9da0aeefd8719473d9761da0f9e870d7324c54cbe7f46  /users/nehalem/fc-ctrd-mod/evidence/e7395ac-failed-create-regression.log
+bf439f98a6ce88990932632cbbaa4a969f5b53bc291672eb3e5c2f3be04731ce  /users/nehalem/fc-ctrd-mod/evidence/step1-failed-create-patched-regression.log
+6e764cd941db8ed02e244d0dfc4d3903ee25cf88e69a71684f4729b21ffd03ed  /users/nehalem/fc-ctrd-mod/evidence/step1-create-failure-unit.log
+e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47  /users/nehalem/fc-ctrd-mod/evidence/step1-create-failure-lint.log

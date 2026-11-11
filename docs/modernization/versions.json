@@ -1,17 +1,17 @@
 {
   "schema_version": 1,
-  "status": "vHive-compatible stack; worker acceptance procedure in step-2.md",
+  "status": "Step 1 cleanup correction accepted; merged vHive stack awaiting worker revalidation",
   "step_1_validation": {
     "runtime_branch": "modernize-runtime",
-    "completion_commit": "e7395acb2c88cfe8c5d32ba61ff65c17e031858c",
-    "completion_log_sha256": "9c6f32f0521ce841fc83ff17cbf188685d32c3f4b800ec4e4f0dc6096c0aa6ab",
-    "tested_runtime_commit": "e7395acb2c88cfe8c5d32ba61ff65c17e031858c",
-    "worker_checkout": "/users/nehalem/fc-ctrd-mod/step1-repro.SwuCJ3fv",
-    "install_prefix": "/users/nehalem/fc-ctrd-mod/install/e7395acb2c88",
-    "acceptance_receipt": "evidence/e7395acb2c88-acceptance-receipt.log",
-    "worker_toolchains": "evidence/e666612819bc-worker-toolchains.log",
-    "previous_completion_commit": "207899bf3c45ad83d07b06d161b4dcec4a0c338b",
-    "previous_completion_log_sha256": "9d8c24c37f42ac148cdfff98c8600b8d440ea6d0889b0b7b63df93e899abc1d8"
+    "completion_commit": "6585eba92db4f8c55f6567cf8d2c8d695adcba05",
+    "tested_runtime_commit": "6585eba92db4f8c55f6567cf8d2c8d695adcba05",
+    "worker_checkout": "/users/nehalem/fc-ctrd-mod/step1-failed-create-committed",
+    "install_prefix": "/users/nehalem/fc-ctrd-mod/install/6585eba92db4",
+    "acceptance_receipt": "evidence/6585eba-acceptance-receipt.log",
+    "completion_log_sha256": "9b5310e6e36b5e893ba49a987d9c9d5f003aecb366d9df95c39db4086b3b2dd1",
+    "previous_completion_commit": "e7395acb2c88cfe8c5d32ba61ff65c17e031858c",
+    "initial_tested_runtime_commit": "e666612819bc1efa71c645434bc36385f92e6423",
+    "worker_toolchains": "evidence/e666612819bc-worker-toolchains.log"
   },
   "worker": {
     "ssh": "nehalem@amd218.utah.cloudlab.us",
@@ -165,5 +165,10 @@
       "postgres_14_3": "sha256:2d1e636f07781d4799b3f2edbff78a0a5494f24c4512cb56a83ebfd0e04ec074",
       "alpine_3_23_0": "sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375"
     }
+  },
+  "step_2_validation": {
+    "runtime_branch": "vhive-compatible",
+    "previous_completion_commit": "122d7084043a1e0b237fea9eb57de8d2eb48c486",
+    "revalidation_status": "pending for the merged task creation cleanup correction"
   }
 }
