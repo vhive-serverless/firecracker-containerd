@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "Step 1 cleanup correction accepted; merged vHive stack awaiting worker revalidation",
+  "status": "Steps 1 and 2 corrected and accepted on the worker; this branch preserves the vHive milestone",
   "step_1_validation": {
     "runtime_branch": "modernize-runtime",
     "completion_commit": "6585eba92db4f8c55f6567cf8d2c8d695adcba05",
@@ -168,7 +168,15 @@
   },
   "step_2_validation": {
     "runtime_branch": "vhive-compatible",
+    "completion_commit": "d959a78de45faf1d8d13fea282b7fb980b629789",
+    "tested_runtime_commit": "d959a78de45faf1d8d13fea282b7fb980b629789",
+    "worker_checkout": "/users/nehalem/fc-ctrd-mod/vhive-failed-create-committed",
+    "install_prefix": "/users/nehalem/fc-ctrd-mod/install/d959a78de45f",
+    "acceptance_receipt": "evidence/d959a78-acceptance-receipt.log",
+    "runtime_acceptance_log_sha256": "ea390f04c789196683b66aa1c235d5ffde52b7845dfbed576152f2a5820b7aff",
+    "vhive_acceptance_log_sha256": "ef964ae176742f1bd4ea9e8066e851d8bef309cd266c26e056824b75779f3efb",
+    "vhive_repeat_log_sha256": "e712841584abbf05cb34a016f1659636832d221a8c863756eba5f4b994696af7",
     "previous_completion_commit": "122d7084043a1e0b237fea9eb57de8d2eb48c486",
-    "revalidation_status": "pending for the merged task creation cleanup correction"
+    "previous_acceptance_receipt": "evidence/122d7084043a-acceptance-receipt.log"
   }
 }

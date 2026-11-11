@@ -1,5 +1,14 @@
 # Step 2: vHive compatibility
 
+The latest validated runtime is `d959a78de45faf1d8d13fea282b7fb980b629789`
+on `vhive-compatible`. Its clean worker checkout
+`/users/nehalem/fc-ctrd-mod/vhive-failed-create-committed` passed build,
+installation, 35 runtime and 5 snapshotter isolated tests, and 79 SDK tests
+with the existing SDK log/metrics skip. Two independent vHive deployment,
+invocation, snapshot, source-stop, new-VMM restore and cleanup runs also passed.
+The [current receipt](evidence/d959a78-acceptance-receipt.log) records inputs,
+process identities, artifact hashes, log hashes and cleanup.
+
 The supported deployment is the pinned vHive standalone orchestrator with
 devmapper, a single function container per unjailed VM, an immutable guest root,
 and Firecracker's File memory backend. The acceptance test runs vHive's
@@ -11,9 +20,14 @@ integration are separate.
 
 This branch started from Step 1 completion commit
 `207899bf3c45ad83d07b06d161b4dcec4a0c338b` and includes the later validated
-shutdown correction `e7395acb2c88cfe8c5d32ba61ff65c17e031858c`. Its
-[worker receipt](evidence/e7395acb2c88-acceptance-receipt.log) records clean
-build/install, all 39 isolated tests, the privileged SDK suite, and cleanup.
+shutdown correction `e7395acb2c88cfe8c5d32ba61ff65c17e031858c` and task
+creation cleanup correction `6585eba92db4f8c55f6567cf8d2c8d695adcba05`.
+The [Step 1 receipt](evidence/6585eba-acceptance-receipt.log) records its full
+acceptance. The latter correction releases a reserved drive and owned bundle
+links after a failed guest create, allowing a healthy container to reuse the
+same one-slot VMM. The previous vHive completion at `122d7084043a` remains
+documented in its [receipt](evidence/122d7084043a-acceptance-receipt.log).
+The VMM, SDK and vHive source pins below are unchanged by this correction.
 
 ## Port and inputs
 
@@ -66,9 +80,11 @@ In a fresh clone from the project's configured remote, check out the
 for the pinned tools, sudo, KVM, and Docker. Then run:
 
 ```sh
+git checkout --detach d959a78de45faf1d8d13fea282b7fb980b629789
 tools/modernize/build-stack.sh
 tools/modernize/install-stack.sh
 tools/modernize/test-stack.sh
+tools/vhive/test-vhive.sh
 tools/vhive/test-vhive.sh
 ```
 

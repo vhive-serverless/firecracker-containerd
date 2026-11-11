@@ -1,0 +1,117 @@
+Worker: amd218.utah.cloudlab.us
+Checkout: /users/nehalem/fc-ctrd-mod/vhive-committed
+Revision: 122d7084043a1e0b237fea9eb57de8d2eb48c486
+Commands: tools/modernize/build-stack.sh, tools/modernize/install-stack.sh, tools/modernize/test-stack.sh, tools/vhive/test-vhive.sh
+INSTALL_DIR=/users/nehalem/fc-ctrd-mod/install/122d7084043a
+--- PASS: TestCNISupport_Isolated (7.18s)
+--- PASS: TestAutomaticCNISupport_Isolated (3.85s)
+--- PASS: TestJailer_Isolated (16.51s)
+--- PASS: TestAttachBlockDevice_Isolated (18.06s)
+--- PASS: TestJailerCPUSet_Isolated (5.89s)
+--- PASS: TestNewJailer_Isolated (0.00s)
+--- PASS: TestDiskLimit_Isolated (10.38s)
+--- PASS: TestForceStopDefaultFirecracker_Isolated (2.16s)
+--- PASS: TestCrashRecovery_Isolated (9.47s)
+--- PASS: TestCNIGracefulCleanup_Isolated (17.11s)
+--- PASS: TestResourceAccounting_Isolated (4.34s)
+--- PASS: TestBinaryOutput_Isolated (3.31s)
+--- PASS: TestShimExitsUponContainerDelete_Isolated (5.32s)
+--- PASS: TestMultipleVMs_Isolated (20.66s)
+--- PASS: TestLongUnixSocketPath_Isolated (5.62s)
+--- PASS: TestStubBlockDevices_Isolated (5.06s)
+--- PASS: TestCreateContainerWithSameName_Isolated (12.76s)
+--- PASS: TestStubDriveReserveAndReleaseByContainers_Isolated (7.19s)
+--- PASS: TestDriveMount_Isolated (5.54s)
+--- PASS: TestDriveMountFails_Isolated (2.27s)
+--- PASS: TestUpdateVMMetadata_Isolated (7.20s)
+--- PASS: TestMemoryBalloon_Isolated (2.19s)
+--- PASS: TestRandomness_Isolated (3.44s)
+--- PASS: TestStopVM_Isolated (33.43s)
+--- PASS: TestStopVMFailFast_Isolated (3.82s)
+--- PASS: TestExec_Isolated (8.23s)
+--- PASS: TestEvents_Isolated (5.26s)
+--- PASS: TestOOM_Isolated (2.99s)
+--- PASS: TestCreateVM_Isolated (123.27s)
+--- PASS: TestPauseResume_Isolated (76.19s)
+--- PASS: TestAttach_Isolated (6.04s)
+--- PASS: TestBrokenPipe_Isolated (23.54s)
+--- PASS: TestVolumes_Isolated (10.14s)
+--- PASS: TestVolumeFrom_Isolated (17.75s)
+--- PASS: TestSnapshotterMetrics_Isolated (5.76s)
+--- PASS: TestSnapshotterMetricsMultipleVMs_Isolated (5.15s)
+--- PASS: TestLaunchContainerWithRemoteSnapshotter_Isolated (6.90s)
+--- PASS: TestLaunchMultipleContainersWithRemoteSnapshotter_Isolated (7.47s)
+--- PASS: TestGuestVolumeFrom_Isolated (18.26s)
+--- SKIP: TestLogAndMetrics (0.00s)
+PINNED_SDK_PRIVILEGED_SUITE_OK
+COMMITTED_STACK_ACCEPTANCE_OK
+
+vHive test inputs and binary hashes:
+runtime=122d7084043a1e0b237fea9eb57de8d2eb48c486
+vhive=1f373249770f51bd930939471607b14a04f9b708
+function=ghcr.io/ease-lab/helloworld@sha256:12dc6715ed1a8306f246ceaf7742c09e38a52a79d17421e4a50d7e0e09fdbc25
+base_image=sha256:9a605deddf567c421e04d46acb16382725adb949dfb94c8e3fba125ada1b1593
+76176e22e9cd9ffa431f55e98c38d27e113c7e1deb66dc321e2d3a8f85f5fba1  /users/nehalem/fc-ctrd-mod/vhive-committed/tmp/vhive-build.lCUh4jS6/image/vhive
+313f3ecb701cd5abf55754ec673fa2d2fdcd3b0b431a5741c10a4370c6b1a6d7  /users/nehalem/fc-ctrd-mod/vhive-committed/tmp/vhive-build.lCUh4jS6/image/vhive-probe
+b124b97d4e5011773f0d6eea2018360e541ed27b37182467dc2556166ffebfe1  tools/vhive/modern-stack.patch
+
+vHive transcript:
+Client:
+  Version:  2.3.7+unknown
+  Revision: 122d7084043a1e0b237fea9eb57de8d2eb48c486
+  Go version: go1.26.11
+
+Server:
+  Version:  2.3.7+unknown
+  Revision: 122d7084043a1e0b237fea9eb57de8d2eb48c486
+  UUID: 11d3c49a-15ab-4811-8a95-6b8df2835d4b
+Client:
+  Version:  2.3.7+unknown
+  Revision: 122d7084043a1e0b237fea9eb57de8d2eb48c486
+  Go version: go1.26.11
+
+Server:
+  Version:  v2.3.7
+  Revision: 6f589cf13dc01a5b493911355427e05b2ff005d7
+  UUID: a3861234-2fee-4797-8945-581e777385c4
+WARNING: version mismatch
+WARNING: revision mismatch
+started VM instance for a function 901
+reply="Hello, before-one!" cold=false
+reply="Hello, before-two!" cold=false
+{"vm_id": "901-0", "vmm_pid": 284, "start_ticks": "3177025", "disk": "/dev/mapper/fc-vhive-122d7084043a-3070969-snap-9", "netns": "/var/run/netns/uvmns1"}
+/fccd/snapshots/901/snap_file
+total 746252
+-rw------- 1 root root 1073741824 Nov 11 02:22 disk_file
+-rw-r--r-- 1 root root        178 Nov 11 02:22 info_file
+-rw-r--r-- 1 root root  536870912 Nov 11 02:22 mem_file
+-rw-r--r-- 1 root root      14543 Nov 11 02:22 snap_file
+
+removed VM 901-0 (PID 284) and /dev/mapper/fc-vhive-122d7084043a-3070969-snap-9
+reply="Hello, after-restore!" cold=true
+reply="Hello, after-warm!" cold=false
+{"vm_id": "901-1", "vmm_pid": 414, "start_ticks": "3178454", "disk": "/dev/mapper/fc-vhive-122d7084043a-3070969-snap-10", "netns": "/var/run/netns/uvmns1"}
+
+removed VM 901-1 (PID 414) and /dev/mapper/fc-vhive-122d7084043a-3070969-snap-10
+VHIVE_DEPLOY_INVOKE_SNAPSHOT_RESTORE_OK
+
+Raw worker log hashes:
+d2e69dfe85eb04e082ace0725fc607e651a94e8f8c4a1d6af2ea4e3f90a421a6  ../evidence/122d7084043a-build-stack.log
+43ad00b54fcf5907c986655a7a769e3d04f0b704179e38ef8f09d89ddf7e521f  ../evidence/122d7084043a-install-stack.log
+489c699a444eb729327f42e5957ee5708e4a8db74108c783e427db41cb22fa13  ../evidence/122d7084043a-acceptance.log
+fa265494649a4a007430b397f32c3d1e16148df0af73de789461957d9f185b34  ../evidence/122d7084043a-vhive-acceptance.log
+
+Selected build hashes:
+635027271c6cbdf768b5f6f96e4c33150a4183edc7d0ba7f1305f614d0d8ab08  bin/firecracker
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  _submodules/runc/runc
+b7b35feb5b6c49c5bfe2ce40f83f31dafc7bb3a4d9a581858e90137ed11011f9  agent/agent
+45d21e9a6ca5f58511f19497cbb5a0965269fe6c9cd6d713e77abf01d53ea93a  _submodules/stargz-snapshotter/out/containerd-stargz-grpc
+84062955ee99a973f882fd50d3d3e33f81ef97dc960c5fe5529360ecd6ace3db  volume/volume-init
+9cb865fc89a89ffbecb271adad4536ab6e3c666311c57e3f91113467e87dd8f0  runtime/containerd-shim-aws-firecracker
+c30dcc1fd2e2ec96fe577f7c3b73e626d0522b97ab3bc429983c50494f4e0c43  firecracker-control/cmd/containerd/firecracker-containerd
+cc69a87a91c6d7908892d35ba6c37751e512bb0995f715cfcb5b45106088cfa3  firecracker-control/cmd/containerd/firecracker-ctr
+14e065fb12815648d909b86f6d2caed7f18987e380dd14d6544f267f301c8fdc  default-vmlinux.bin
+0c48b98eb8179e45438a5ceb64b3693c774a23ec5b0eaae48c48352ae5be9b84  tools/image-builder/rootfs.img
+32e7bab4b7f7fb224e93eaa68e2cc5d3b4dc271470c8f86df4704a77aaeabf2f  tools/image-builder/rootfs-stargz.img
+
+Acceptance pools, vHive test pool/container, and SDK test cgroup removed. Tracked checkout clean.
