@@ -1,5 +1,12 @@
 # Step 1: modernized runtime
 
+Install-loop maintenance at `1adbcfc4f48dd7bee8d40bf24138f39350441a55` passed the
+worker fixture: a failing first component stops installation before the second,
+and a successful component still installs. The [maintenance receipt](evidence/1adbcfc-install-guard-receipt.log)
+records source and log hashes. This one-line build-system check did not rerun
+runtime acceptance; the prior functional results below retain their original
+source revisions and dependency pins.
+
 Latest committed revalidation: `06bd2058ba7938ad31eec9e17ac4d2e4c33a958f`.
 The clean worker checkout `/users/nehalem/fc-ctrd-mod/step1-io-committed` passed
 build, private installation and full acceptance: 36 runtime, five snapshotter
