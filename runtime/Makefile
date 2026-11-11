@@ -22,6 +22,7 @@ DOCKER_IMAGE_TAG?=latest
 GO_CACHE_VOLUME_NAME?=gocache
 FIRECRACKER_CONTAINERD_TEST_IMAGE?=localhost/firecracker-containerd-test
 FICD_DM_POOL?=fc-test-thinpool
+FICD_VM_STORAGE?=$(abspath $(CURDIR)/../../.ficd-test-vms/$(notdir $(abspath $(CURDIR)/..)))
 
 REVISION=$(shell git rev-parse HEAD)
 
@@ -62,7 +63,7 @@ integ-test-%: logs test-deps
 		--volume /run/udev/control:/run/udev/control \
 		--volume $(CURDIR)/logs:/var/log/firecracker-containerd-test \
 		--volume $(CURDIR)/..:/src \
-		--volume $(CURDIR)/vm-storage:/srv/firecracker_containerd_tests \
+		--volume $(FICD_VM_STORAGE):/srv/firecracker_containerd_tests \
 		--volume $(GO_CACHE_VOLUME_NAME):/go \
 		--env ENABLE_ISOLATED_TESTS=1 \
 		--env FICD_DM_VOLUME_GROUP=$(FICD_DM_VOLUME_GROUP) \
@@ -85,7 +86,7 @@ benchmark-%: logs
 		--volume /run/udev/control:/run/udev/control \
 		--volume $(CURDIR)/logs:/var/log/firecracker-containerd-test \
 		--volume $(CURDIR)/..:/src \
-		--volume $(CURDIR)/vm-storage:/srv/firecracker_containerd_tests \
+		--volume $(FICD_VM_STORAGE):/srv/firecracker_containerd_tests \
 		--volume $(GO_CACHE_VOLUME_NAME):/go \
 		--env ENABLE_ISOLATED_TESTS=1 \
 		--env FICD_DM_VOLUME_GROUP=$(FICD_DM_VOLUME_GROUP) \

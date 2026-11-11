@@ -289,7 +289,7 @@
     "sdk_commit": "832b1a5132e06f5e2167b64b97b5cd8946604005"
   },
   "step_4_guest_storage": {
-    "status": "WIP; committed allocation/capture checks passed but complete storage run exposed cross-filesystem jailer FIFO failure; correction c7d73c7 development-tested, committed revalidation pending",
+    "status": "Committed disk-backed storage and native capture component passed at 8f8d00f; native restore/overall Step4 remain WIP",
     "default_mode": "disk",
     "default_capacity_mib": 512,
     "capacity_range_mib": [
@@ -301,13 +301,21 @@
     "host_backing": "direct ext3/ext4, XFS or Btrfs filesystem required",
     "ownership": "private file inside each VM jail; removed on VM cleanup",
     "boot_device_selection": "filesystem UUID; direct device probing before proc/udev startup",
-    "native_restore": "inherited Step 3 WIP; no restore acceptance claimed"
+    "native_restore": "inherited Step 3 WIP; no restore acceptance claimed",
+    "validation": {
+      "tested_runtime_commit": "8f8d00fc2fb122d40c2e034f62e67978ba194c1e",
+      "worker_checkout": "/users/nehalem/fc-ctrd-mod/step4-storage-dev",
+      "receipt": "evidence/8f8d00f-storage-acceptance-receipt.log",
+      "receipt_sha256": "d8eed9b39406ff4511a4a3b78a42655f2c68926f5cdcdca9c78af46c92d1a40c",
+      "scope": "full build/install/test-storage; host/guest disk and ENOSPC; ownership/cleanup; original RAM control; native capture independent writable disks; cross-FS FIFOs; eight VM creation cases; no native restore claim"
+    },
+    "test_state_directory": "FICD_VM_STORAGE; defaults to ../.ficd-test-vms/<checkout-name>, outside source/build contexts"
   },
   "step_4_memory": {
     "status": "WIP milestone; free-page reporting component passed committed worker acceptance; DAMON/pmem/evaluation pending",
     "free_page_reporting": "FirecrackerBalloonDevice.FreePageReporting; independent of target amount",
-    "damon": "pinned source controls audited; activation implementation pending",
-    "pmem_dax": "capabilities audited; runtime/image implementation pending",
+    "damon": "Implemented bounded startup controls; component/race/lint and cold-file development VM passed; clean committed acceptance pending",
+    "pmem_dax": "Optional reproducible ext4 image validated; runtime pmem integration/guest DAX activation pending",
     "evaluation": "five requested configurations plus matching filesystem controls pending",
     "free_page_reporting_validation": {
       "tested_runtime_commit": "020f85b7c137be6989d96fbf4d63c1a3b3e9b71e",
@@ -325,6 +333,41 @@
       "disabled_filled_rss_kib": 236700,
       "disabled_idle_rss_kib": 237260,
       "interpretation": "single mechanism acceptance run, not five-arm evaluation"
+    },
+    "damon_development": {
+      "guest_memory_mib": 512,
+      "min_age_seconds": 5,
+      "quota_mib_per_second": 16,
+      "quota_time_ms_per_second": 5,
+      "report_order": 9,
+      "anonymous_folios_excluded": true,
+      "balloon_target_and_actual_mib": 0,
+      "filled_rss_kib": 288976,
+      "idle_rss_kib": 247264,
+      "reloaded_rss_kib": 289472,
+      "reclaimed_delta_bytes": 49467392,
+      "reporting_failures": 0,
+      "file_checksum_and_ram_token_preserved": true,
+      "scope": "one real-VM mechanism test, not evaluation"
+    },
+    "readonly_dax_image": {
+      "image_build_tested_source": "e76967bf13111a4818b4e57868fe2d1cc38de9ba",
+      "image_sha256": "fddd6a51d06feeaf41f65d879b52f81062e5b92f027f7f5e0e197d78d2882b3c",
+      "capacity_bytes": 536870912,
+      "sparse_host_allocated_bytes": 214065152,
+      "nominal_page_metadata_bytes": 8388608,
+      "filesystem": "ext4, 4096-byte blocks, clean, no journal, immutable mode0444",
+      "evidence": "../../tools/image-builder/evidence/e76967b-dax-image-receipt.log",
+      "guest_dax_activation_verified": false
     }
+  },
+  "shared_jailer_telemetry_validation": {
+    "common_fix": "c7d73c703d18d33e07b39c2785dbcb1f77af039f",
+    "step_1_tested": "06bd2058ba7938ad31eec9e17ac4d2e4c33a958f",
+    "step_1_result": "120 pass, one existing SDK skip; full base acceptance",
+    "step_2_tested": "4e0033b81a17d9a32c2861263c2792ebcfe37ebd",
+    "step_2_result": "120 pass, one existing SDK skip; two vHive runs",
+    "step_3_tested": "3c0d1ce5ce8fc47e80607a8a9a11330746c2972b",
+    "step_3_result": "bounded FIFO/CreateVM maintenance passed; Step3 remains WIP"
   }
 }

@@ -3,6 +3,7 @@ bin/
 tmp/
 runtime/logs
 runtime/vm-storage
+runtime/.vm-storage
 *stamp
 default-vmlinux.bin
 /cri/firecracker-cri

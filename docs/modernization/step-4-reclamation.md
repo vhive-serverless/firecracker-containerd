@@ -1,7 +1,16 @@
 # Reclamation integration notes — WIP
 
-These are implementation inputs, not experimental results. The current Step 4
-branch is incomplete, and Step 3 remains WIP by explicit user instruction.
+Step 4 is incomplete, and Step 3 remains WIP by explicit user instruction.
+The runtime configuration below has passed worker component/race/lint checks
+and one real-VM development test. Clean committed validation remains pending.
+
+`CreateVMRequest.Reclamation` overrides administrator `guest_reclamation`
+configuration. Nil inherits the administrator value; explicit `Enabled=false`
+disables it for that VM. Enabled mode activates DAMON and free-page reporting;
+pmem selection is separate. Defaults are five-second cold age, 16 MiB/s size
+quota, 5 ms/s action quota and reporting order nine. `MinAgeSeconds`,
+`QuotaMibPerSecond`, `QuotaTimeMs` and optional `ReportingOrder` expose bounded
+overrides. Native restore retains its captured kernel/device state.
 
 The [pinned kernel implementation](https://github.com/amazonlinux/linux/blob/7483450dec64b4f923037de31d8c28298a7c3359/mm/damon/reclaim.c)
 supports built-in DAMON_RECLAIM. Anonymous folios can be excluded with
@@ -10,12 +19,19 @@ exclude tmpfs/shmem. Use the name “non-anonymous LRU reclaim.” The cold-age
 threshold is in microseconds. Configure while disabled, then enable; stopping
 is synchronous. Runtime changes require the documented commit-input protocol.
 
-For the controlled cold-file experiment, the intended initial policy is a
+For the controlled cold-file experiment, the implemented initial policy is a
 five-second cold age, 5 ms / 16 MiB per second action quotas, 5 ms sampling and
 100 ms aggregation. Free-memory watermarks of 1000/1000/0 per thousand remove
 pressure gating; PSI/user-feedback quota autotuning stays disabled. These
 choices are our experiment settings, not disclosed paper settings. Test their
 actual activation and reclaim behavior before relying on them.
+
+The first development VM test retained a 128 MiB ext4 file across idle. DAMON
+reclaimed 49467392 bytes; VMM RSS moved from 288976 to 247264 KiB, then to
+289472 KiB after reading the file again. Reporting processed 78 descriptors
+without failures, with balloon target/actual zero. The file checksum and a
+random token held only in process memory survived page reuse. This is one
+mechanism check, not the controlled evaluation or a claimed paper reproduction.
 
 Record `bytes_reclaim_tried_regions`, `bytes_reclaimed_regions`,
 `nr_quota_exceeds`, and `kdamond_pid` from the module parameters. Tried bytes

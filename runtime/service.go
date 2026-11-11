@@ -661,6 +661,9 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 			_ = os.Remove(filepath.Join(s.jailer.JailPath().RootPath(), guestOverlayFile))
 		}
 	}()
+	if err := s.configureGuestReclamation(request); err != nil {
+		return fmt.Errorf("configure guest reclamation: %w", err)
+	}
 	s.vmRequest, err = json.Marshal(request)
 	if err != nil {
 		return fmt.Errorf("record VM creation request: %w", err)

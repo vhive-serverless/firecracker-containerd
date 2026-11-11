@@ -10,6 +10,7 @@ cd "$repo_dir"
 test -z "$(git status --porcelain)"
 export DOCKER_IMAGE_TAG=$(git rev-parse --short=12 HEAD)
 export FICD_DM_VOLUME_GROUP=''
+export FICD_VM_STORAGE=${FICD_VM_STORAGE:-"$(dirname "$repo_dir")/.ficd-test-vms/$(basename "$repo_dir")"}
 pool=fc-storage-${DOCKER_IMAGE_TAG}
 if sudo -n dmsetup info "$pool" >/dev/null 2>&1; then
     echo "Storage test pool already exists: $pool" >&2
@@ -61,7 +62,7 @@ mkdir -p bin/receipts/storage
 git rev-parse HEAD > bin/receipts/storage/runtime-revision
 git submodule status > bin/receipts/storage/submodules
 go list -mod=readonly -m -json all > bin/receipts/storage/go-modules.json
-findmnt -T runtime/vm-storage > bin/receipts/storage/host-backing
+findmnt -T "$FICD_VM_STORAGE" > bin/receipts/storage/host-backing
 sha256sum runtime/containerd-shim-aws-firecracker agent/agent bin/firecracker \
     default-vmlinux.bin tools/image-builder/rootfs.img \
     > bin/receipts/storage/binaries.sha256

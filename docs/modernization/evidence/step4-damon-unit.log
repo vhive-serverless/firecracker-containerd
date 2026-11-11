@@ -1,0 +1,9 @@
+=== RUN   TestGuestReclamation_Isolated
+    testutils.go:61: skipping test that requires isolation
+--- SKIP: TestGuestReclamation_Isolated (0.00s)
+=== RUN   TestGuestReclamationConfiguration
+--- PASS: TestGuestReclamationConfiguration (0.00s)
+=== RUN   TestGuestReclamationRejectsConflictingAndUnboundedInputs
+--- PASS: TestGuestReclamationRejectsConflictingAndUnboundedInputs (0.00s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	1.054s

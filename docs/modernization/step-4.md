@@ -61,7 +61,7 @@ virtio-blk control; otherwise filesystem/compression effects would be mixed
 into the claimed pmem result. Additional controls may supplement the five
 requested configurations for this reason.
 
-## Disk upper configuration (development validation passed)
+## Disk upper configuration (committed component validation passed)
 
 `guest_root_mode` defaults to `disk`; `guest_root_size_mib` defaults to 512.
 `CreateVMRequest.GuestRoot` can select `disk` or the measured original `ram`
@@ -107,6 +107,21 @@ The storage script also tests a real host allocation failure inside a private
 32 MiB loop-backed ext4 filesystem, without filling the shared worker disk.
 Its final marker covers storage and native **capture**, not native restore,
 Kubernetes Pod checkpoint/restore, pmem/DAX or DAMON acceptance.
+
+Clean commit `8f8d00fc2fb122d40c2e034f62e67978ba194c1e` passed the complete
+storage script after the FIFO correction, plus full build and private install.
+The [receipt](evidence/8f8d00f-storage-acceptance-receipt.log) and
+[raw acceptance](evidence/8f8d00f-storage-acceptance.log) record component tests,
+host/guest ENOSPC, both jailer modes, RAM control, independent repeated capture,
+cross-filesystem telemetry and all eight CreateVM cases. Native restore remains WIP.
+
+Test VM state now defaults to the sibling directory
+`../.ficd-test-vms/<checkout-name>` via `FICD_VM_STORAGE`. This keeps root-owned
+scratch disks outside Go package discovery and Docker build contexts. It must
+reside on real host disk; allocation verifies the opened file's filesystem.
+Existing stopped test data under `runtime/vm-storage` or `runtime/.vm-storage`
+must be kept outside the source tree before reusing that old checkout. Fresh
+checkouts use the new location directly.
 
 ## Free-page reporting — component validation passed
 

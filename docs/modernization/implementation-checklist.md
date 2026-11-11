@@ -65,9 +65,9 @@ branch starts at the validated completion commit of its prerequisite.
 ## Step 4: damon-virtio-pmem (in progress; Step 3 remains WIP)
 
 - [x] Create branch from pinned Step 3 WIP commit `26ceead`; user explicitly authorized this ordering change on 2026-11-11. Scope remains writable storage and memory reduction; inherited restore gaps remain visible.
-- [ ] Read arXiv 2609.22978; verify current running host/guest/container storage and persistence boundaries before changes.
-- [ ] Disk-backed per-VM persistent guest/container writes; immutable base; ext4 upperdir/workdir where OverlayFS retained; only explicitly ephemeral tmpfs.
-- [ ] Verify host disk backing (no tmpfs), devices and mounts; capacity, allocation, ownership, cleanup and ENOSPC handling.
+- [x] Read arXiv 2609.22978; verify running host/guest/container storage before changes (f52d26c audit).
+- [x] Private disk-backed ext4 guest upper/work; immutable base; container writable roots already ext4; explicitly ephemeral tmpfs retained. Clean storage/capture component validation at 8f8d00f.
+- [x] Host disk/device/mount inspection, bounded capacity/reservation, jail ownership, cleanup, and real host/guest ENOSPC checks passed at 8f8d00f.
 - [ ] Independently configurable virtio-pmem/DAX and DAMON plus actual balloon free-page reporting; verify/implement VMM/SDK/kernel support and document deviations.
 - [ ] Account for pmem metadata, cold accesses, filesystem/DAX compatibility and explicit immutable sharing; never share writable state.
 - [ ] Integrate consistent disks with memory/VMM snapshots; quiesce/flush/snapshot/restore ordering, no advanced disks or writable sharing.
