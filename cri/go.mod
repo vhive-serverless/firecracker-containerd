@@ -103,4 +103,4 @@ replace github.com/firecracker-microvm/firecracker-containerd => ..
 
 // Module replacements are not inherited from the parent. Keep this exact SDK
 // replacement aligned with docs/modernization/versions.json.
-replace github.com/firecracker-microvm/firecracker-go-sdk => github.com/JooyoungPark73/firecracker-go-sdk v0.0.0-20261111001616-51a10ee490d4
+replace github.com/firecracker-microvm/firecracker-go-sdk => github.com/JooyoungPark73/firecracker-go-sdk v0.0.0-20261111093432-832b1a5132e0

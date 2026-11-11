@@ -151,6 +151,35 @@ log hashes. Its kernel mount tests use the worker host kernel `6.8.0-147-generic
 that receipt predates the shim/agent mount wiring and does not establish its
 Firecracker guest acceptance.
 
+## Native snapshot transport
+
+This branch pins Firecracker
+`ce86b117d59ca93b1c04b791a251b445ace76703` and SDK
+`832b1a5132e06f5e2167b64b97b5cd8946604005` on matching
+`cri-native-snapshot-restore` branches. The API can retain established source
+vsock connections during checkpoint creation and reset captured connections
+only in the restored guest. The SDK exposes `WithRetainedSourceVsock(true)`
+and `WithSnapshotVsockReset(true)`. Existing defaults keep the vHive path's
+behavior, and the serialized VMM snapshot format is unchanged.
+
+Both committed dependency checkouts passed worker validation. Four real-VMM
+cases cover MMIO/PCI and retained/legacy source policies: the source continues
+after a failed and successful retained snapshot, exits before restore, and a
+new VMM returns the captured memory counter with its listener working and stale
+connections released. Captured memory/state files remain unchanged after the
+restored guest writes. The full privileged SDK suite passed 79 cases; its gated
+native test passed separately. The
+[transport receipt](evidence/ce86b11-832b1a5-native-vsock-receipt.log) records
+the two SDK skips, targeted VMM tests, lint, race/vet checks, exact Swagger
+regeneration, binary hashes and commands. SDK snapshot tests also passed against
+the previous VMM, confirming that ordinary load calls omit the new option.
+
+This validates transport and memory primitives independently. The fixture has
+no persistent disks or container tasks. The runtime still needs native Pod
+checkpoint coordination, independent consistent disk capture, saved task/volume
+metadata and restored IO/events/ownership. These dependency results do not
+establish whole-Pod restore or Kubernetes checkpoint/restore integration.
+
 ## VM capacity from Pod resources
 
 The shim reads containerd 2.3.7's standard `io.kubernetes.cri.sandbox-cpu-period`,

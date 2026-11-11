@@ -100,8 +100,8 @@
       "base_tag_object": "07a7c2e20a8f4f661702551d02fc3eca679842a5",
       "base_commit": "eaf83bb718a559d324613d566eaf776b31a62340",
       "fork": "https://github.com/JooyoungPark73/firecracker.git",
-      "branch": "vhive-compatible",
-      "commit": "df2d5b98ffe7e62bd367371e962fc00b0ee26e63",
+      "branch": "cri-native-snapshot-restore",
+      "commit": "ce86b117d59ca93b1c04b791a251b445ace76703",
       "rust": "1.97.0",
       "target": "x86_64-unknown-linux-musl"
     },
@@ -116,9 +116,9 @@
     "swagger_generator_previous_work": "v0.33.1",
     "sdk": {
       "remote": "git@github.com:JooyoungPark73/firecracker-go-sdk.git",
-      "branch": "vhive-compatible",
-      "commit": "51a10ee490d4627076b887c7defa0c05399e8d21",
-      "module_replacement": "github.com/JooyoungPark73/firecracker-go-sdk v0.0.0-20261111001616-51a10ee490d4"
+      "branch": "cri-native-snapshot-restore",
+      "commit": "832b1a5132e06f5e2167b64b97b5cd8946604005",
+      "module_replacement": "github.com/JooyoungPark73/firecracker-go-sdk v0.0.0-20261111093432-832b1a5132e0"
     },
     "containerd": {
       "version": "v2.3.7",
