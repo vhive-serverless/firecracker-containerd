@@ -62,7 +62,25 @@ tools/modernize/test-pmem.sh
 The script checks lint, race units, forced protobuf regeneration, guest DAX and
 block controls, jail sharing, combined DAMON/pmem correctness and native capture.
 It does not claim native restore or the controlled evaluation. Initial worker
-unit checks passed; actual VM validation and clean committed acceptance remain
-pending. The initial lint failure is retained in
+unit and full lint checks passed. Development VM checks then passed on a dirty
+`6291b38` checkout: eight VMs covered pmem/block and jailed/unjailed combinations
+(52.25 s), and combined pmem/DAMON repeated capture passed both jailer modes
+(112.04 s). Actual lower-file STATX_ATTR_DAX was true in the four pmem VMs and
+false in the four matched block controls. Shared backing, private upper writes,
+copy-up/rename/delete, mmap/reread and anonymous canary checks passed.
+
+The [development receipt](evidence/pmem-dev-vm-receipt.log) identifies the dirty
+source patch/archive, binaries, image and raw logs. These runs precede the final
+artifact-directory fsync and block-control capture corrections in `438c2cb`.
+Clean committed validation of that revision is running; it remains required.
+The raw [root checks](evidence/pmem-dev-PmemRoot_Isolated.log) and
+[combined capture checks](evidence/pmem-dev-PmemNativeCheckpoint_Isolated.log)
+do not establish native restore or measured memory savings.
+
+The initial lint failure is retained in
 [evidence](evidence/step4-pmem-dev-lint-failed.log); its read-only sharing permission
-and test-fixture findings are being corrected and rechecked.
+and test-fixture findings were corrected and full lint passed before the VM run.
+
+The immutable cache currently rehashes the full image for every VM creation.
+This warms host backing pages and adds image-sized CPU/I/O work. Evaluation
+must include that startup cost and distinguish this cache state from cold I/O.

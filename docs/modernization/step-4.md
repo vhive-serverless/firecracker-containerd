@@ -169,6 +169,6 @@ is referenced by pathname in VMM snapshots, so relocation and immutable lifetime
 need an explicit contract. End-to-end native restore remains WIP from Step 3.
 
 [Pmem integration notes](step-4-pmem.md) describe the optional immutable ext4
-root, digest-pinned sharing, matching virtio-blk control, artifact handling and
-pending guest DAX validation. The static observation probe has passed committed
-host validation; that result alone does not establish guest DAX activation.
+root, digest-pinned sharing, matching virtio-blk control and artifact handling.
+Development guest DAX and combined capture tests passed both jailer modes;
+clean committed pmem acceptance and the controlled evaluation remain pending.
