@@ -74,8 +74,12 @@ in the selection above. The
 actual daemon revision, image, selection and log hashes. Full-suite and
 Kubernetes results must be reported separately.
 
-The unfiltered development trial with Alpine completed 113 tests: 89 passed,
-24 failed and 29 were skipped by the upstream suite. It exposed real missing
+The unfiltered trial with Alpine was repeated from clean committed checkout
+`9d60ca4` with the same result: 113 tests completed, 89 passed, 24 failed and
+29 were skipped by the upstream suite. The
+[full-suite receipt](evidence/9d60ca4-cri-full-receipt.log) preserves every
+failed and skipped test name, the reported skip reasons and the complete raw
+log/report hashes. This result prevents a claim of CRI conformance. It exposed real missing
 volume and port-forward integration plus unsupported host namespaces. Nine
 AppArmor tests failed during setup because the test image lacks `sudo`;
 their runtime behavior has not yet been tested. Two failures also exposed an
