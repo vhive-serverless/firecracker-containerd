@@ -414,6 +414,7 @@ def trial_summary(directory, manifest, physical, offset_ns, window_ns, gap, allo
     metrics['pool_backing'] = trial.get('pool_backing', {})
     details['pool_status_raw'] = trial.get('pool_status')
     details['input_image'] = image
+    metrics['input_image_file'] = {key: number(image[key], key) for key in ('logical_bytes', 'allocated_bytes') if key in image}
     details['host_phase_records'] = phases
     probe_digest = phase_one(phases, 'input_ready').get('probe_sha256')
     check(digest(probe_digest), 'missing probe binary digest')
@@ -546,11 +547,27 @@ def write_outputs(output, summary):
     flat = [flatten(t['metrics']) for t in summary['trials']]
     columns = sorted({key for row in flat for key in row})
     with (output / 'trials.csv').open('x', newline='') as stream:
-        keys = ['label', 'matrix', 'trial', 'arm', 'block', 'ordinal', 'provenance_id']
-        writer = csv.DictWriter(stream, fieldnames=keys + columns)
+        keys = ['label', 'matrix', 'trial', 'arm', 'block', 'ordinal', 'provenance_id', 'probe_sha256']
+        annotations = ['physical_device', 'physical_device_selection', 'unavailable_json',
+                       'unavailable_io_layers_json', 'development_issues_json',
+                       'full_start_host_ns', 'full_end_host_ns', 'idle_start_host_ns', 'idle_end_host_ns']
+        writer = csv.DictWriter(stream, fieldnames=keys + annotations + columns)
         writer.writeheader()
         for trial, values in zip(summary['trials'], flat):
-            writer.writerow({**{key: trial[key] for key in keys}, **values})
+            detail = trial['details']
+            full, idle = detail['windows']['full_trial'], detail['windows']['common_idle']
+            unavailable_io = {window: {device: layer.get('reason') for device, layer in data['io_stat_layers_not_summed'].items()
+                                       if layer['status'] != 'ok'} for window, data in detail['io_stat'].items()}
+            writer.writerow({**{key: trial[key] for key in keys}, **values,
+                             'physical_device': detail['physical_device']['physical_major_minor'],
+                             'physical_device_selection': detail['physical_device']['selection'],
+                             'unavailable_json': json.dumps(detail.get('unavailable', {}), sort_keys=True),
+                             'unavailable_io_layers_json': json.dumps(unavailable_io, sort_keys=True),
+                             'development_issues_json': json.dumps(trial['development_issues']),
+                             'full_start_host_ns': full['start_host_monotonic_ns'],
+                             'full_end_host_ns': full['end_host_monotonic_ns'],
+                             'idle_start_host_ns': idle['start_host_monotonic_ns'],
+                             'idle_end_host_ns': idle['end_host_monotonic_ns']})
     with (output / 'arms.csv').open('x', newline='') as stream:
         writer = csv.writer(stream)
         writer.writerow(['label', 'provenance_id', 'arm', 'trials', 'metric', 'count', 'median', 'min', 'max'])
