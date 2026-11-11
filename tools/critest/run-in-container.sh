@@ -65,7 +65,7 @@ cat "$logs/runtime-version.log"
 test "$(awk -v rev="$CRI_RUNTIME_REVISION" '$1 == "Revision:" && $2 == rev {n++} END {print n+0}' "$logs/runtime-version.log")" = 2
 ctr --address "$socket" plugins list > "$logs/plugins.log"
 cat > /tmp/test-images.yaml <<'YAML'
-defaultTestContainerImage: docker.io/library/alpine:3.23.0@sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+defaultTestContainerImage: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf
 YAML
 args=(--runtime-endpoint "unix://$socket" --image-endpoint "unix://$socket"
     --runtime-handler firecracker --test-images-file /tmp/test-images.yaml

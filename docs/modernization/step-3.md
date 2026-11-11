@@ -67,6 +67,24 @@ not a claim of complete CRI conformance or completion of Step 3.
 
 Development image overrides (`CRI_BASE_IMAGE` and `CRI_RUNTIME_REVISION`) are
 recorded explicitly and do not establish acceptance of a committed stack.
-Development worker trials passed all 15 tests in the selection above after the
-adapter and portmap integration. Validation from the committed reconstruction
-is the next gate; full-suite and Kubernetes results must be reported separately.
+The worker rebuilt the complete stack from clean committed checkout
+`9d60ca4adf9a911eee2f18c667465c6c7ec4633e`, passed lint, and passed all 15 tests
+in the selection above. The
+[focused receipt](evidence/9d60ca4-cri-focused-receipt.log) records the source,
+actual daemon revision, image, selection and log hashes. Full-suite and
+Kubernetes results must be reported separately.
+
+The unfiltered development trial with Alpine completed 113 tests: 89 passed,
+24 failed and 29 were skipped by the upstream suite. It exposed real missing
+volume and port-forward integration plus unsupported host namespaces. Nine
+AppArmor tests failed during setup because the test image lacks `sudo`;
+their runtime behavior has not yet been tested. Two failures also exposed an
+invalid fixture choice: the upstream
+suite expects BusyBox 1.29-2 behavior for raw-ICMP capability checks and its
+`/bin/ls` layout for masked-path checks. The test script now pins that exact
+upstream default image. Those cases must be rerun before classifying them as
+runtime failures; no tests or assertions have been removed. A separate worker
+development rerun with the pinned BusyBox image passed both cases, including
+cleanup, in 13.8 seconds. The raw log is
+`~/fc-ctrd-mod/evidence/cri-busybox-fixture-regression.log` (SHA-256
+`4a0e620984f496f3c83c1a6bb464fbbce7e469080db4916db57b7b01883bda55`).
