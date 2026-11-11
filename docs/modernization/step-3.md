@@ -40,6 +40,36 @@ including the sandbox). The x86 MMIO profile permits 2–14 slots, reserving
 interrupts for root, network, vsock and ACPI devices. Host network, host PID and host IPC requests are
 rejected rather than interpreted as guest-host namespace requests.
 
+## Host volume export layer
+
+`internal/volfs` supplies the host descriptor table for future guest volume
+sharing. An export authorizes a directory or one regular file. Descendant
+operations take inode identifiers and single byte-sequence names, and never
+resolve a caller-supplied host path. Symlinks are returned for resolution by
+the guest VFS. Regular-file reads and writes refer to the same host inode,
+including after rename or unlink. The layer includes creation, directory
+listing, hard links, ownership, mode, timestamps, truncation, synchronization
+and backing-filesystem capacity. Descriptor limits, read-only exports and
+cleanup apply independently of the transport.
+
+This layer is not connected to the shim or guest agent yet. Other host bind
+mounts remain rejected, and its filesystem tests do not establish guest volume
+support. Guest permission checks and ID mapping, the FUSE client, bounded
+reconnectable transport, cache coherence, mount propagation, extended attributes
+and checkpoint serialization still require implementation and validation.
+
+Run the host filesystem checks on the worker:
+
+```sh
+go test -mod=readonly -race -count=1 ./internal/volfs
+go test -mod=readonly -race -c -o bin/volfs.test ./internal/volfs
+sudo -n bin/volfs.test -test.v -test.timeout=120s
+```
+
+The root invocation also checks the host service's hard-link capability and
+guest UID/GID ownership with setgid directory inheritance. All fixtures live
+in temporary directories; the tests do not mount a filesystem.
+
 ## VM capacity from Pod resources
 
 The shim reads containerd 2.3.7's standard `io.kubernetes.cri.sandbox-cpu-period`,
