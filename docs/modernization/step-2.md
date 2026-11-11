@@ -1,10 +1,29 @@
 # Step 2: vHive compatibility
 
-Latest committed revalidation: `2780f2e92d8a376e6514d1e099b2c03b0e1847ed`. The clean worker checkout
+Latest committed revalidation: `4e0033b81a17d9a32c2861263c2792ebcfe37ebd`.
+The clean worker checkout `/users/nehalem/fc-ctrd-mod/vhive-io-committed`
+passed build, private installation, 36 runtime, five snapshotter and 79 SDK
+cases (one existing SDK metrics skip). Two independent vHive
+deploy/invoke/snapshot/source-stop/restore/cleanup runs also passed.
+The [FIFO correction receipt](evidence/4e0033b-fifo-acceptance-receipt.log)
+records exact binary, image and log hashes, process identities, cleanup, and
+two retained unsuccessful harness attempts: shared lint-lock contention and
+an overlong temporary path. The successful full acceptance rerun used a short
+private temporary directory; no source change was needed for those retries.
+
+This backports the shared jailer FIFO ordering correction from
+`c7d73c703d18d33e07b39c2785dbcb1f77af039f`. Telemetry hard links or
+cross-filesystem bind mounts are prepared before runc starts. The new real-VM
+`TestJailerTelemetryCrossFilesystem_Isolated` verified delivery to both
+external FIFO readers, and the full `TestCreateVM_Isolated` matrix passed.
+Dependency pins and earlier acceptance receipts remain unchanged. The vHive
+profile below remains the standalone unjailed deployment.
+
+Earlier metrics revalidation: `2780f2e92d8a376e6514d1e099b2c03b0e1847ed`. The clean worker checkout
 `/users/nehalem/fc-ctrd-mod/vhive-io-committed` passed build, private installation,
 35 runtime, five snapshotter and 79 SDK tests (one existing metrics skip).
 Two independent vHive deploy/invoke/snapshot/source-stop/restore/cleanup runs also passed.
-The [latest receipt](evidence/2780f2e-metrics-acceptance-receipt.log) records exact artifact and log
+The [metrics receipt](evidence/2780f2e-metrics-acceptance-receipt.log) records exact artifact and log
 hashes. This includes the I/O replacement correction and a metrics teardown
 correction that returns ports under a mutex and makes shutdown idempotent.
 Earlier acceptance records below retain their original tested revisions.
@@ -89,7 +108,10 @@ In a fresh clone from the project's configured remote, check out the
 for the pinned tools, sudo, KVM, and Docker. Then run:
 
 ```sh
-git checkout --detach d959a78de45faf1d8d13fea282b7fb980b629789
+git checkout --detach 4e0033b81a17d9a32c2861263c2792ebcfe37ebd
+export STACK_DIR=/users/nehalem/fc-ctrd-mod
+export TMPDIR=/tmp/s2f-4e0033b
+mkdir -p "$TMPDIR"
 tools/modernize/build-stack.sh
 tools/modernize/install-stack.sh
 tools/modernize/test-stack.sh
