@@ -10,6 +10,14 @@ baseline proves that the released cluster runs Pods, exec, logs, filesystem
 writes and DNS. It does **not** satisfy the Firecracker RuntimeClass,
 CRI conformance, or Kubernetes Pod checkpoint/restore acceptance gates.
 
+Worker acceptance from clean commit
+`40a3cdd37d5e19e8212db69d665319e05eed42e6` passed both `create` and a separate
+`probe`. The [receipt](evidence/40a3cdd-upstream-one-node-receipt.log) records
+the tested inputs and full log hashes. The node was Ready and the Pod tests
+passed; API discovery advertised neither `PodCheckpoint` nor
+`Pod.spec.restoreFrom`. The separate upstream v1.37.2 binary probe also
+rejected the required gate, so this finding is not specific to k3s.
+
 Run on the designated worker from a committed checkout:
 
 ```sh

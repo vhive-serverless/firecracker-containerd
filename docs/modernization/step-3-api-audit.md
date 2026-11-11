@@ -5,10 +5,11 @@ Step 3 is incomplete. This branch starts from the accepted Step 2 commit
 [worker receipt](evidence/122d7084043a-acceptance-receipt.log) records all
 runtime and vHive acceptance gates. Step 4 has not started.
 
-The [committed worker probe receipt](evidence/579da231cefb-kubernetes-api-audit.log)
+The [committed worker probe receipt](evidence/f649858-kubernetes-api-audit.log)
 records the binary hashes, gate errors, raw log hashes, and audit exit status.
 The script was tested from clean commit
-`579da231cefb7771a57f3bb06e4b07fe1b17f579`.
+`f649858` (the receipt records the complete commit). The earlier
+two-build audit remains in `evidence/579da231cefb-kubernetes-api-audit.log`.
 
 ## Released binaries tested on the worker
 

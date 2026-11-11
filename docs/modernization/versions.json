@@ -186,8 +186,8 @@
     "vhive_acceptance_log_sha256": "fa265494649a4a007430b397f32c3d1e16148df0af73de789461957d9f185b34"
   },
   "kubernetes_capability_audit": {
-    "receipt": "evidence/579da231cefb-kubernetes-api-audit.log",
-    "audit_commit": "579da231cefb7771a57f3bb06e4b07fe1b17f579",
+    "receipt": "evidence/f649858-kubernetes-api-audit.log",
+    "audit_commit": "f6498581d2ab8083774f138ec0f5e3789bf8e5d2",
     "feature_gate": "PodLevelCheckpointRestore",
     "k3s": {
       "version": "v1.37.2+k3s1",
@@ -211,6 +211,13 @@
       "commit": "c50e5395f1ae2d4a2c05f28fdcc38c0916cc1a32",
       "apiserver_sha256": "b87e5a91107cf994bfa38c6c1b28eb39f01fc040734ec9942c22738bc8b8f34b",
       "result": "upstream API server rejects required feature gate; not specific to k3s"
-    }
+    },
+    "previous_audit_commit": "579da231cefb7771a57f3bb06e4b07fe1b17f579",
+    "previous_receipt": "evidence/579da231cefb-kubernetes-api-audit.log"
+  },
+  "kubernetes_one_node_validation": {
+    "tested_commit": "40a3cdd37d5e19e8212db69d665319e05eed42e6",
+    "receipt": "evidence/40a3cdd-upstream-one-node-receipt.log",
+    "result": "stock-runtime baseline passed; full Step 3 acceptance pending"
   }
 }
