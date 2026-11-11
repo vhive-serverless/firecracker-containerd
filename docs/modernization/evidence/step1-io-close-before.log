@@ -1,0 +1,5 @@
+--- FAIL: TestProxyCloseDrainsBlockedOutput (1.10s)
+    ioproxy_test.go:84: closed proxy retained its blocked reader; replacing it can leave competing output consumers
+FAIL
+FAIL	github.com/firecracker-microvm/firecracker-containerd/internal/vm	1.134s
+FAIL
