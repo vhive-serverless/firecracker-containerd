@@ -164,6 +164,16 @@
       "iperf3_3_6_r0": "sha256:1ae7855531c64f83144c3a4ba68f02b17d1588f3470a183688e877e8eb3cceac",
       "postgres_14_3": "sha256:2d1e636f07781d4799b3f2edbff78a0a5494f24c4512cb56a83ebfd0e04ec074",
       "alpine_3_23_0": "sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375"
+    },
+    "kubernetes_one_node": {
+      "kind_version": "v0.33.0",
+      "kind_sha256": "aee6151561422756b764a4ae28e7f44cda5af5a9eead3cc9985112b1de8d8e0d",
+      "kubernetes_version": "v1.37.2",
+      "server_archive_sha256": "38e16f4ef1a3bf1406efa58f177b170b941e9aa6dedd0b8f1e27c2a52f1bdf38",
+      "base_image": "docker.io/kindest/base@sha256:8098fa3cae05bc15d9c4b93a566d19e1f8e65a25e26ebeb993b6cb41142cf791",
+      "smoke_image": "docker.io/library/alpine:3.23.0@sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375",
+      "runtime": "kind base containerd v2.3.4; stock runtime baseline only; Firecracker acceptance pending",
+      "script": "tools/kubernetes/one-node-baseline.sh"
     }
   },
   "step_2_validation": {

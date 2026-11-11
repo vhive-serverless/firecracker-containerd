@@ -30,6 +30,20 @@ This differs from the
 which describes Pod checkpoint/restore as alpha. The actual checked binaries
 and source determine this audit result.
 
+This is not inferred from the unrecognized gate alone. In the released
+v1.37.2 source, the only callers of `.CheckpointPod(` and `.RestorePod(`
+under `pkg/` are the instrumentation wrappers in
+`pkg/kubelet/kuberuntime/instrumented_services.go`. The kubelet HTTP checkpoint
+route in `pkg/kubelet/server/server.go` still requires
+`/{podNamespace}/{podID}/{containerName}` and uses `ContainerCheckpoint`.
+That existing container-only route does not implement whole-Pod restore.
+
+A [plain upstream single-node baseline](one-node-baseline.md) separately
+checks Kubernetes v1.37.2 without the k3s packaging. Default API discovery
+alone would not disprove an opt-in alpha feature; it is recorded alongside
+the rejected gate and missing source call paths, rather than treated as a
+replacement for those checks.
+
 ## Upstream implementation status
 
 The [checkpoint implementation PR](https://github.com/kubernetes/kubernetes/pull/140186)
