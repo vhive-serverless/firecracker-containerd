@@ -32,6 +32,17 @@ This differs from the
 which describes Pod checkpoint/restore as alpha. The actual checked binaries
 and source determine this audit result.
 
+The current KEP resolves the release-target ambiguity: its metadata targets
+alpha in **v1.38**. The upstream
+[milestone update](https://github.com/kubernetes/enhancements/commit/7672f60a388a323ee8ec8a2e02232b7eeefc7e57)
+changed the target on September 17, 2026. The
+[v1.38 schedule](https://www.kubernetes.dev/resources/release/) plans the final
+release for December 16, 2026; a target milestone does not imply that every
+prerelease already contains the implementation. At the November 11 audit,
+`latest-1.38.txt` and upstream release tags still identified
+`v1.38.0-beta.0` as the newest published 1.38 build. That exact beta was tested
+above and lacks the gate. No unmerged PR build has been substituted.
+
 This is not inferred from the unrecognized gate alone. In the released
 v1.37.2 source, the only callers of `.CheckpointPod(` and `.RestorePod(`
 under `pkg/` are the instrumentation wrappers in

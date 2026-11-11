@@ -259,6 +259,10 @@ func (ts *TaskService) Create(requestCtx context.Context, req *taskAPI.CreateTas
 			return nil, fmt.Errorf("failed to update spec: %w", err)
 		}
 	}
+	specData, err = prepareCRIFiles(specData, extraData.CriFiles, bundleDir.RootPath())
+	if err != nil {
+		return nil, fmt.Errorf("failed to prepare CRI guest configuration: %w", err)
+	}
 	err = bundleDir.OCIConfig().Write(specData)
 	if err != nil {
 		return nil, fmt.Errorf("failed to write oci config file: %w", err)

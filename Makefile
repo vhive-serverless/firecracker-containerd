@@ -298,8 +298,12 @@ LOOPBACK_BIN?=$(BINPATH)/loopback
 $(LOOPBACK_BIN):
 	GOBIN=$(dir $@) go install github.com/containernetworking/plugins/plugins/main/loopback@v1.9.1
 
+PORTMAP_BIN?=$(BINPATH)/portmap
+$(PORTMAP_BIN):
+	GOBIN=$(dir $@) go install github.com/containernetworking/plugins/plugins/meta/portmap@v1.9.1
+
 .PHONY: cni-bins
-cni-bins: $(BRIDGE_BIN) $(PTP_BIN) $(HOSTLOCAL_BIN) $(FIREWALL_BIN) $(TC_REDIRECT_TAP_BIN) $(LOOPBACK_BIN)
+cni-bins: $(BRIDGE_BIN) $(PTP_BIN) $(HOSTLOCAL_BIN) $(FIREWALL_BIN) $(TC_REDIRECT_TAP_BIN) $(LOOPBACK_BIN) $(PORTMAP_BIN)
 
 .PHONY: test-cni-bins
 test-cni-bins: $(TEST_BRIDGED_TAP_BIN)
@@ -312,6 +316,7 @@ install-cni-bins: cni-bins $(CNI_BIN_ROOT)
 	install -D -o root -g root -m755 -t $(CNI_BIN_ROOT) $(FIREWALL_BIN)
 	install -D -o root -g root -m755 -t $(CNI_BIN_ROOT) $(TC_REDIRECT_TAP_BIN)
 	install -D -o root -g root -m755 -t $(CNI_BIN_ROOT) $(LOOPBACK_BIN)
+	install -D -o root -g root -m755 -t $(CNI_BIN_ROOT) $(PORTMAP_BIN)
 
 .PHONY: install-test-cni-bins
 install-test-cni-bins: test-cni-bins $(CNI_BIN_ROOT)

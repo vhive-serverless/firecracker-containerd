@@ -54,6 +54,7 @@ import (
 	"github.com/firecracker-microvm/firecracker-go-sdk/vsock"
 	"github.com/gofrs/uuid"
 	"github.com/hashicorp/go-multierror"
+	"github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/sys/unix"
 	"google.golang.org/grpc/codes"
@@ -358,6 +359,27 @@ func (m *shimManager) Start(shimCtx context.Context, opts *bootapi.BootstrapPara
 
 	var exitAfterAllTasksDeleted bool
 	containerCount := 0
+	configBytes, err := bundleDir.OCIConfig().Bytes()
+	if err != nil {
+		return nil, err
+	}
+	var spec specs.Spec
+	if err := json.Unmarshal(configBytes, &spec); err != nil {
+		return nil, err
+	}
+	cfg, err := config.LoadConfig("")
+	if err != nil {
+		return nil, err
+	}
+	criRequest, err := criVMRequest(&spec, cfg)
+	if err != nil {
+		return nil, err
+	}
+	if criRequest != nil {
+		vmID = criRequest.VMID
+		containerCount = int(criRequest.ContainerCount)
+		exitAfterAllTasksDeleted = true
+	}
 
 	if vmID == "" {
 		// If here, no VMID has been provided by the client for this container, so auto-generate a new one.
@@ -395,11 +417,21 @@ func (m *shimManager) Start(shimCtx context.Context, opts *bootapi.BootstrapPara
 	defer ttrpcClient.Close()
 
 	fcControlClient := fccontrolTtrpc.NewFirecrackerClient(ttrpcClient)
-	_, err = fcControlClient.CreateVM(shimCtx, &proto.CreateVMRequest{
+	request := &proto.CreateVMRequest{
 		VMID:                     vmID,
 		ExitAfterAllTasksDeleted: exitAfterAllTasksDeleted,
 		ContainerCount:           int32(containerCount),
-	})
+	}
+	if criRequest != nil {
+		request = criRequest
+	}
+	if criRequest != nil && criRequest.NetNS == "" {
+		// A workload may only join the VM created by its sandbox. Do not boot
+		// an unrelated VM if the sandbox has already disappeared.
+		_, err = fcControlClient.GetVMInfo(shimCtx, &proto.GetVMInfoRequest{VMID: vmID})
+	} else {
+		_, err = fcControlClient.CreateVM(shimCtx, request)
+	}
 	if err != nil {
 		errStatus, ok := status.FromError(err)
 		// ignore AlreadyExists errors, that just means the shim is already up and running
@@ -413,7 +445,9 @@ func (m *shimManager) Start(shimCtx context.Context, opts *bootapi.BootstrapPara
 	// - -address is required and NewService() won't be called if the flag is missing.
 	// So we log the version informaion here instead
 	str := ""
-	if exitAfterAllTasksDeleted {
+	if criRequest != nil {
+		str = " The VM will be torn down after its Pod tasks are deleted."
+	} else if exitAfterAllTasksDeleted {
 		str = " The VM will be torn down after serving a single task."
 	}
 	log.WithField("vmID", vmID).Infof("successfully started shim (git commit: %s).%s", revision, str)
@@ -1251,6 +1285,9 @@ func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTask
 	if err != nil {
 		err = fmt.Errorf("failed to generate extra data: %w", err)
 		logger.WithError(err).Error()
+		return nil, err
+	}
+	if err := prepareCRISpec(extraData); err != nil {
 		return nil, err
 	}
 

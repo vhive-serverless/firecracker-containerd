@@ -30,6 +30,7 @@ type ExtraData struct {
 	StdinPort     uint32                 `protobuf:"varint,3,opt,name=StdinPort,proto3" json:"StdinPort,omitempty"`
 	StdoutPort    uint32                 `protobuf:"varint,4,opt,name=StdoutPort,proto3" json:"StdoutPort,omitempty"`
 	StderrPort    uint32                 `protobuf:"varint,5,opt,name=StderrPort,proto3" json:"StderrPort,omitempty"`
+	CriFiles      []*CRIFile             `protobuf:"bytes,6,rep,name=CriFiles,proto3" json:"CriFiles,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -99,6 +100,75 @@ func (x *ExtraData) GetStderrPort() uint32 {
 	return 0
 }
 
+func (x *ExtraData) GetCriFiles() []*CRIFile {
+	if x != nil {
+		return x.CriFiles
+	}
+	return nil
+}
+
+// Generated Pod configuration files copied from the host into a guest bundle.
+// Source is matched to an OCI bind mount; it is never used as a guest path.
+type CRIFile struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Source        string                 `protobuf:"bytes,1,opt,name=Source,proto3" json:"Source,omitempty"`
+	Contents      []byte                 `protobuf:"bytes,2,opt,name=Contents,proto3" json:"Contents,omitempty"`
+	Mode          uint32                 `protobuf:"varint,3,opt,name=Mode,proto3" json:"Mode,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CRIFile) Reset() {
+	*x = CRIFile{}
+	mi := &file_types_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CRIFile) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CRIFile) ProtoMessage() {}
+
+func (x *CRIFile) ProtoReflect() protoreflect.Message {
+	mi := &file_types_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CRIFile.ProtoReflect.Descriptor instead.
+func (*CRIFile) Descriptor() ([]byte, []int) {
+	return file_types_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *CRIFile) GetSource() string {
+	if x != nil {
+		return x.Source
+	}
+	return ""
+}
+
+func (x *CRIFile) GetContents() []byte {
+	if x != nil {
+		return x.Contents
+	}
+	return nil
+}
+
+func (x *CRIFile) GetMode() uint32 {
+	if x != nil {
+		return x.Mode
+	}
+	return 0
+}
+
 // Message to specify network config for a Firecracker VM
 type FirecrackerNetworkInterface struct {
 	state          protoimpl.MessageState  `protogen:"open.v1"`
@@ -117,7 +187,7 @@ type FirecrackerNetworkInterface struct {
 
 func (x *FirecrackerNetworkInterface) Reset() {
 	*x = FirecrackerNetworkInterface{}
-	mi := &file_types_proto_msgTypes[1]
+	mi := &file_types_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -129,7 +199,7 @@ func (x *FirecrackerNetworkInterface) String() string {
 func (*FirecrackerNetworkInterface) ProtoMessage() {}
 
 func (x *FirecrackerNetworkInterface) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[1]
+	mi := &file_types_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -142,7 +212,7 @@ func (x *FirecrackerNetworkInterface) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FirecrackerNetworkInterface.ProtoReflect.Descriptor instead.
 func (*FirecrackerNetworkInterface) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{1}
+	return file_types_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *FirecrackerNetworkInterface) GetAllowMMDS() bool {
@@ -210,7 +280,7 @@ type CNIConfiguration struct {
 
 func (x *CNIConfiguration) Reset() {
 	*x = CNIConfiguration{}
-	mi := &file_types_proto_msgTypes[2]
+	mi := &file_types_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -222,7 +292,7 @@ func (x *CNIConfiguration) String() string {
 func (*CNIConfiguration) ProtoMessage() {}
 
 func (x *CNIConfiguration) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[2]
+	mi := &file_types_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -235,7 +305,7 @@ func (x *CNIConfiguration) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CNIConfiguration.ProtoReflect.Descriptor instead.
 func (*CNIConfiguration) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{2}
+	return file_types_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CNIConfiguration) GetNetworkName() string {
@@ -296,7 +366,7 @@ type StaticNetworkConfiguration struct {
 
 func (x *StaticNetworkConfiguration) Reset() {
 	*x = StaticNetworkConfiguration{}
-	mi := &file_types_proto_msgTypes[3]
+	mi := &file_types_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -308,7 +378,7 @@ func (x *StaticNetworkConfiguration) String() string {
 func (*StaticNetworkConfiguration) ProtoMessage() {}
 
 func (x *StaticNetworkConfiguration) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[3]
+	mi := &file_types_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -321,7 +391,7 @@ func (x *StaticNetworkConfiguration) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StaticNetworkConfiguration.ProtoReflect.Descriptor instead.
 func (*StaticNetworkConfiguration) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{3}
+	return file_types_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *StaticNetworkConfiguration) GetMacAddress() string {
@@ -367,7 +437,7 @@ type IPConfiguration struct {
 
 func (x *IPConfiguration) Reset() {
 	*x = IPConfiguration{}
-	mi := &file_types_proto_msgTypes[4]
+	mi := &file_types_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -379,7 +449,7 @@ func (x *IPConfiguration) String() string {
 func (*IPConfiguration) ProtoMessage() {}
 
 func (x *IPConfiguration) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[4]
+	mi := &file_types_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -392,7 +462,7 @@ func (x *IPConfiguration) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IPConfiguration.ProtoReflect.Descriptor instead.
 func (*IPConfiguration) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{4}
+	return file_types_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *IPConfiguration) GetPrimaryAddr() string {
@@ -432,7 +502,7 @@ type FirecrackerMachineConfiguration struct {
 
 func (x *FirecrackerMachineConfiguration) Reset() {
 	*x = FirecrackerMachineConfiguration{}
-	mi := &file_types_proto_msgTypes[5]
+	mi := &file_types_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -444,7 +514,7 @@ func (x *FirecrackerMachineConfiguration) String() string {
 func (*FirecrackerMachineConfiguration) ProtoMessage() {}
 
 func (x *FirecrackerMachineConfiguration) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[5]
+	mi := &file_types_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -457,7 +527,7 @@ func (x *FirecrackerMachineConfiguration) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FirecrackerMachineConfiguration.ProtoReflect.Descriptor instead.
 func (*FirecrackerMachineConfiguration) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{5}
+	return file_types_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *FirecrackerMachineConfiguration) GetCPUTemplate() string {
@@ -514,7 +584,7 @@ type FirecrackerRootDrive struct {
 
 func (x *FirecrackerRootDrive) Reset() {
 	*x = FirecrackerRootDrive{}
-	mi := &file_types_proto_msgTypes[6]
+	mi := &file_types_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -526,7 +596,7 @@ func (x *FirecrackerRootDrive) String() string {
 func (*FirecrackerRootDrive) ProtoMessage() {}
 
 func (x *FirecrackerRootDrive) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[6]
+	mi := &file_types_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -539,7 +609,7 @@ func (x *FirecrackerRootDrive) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FirecrackerRootDrive.ProtoReflect.Descriptor instead.
 func (*FirecrackerRootDrive) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{6}
+	return file_types_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *FirecrackerRootDrive) GetHostPath() string {
@@ -609,7 +679,7 @@ type FirecrackerDriveMount struct {
 
 func (x *FirecrackerDriveMount) Reset() {
 	*x = FirecrackerDriveMount{}
-	mi := &file_types_proto_msgTypes[7]
+	mi := &file_types_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -621,7 +691,7 @@ func (x *FirecrackerDriveMount) String() string {
 func (*FirecrackerDriveMount) ProtoMessage() {}
 
 func (x *FirecrackerDriveMount) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[7]
+	mi := &file_types_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -634,7 +704,7 @@ func (x *FirecrackerDriveMount) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FirecrackerDriveMount.ProtoReflect.Descriptor instead.
 func (*FirecrackerDriveMount) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{7}
+	return file_types_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *FirecrackerDriveMount) GetHostPath() string {
@@ -697,7 +767,7 @@ type FirecrackerRateLimiter struct {
 
 func (x *FirecrackerRateLimiter) Reset() {
 	*x = FirecrackerRateLimiter{}
-	mi := &file_types_proto_msgTypes[8]
+	mi := &file_types_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -709,7 +779,7 @@ func (x *FirecrackerRateLimiter) String() string {
 func (*FirecrackerRateLimiter) ProtoMessage() {}
 
 func (x *FirecrackerRateLimiter) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[8]
+	mi := &file_types_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -722,7 +792,7 @@ func (x *FirecrackerRateLimiter) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FirecrackerRateLimiter.ProtoReflect.Descriptor instead.
 func (*FirecrackerRateLimiter) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{8}
+	return file_types_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *FirecrackerRateLimiter) GetBandwidth() *FirecrackerTokenBucket {
@@ -751,7 +821,7 @@ type FirecrackerTokenBucket struct {
 
 func (x *FirecrackerTokenBucket) Reset() {
 	*x = FirecrackerTokenBucket{}
-	mi := &file_types_proto_msgTypes[9]
+	mi := &file_types_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -763,7 +833,7 @@ func (x *FirecrackerTokenBucket) String() string {
 func (*FirecrackerTokenBucket) ProtoMessage() {}
 
 func (x *FirecrackerTokenBucket) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[9]
+	mi := &file_types_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -776,7 +846,7 @@ func (x *FirecrackerTokenBucket) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FirecrackerTokenBucket.ProtoReflect.Descriptor instead.
 func (*FirecrackerTokenBucket) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{9}
+	return file_types_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *FirecrackerTokenBucket) GetOneTimeBurst() int64 {
@@ -811,7 +881,7 @@ type FirecrackerBalloonDevice struct {
 
 func (x *FirecrackerBalloonDevice) Reset() {
 	*x = FirecrackerBalloonDevice{}
-	mi := &file_types_proto_msgTypes[10]
+	mi := &file_types_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -823,7 +893,7 @@ func (x *FirecrackerBalloonDevice) String() string {
 func (*FirecrackerBalloonDevice) ProtoMessage() {}
 
 func (x *FirecrackerBalloonDevice) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[10]
+	mi := &file_types_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -836,7 +906,7 @@ func (x *FirecrackerBalloonDevice) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FirecrackerBalloonDevice.ProtoReflect.Descriptor instead.
 func (*FirecrackerBalloonDevice) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{10}
+	return file_types_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *FirecrackerBalloonDevice) GetAmountMib() int64 {
@@ -870,7 +940,7 @@ type MemoryBackend struct {
 
 func (x *MemoryBackend) Reset() {
 	*x = MemoryBackend{}
-	mi := &file_types_proto_msgTypes[11]
+	mi := &file_types_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -882,7 +952,7 @@ func (x *MemoryBackend) String() string {
 func (*MemoryBackend) ProtoMessage() {}
 
 func (x *MemoryBackend) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[11]
+	mi := &file_types_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -895,7 +965,7 @@ func (x *MemoryBackend) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MemoryBackend.ProtoReflect.Descriptor instead.
 func (*MemoryBackend) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{11}
+	return file_types_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *MemoryBackend) GetBackendType() string {
@@ -922,7 +992,7 @@ type CNIConfiguration_CNIArg struct {
 
 func (x *CNIConfiguration_CNIArg) Reset() {
 	*x = CNIConfiguration_CNIArg{}
-	mi := &file_types_proto_msgTypes[12]
+	mi := &file_types_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -934,7 +1004,7 @@ func (x *CNIConfiguration_CNIArg) String() string {
 func (*CNIConfiguration_CNIArg) ProtoMessage() {}
 
 func (x *CNIConfiguration_CNIArg) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[12]
+	mi := &file_types_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -947,7 +1017,7 @@ func (x *CNIConfiguration_CNIArg) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CNIConfiguration_CNIArg.ProtoReflect.Descriptor instead.
 func (*CNIConfiguration_CNIArg) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{2, 0}
+	return file_types_proto_rawDescGZIP(), []int{3, 0}
 }
 
 func (x *CNIConfiguration_CNIArg) GetKey() string {
@@ -968,7 +1038,7 @@ var File_types_proto protoreflect.FileDescriptor
 
 const file_types_proto_rawDesc = "" +
 	"\n" +
-	"\vtypes.proto\x1a\x19google/protobuf/any.proto\"\xbd\x01\n" +
+	"\vtypes.proto\x1a\x19google/protobuf/any.proto\"\xe3\x01\n" +
 	"\tExtraData\x12\x1a\n" +
 	"\bJsonSpec\x18\x01 \x01(\fR\bJsonSpec\x126\n" +
 	"\vRuncOptions\x18\x02 \x01(\v2\x14.google.protobuf.AnyR\vRuncOptions\x12\x1c\n" +
@@ -978,7 +1048,12 @@ const file_types_proto_rawDesc = "" +
 	"StdoutPort\x12\x1e\n" +
 	"\n" +
 	"StderrPort\x18\x05 \x01(\rR\n" +
-	"StderrPort\"\xad\x02\n" +
+	"StderrPort\x12$\n" +
+	"\bCriFiles\x18\x06 \x03(\v2\b.CRIFileR\bCriFiles\"Q\n" +
+	"\aCRIFile\x12\x16\n" +
+	"\x06Source\x18\x01 \x01(\tR\x06Source\x12\x1a\n" +
+	"\bContents\x18\x02 \x01(\fR\bContents\x12\x12\n" +
+	"\x04Mode\x18\x03 \x01(\rR\x04Mode\"\xad\x02\n" +
 	"\x1bFirecrackerNetworkInterface\x12\x1c\n" +
 	"\tAllowMMDS\x18\x01 \x01(\bR\tAllowMMDS\x12=\n" +
 	"\rInRateLimiter\x18\x02 \x01(\v2\x17.FirecrackerRateLimiterR\rInRateLimiter\x12?\n" +
@@ -1059,40 +1134,42 @@ func file_types_proto_rawDescGZIP() []byte {
 	return file_types_proto_rawDescData
 }
 
-var file_types_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_types_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_types_proto_goTypes = []any{
 	(*ExtraData)(nil),                       // 0: ExtraData
-	(*FirecrackerNetworkInterface)(nil),     // 1: FirecrackerNetworkInterface
-	(*CNIConfiguration)(nil),                // 2: CNIConfiguration
-	(*StaticNetworkConfiguration)(nil),      // 3: StaticNetworkConfiguration
-	(*IPConfiguration)(nil),                 // 4: IPConfiguration
-	(*FirecrackerMachineConfiguration)(nil), // 5: FirecrackerMachineConfiguration
-	(*FirecrackerRootDrive)(nil),            // 6: FirecrackerRootDrive
-	(*FirecrackerDriveMount)(nil),           // 7: FirecrackerDriveMount
-	(*FirecrackerRateLimiter)(nil),          // 8: FirecrackerRateLimiter
-	(*FirecrackerTokenBucket)(nil),          // 9: FirecrackerTokenBucket
-	(*FirecrackerBalloonDevice)(nil),        // 10: FirecrackerBalloonDevice
-	(*MemoryBackend)(nil),                   // 11: MemoryBackend
-	(*CNIConfiguration_CNIArg)(nil),         // 12: CNIConfiguration.CNIArg
-	(*anypb.Any)(nil),                       // 13: google.protobuf.Any
+	(*CRIFile)(nil),                         // 1: CRIFile
+	(*FirecrackerNetworkInterface)(nil),     // 2: FirecrackerNetworkInterface
+	(*CNIConfiguration)(nil),                // 3: CNIConfiguration
+	(*StaticNetworkConfiguration)(nil),      // 4: StaticNetworkConfiguration
+	(*IPConfiguration)(nil),                 // 5: IPConfiguration
+	(*FirecrackerMachineConfiguration)(nil), // 6: FirecrackerMachineConfiguration
+	(*FirecrackerRootDrive)(nil),            // 7: FirecrackerRootDrive
+	(*FirecrackerDriveMount)(nil),           // 8: FirecrackerDriveMount
+	(*FirecrackerRateLimiter)(nil),          // 9: FirecrackerRateLimiter
+	(*FirecrackerTokenBucket)(nil),          // 10: FirecrackerTokenBucket
+	(*FirecrackerBalloonDevice)(nil),        // 11: FirecrackerBalloonDevice
+	(*MemoryBackend)(nil),                   // 12: MemoryBackend
+	(*CNIConfiguration_CNIArg)(nil),         // 13: CNIConfiguration.CNIArg
+	(*anypb.Any)(nil),                       // 14: google.protobuf.Any
 }
 var file_types_proto_depIdxs = []int32{
-	13, // 0: ExtraData.RuncOptions:type_name -> google.protobuf.Any
-	8,  // 1: FirecrackerNetworkInterface.InRateLimiter:type_name -> FirecrackerRateLimiter
-	8,  // 2: FirecrackerNetworkInterface.OutRateLimiter:type_name -> FirecrackerRateLimiter
-	2,  // 3: FirecrackerNetworkInterface.CNIConfig:type_name -> CNIConfiguration
-	3,  // 4: FirecrackerNetworkInterface.StaticConfig:type_name -> StaticNetworkConfiguration
-	12, // 5: CNIConfiguration.Args:type_name -> CNIConfiguration.CNIArg
-	4,  // 6: StaticNetworkConfiguration.IPConfig:type_name -> IPConfiguration
-	8,  // 7: FirecrackerRootDrive.RateLimiter:type_name -> FirecrackerRateLimiter
-	8,  // 8: FirecrackerDriveMount.RateLimiter:type_name -> FirecrackerRateLimiter
-	9,  // 9: FirecrackerRateLimiter.Bandwidth:type_name -> FirecrackerTokenBucket
-	9,  // 10: FirecrackerRateLimiter.Ops:type_name -> FirecrackerTokenBucket
-	11, // [11:11] is the sub-list for method output_type
-	11, // [11:11] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	14, // 0: ExtraData.RuncOptions:type_name -> google.protobuf.Any
+	1,  // 1: ExtraData.CriFiles:type_name -> CRIFile
+	9,  // 2: FirecrackerNetworkInterface.InRateLimiter:type_name -> FirecrackerRateLimiter
+	9,  // 3: FirecrackerNetworkInterface.OutRateLimiter:type_name -> FirecrackerRateLimiter
+	3,  // 4: FirecrackerNetworkInterface.CNIConfig:type_name -> CNIConfiguration
+	4,  // 5: FirecrackerNetworkInterface.StaticConfig:type_name -> StaticNetworkConfiguration
+	13, // 6: CNIConfiguration.Args:type_name -> CNIConfiguration.CNIArg
+	5,  // 7: StaticNetworkConfiguration.IPConfig:type_name -> IPConfiguration
+	9,  // 8: FirecrackerRootDrive.RateLimiter:type_name -> FirecrackerRateLimiter
+	9,  // 9: FirecrackerDriveMount.RateLimiter:type_name -> FirecrackerRateLimiter
+	10, // 10: FirecrackerRateLimiter.Bandwidth:type_name -> FirecrackerTokenBucket
+	10, // 11: FirecrackerRateLimiter.Ops:type_name -> FirecrackerTokenBucket
+	12, // [12:12] is the sub-list for method output_type
+	12, // [12:12] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_types_proto_init() }
@@ -1106,7 +1183,7 @@ func file_types_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_types_proto_rawDesc), len(file_types_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   13,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
