@@ -98,6 +98,7 @@ type servedExport struct {
 // Server owns registered exports and their replay records. One guest mount
 // owns each export's session; reconnecting that session preserves its handles.
 type Server struct {
+	checkpoint  sync.RWMutex
 	mu          sync.Mutex
 	closed      bool
 	listener    net.Listener
@@ -136,6 +137,8 @@ func validToken(token string) bool {
 // Register transfers ownership on success. Callers close an export themselves
 // if registration fails. Unregister or Close releases successful registrations.
 func (s *Server) Register(export *Export) (Descriptor, error) {
+	s.checkpoint.RLock()
+	defer s.checkpoint.RUnlock()
 	if export == nil {
 		return Descriptor{}, unix.EINVAL
 	}
@@ -172,6 +175,8 @@ func (e *servedExport) close() error {
 // Unregister revokes a capability after any active host operation completes.
 // Repeated cleanup is safe, including after the whole server has closed.
 func (s *Server) Unregister(token string) error {
+	s.checkpoint.RLock()
+	defer s.checkpoint.RUnlock()
 	s.mu.Lock()
 	export := s.exports[token]
 	delete(s.exports, token)
@@ -229,6 +234,7 @@ func (s *Server) Serve(ctx context.Context, listener net.Listener) error {
 // Close closes transports, drains active host calls and releases all exports.
 func (s *Server) Close() error {
 	s.closeOnce.Do(func() {
+		s.checkpoint.Lock()
 		s.mu.Lock()
 		s.closed = true
 		if s.listener != nil {
@@ -243,6 +249,7 @@ func (s *Server) Close() error {
 		for _, export := range exports {
 			s.closeErr = errors.Join(s.closeErr, export.close())
 		}
+		s.checkpoint.Unlock()
 		s.workers.Wait()
 	})
 	return s.closeErr
@@ -294,6 +301,8 @@ func fatalReply(id uint64, errno unix.Errno) []byte {
 }
 
 func (s *Server) handle(frame []byte) []byte {
+	s.checkpoint.RLock()
+	defer s.checkpoint.RUnlock()
 	var request Request
 	if err := json.Unmarshal(frame, &request); err != nil {
 		return fatalReply(0, unix.EPROTO)

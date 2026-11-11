@@ -4,6 +4,41 @@ Step 3 is incomplete. Steps 1 and 2 retain their accepted branches. This branch
 currently adds a containerd CRI adapter, RuntimeClass deployment tests and native
 snapshot transport primitives. Full CRI compliance and native/Kubernetes Pod
 checkpoint/restore remain incomplete.
+
+## Restorable host volumes
+
+`internal/volfs` can freeze RPC execution and capture its exported files together
+with capability tokens, ordered-session replay records, logical inode IDs,
+lookup references and open file handles. Restore rebuilds those tables in a new
+host server and copies all writable data into a private workspace. Hard links,
+overlapping exports, raw byte names and retained unlinked regular files survive.
+The source server can resume, and independent restores cannot modify the artifact.
+
+The caller must pause the guest and quiesce every other writer before capture.
+Freezing the host server alone does not establish that consistency boundary.
+The artifact supports regular files, directories and symlinks. Unsupported inode
+types and directory graphs with multiple parents or cycles fail capture. Host
+ctime, physical allocation and filesystem-wide statistics can differ after
+copying to another host filesystem. Very long host restore paths can fail with
+`ENAMETOOLONG`; no partial restore workspace is retained on failure.
+
+Run the component checks on the designated worker with the pinned Go toolchain:
+
+```sh
+go test -mod=readonly -race -count=1 -timeout=180s ./internal/volfs
+make lint
+FC_NATIVE_VMM=/users/nehalem/fc-ctrd-mod/cri-committed/bin/firecracker \
+FC_NATIVE_KERNEL=/users/nehalem/fc-ctrd-mod/cri-committed/default-vmlinux.bin \
+    tools/modernize/test-native-volumes.sh
+```
+
+The VM test uses a purpose-built initramfs with two FUSE mounts of a shared
+export. It captures guest memory and the host tables at counter 41, resumes the
+source to counter 42, terminates its VMM and removes the source directory. A new
+VMM and host server restore counter 41, both shared views, an open unlinked file
+and the original logical inode. The clone can then advance to counter 42.
+This component test does not exercise OCI task adoption, block-device capture,
+runtime checkpoint RPCs or Kubernetes checkpoint/restore.
 The [API audit](step-3-api-audit.md) records the v1.38 alpha target and the missing
 workflow in the released builds tested so far. Step 4 has not started.
 
