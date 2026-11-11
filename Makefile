@@ -98,6 +98,7 @@ clean:
 	$(MAKE) firecracker-clean
 	rm -f tools/*stamp *stamp
 	$(MAKE) -C tools/image-builder clean
+	$(MAKE) -C tools/memory-probe clean
 	rm -f $(DEFAULT_VMLINUX_NAME)
 
 rmi-if-exists = $(if $(shell docker images -q $(1)),docker rmi $(1),true)
@@ -141,12 +142,18 @@ $(BINPATH)/ltag:
 install:
 	set -e; for d in $(SUBDIRS); do $(MAKE) -C $$d install; done
 
-files_ephemeral: $(RUNC_BIN) agent-in-docker
+memory-probe:
+	$(MAKE) -C tools/memory-probe
+
+.PHONY: memory-probe
+
+files_ephemeral: $(RUNC_BIN) agent-in-docker memory-probe-in-docker
 	mkdir -p tools/image-builder/files_ephemeral/usr/local/bin
 	mkdir -p tools/image-builder/files_ephemeral/var/firecracker-containerd-test/scripts
 	for f in tools/docker/scripts/*; do test -f $$f && install -m 755 $$f tools/image-builder/files_ephemeral/var/firecracker-containerd-test/scripts; done
 	cp $(RUNC_BIN) tools/image-builder/files_ephemeral/usr/local/bin
 	cp agent/agent tools/image-builder/files_ephemeral/usr/local/bin
+	cp tools/memory-probe/fc-memory-probe tools/image-builder/files_ephemeral/usr/local/bin
 	touch tools/image-builder/files_ephemeral
 
 files_ephemeral_stargz: $(STARGZ_BIN) docker-credential-mmds-in-docker volume-in-docker
