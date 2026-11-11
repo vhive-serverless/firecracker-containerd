@@ -1,5 +1,12 @@
 # Step 1: modernized runtime
 
+Task-test synchronization maintenance at
+`8797ff8523fa03547a205e3ea81863198e09241b` passed 200 targeted worker
+repetitions across root/nonroot, single/default concurrency and plain/race modes.
+The [maintenance receipt](evidence/8797ff8-task-wait-sync-receipt.log) records
+the commands and hashes. The scope was host unit tests; the runtime acceptance
+results below retain their original source revisions, dependency pins and receipts.
+
 Install-loop maintenance at `1adbcfc4f48dd7bee8d40bf24138f39350441a55` passed the
 worker fixture: a failing first component stops installation before the second,
 and a successful component still installs. The [maintenance receipt](evidence/1adbcfc-install-guard-receipt.log)

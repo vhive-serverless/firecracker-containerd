@@ -1,0 +1,216 @@
+Task-test Wait-start synchronization maintenance: PASS (step1).
+Branch: modernize-runtime
+Tested source: 8797ff8523fa03547a205e3ea81863198e09241b
+Preserved parent documentation head: cfb56ca927881eeed26ad432aef69258ab316e44
+Prior functional validation source: 06bd2058ba7938ad31eec9e17ac4d2e4c33a958f
+Worker checkout: /users/nehalem/fc-ctrd-mod/step1-io-committed
+Common signed fix: 426c7f5340e4f14b5abcce78be6fa7edede0c0c2
+Accepted main cherry-pick: 0cabdfa94b899edb56f3ea58f6a06622a4dd13f0
+Date: 2026-11-12 (Asia/Singapore); worker logs retain their original timestamps.
+Worker: nehalem@amd218.utah.cloudlab.us; Go go1.26.11 linux/amd64.
+The source commit was cherry-picked with -s -x and changes only internal/vm/task_test.go.
+It preserves the exact final request-count, task ID and ExecID assertions.
+
+The mock records each Wait request before sending an optional buffered notification
+for that exact task/exec identity. The lifecycle test registers each notification
+before launching its process and awaits it with a stopped five-second timer after
+cancelling the request context. The test then follows its existing I/O and exit
+sequence. No sleeps or production behavior changes were added. DeleteProcess still
+waits for I/O completion independently of the asynchronous monitorExit goroutine.
+
+Actual validation from the exact clean source revision:
+- Plain and race test binaries compiled with -mod=readonly, and go vet passed.
+- Targeted TestTaskManager_CreateExecDeleteTask passed 25 repetitions for each of
+  eight combinations: root/nonroot x GOMAXPROCS=1/default x plain/race (200 total).
+- No failures, skips or race warnings. Source remained clean before/after tests.
+- Existing prior documentation/functional heads are ancestors, not replaced.
+  go.mod, go.sum, versions.json, dependency references and prior receipts are unchanged.
+- No full VM rebuild, runtime suite, vHive deployment, CRI/native-restore test, global
+  installation, matrix run or observation was performed for this maintenance.
+  Prior functional acceptance remains tied to its original source and artifact hashes.
+
+Baseline limitations and main evidence:
+The lead confirmed the original c4ae5f3 CI timing failure: PopWaitRequests saw one
+request while two monitor goroutines were expected to have entered Wait. This task's
+300 bounded local pre-fix repetitions passed, so the sporadic failure was not locally
+reproduced. Earlier milestone branches did not rerun a pre-fix baseline.
+Main patch validation passed 800 targeted repetitions across all eight combinations,
+plus all 22 internal/vm tests under -race as root and nonroot (no skips). A clean
+committed build at 426c7f5 passed 40 further race repetitions. Those main results are
+separate from the 200 repetitions on this branch. Two initial main baseline harness
+invocations used incorrectly ordered env options and exited 127; their original logs
+remain retained. Corrected commands passed and only 300 valid attempts are counted.
+Main evidence: /users/nehalem/fc-ctrd-mod/evidence/c4ae5f3-ci-wait-sync/validation-summary.json
+Main evidence SHA-256: 5bd351c97f07e9fc86856e5c7c8c230a8b8a01cb31b5a6e768d3eccb7833f2b5
+The lead subsequently verified main GitHub Build SUCCESS for 0cabdfa via public API:
+https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43068267918
+That CI result does not relabel this branch's earlier runtime acceptance as rerun.
+
+Direct reproduction from a clean checkout of tested source 8797ff8523fa03547a205e3ea81863198e09241b:
+cd /users/nehalem/fc-ctrd-mod/step1-io-committed
+export PATH=/users/nehalem/fc-ctrd-mod/toolchains/go1.26.11/bin:$PATH
+export GOTOOLCHAIN=local TMPDIR="$PWD/tmp"
+mkdir -p bin tmp
+go test -mod=readonly -c -o bin/task-wait-sync.test ./internal/vm
+go test -mod=readonly -race -c -o bin/task-wait-sync-race.test ./internal/vm
+go vet ./internal/vm
+# For each binary: user and sudo -n; GOMAXPROCS=1 and env -u GOMAXPROCS.
+# Options to env precede assignments. Example root/default race invocation:
+sudo -n env -u GOMAXPROCS TMPDIR="$TMPDIR" "$PWD/bin/task-wait-sync-race.test" \
+  -test.v -test.failfast -test.run='^TestTaskManager_CreateExecDeleteTask$' \
+  -test.count=25 -test.timeout=90s
+# Original driver records all eight exact variants and validates fetched parent
+# heads before loading a local source bundle. It was run before publishing source:
+# /users/nehalem/fc-ctrd-mod/evidence/validate-task-wait-backports.sh
+Driver SHA-256: 0e0203170996247cdfe4bcb33789fb7a629cdd7b035829d2b1711fdd0a60d9f2
+No force-push, reset of unrelated changes, /dev/sdb operation or milestone completion.
+
+Actual committed-source checks, binary/manifest/log SHA-256 values:
+{
+  "step": "step1",
+  "worker_checkout": "/users/nehalem/fc-ctrd-mod/step1-io-committed",
+  "source_revision": "8797ff8523fa03547a205e3ea81863198e09241b",
+  "source_clean": true,
+  "preserved_parent": "cfb56ca927881eeed26ad432aef69258ab316e44",
+  "prior_functional_validation_revision": "06bd2058ba7938ad31eec9e17ac4d2e4c33a958f",
+  "common_fix": "426c7f5340e4f14b5abcce78be6fa7edede0c0c2",
+  "test_only": true,
+  "repetitions": 200,
+  "checks": [
+    {
+      "privilege": "user",
+      "gomaxprocs": "1",
+      "mode": "plain",
+      "repetitions": 25,
+      "log": "user-one-plain.log"
+    },
+    {
+      "privilege": "user",
+      "gomaxprocs": "1",
+      "mode": "race",
+      "repetitions": 25,
+      "log": "user-one-race.log"
+    },
+    {
+      "privilege": "user",
+      "gomaxprocs": "unset/default",
+      "mode": "plain",
+      "repetitions": 25,
+      "log": "user-normal-plain.log"
+    },
+    {
+      "privilege": "user",
+      "gomaxprocs": "unset/default",
+      "mode": "race",
+      "repetitions": 25,
+      "log": "user-normal-race.log"
+    },
+    {
+      "privilege": "root",
+      "gomaxprocs": "1",
+      "mode": "plain",
+      "repetitions": 25,
+      "log": "root-one-plain.log"
+    },
+    {
+      "privilege": "root",
+      "gomaxprocs": "1",
+      "mode": "race",
+      "repetitions": 25,
+      "log": "root-one-race.log"
+    },
+    {
+      "privilege": "root",
+      "gomaxprocs": "unset/default",
+      "mode": "plain",
+      "repetitions": 25,
+      "log": "root-normal-plain.log"
+    },
+    {
+      "privilege": "root",
+      "gomaxprocs": "unset/default",
+      "mode": "race",
+      "repetitions": 25,
+      "log": "root-normal-race.log"
+    }
+  ],
+  "baseline_note": "Main c4ae5f3 CI failure confirmed by lead; 300 bounded local pre-fix repeats did not reproduce it. Earlier branches did not rerun a pre-fix baseline.",
+  "full_runtime_acceptance_rerun": false,
+  "step3_wip": false,
+  "sha256": {
+    "/users/nehalem/fc-ctrd-mod/step1-io-committed/internal/vm/task_test.go": "813ad0522a259923b32037dd6c3a1d8e7c7db420ef04997002e9c54d6e2f40b2",
+    "/users/nehalem/fc-ctrd-mod/step1-io-committed/docs/modernization/versions.json": "d7341e35c8628df2376c4a5b0dfebf958b2e5089f490a631917411c345958104",
+    "/users/nehalem/fc-ctrd-mod/step1-io-committed/go.mod": "ec5e2b2fc3aabae8fea3570ef5df7235bed70307d4ee760b5db03e7edeedfe27",
+    "/users/nehalem/fc-ctrd-mod/step1-io-committed/go.sum": "f688e9f3545e322c302edf589f9ad0be4f2544ccd57e2bae4ee73980ee7ae899",
+    "/users/nehalem/fc-ctrd-mod/step1-io-committed/bin/task-wait-sync.test": "176526fa686411073d184de6a20e0eedb6c5b1237e5d89f3e41ab2a2d0df2a36",
+    "/users/nehalem/fc-ctrd-mod/step1-io-committed/bin/task-wait-sync-race.test": "bbe97253b74b442e9ee32409235015d91a4bdfbc56b15a17c125a5c8c9d0132f",
+    "/users/nehalem/fc-ctrd-mod/evidence/step1-task-wait-sync/build.log": "f04ef89f02a599c0cefe4edaeeec641ffad59eed02ea188d46db7e9848f8f984",
+    "/users/nehalem/fc-ctrd-mod/evidence/step1-task-wait-sync/root-normal-plain.log": "031b004f8e132d870a06836712b25a241057b89c7b845f4d1d47bc2dc727e8fe",
+    "/users/nehalem/fc-ctrd-mod/evidence/step1-task-wait-sync/root-normal-race.log": "59eeff5973584f98bcffcaf0f9b08fdd67af843dceca67469044b2c790a912e8",
+    "/users/nehalem/fc-ctrd-mod/evidence/step1-task-wait-sync/root-one-plain.log": "df48711872738cc0d5055d3bb9356b2e8dfc0bd12a9f6ef46c62f6d979440643",
+    "/users/nehalem/fc-ctrd-mod/evidence/step1-task-wait-sync/root-one-race.log": "3a2a9edd3ec6f4fc40c1fc104479d962392f6b874ddb4dcd835bdcdd584c9bc1",
+    "/users/nehalem/fc-ctrd-mod/evidence/step1-task-wait-sync/status.log": "83f91bb3f6e423dc9a1086623c2e2b76b761615f48fc11b52da8c71594049367",
+    "/users/nehalem/fc-ctrd-mod/evidence/step1-task-wait-sync/user-normal-plain.log": "7e90269e25af6933e14457131c3313b0f2ee3831d2e2714ffc75dc53c3efabad",
+    "/users/nehalem/fc-ctrd-mod/evidence/step1-task-wait-sync/user-normal-race.log": "b8e7f7356d0253a08773831eaa3e11697a95051459a01cb6beb483e25856627b",
+    "/users/nehalem/fc-ctrd-mod/evidence/step1-task-wait-sync/user-one-plain.log": "7ab9e0472c75659ad5fdff6981acf279941a7035801bc95ac801d1e499b67c87",
+    "/users/nehalem/fc-ctrd-mod/evidence/step1-task-wait-sync/user-one-race.log": "03d5bb0fb7ba7e0a60d9cd99845c859a0a6ce8a9c8292c8c574a4e9d7463faa3",
+    "/users/nehalem/fc-ctrd-mod/evidence/validate-task-wait-backports.sh": "0e0203170996247cdfe4bcb33789fb7a629cdd7b035829d2b1711fdd0a60d9f2"
+  }
+}
+
+Actual build, bundle, dependency and source log:
+Wed Nov 11 17:31:02 UTC 2026
+From https://github.com/vhive-serverless/firecracker-containerd
+ * branch              modernize-runtime -> FETCH_HEAD
+   1adbcfc4..cfb56ca9  modernize-runtime -> origin/modernize-runtime
+/users/nehalem/fc-ctrd-mod/evidence/ci-wait-sync-bundles/fcmod-ci-sync-step1.bundle is okay
+The bundle contains this ref:
+8797ff8523fa03547a205e3ea81863198e09241b refs/heads/modernize-runtime
+The bundle requires this ref:
+cfb56ca927881eeed26ad432aef69258ab316e44 
+The bundle uses this hash algorithm: sha1
+From /users/nehalem/fc-ctrd-mod/evidence/ci-wait-sync-bundles/fcmod-ci-sync-step1.bundle
+ * branch              modernize-runtime -> FETCH_HEAD
+Previous HEAD position was 1adbcfc4 Stop installation when a component fails
+HEAD is now at 8797ff85 Synchronize task lifecycle test with mock Wait startup
+step=step1
+branch=modernize-runtime
+source=8797ff8523fa03547a205e3ea81863198e09241b
+preserved_parent=cfb56ca927881eeed26ad432aef69258ab316e44
+prior_functional_validation=06bd2058ba7938ad31eec9e17ac4d2e4c33a958f
+go version go1.26.11 linux/amd64
+{
+	"Path": "github.com/firecracker-microvm/firecracker-go-sdk",
+	"Version": "v1.0.1-0.20250818195323-ed6ff32aa924",
+	"Replace": {
+		"Path": "github.com/JooyoungPark73/firecracker-go-sdk",
+		"Version": "v0.0.0-20261110215740-0d7a093c9b0c",
+		"Time": "2026-11-10T21:57:40Z",
+		"Dir": "/users/nehalem/go/pkg/mod/github.com/!jooyoung!park73/firecracker-go-sdk@v0.0.0-20261110215740-0d7a093c9b0c",
+		"GoMod": "/users/nehalem/go/pkg/mod/cache/download/github.com/!jooyoung!park73/firecracker-go-sdk/@v/v0.0.0-20261110215740-0d7a093c9b0c.mod",
+		"GoVersion": "1.24.11",
+		"Sum": "h1:l7EOt6Kz+Q/HdLeFOdkW3YvCMw1kewYNha40Ttw3QYc=",
+		"GoModSum": "h1:IKSxd5Gsx+H4cFowjf6q4kuzbcCWkYsYGKxf/WKKNL4="
+	},
+	"Dir": "/users/nehalem/go/pkg/mod/github.com/!jooyoung!park73/firecracker-go-sdk@v0.0.0-20261110215740-0d7a093c9b0c",
+	"GoMod": "/users/nehalem/go/pkg/mod/cache/download/github.com/!jooyoung!park73/firecracker-go-sdk/@v/v0.0.0-20261110215740-0d7a093c9b0c.mod",
+	"GoVersion": "1.24.11"
+}
+813ad0522a259923b32037dd6c3a1d8e7c7db420ef04997002e9c54d6e2f40b2  internal/vm/task_test.go
+d7341e35c8628df2376c4a5b0dfebf958b2e5089f490a631917411c345958104  docs/modernization/versions.json
+ec5e2b2fc3aabae8fea3570ef5df7235bed70307d4ee760b5db03e7edeedfe27  go.mod
+f688e9f3545e322c302edf589f9ad0be4f2544ccd57e2bae4ee73980ee7ae899  go.sum
+176526fa686411073d184de6a20e0eedb6c5b1237e5d89f3e41ab2a2d0df2a36  bin/task-wait-sync.test
+bbe97253b74b442e9ee32409235015d91a4bdfbc56b15a17c125a5c8c9d0132f  bin/task-wait-sync-race.test
+
+Actual targeted status:
+user-one-plain PASS count=25
+user-one-race PASS count=25
+user-normal-plain PASS count=25
+user-normal-race PASS count=25
+root-one-plain PASS count=25
+root-one-race PASS count=25
+root-normal-plain PASS count=25
+root-normal-race PASS count=25
+source_clean=true
+BACKPORT_TARGETED_CHECKS_PASS
