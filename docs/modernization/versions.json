@@ -189,7 +189,7 @@
       "go_mod_sum": "h1:aU7NkGYZUmuJrZapoI3mEcNve7PZTySUOLBuch/vR6U=",
       "vsock_port": 10901,
       "protocol_version": 1,
-      "status": "RPC and guest FUSE client under validation; shim/agent mount wiring and native restore metadata pending"
+      "status": "RPC and FUSE client validated on the worker host kernel; shim/agent mount wiring and native restore metadata pending"
     },
     "cri_integration": {
       "binary": "cri/firecracker-cri",

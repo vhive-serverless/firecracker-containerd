@@ -107,6 +107,16 @@ privileged invocation passed all nine tests with no skips. The
 binary hashes, build metadata and raw log hashes. This validates the export
 layer independently; it does not establish guest mount support.
 
+Clean committed checkout `20578179278235e44daff729dc102b427239a4fa` passed
+the RPC and FUSE component checks on the worker. Both module linters,
+dependency tidy and input verification passed. The unprivileged race run
+passed 14 tests and skipped five privileged cases; the privileged race binary
+passed all 19 tests, including four real kernel mount cases, with no skips.
+The [RPC/FUSE receipt](evidence/2057817-volfs-rpc-fuse-receipt.log) preserves
+the exact commands, dependency verification, binary/source hashes and raw
+log hashes. Its kernel mount tests use the worker host kernel `6.8.0-147-generic`;
+Firecracker guest and CRI volume acceptance remain pending.
+
 ## VM capacity from Pod resources
 
 The shim reads containerd 2.3.7's standard `io.kubernetes.cri.sandbox-cpu-period`,
