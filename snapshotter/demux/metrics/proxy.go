@@ -37,9 +37,8 @@ const (
 
 // Monitor is used for port and lifecycle management of metrics proxies.
 type Monitor struct {
-	// ch is used for communicating when a metrics proxy and its port are no longer in use
-	// so that the Monitor can mark the port as free.
-	ch chan int
+	done     chan struct{}
+	stopOnce sync.Once
 	// portsInUse is a set that tracks used and unused metrics proxy server ports.
 	portsInUse map[int]bool
 	// startPort is first port in the configurable range of ports to serve metrics proxies from.
@@ -55,30 +54,36 @@ func NewMonitor(startPort, endPort int) (*Monitor, error) {
 	if startPort <= 0 || endPort <= 0 || startPort > endPort {
 		return nil, fmt.Errorf("invalid port range %d-%d", startPort, endPort)
 	}
-	return &Monitor{make(chan int), make(map[int]bool), startPort, endPort, &sync.Mutex{}}, nil
+	return &Monitor{done: make(chan struct{}), portsInUse: make(map[int]bool), startPort: startPort, endPort: endPort, mu: &sync.Mutex{}}, nil
 }
 
-// Start receives messages from the proxy server channel indiciating a server has closed or terminated.
-// It marks the metrics proxy server's port as available by removing it from the portsInUse set.
+// Start waits for monitor shutdown. Servers release their ports directly so a
+// server finishing after Stop does not send into a closed notification channel.
 func (m *Monitor) Start() error {
-	for freePort := range m.ch {
-		m.mu.Lock()
-		delete(m.portsInUse, freePort)
-		m.mu.Unlock()
-	}
-
+	<-m.done
 	return nil
 }
 
-// Stop closes the metrics proxy monitoring channel.
+// Stop ends monitoring and prevents new port allocations. Repeated calls are safe.
 func (m *Monitor) Stop() {
-	close(m.ch)
+	m.stopOnce.Do(func() { close(m.done) })
+}
+
+func (m *Monitor) releasePort(port int) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	delete(m.portsInUse, port)
 }
 
 // findOpenPort returns a port for use by a metrics proxy server.
 func (m *Monitor) findOpenPort() (int, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
+	select {
+	case <-m.done:
+		return 0, fmt.Errorf("metrics monitor is stopped")
+	default:
+	}
 	metricsProxyPort := -1
 	for p := m.startPort; p <= m.endPort; p++ {
 		if _, ok := m.portsInUse[p]; !ok {
@@ -126,7 +131,7 @@ func NewProxy(host string, monitor *Monitor, labels map[string]string, dialer fu
 	if err != nil {
 		return nil, err
 	}
-	return &Proxy{
+	proxy := &Proxy{
 		client: &http.Client{
 			Transport: &http.Transport{
 				DialContext: dialer,
@@ -137,28 +142,27 @@ func NewProxy(host string, monitor *Monitor, labels map[string]string, dialer fu
 		Port:    port,
 		Labels:  labels,
 		monitor: monitor,
-	}, nil
+	}
+	mux := http.NewServeMux()
+	mux.HandleFunc("/metrics", proxy.metrics)
+
+	proxy.server = &http.Server{
+		Addr:              proxy.host + ":" + strconv.Itoa(proxy.Port),
+		Handler:           mux,
+		ReadHeaderTimeout: 2 * time.Second,
+	}
+	return proxy, nil
 }
 
 // Serve starts the metrics proxy server for a single in-VM snapshotter.
 func (mp *Proxy) Serve(ctx context.Context) error {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/metrics", mp.metrics)
-
-	mp.server = &http.Server{
-		Addr:              mp.host + ":" + strconv.Itoa(mp.Port),
-		Handler:           mux,
-		ReadHeaderTimeout: 2 * time.Second,
-	}
-
+	defer mp.monitor.releasePort(mp.Port)
 	err := mp.server.ListenAndServe()
 	if err != http.ErrServerClosed {
 		log.G(ctx).Errorf("metrics proxy server: %v\n", err)
-		mp.monitor.ch <- mp.Port
 		return err
 	}
 
-	mp.monitor.ch <- mp.Port
 	return nil
 }
 
