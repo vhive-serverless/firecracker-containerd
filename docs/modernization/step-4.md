@@ -82,8 +82,8 @@ administrator truncation or unrelated hardware failure.
 
 The legacy vHive snapshot API supports only the explicit RAM layout; it cannot
 silently omit the new upper. Native capture must include the upper alongside
-the other disks. Native restore remains unaccepted. Pmem and the five-arm
-evaluation remains pending; DAMON and pmem component acceptance are recorded below.
+the other disks. Native restore remains unaccepted. The five-arm evaluation
+remains pending; DAMON and pmem component acceptance are recorded below.
 
 The development worker passed disk upper inspection, write/copy-up/rename/delete,
 guest ENOSPC recovery, ownership and cleanup, with and without the runc jailer
