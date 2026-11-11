@@ -315,7 +315,7 @@
     "status": "WIP milestone; free-page reporting and DAMON components passed committed worker acceptance; pmem/evaluation pending",
     "free_page_reporting": "FirecrackerBalloonDevice.FreePageReporting; independent of target amount",
     "damon": "Bounded non-anonymous reclamation and reporting passed clean committed worker acceptance at 9706231",
-    "pmem_dax": "Optional reproducible ext4 image and static probe validated; runtime pmem/cache/jailer/capture implementation in worker development validation; actual guest DAX and clean committed acceptance pending",
+    "pmem_dax": "Runtime pmem/DAX, both jailers, shared immutable backing, private writes and combined DAMON capture passed dirty development VM checks; clean committed validation at 438c2cb running",
     "evaluation": "five requested configurations plus matching filesystem controls pending",
     "free_page_reporting_validation": {
       "tested_runtime_commit": "020f85b7c137be6989d96fbf4d63c1a3b3e9b71e",
@@ -375,6 +375,21 @@
       "reporting_failures": 0,
       "file_checksum_and_ram_token_preserved": true,
       "scope": "mechanism acceptance, not five-arm evaluation or native restore"
+    },
+    "pmem_development": {
+      "source_base": "6291b38d3a5a7ea5778f6c5aadec9521e62aba5a",
+      "source_dirty": true,
+      "worker_checkout": "/users/nehalem/fc-ctrd-mod/step4-pmem-dev",
+      "receipt": "evidence/pmem-dev-vm-receipt.log",
+      "receipt_sha256": "1bd63fd2a7f7dc6f525e7802ee78578ceee7d06da33a34e4c81b1c184a412a1f",
+      "image_sha256": "795e0c4f28179f3a2bcedf5face03665fd5731e207afd7524c338baa78606216",
+      "pmem_vm_count": 4,
+      "block_control_vm_count": 4,
+      "actual_lower_file_dax_verified": true,
+      "both_jailer_modes": true,
+      "root_checks_seconds": 52.25,
+      "combined_capture_seconds": 112.04,
+      "scope": "development only; repeated combined pmem/DAMON native capture, no restore or controlled savings evaluation; final 438c2cb corrections await clean acceptance"
     }
   },
   "shared_jailer_telemetry_validation": {
