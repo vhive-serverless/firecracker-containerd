@@ -52,3 +52,9 @@ backing allocation, actual reclaim causality or guest DAX by themselves.
 Run `-stat-only` against the actual file in each guest to establish DAX support
 and value before comparing control arms. Retain the probe's binary SHA-256 with
 each run so all arms can be checked for identical bytes.
+
+Clean committed host validation at `c2f54652a3a1c20beb114a31e0bddaf1486f8675`
+passed build, unit tests, vet/lint, both CLI round trips and 15 invalid-input cases.
+Native and pinned-container builds produced identical static bytes. The
+[host receipt](evidence/c2f5465-host-receipt.log) records commands, hashes and the
+preserved initial lint failure. Guest DAX and image-level verification remain pending.
