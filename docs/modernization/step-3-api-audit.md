@@ -90,8 +90,19 @@ and receipt. Exit status 2 with
 reject the required gate. A changed result needs discovery and kubelet
 verification; the script does not automatically claim full API support.
 
-The next scope decision is whether to permit pinned experimental builds from
-the open upstream implementation series. Keeping the released-build constraint
-leaves the Kubernetes acceptance portion of Step 3 unavailable until a
-compatible release exists. This audit does not claim CRI conformance, native
-Pod restore, or completion of Step 3.
+The released-build requirement remains in force. No experimental Kubernetes
+build has been substituted. The Kubernetes acceptance portion of Step 3 remains
+unavailable until a compatible release exists or the user changes that
+requirement explicitly.
+
+Work can continue on CRI integration, ordinary Firecracker RuntimeClass Pods
+and the native VM checkpoint/restore engine independently of that release gate.
+Checkpoint/restore has not been removed from Step 3. Runtime-level restoration
+must work, and Kubernetes must initiate Pod checkpoint and restore through the
+supported interfaces before this milestone is complete. The current runtime
+still lacks that complete native Pod restore path; the newer CRI method
+definitions and the earlier vHive snapshot path do not establish it.
+
+This audit does not claim CRI conformance, native Pod restore, or completion of
+Step 3. The current implementation and validation are tracked in
+[Step 3 implementation status](step-3.md).
