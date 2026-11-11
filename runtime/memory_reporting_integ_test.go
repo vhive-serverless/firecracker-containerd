@@ -15,10 +15,13 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -40,6 +43,7 @@ import (
 	"github.com/firecracker-microvm/firecracker-go-sdk/client/models"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/sys/unix"
 )
 
 func TestFreePageReporting_Isolated(t *testing.T) {
@@ -108,6 +112,7 @@ func TestFreePageReporting_Isolated(t *testing.T) {
 			require.Eventually(t, func() bool {
 				_, err := api.CreateSyncAction(ctx, &models.InstanceActionInfo{ActionType: fc.String(models.InstanceActionInfoActionTypeFlushMetrics)})
 				require.NoError(t, err)
+				require.NoError(t, metrics.awaitFlushed(ctx))
 				idle, err = vmmRSSKiB(state.VMM.PID)
 				require.NoError(t, err)
 				reports, freed, failures, readErr := metrics.snapshot()
@@ -150,6 +155,10 @@ type reportingMetrics struct {
 	reports, freed, failures uint64
 	seen                     bool
 	err                      error
+	fifo                     *reportingMetricsFIFO
+	parsedBytes              uint64
+	changed                  chan struct{}
+	beforeAggregate          func([]byte) // Optional deterministic reader gate in unit tests.
 }
 
 func (m *reportingMetrics) ready() bool { m.mu.Lock(); defer m.mu.Unlock(); return m.seen }
@@ -160,26 +169,189 @@ func (m *reportingMetrics) snapshot() (uint64, uint64, uint64, error) {
 	return m.reports, m.freed, m.failures, m.err
 }
 
+// awaitFlushed must be called after a successful synchronous FlushMetrics API
+// response. That response guarantees its complete newline-terminated record was
+// written. Count bytes already read (including scanner buffering) plus bytes
+// still queued in the FIFO, then wait until aggregation has consumed that prefix.
+func (m *reportingMetrics) awaitFlushed(ctx context.Context) error {
+	var fifo *reportingMetricsFIFO
+	for fifo == nil {
+		m.mu.Lock()
+		err := m.err
+		fifo = m.fifo
+		changed := m.changedLocked()
+		m.mu.Unlock()
+		if err != nil {
+			return err
+		}
+		if fifo == nil {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-changed:
+			}
+		}
+	}
+	target, err := fifo.watermark()
+	if err != nil {
+		return err
+	}
+	if target == 0 {
+		return errors.New("successful metrics flush produced no bytes")
+	}
+	for {
+		m.mu.Lock()
+		err := m.err
+		complete := m.parsedBytes >= target
+		changed := m.changedLocked()
+		m.mu.Unlock()
+		if err != nil {
+			return err
+		}
+		if complete {
+			return ctx.Err()
+		}
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-changed:
+		}
+	}
+}
+
+func (m *reportingMetrics) changedLocked() <-chan struct{} {
+	if m.changed == nil {
+		m.changed = make(chan struct{})
+	}
+	return m.changed
+}
+
+func (m *reportingMetrics) notifyLocked() {
+	if m.changed != nil {
+		close(m.changed)
+		m.changed = nil
+	}
+}
+
+// The raw descriptor stays nonblocking. Never hold mu across a poll or a Go
+// File.Read, which can wait for more bytes while a flush needs its watermark.
+type reportingMetricsFIFO struct {
+	mu        sync.Mutex
+	fd        int
+	readBytes uint64
+	closed    bool
+	ctx       context.Context
+}
+
+func (f *reportingMetricsFIFO) Read(buffer []byte) (int, error) {
+	if len(buffer) == 0 {
+		return 0, nil
+	}
+	for {
+		if err := f.ctx.Err(); err != nil {
+			return 0, err
+		}
+		f.mu.Lock()
+		if f.closed {
+			f.mu.Unlock()
+			return 0, os.ErrClosed
+		}
+		n, err := unix.Read(f.fd, buffer)
+		if n > 0 {
+			f.readBytes += uint64(n)
+		}
+		f.mu.Unlock()
+		if n > 0 {
+			return n, err
+		}
+		if err == nil {
+			return 0, io.EOF
+		}
+		if errors.Is(err, unix.EINTR) {
+			continue
+		}
+		if !errors.Is(err, unix.EAGAIN) && !errors.Is(err, unix.EWOULDBLOCK) {
+			return 0, err
+		}
+		// A bounded readiness poll allows cancellation without sleeping to guess
+		// whether the metrics producer or parser has caught up.
+		fd := f.fd
+		if fd < 0 || fd > math.MaxInt32 {
+			return 0, errors.New("metrics FIFO descriptor exceeds poll range")
+		}
+		_, err = unix.Poll([]unix.PollFd{{Fd: int32(fd), Events: unix.POLLIN}}, 50)
+		if err != nil && !errors.Is(err, unix.EINTR) {
+			return 0, err
+		}
+	}
+}
+
+func (f *reportingMetricsFIFO) watermark() (uint64, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.closed {
+		return 0, os.ErrClosed
+	}
+	// TIOCINQ is Linux FIONREAD. The same lock covers every nonblocking read
+	// and its byte count, so no byte can fall between these two quantities.
+	pending, err := unix.IoctlGetInt(f.fd, unix.TIOCINQ)
+	if err != nil {
+		return 0, err
+	}
+	if pending < 0 {
+		return 0, errors.New("negative metrics FIFO byte count")
+	}
+	return f.readBytes + uint64(pending), nil
+}
+
+func (f *reportingMetricsFIFO) close() {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if !f.closed {
+		f.closed = true
+		_ = unix.Close(f.fd)
+	}
+}
+
 func (m *reportingMetrics) read(ctx context.Context, path string) {
 	err := m.readFIFO(ctx, path)
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	if ctx.Err() == nil {
+		if err == nil {
+			err = io.EOF
+		}
 		m.err = err
 	}
+	m.notifyLocked()
 }
 
 func (m *reportingMetrics) readFIFO(ctx context.Context, path string) error {
 	ticker := time.NewTicker(10 * time.Millisecond)
 	defer ticker.Stop()
 	for {
-		file, err := os.OpenFile(path, os.O_RDWR|syscall.O_NONBLOCK, 0)
+		fd, err := unix.Open(path, unix.O_RDWR|unix.O_NONBLOCK|unix.O_CLOEXEC, 0)
 		if err == nil {
-			defer file.Close()
-			stop := context.AfterFunc(ctx, func() { _ = file.Close() })
+			file := &reportingMetricsFIFO{fd: fd, ctx: ctx}
+			defer file.close()
+			stop := context.AfterFunc(ctx, file.close)
 			defer stop()
+			m.mu.Lock()
+			m.fifo = file
+			m.notifyLocked()
+			m.mu.Unlock()
 			scanner := bufio.NewScanner(file)
 			scanner.Buffer(make([]byte, 8192), 1<<20)
+			// Retain the newline so parsedBytes measures the raw stream exactly.
+			scanner.Split(func(data []byte, atEOF bool) (int, []byte, error) {
+				if index := bytes.IndexByte(data, '\n'); index >= 0 {
+					return index + 1, data[:index+1], nil
+				}
+				if atEOF && len(data) > 0 {
+					return 0, nil, io.ErrUnexpectedEOF
+				}
+				return 0, nil, nil
+			})
 			for scanner.Scan() {
 				var item struct {
 					Balloon struct {
@@ -191,11 +363,16 @@ func (m *reportingMetrics) readFIFO(ctx context.Context, path string) error {
 				if err := json.Unmarshal(scanner.Bytes(), &item); err != nil {
 					return err
 				}
+				if m.beforeAggregate != nil {
+					m.beforeAggregate(scanner.Bytes())
+				}
 				m.mu.Lock()
 				m.seen = true
 				m.reports += item.Balloon.Reports
 				m.freed += item.Balloon.Freed
 				m.failures += item.Balloon.Failures
+				m.parsedBytes += uint64(len(scanner.Bytes()))
+				m.notifyLocked()
 				m.mu.Unlock()
 			}
 			return scanner.Err()
