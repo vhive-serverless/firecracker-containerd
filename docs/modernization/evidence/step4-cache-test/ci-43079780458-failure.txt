@@ -1,0 +1,17 @@
+GitHub Actions CI failure extract
+Repository: vhive-serverless/firecracker-containerd
+Workflow run: 43079780458
+Commit: 393f5f61240a2ac925dfef99e1894b6eb748cff1
+Job: 130728978173 (ubuntu-24.04 / Go 1.26.11), conclusion=failure
+Step 6: make test, conclusion=failure (exit code 2)
+Earlier steps: make and make lint succeeded.
+
+2026-11-11T18:43:06.0288421Z --- FAIL: TestLogErrorOnEvictionFailure (0.03s)
+2026-11-11T18:43:06.0292857Z Error Trace: snapshotter/demux/cache/evict_test.go:161
+2026-11-11T18:43:06.0294252Z Error: "map[]" should have 1 item(s), but has 0
+2026-11-11T18:43:06.0295261Z Test: TestLogErrorOnEvictionFailure
+2026-11-11T18:43:06.0296146Z Messages: Cache entry was never evicted
+
+The cache reaper logged "mock Close error from remote snapshotter". Evict removes the map entry even when Snapshotter.Close returns an error, then returns that error for logging. The old test assertion conflicted with this behavior and was coupled to a one-shot timer/context deadline.
+
+Latest evidence-only run: 43083312685 on 907fc268ea85f60dfcdae2b1471b5ffb28811003 completed success, including make test. This later pass does not change the old test's timing/assertion issue.
