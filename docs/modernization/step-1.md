@@ -1,9 +1,22 @@
 # Step 1: modernized runtime
 
-Latest committed revalidation: `3adc9f64ebc0fd623f8072b53084c8b8eebcdef4`. The clean worker checkout
-`/users/nehalem/fc-ctrd-mod/step1-io-committed` passed build, private installation,
+Latest committed revalidation: `06bd2058ba7938ad31eec9e17ac4d2e4c33a958f`.
+The clean worker checkout `/users/nehalem/fc-ctrd-mod/step1-io-committed` passed
+build, private installation and full acceptance: 36 runtime, five snapshotter
+and 79 SDK tests, with the existing SDK metrics skip. Three targeted jailer
+race tests also passed. The [telemetry receipt](evidence/06bd205-telemetry-acceptance-receipt.log)
+records the exact source, artifact hashes, Docker image and raw log hashes.
+
+This correction prepares telemetry links or bind mounts before runc starts.
+It preserves the original log and metrics FIFO readers when their filesystem
+differs from the jail filesystem. The new real-VM cross-filesystem regression
+and all eight jailed/unjailed `TestCreateVM_Isolated` cases passed. The Step 1
+dependency pins and earlier acceptance receipts remain unchanged.
+
+Earlier committed revalidation: `3adc9f64ebc0fd623f8072b53084c8b8eebcdef4`. The clean worker checkout
+`/users/nehalem/fc-ctrd-mod/step1-metrics-committed` passed build, private installation,
 35 runtime, five snapshotter and 79 SDK tests (one existing metrics skip).
-The [latest receipt](evidence/3adc9f6-metrics-acceptance-receipt.log) records exact artifact and log
+The [metrics receipt](evidence/3adc9f6-metrics-acceptance-receipt.log) records exact artifact and log
 hashes. This includes the I/O replacement correction and a metrics teardown
 correction that returns ports under a mutex and makes shutdown idempotent.
 Earlier acceptance records below retain their original tested revisions.
@@ -116,7 +129,7 @@ checkout=$(mktemp -d "$STACK_DIR/step1-repro.XXXXXXXX")
 git clone --branch modernize-runtime --recurse-submodules \
   https://github.com/vhive-serverless/firecracker-containerd.git "$checkout"
 cd "$checkout"
-git checkout --detach 6585eba92db4f8c55f6567cf8d2c8d695adcba05
+git checkout --detach 06bd2058ba7938ad31eec9e17ac4d2e4c33a958f
 tools/modernize/prepare-worker.sh
 # If provisioning added the Docker group, reconnect and return to this checkout.
 revision=$(git rev-parse --short=12 HEAD)
