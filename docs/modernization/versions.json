@@ -1,13 +1,17 @@
 {
   "schema_version": 1,
-  "status": "Step 1 worker acceptance passed; Steps 2 through 4 pending",
+  "status": "vHive-compatible stack; worker acceptance procedure in step-2.md",
   "step_1_validation": {
     "runtime_branch": "modernize-runtime",
-    "tested_runtime_commit": "e666612819bc1efa71c645434bc36385f92e6423",
-    "worker_checkout": "/users/nehalem/fc-ctrd-mod/validated-runtime",
-    "install_prefix": "/users/nehalem/fc-ctrd-mod/install/e666612819bc",
-    "acceptance_receipt": "evidence/e666612819bc-acceptance-receipt.log",
-    "worker_toolchains": "evidence/e666612819bc-worker-toolchains.log"
+    "completion_commit": "207899bf3c45ad83d07b06d161b4dcec4a0c338b",
+    "completion_log_sha256": "9d8c24c37f42ac148cdfff98c8600b8d440ea6d0889b0b7b63df93e899abc1d8",
+    "tested_runtime_commit": "207899bf3c45ad83d07b06d161b4dcec4a0c338b",
+    "worker_checkout": "/users/nehalem/fc-ctrd-mod/step1-repro.SwuCJ3fv",
+    "install_prefix": "/users/nehalem/fc-ctrd-mod/install/207899bf3c45",
+    "acceptance_receipt": "evidence/207899bf3c45-acceptance-receipt.log",
+    "worker_toolchains": "evidence/e666612819bc-worker-toolchains.log",
+    "previous_completion_commit": "0d8e700f68881516637778c57dbc9ee12ac48b10",
+    "previous_completion_log_sha256": "4c09141c78b07953a9708334a81f0e60912d3f0410a4f17cce55c84e9cd81dce"
   },
   "worker": {
     "ssh": "nehalem@amd218.utah.cloudlab.us",
@@ -82,11 +86,22 @@
     }
   },
   "selected_inputs": {
+    "vhive": {
+      "repository": "https://github.com/vhive-serverless/vHive.git",
+      "commit": "1f373249770f51bd930939471607b14a04f9b708",
+      "function_image": "ghcr.io/ease-lab/helloworld@sha256:12dc6715ed1a8306f246ceaf7742c09e38a52a79d17421e4a50d7e0e09fdbc25",
+      "snapshotter": "devmapper",
+      "memory_backend": "File",
+      "patch": "tools/vhive/modern-stack.patch"
+    },
     "firecracker": {
       "upstream": "https://github.com/firecracker-microvm/firecracker.git",
-      "tag": "v1.18.0",
-      "tag_object": "07a7c2e20a8f4f661702551d02fc3eca679842a5",
-      "commit": "eaf83bb718a559d324613d566eaf776b31a62340",
+      "base_tag": "v1.18.0",
+      "base_tag_object": "07a7c2e20a8f4f661702551d02fc3eca679842a5",
+      "base_commit": "eaf83bb718a559d324613d566eaf776b31a62340",
+      "fork": "https://github.com/JooyoungPark73/firecracker.git",
+      "branch": "vhive-compatible",
+      "commit": "df2d5b98ffe7e62bd367371e962fc00b0ee26e63",
       "rust": "1.97.0",
       "target": "x86_64-unknown-linux-musl"
     },
@@ -101,9 +116,9 @@
     "swagger_generator_previous_work": "v0.33.1",
     "sdk": {
       "remote": "git@github.com:JooyoungPark73/firecracker-go-sdk.git",
-      "branch": "modernize-runtime",
-      "commit": "0d7a093c9b0cee5b93d0b9551888a571bb478154",
-      "module_replacement": "github.com/JooyoungPark73/firecracker-go-sdk v0.0.0-20261110215740-0d7a093c9b0c"
+      "branch": "vhive-compatible",
+      "commit": "51a10ee490d4627076b887c7defa0c05399e8d21",
+      "module_replacement": "github.com/JooyoungPark73/firecracker-go-sdk v0.0.0-20261111001616-51a10ee490d4"
     },
     "containerd": {
       "version": "v2.3.7",

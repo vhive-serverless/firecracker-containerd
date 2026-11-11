@@ -8,6 +8,9 @@ sdk_revision=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["
 sdk_src="$repo_dir/tmp/sdk-tests/$sdk_revision"
 fixtures="$repo_dir/tmp/sdk-testdata/$sdk_revision"
 image=${SDK_TEST_IMAGE:-"localhost/firecracker-containerd-test:$(git -C "$repo_dir" rev-parse --short=12 HEAD)"}
+vmm_build="$repo_dir/_submodules/firecracker/build/cargo_target/x86_64-unknown-linux-musl/release"
+test -x "$repo_dir/bin/firecracker"
+test -x "$vmm_build/jailer"
 mkdir -p "$(dirname "$sdk_src")" "$fixtures"
 if [ ! -d "$sdk_src/.git" ]; then
     git clone --no-checkout https://github.com/JooyoungPark73/firecracker-go-sdk.git "$sdk_src"
@@ -30,10 +33,12 @@ trap cleanup EXIT
 docker run --rm --privileged --cgroupns=host --network=none --init \
     --entrypoint /bin/bash \
     --volume "$sdk_src:/sdk" --volume "$fixtures:/fixtures" \
+    --volume "$repo_dir/bin/firecracker:/selected-vmm/firecracker:ro" \
+    --volume "$vmm_build/jailer:/selected-vmm/jailer:ro" \
     --volume "$(go env GOMODCACHE):/go/pkg/mod" \
     --workdir /sdk --env CGO_ENABLED=0 --env GOPROXY=off --env GOSUMDB=off \
-    --env FC_TEST_DATA_PATH=/fixtures --env FC_TEST_BIN=/fixtures/firecracker \
-    --env FC_TEST_JAILER_BIN=/fixtures/jailer --env FC_TEST_RELEASE_API=1 \
+    --env FC_TEST_DATA_PATH=/fixtures --env FC_TEST_BIN=/selected-vmm/firecracker \
+    --env FC_TEST_JAILER_BIN=/selected-vmm/jailer --env FC_TEST_RELEASE_API=1 \
     "$image" -c 'go test -v -count=1 -timeout=15m ./...'
 cleanup
 git diff --exit-code

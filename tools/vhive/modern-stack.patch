@@ -1,0 +1,355 @@
+diff --git a/ctriface/iface.go b/ctriface/iface.go
+index b089264..8e1e6a3 100644
+--- a/ctriface/iface.go
++++ b/ctriface/iface.go
+@@ -37,6 +37,7 @@ import (
+ 
+ 	"github.com/containerd/containerd"
+ 	"github.com/containerd/containerd/cio"
++	"github.com/containerd/containerd/errdefs"
+ 	"github.com/containerd/containerd/namespaces"
+ 	"github.com/containerd/containerd/oci"
+ 
+@@ -44,8 +45,8 @@ import (
+ 	"github.com/firecracker-microvm/firecracker-containerd/runtime/firecrackeroci"
+ 	"github.com/pkg/errors"
+ 
+-	_ "google.golang.org/grpc/codes"  //tmp
+-	_ "google.golang.org/grpc/status" //tmp
++	"google.golang.org/grpc/codes"
++	"google.golang.org/grpc/status"
+ 
+ 	"github.com/go-multierror/multierror"
+ 	"github.com/vhive-serverless/vhive/memory/manager"
+@@ -265,8 +266,7 @@ func (o *Orchestrator) StartVMWithEnvironment(ctx context.Context, vmID, imageNa
+ 	return &StartVMResponse{GuestIP: vm.GetIP()}, startVMMetric, nil
+ }
+ 
+-// StopSingleVM Shuts down a VM
+-// Note: VMs are not quisced before being stopped
++// StopSingleVM disposes of a function instance and its writable disk.
+ func (o *Orchestrator) StopSingleVM(ctx context.Context, vmID string) error {
+ 	logger := log.WithFields(log.Fields{"vmID": vmID})
+ 	logger.Debug("Orchestrator received StopVM")
+@@ -281,35 +281,36 @@ func (o *Orchestrator) StopSingleVM(ctx context.Context, vmID string) error {
+ 
+ 	}
+ 
+-	logger = log.WithFields(log.Fields{"vmID": vmID})
++	ctx, cancel := context.WithTimeout(ctx, 45*time.Second)
++	defer cancel()
+ 
+-	// FIXME (gh-818)
+-	//if !vm.SnapBooted {
+-	//	time.Sleep(3 * time.Second)
+-	//	task := *vm.Task
+-	//	if err := task.Kill(ctx, syscall.SIGKILL); err != nil {
+-	//		logger.WithError(err).Error("Failed to kill the task")
+-	//		return err
+-	//	}
+-	//
+-	//	<-vm.TaskCh
+-	//	//FIXME: Seems like some tasks need some extra time to die Issue#15, lr_training
+-	//	time.Sleep(500 * time.Millisecond)
+-	//
+-	//	if _, err := task.Delete(ctx); err != nil {
+-	//		logger.WithError(err).Error("failed to delete task")
+-	//		return err
+-	//	}
+-	//
+-	//	container := *vm.Container
+-	//	if err := container.Delete(ctx, containerd.WithSnapshotCleanup); err != nil {
+-	//		logger.WithError(err).Error("failed to delete container")
+-	//		return err
+-	//	}
+-	//}
+-
+-	if _, err := o.fcClient.StopVM(ctx, &proto.StopVMRequest{VMID: vmID}); err != nil {
+-		logger.WithError(err).Error("failed to stop firecracker-containerd VM")
++	// Firecracker resets vsock connections when it takes the snapshot.
++	// Captured and restored instances can still serve TCP requests, but
++	// their original containerd task connection is no longer usable.
++	forceStop := vm.SnapshotCaptured || vm.SnapBooted
++	if !forceStop && vm.Task != nil {
++		// A cold VM owns a containerd task and its active snapshot. Delete
++		// the task before shutting down the guest agent.
++		if _, err := (*vm.Task).Delete(ctx, containerd.WithProcessKill); err != nil && !errdefs.IsNotFound(err) {
++			return errors.Wrap(err, "delete function task")
++		}
++	}
++	if forceStop {
++		// Quiesce the disposable instance and terminate its paused VMM.
++		if _, err := o.fcClient.PauseVM(ctx, &proto.PauseVMRequest{VMID: vmID}); err != nil {
++			return errors.Wrap(err, "pause function for deletion")
++		}
++	}
++	if _, err := o.fcClient.StopVM(ctx, &proto.StopVMRequest{VMID: vmID, TimeoutSeconds: 20}); err != nil {
++		if !forceStop || status.Code(err) != codes.Internal || status.Convert(err).Message() != "forcefully terminated VM "+vmID {
++			return errors.Wrap(err, "stop function VM")
++		}
++		logger.Debug("Stopped paused function instance")
++	}
++	if !vm.SnapBooted && vm.Container != nil {
++		if err := (*vm.Container).Delete(ctx, containerd.WithSnapshotCleanup); err != nil && !errdefs.IsNotFound(err) {
++			return errors.Wrap(err, "delete function container and writable snapshot")
++		}
+ 	}
+ 
+ 	if o.GetUPFEnabled() {
+@@ -318,19 +319,15 @@ func (o *Orchestrator) StopSingleVM(ctx context.Context, vmID string) error {
+ 		}
+ 	}
+ 
+-	if err := o.vmPool.Free(vmID); err != nil {
+-		logger.Error("failed to free VM from VM pool")
+-		return err
+-	}
+-
+-	o.workloadIo.Delete(vmID)
+-
+ 	if vm.SnapBooted && o.snapshotter == "devmapper" {
+ 		if err := o.devMapper.RemoveDeviceSnapshot(ctx, vm.ContainerSnapKey); err != nil {
+-			logger.Error("failed to deactivate container snapshot")
+-			return err
++			return errors.Wrap(err, "remove restored writable snapshot")
+ 		}
+ 	}
++	if err := o.vmPool.Free(vmID); err != nil {
++		return errors.Wrap(err, "free function network")
++	}
++	o.workloadIo.Delete(vmID)
+ 
+ 	logger.Debug("Stopped VM successfully")
+ 
+@@ -343,12 +340,10 @@ func (o *Orchestrator) getImage(ctx context.Context, imageName string) (*contain
+ }
+ 
+ func (o *Orchestrator) getVMConfig(vm *misc.VM) *proto.CreateVMRequest {
+-	kernelArgs := "ro noapic reboot=k panic=1 acpi=off pci=off nomodules systemd.log_color=false systemd.journald.forward_to_console systemd.unit=firecracker.target init=/sbin/overlay-init tsc=reliable quiet ipv6.disable=1 console=ttyS0"
+ 
+ 	return &proto.CreateVMRequest{
+ 		VMID:           vm.ID,
+ 		TimeoutSeconds: 100,
+-		KernelArgs:     kernelArgs,
+ 		MachineCfg: &proto.FirecrackerMachineConfiguration{
+ 			VcpuCount:  1,
+ 			MemSizeMib: 512,
+@@ -441,6 +436,11 @@ func (o *Orchestrator) CreateSnapshot(ctx context.Context, vmID string, snap *sn
+ 
+ 	ctx = withNamespace(ctx, o.snapshotter, vmID)
+ 
++	vm, err := o.vmPool.GetVM(vmID)
++	if err != nil {
++		return err
++	}
++
+ 	req := &proto.CreateSnapshotRequest{
+ 		VMID:         vmID,
+ 		SnapshotPath: snap.GetSnapshotFilePath(),
+@@ -451,19 +451,11 @@ func (o *Orchestrator) CreateSnapshot(ctx context.Context, vmID string, snap *sn
+ 		logger.WithError(err).Error("failed to create snapshot of the VM")
+ 		return err
+ 	}
+-
+-	vm, err := o.vmPool.GetVM(vmID)
+-	if err != nil {
+-		return err
+-	}
++	vm.SnapshotCaptured = true
+ 
+ 	if o.snapshotter == "devmapper" {
+-		patchFilePath := snap.GetPatchFilePath()
+-		logger = log.WithFields(log.Fields{"vmID": vmID, "patchFilePath": patchFilePath})
+-		logger.Debug("Creating patch file with disk state difference")
+-		if err := o.devMapper.CreatePatch(ctx, patchFilePath, vm.ContainerSnapKey, *vm.Image); err != nil {
+-			logger.WithError(err).Error("failed to create container patch file")
+-			return err
++		if err := o.devMapper.SaveBlockImage(ctx, vm.ContainerSnapKey, snap.GetDiskFilePath()); err != nil {
++			return errors.Wrap(err, "capture paused workload disk")
+ 		}
+ 	}
+ 
+@@ -540,13 +532,22 @@ func (o *Orchestrator) LoadSnapshot(ctx context.Context, vmID string, snap *snap
+ 			return nil, nil, errors.Wrapf(err, "creating container snapshot")
+ 		}
+ 
++		defer func() {
++			if retErr != nil {
++				cleanupCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
++				defer cancel()
++				if err := o.devMapper.RemoveDeviceSnapshot(cleanupCtx, vm.ContainerSnapKey); err != nil {
++					logger.WithError(err).Error("failed to remove restore disk")
++				}
++			}
++		}()
+ 		containerSnap, err := o.devMapper.GetDeviceSnapshot(ctx, vm.ContainerSnapKey)
+ 		if err != nil {
+ 			return nil, nil, errors.Wrapf(err, "previously created container device does not exist")
+ 		}
+ 
+-		if err := o.devMapper.RestorePatch(ctx, vm.ContainerSnapKey, snap.GetPatchFilePath()); err != nil {
+-			return nil, nil, errors.Wrapf(err, "unpacking patch into container snapshot")
++		if err := o.devMapper.RestoreBlockImage(ctx, vm.ContainerSnapKey, snap.GetDiskFilePath()); err != nil {
++			return nil, nil, errors.Wrapf(err, "restoring block image into container snapshot")
+ 		}
+ 
+ 		conf.ContainerSnapshotPath = containerSnap.GetDevicePath()
+diff --git a/devmapper/block_image.go b/devmapper/block_image.go
+new file mode 100644
+index 0000000..8b82112
+--- /dev/null
++++ b/devmapper/block_image.go
+@@ -0,0 +1,113 @@
++// MIT License
++//
++// Copyright (c) 2023 Georgiy Lebedev, Amory Hoste and vHive team
++//
++// Permission is hereby granted, free of charge, to any person obtaining a copy
++// of this software and associated documentation files (the "Software"), to deal
++// in the Software without restriction, including without limitation the rights
++// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++// copies of the Software, and to permit persons to whom the Software is
++// furnished to do so, subject to the following conditions:
++//
++// The above copyright notice and this permission notice shall be included in all
++// copies or substantial portions of the Software.
++//
++// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++// SOFTWARE.
++
++package devmapper
++
++import (
++	"context"
++	"fmt"
++	"os"
++	"os/exec"
++	"path/filepath"
++	"strconv"
++	"strings"
++)
++
++func blockSize(ctx context.Context, path string) (int64, error) {
++	info, err := os.Stat(path)
++	if err != nil {
++		return 0, err
++	}
++	if info.Mode()&os.ModeDevice == 0 || info.Mode()&os.ModeCharDevice != 0 {
++		return 0, fmt.Errorf("%s is not a block device", path)
++	}
++	out, err := exec.CommandContext(ctx, "blockdev", "--getsize64", path).Output()
++	if err != nil {
++		return 0, fmt.Errorf("query block device %s: %w", path, err)
++	}
++	return strconv.ParseInt(strings.TrimSpace(string(out)), 10, 64)
++}
++
++func copyBlockImage(ctx context.Context, src, dst, conv string) error {
++	out, err := exec.CommandContext(ctx, "dd", "if="+src, "of="+dst, "bs=4M", "conv="+conv, "status=none").CombinedOutput()
++	if err != nil {
++		return fmt.Errorf("copy %s to %s: %w: %s", src, dst, err, out)
++	}
++	return nil
++}
++
++// SaveBlockImage captures the exact ext4 image while the source VM is paused.
++// Replaying files would not reproduce the journal and metadata in guest memory.
++func (dmpr *DeviceMapper) SaveBlockImage(ctx context.Context, key, path string) error {
++	mounts, err := dmpr.snapshotService.Mounts(ctx, key)
++	if err != nil {
++		return err
++	}
++	if len(mounts) != 1 {
++		return fmt.Errorf("expected one block device for %s, got %d", key, len(mounts))
++	}
++	device := mounts[0].Source
++	size, err := blockSize(ctx, device)
++	if err != nil {
++		return err
++	}
++	tmp, err := os.CreateTemp(filepath.Dir(path), ".disk-")
++	if err != nil {
++		return err
++	}
++	defer os.Remove(tmp.Name())
++	if err := tmp.Close(); err != nil {
++		return err
++	}
++	if err := copyBlockImage(ctx, device, tmp.Name(), "sparse,fsync"); err != nil {
++		return err
++	}
++	info, err := os.Stat(tmp.Name())
++	if err != nil {
++		return err
++	}
++	if info.Size() != size {
++		return fmt.Errorf("incomplete block image: got %d bytes, want %d", info.Size(), size)
++	}
++	return os.Rename(tmp.Name(), path)
++}
++
++// RestoreBlockImage replaces all blocks of an independently allocated device.
++func (dmpr *DeviceMapper) RestoreBlockImage(ctx context.Context, key, path string) error {
++	snap, err := dmpr.GetDeviceSnapshot(ctx, key)
++	if err != nil {
++		return err
++	}
++	device := snap.GetDevicePath()
++	size, err := blockSize(ctx, device)
++	if err != nil {
++		return err
++	}
++	info, err := os.Stat(path)
++	if err != nil {
++		return err
++	}
++	if !info.Mode().IsRegular() || info.Size() != size {
++		return fmt.Errorf("expected a regular %d-byte disk image at %s", size, path)
++	}
++	return copyBlockImage(ctx, path, device, "notrunc,fsync")
++}
+diff --git a/functions.go b/functions.go
+index c65f17f..cbb00ae 100644
+--- a/functions.go
++++ b/functions.go
+@@ -451,7 +451,7 @@ func (f *Function) CreateInstanceSnapshot() {
+ 
+ 	logger.Debug("Creating instance snapshot")
+ 
+-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
++	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+ 	defer cancel()
+ 
+ 	err := orch.PauseVM(ctx, f.vmID)
+diff --git a/misc/types.go b/misc/types.go
+index 0073043..3da86e8 100644
+--- a/misc/types.go
++++ b/misc/types.go
+@@ -37,6 +37,7 @@ type VM struct {
+ 	ID               string
+ 	ContainerSnapKey string
+ 	SnapBooted       bool
++	SnapshotCaptured bool
+ 	Image            *containerd.Image
+ 	Container        *containerd.Container
+ 	Task             *containerd.Task
+diff --git a/snapshotting/snapshot.go b/snapshotting/snapshot.go
+index bc447d7..6ceaaa1 100644
+--- a/snapshotting/snapshot.go
++++ b/snapshotting/snapshot.go
+@@ -90,8 +90,8 @@ func (snp *Snapshot) GetWorkingSetTraceFilePath() string {
+ 	return filepath.Join(snp.snapDir, "working_set_trace")
+ }
+ 
+-func (snp *Snapshot) GetPatchFilePath() string {
+-	return filepath.Join(snp.snapDir, "patch_file")
++func (snp *Snapshot) GetDiskFilePath() string {
++	return filepath.Join(snp.snapDir, "disk_file")
+ }
+ 
+ func (snp *Snapshot) GetInfoFilePath() string {

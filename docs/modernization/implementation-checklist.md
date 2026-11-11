@@ -36,10 +36,10 @@ branch starts at the validated completion commit of its prerequisite.
 - [x] Worker repeated operations and representative failures without resource leaks; relevant tests pass.
 - [x] Commit/push all repositories; validate committed checkout without untracked state; capture exact versions/commands/paths and limitations.
 
-## Step 2: vhive-compatible (not started)
+## Step 2: vhive-compatible
 
-- [ ] Create branch from validated Step 1 completion commit.
-- [ ] Inspect integration behavior/dependencies, port SDK/runtime/network/storage/snapshot changes without downgrades.
+- [x] Create branch from validated Step 1 completion commit.
+- [x] Inspect integration behavior/dependencies, port SDK/runtime/network/storage/snapshot changes without downgrades.
 - [ ] Pin and deploy supported vHive on worker.
 - [ ] Demonstrate function deploy/invoke/repeated invoke/cleanup and applicable snapshot/restore.
 - [ ] Provide end-to-end regression script and rerun Step 1 acceptance.

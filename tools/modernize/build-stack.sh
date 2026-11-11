@@ -16,6 +16,7 @@ if [ "${ALLOW_DIRTY:-0}" != 1 ]; then
         exit 1
     }
 fi
+git submodule sync --recursive
 git submodule update --init --recursive
 python3 tools/modernize/verify-inputs.py
 rustc --version

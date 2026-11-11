@@ -478,6 +478,12 @@ func (s *service) waitVMReady() error {
 func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRequest) (*proto.CreateVMResponse, error) {
 	defer logPanicAndDie(s.logger)
 
+	if err := validateOrchestratorNetNS(request); err != nil {
+		return nil, err
+	}
+	if err := validateSnapshotRestore(request); err != nil {
+		return nil, err
+	}
 	timeout := defaultCreateVMTimeout
 	if request.TimeoutSeconds > 0 {
 		timeout = time.Duration(request.TimeoutSeconds) * time.Second
@@ -613,6 +619,9 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 	}
 
 	opts = append(opts, jailedOpts...)
+	if request.LoadSnapshot {
+		opts = append(opts, snapshotRestoreOpt(s.machineConfig, request))
+	}
 
 	// In the event that a noop jailer is used, we will pass in the shim context
 	// and have the SDK construct a new machine using that context. Otherwise, a
@@ -621,6 +630,9 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 	s.machine, err = firecracker.NewMachine(s.shimCtx, *s.machineConfig, opts...)
 	if err != nil {
 		return fmt.Errorf("failed to create new machine instance: %w", err)
+	}
+	if request.LoadSnapshot {
+		s.machine.Handlers.FcInit = s.machine.Handlers.FcInit.AppendAfter(firecracker.SetupNetworkHandlerName, populateRestoreTaps)
 	}
 	if err := s.configureRecovery(); err != nil {
 		return fmt.Errorf("failed to record VM recovery state: %w", err)
@@ -1012,7 +1024,8 @@ func (s *service) buildVMConfiguration(req *proto.CreateVMRequest) (*firecracker
 	cfg.LogPath = logPath
 	cfg.MetricsPath = metricsPath
 
-	if req.JailerConfig != nil {
+	cfg.NetNS = req.NetNS
+	if req.JailerConfig != nil && req.JailerConfig.NetNS != "" {
 		cfg.NetNS = req.JailerConfig.NetNS
 	}
 
@@ -1043,16 +1056,19 @@ func (s *service) buildVMConfiguration(req *proto.CreateVMRequest) (*firecracker
 		containerCount = 1
 	}
 
-	s.containerStubHandler, err = CreateContainerStubs(
-		&cfg, s.jailer, containerCount, s.logger)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create container stub drives: %w", err)
-	}
-
-	s.driveMountStubs, err = CreateDriveMountStubs(
-		&cfg, s.jailer, req.DriveMounts, s.logger)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create drive mount stub drives: %w", err)
+	if req.LoadSnapshot {
+		// The saved workload already owns the one restored drive. The vHive
+		// interface does not start additional tasks in a restored VM.
+		s.containerStubHandler = &StubDriveHandler{}
+	} else {
+		s.containerStubHandler, err = CreateContainerStubs(&cfg, s.jailer, containerCount, s.logger)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create container stub drives: %w", err)
+		}
+		s.driveMountStubs, err = CreateDriveMountStubs(&cfg, s.jailer, req.DriveMounts, s.logger)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create drive mount stub drives: %w", err)
+		}
 	}
 
 	// If no value for NetworkInterfaces was specified (not even an empty but non-nil list) and
