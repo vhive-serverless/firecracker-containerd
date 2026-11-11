@@ -306,6 +306,15 @@ class MatrixTests(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertFalse(output.exists())
 
+    def test_different_idle_protocol_is_mixed_even_with_same_source(self):
+        other = Path(self.temporary.name) / 'other-protocol'
+        fixture(other)
+        manifest = analysis.load(other / 'manifest.json')
+        manifest['arguments']['idle'] = 60
+        save(other / 'manifest.json', manifest)
+        with self.assertRaisesRegex(analysis.AnalysisError, 'mixed matrix provenance'):
+            analysis.analyze([self.root, other], idle_offset=1, idle_window=2)
+
 
 class PairTests(unittest.TestCase):
     def test_pairs_are_within_block_and_pmem_uses_ext4_controls(self):
