@@ -6,6 +6,12 @@ the full CRI, Kubernetes RuntimeClass, or native Pod checkpoint/restore gates.
 The [API audit](step-3-api-audit.md) records the v1.38 alpha target and the missing
 workflow in the released builds tested so far. Step 4 has not started.
 
+This branch also carries the validated task creation cleanup correction from
+Step 1 commit `6585eba` through Step 2 commit `d959a78`. Their receipts are linked
+from [Step 1](step-1.md) and [Step 2](step-2.md). The results below identify their
+tested source revisions; earlier results do not establish acceptance of the
+merged Step 3 runtime.
+
 ## Pod mapping and the current CRI path
 
 The host shim recognizes containerd's standard `io.kubernetes.cri.sandbox-id`
@@ -161,3 +167,16 @@ development rerun with the pinned BusyBox image passed both cases, including
 cleanup, in 13.8 seconds. The raw log is
 `~/fc-ctrd-mod/evidence/cri-busybox-fixture-regression.log` (SHA-256
 `4a0e620984f496f3c83c1a6bb464fbbce7e469080db4916db57b7b01883bda55`).
+
+The subsequent clean committed run at
+`3ceb2f506c98dd5cee5380d82b26b52155e41170` passed build, installation, lint,
+race tests, dependency tidy, regeneration and explicit revision checks after
+forcing the CRI component to compile inside Docker. Its unfiltered SPDY CRI run
+completed 113 of 142 checks: **92 passed, 21 failed and 29 were skipped**. Normal
+Pod port forwarding and both BusyBox fixture regressions passed. The
+[receipt](evidence/3ceb2f5-cri-full-receipt.log) records every failed and skipped
+test, upstream skip reasons, source state, image identity, actual image binary
+hashes and raw log/report hashes. The remaining failures cover volumes,
+unsupported host namespaces and nine AppArmor setup failures due to missing
+`sudo`; they prevent a claim of CRI compliance. This result predates the merged
+task creation cleanup correction and remains a baseline for subsequent changes.

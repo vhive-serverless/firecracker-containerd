@@ -221,7 +221,9 @@ func (dh driveHandler) UnmountDrive(_ context.Context, req *drivemount.UnmountDr
 	}
 
 	err := mount.Unmount(drive.Path(), 0)
-	if err == nil {
+	// A failed task Create may already have unmounted and removed its bundle.
+	// The host still needs to detach the drive and return its slot to the pool.
+	if err == nil || os.IsNotExist(err) {
 		return &types.Empty{}, nil
 	}
 

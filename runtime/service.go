@@ -152,7 +152,7 @@ type service struct {
 	driveMountStubs          []MountableStubDrive
 	exitAfterAllTasksDeleted bool // exit the VM and shim when all tasks are deleted
 
-	blockDeviceTasks map[string]struct{}
+	blockDeviceTasks sync.Map
 
 	cleanupErr  error
 	cleanupOnce sync.Once
@@ -228,10 +228,9 @@ func NewService(shimCtx context.Context, remotePublisher shim.Publisher, sd shut
 
 		config: cfg,
 
-		vmReady:          make(chan struct{}),
-		jailer:           newNoopJailer(shimCtx, logger, shimDir),
-		blockDeviceTasks: make(map[string]struct{}),
-		fifos:            make(map[string]map[string]cio.Config),
+		vmReady: make(chan struct{}),
+		jailer:  newNoopJailer(shimCtx, logger, shimDir),
+		fifos:   make(map[string]map[string]cio.Config),
 	}
 
 	s.startEventForwarders(remotePublisher)
@@ -1220,7 +1219,7 @@ func (s *service) deleteFIFOs(taskID, execID string) error {
 	return nil
 }
 
-func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTaskRequest) (*taskAPI.CreateTaskResponse, error) {
+func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTaskRequest) (_ *taskAPI.CreateTaskResponse, retErr error) {
 	logger := s.logger.WithField(logTaskID, request.ID)
 	defer logPanicAndDie(logger)
 
@@ -1246,6 +1245,33 @@ func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTask
 		logger.WithError(err).Error()
 		return nil, err
 	}
+	addressCreated, driveReserved := false, false
+	defer func() {
+		if retErr == nil {
+			return
+		}
+		// The caller may have canceled the failed Create. Roll back resources
+		// with a separate bound before another container reuses this VM.
+		cleanupCtx, cancel := context.WithTimeout(context.WithoutCancel(requestCtx), 5*time.Second)
+		defer cancel()
+		if driveReserved {
+			if err := s.containerStubHandler.Release(cleanupCtx, request.ID, s.driveMountClient, s.machine); err != nil {
+				retErr = errors.Join(retErr, fmt.Errorf("failed to release drive after create failure: %w", err))
+				return // Retain the bundle links if the drive still needs cleanup.
+			}
+			s.blockDeviceTasks.Delete(request.ID)
+		}
+		if addressCreated {
+			if err := os.Remove(hostBundleDir.AddrFilePath()); err != nil && !os.IsNotExist(err) {
+				retErr = errors.Join(retErr, fmt.Errorf("failed to remove address after create failure: %w", err))
+			}
+		}
+		if link, err := s.shimDir.BundleLink(request.ID); err == nil {
+			if err := os.Remove(link.RootPath()); err != nil && !os.IsNotExist(err) {
+				retErr = errors.Join(retErr, fmt.Errorf("failed to remove bundle link after create failure: %w", err))
+			}
+		}
+	}()
 
 	err = s.shimDir.CreateAddressLink(request.ID)
 	if err != nil {
@@ -1253,6 +1279,7 @@ func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTask
 		logger.WithError(err).Error()
 		return nil, err
 	}
+	addressCreated = true
 
 	// We don't support a rootfs with multiple mounts, only one mount can be exposed to the
 	// vm per-container
@@ -1273,7 +1300,8 @@ func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTask
 			logger.WithError(err).Error()
 			return nil, err
 		}
-		s.blockDeviceTasks[request.ID] = struct{}{}
+		s.blockDeviceTasks.Store(request.ID, struct{}{})
+		driveReserved = true
 	}
 
 	ociConfigBytes, err := hostBundleDir.OCIConfig().Bytes()
@@ -1382,10 +1410,12 @@ func (s *service) Delete(requestCtx context.Context, req *taskAPI.DeleteRequest)
 
 	var result *multierror.Error
 
-	if _, contains := s.blockDeviceTasks[req.ID]; contains {
+	if _, contains := s.blockDeviceTasks.Load(req.ID); contains {
 		// Trying to release stub drive for further reuse
 		if err := s.containerStubHandler.Release(requestCtx, req.ID, s.driveMountClient, s.machine); err != nil {
 			result = multierror.Append(fmt.Errorf("failed to release stub drive for container: %s: %w", req.ID, err))
+		} else {
+			s.blockDeviceTasks.Delete(req.ID)
 		}
 	}
 
