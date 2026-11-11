@@ -20,8 +20,8 @@ cleanup() {
 trap cleanup EXIT
 python3 tools/modernize/verify-inputs.py
 make lint
-go test -mod=readonly -race -count=1 -v \
-    -run '^Test(ReportingMetricsAwaitFlushed|BalloonBootOptionsForNativeRestore)' ./runtime
+unit_tests='^Test(ReportingMetricsAwaitFlushed|BalloonBootOptionsForNativeRestore|NativeRestore(DiskBackingAndReservation|RejectsRAMBacking|StorageFailureCleanup)|GuestOverlay(Allocation|RejectsRAMAndCleansFailure))'
+go test -mod=readonly -race -count=1 -v -run "$unit_tests" ./runtime
 make image-dax
 make test-images
 tools/thinpool.sh create "$pool"

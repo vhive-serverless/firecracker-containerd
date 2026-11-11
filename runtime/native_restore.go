@@ -36,6 +36,7 @@ import (
 	ioproxy "github.com/firecracker-microvm/firecracker-containerd/proto/service/ioproxy/ttrpc"
 	fc "github.com/firecracker-microvm/firecracker-go-sdk"
 	"github.com/firecracker-microvm/firecracker-go-sdk/client/models"
+	"golang.org/x/sys/unix"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -217,7 +218,10 @@ func validateNativeRestore(manifest *nativeCheckpoint) error {
 	return nil
 }
 
-func (s *service) cloneNativeRestore(ctx context.Context, request *proto.CreateVMRequest) error {
+func (s *service) cloneNativeRestore(ctx context.Context, request *proto.CreateVMRequest) (retErr error) {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	restore := s.nativeRestore
 	restore.workspace = filepath.Join(s.jailer.JailPath().RootPath(), "native-restore")
 	if err := os.MkdirAll(s.jailer.JailPath().RootPath(), 0700); err != nil {
@@ -225,6 +229,30 @@ func (s *service) cloneNativeRestore(ctx context.Context, request *proto.CreateV
 	}
 	if err := os.Mkdir(restore.workspace, 0700); err != nil {
 		return err
+	}
+	defer func() {
+		if retErr != nil {
+			retErr = errors.Join(retErr, os.RemoveAll(restore.workspace))
+			restore.files = make(map[string]string)
+		}
+	}()
+	workspace, err := os.Open(restore.workspace)
+	if err != nil {
+		return err
+	}
+	defer workspace.Close()
+	upper := ""
+	for _, drive := range restore.manifest.Drives {
+		if !drive.ReadOnly {
+			// Even a RAM-upper control has persistent workload disks. Reject
+			// unsuitable clone storage before copying memory, state or disks.
+			if err := requireDiskBacking(workspace); err != nil {
+				return err
+			}
+			if drive.ID == guestOverlayDrive {
+				upper = drive.File.Path
+			}
+		}
 	}
 	if err := os.Mkdir(filepath.Join(restore.workspace, "drives"), 0700); err != nil {
 		return err
@@ -270,6 +298,25 @@ func (s *service) cloneNativeRestore(ctx context.Context, request *proto.CreateV
 			return fmt.Errorf("native artifact checksum mismatch for %s: %w", saved.Path, syscall.EIO)
 		}
 		path := filepath.Join(restore.workspace, saved.Path)
+		if saved.Path == upper {
+			// copyNativeFile preserves sparse workload disks. Only the guest
+			// upper must retain the full capacity promised by fresh creation.
+			file, err := os.OpenFile(path, os.O_RDWR|unix.O_NOFOLLOW, 0)
+			if err != nil {
+				return err
+			}
+			err = requireDiskBacking(file)
+			if err == nil {
+				err = reserveGuestDisk(ctx, file, saved.Size)
+			}
+			if err == nil {
+				err = file.Sync()
+			}
+			err = errors.Join(err, file.Close())
+			if err != nil {
+				return fmt.Errorf("reserve restored guest upper: %w", err)
+			}
+		}
 		if err := s.nativeFileOwner(path); err != nil {
 			return err
 		}

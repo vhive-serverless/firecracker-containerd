@@ -120,16 +120,8 @@ func createGuestOverlay(ctx context.Context, path string, sizeMiB uint32, option
 			_ = root.Remove(name)
 		}
 	}()
-	var backing unix.Statfs_t
-	if err := unix.Fstatfs(int(file.Fd()), &backing); err != nil {
+	if err := requireDiskBacking(file); err != nil {
 		return "", err
-	}
-	// Require a directly identifiable disk filesystem. Overlay, network and
-	// unknown mounts cannot prove that the actual upper avoids RAM backing.
-	switch backing.Type {
-	case unix.EXT4_SUPER_MAGIC, unix.XFS_SUPER_MAGIC, unix.BTRFS_SUPER_MAGIC:
-	default:
-		return "", fmt.Errorf("guest upper requires ext4/ext3, XFS or Btrfs host storage (filesystem magic %#x)", backing.Type)
 	}
 	capacity := int64(sizeMiB) << 20
 	if err := file.Truncate(capacity); err != nil {
@@ -165,6 +157,22 @@ func createGuestOverlay(ctx context.Context, path string, sizeMiB uint32, option
 		return "", err
 	}
 	return uuid, nil
+}
+
+// Check the opened object, rather than a pathname that could identify another
+// mount. EXT4_SUPER_MAGIC also identifies ext3. Unknown, overlay, RAM and network
+// filesystems cannot establish persistent local guest-disk backing.
+func requireDiskBacking(file *os.File) error {
+	var backing unix.Statfs_t
+	if err := unix.Fstatfs(int(file.Fd()), &backing); err != nil {
+		return err
+	}
+	switch backing.Type {
+	case unix.EXT4_SUPER_MAGIC, unix.XFS_SUPER_MAGIC, unix.BTRFS_SUPER_MAGIC:
+		return nil
+	default:
+		return fmt.Errorf("guest disk requires ext4/ext3, XFS or Btrfs host storage (filesystem magic %#x)", backing.Type)
+	}
 }
 
 func reserveGuestDisk(ctx context.Context, file *os.File, capacity int64) error {

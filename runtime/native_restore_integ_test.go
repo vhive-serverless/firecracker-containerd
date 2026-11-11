@@ -44,6 +44,7 @@ import (
 	"github.com/firecracker-microvm/firecracker-containerd/runtime/firecrackeroci"
 	"github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/sys/unix"
 )
 
 func TestNativeRestore_Isolated(t *testing.T) {
@@ -114,7 +115,9 @@ func testNativeRestore(t *testing.T, storage *nativeRestoreStorageCase) {
 			require.NoError(t, os.WriteFile(filepath.Join(shared, "state"), []byte("volume-41"), 0600))
 			tasks := make([]containerd.Task, 0, 2)
 			initial := make([]string, 0, 2)
-			const app = `counter=40; token=$(head -c 16 /dev/urandom | od -An -tx1 | tr -d ' \n'); while :; do if test -f /request; then rm /request; counter=$((counter+1)); echo "$token:$counter" >/response; echo "$token:$counter"; fi; sleep .02; done`
+			// Publish a complete response: existence alone cannot acknowledge a
+			// shell redirection that has created/truncated a file but not written it.
+			const app = `counter=40; token=$(head -c 16 /dev/urandom | od -An -tx1 | tr -d ' \n'); while :; do if test -f /request; then rm /request; counter=$((counter+1)); echo "$token:$counter" >/response.next; mv /response.next /response; echo "$token:$counter"; fi; sleep .02; done`
 			const probe = "rm -f /response; touch /request; while ! test -f /response; do sleep .01; done; cat /response"
 			for index := range 2 {
 				name := fmt.Sprintf("%s-%d", id, index)
@@ -223,18 +226,28 @@ func testNativeRestore(t *testing.T, storage *nativeRestoreStorageCase) {
 			require.NoError(t, err)
 			restored := taskAPI.NewTTRPCTaskClient(rpc)
 			require.Len(t, response.RestoredIO, 2)
+			if storage != nil && storage.reclaim {
+				checkNativeRestoreReportingActivity(ctx, t, restored, tasks[0].ID(), current.VMM.PID)
+				stats, err := control.GetBalloonStats(ctx, &proto.GetBalloonStatsRequest{VMID: cloneID})
+				require.NoError(t, err)
+				require.Zero(t, stats.TargetMib, "post-restore reporting must not inflate the balloon")
+				require.Zero(t, stats.ActualMib)
+			}
 			for index, process := range tasks {
 				state, err := restored.State(ctx, &taskAPI.StateRequest{ID: process.ID()})
 				require.NoError(t, err)
 				require.Equal(t, process.Pid(), state.Pid)
 				value := nativeRestoredExec(ctx, t, restored, process.ID(), probe)
 				require.Equal(t, strings.TrimSuffix(initial[index], "41")+"42", value, "shell memory token and counter must resume rather than restart")
+				matchedIO := false
 				for _, streams := range response.RestoredIO {
 					if streams.ID == process.ID() && streams.ExecID == "" {
+						matchedIO = true
 						require.NotEmpty(t, streams.Stdout)
 						require.Equal(t, value, nativeRestoredLog(ctx, t, streams.Stdout))
 					}
 				}
+				require.True(t, matchedIO, "restored task %s must expose and deliver its init-process logs", process.ID())
 				require.Equal(t, "volume-41", nativeRestoredExec(ctx, t, restored, process.ID(), "cat /shared/state"))
 				if storage != nil {
 					require.Equal(t, "before", nativeRestoredExec(ctx, t, restored, process.ID(), "cat /native-storage-state"))
@@ -292,6 +305,18 @@ func checkNativeRestorePrivateBackings(t *testing.T, manifest *nativeCheckpoint,
 		require.True(t, info.Mode().IsRegular())
 		require.Equal(t, drive.File.Size, info.Size())
 		require.NotZero(t, info.Mode().Perm()&0200, "clone disk must remain writable")
+		file, err := os.Open(path)
+		require.NoError(t, err)
+		info, err = file.Stat()
+		require.NoError(t, err)
+		require.NoError(t, requireDiskBacking(file), "restored writable drive %s must use real host disk storage", drive.ID)
+		var backing unix.Statfs_t
+		require.NoError(t, unix.Fstatfs(int(file.Fd()), &backing))
+		require.NoError(t, file.Close())
+		if drive.ID == guestOverlayDrive {
+			require.GreaterOrEqual(t, info.Sys().(*syscall.Stat_t).Blocks*512, info.Size(), "restored guest upper must reserve its full capacity")
+			t.Logf("restored upper filesystem_magic=%#x allocated_bytes=%d capacity_bytes=%d", backing.Type, info.Sys().(*syscall.Stat_t).Blocks*512, info.Size())
+		}
 		captured, err := os.Stat(filepath.Join(artifact, drive.File.Path))
 		require.NoError(t, err)
 		require.False(t, os.SameFile(captured, info), "clone must copy captured disk %s rather than hard-link it", drive.ID)
