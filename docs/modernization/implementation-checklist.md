@@ -45,7 +45,7 @@ branch starts at the validated completion commit of its prerequisite.
 - [x] Provide end-to-end regression script and rerun Step 1 acceptance.
 - [x] Push compatible dependency/runtime commits, validate independent committed reconstruction and report revisions/commands/results/limitations.
 
-## Step 3: cri-native-snapshot-restore
+## Step 3: cri-native-snapshot-restore — WIP
 
 - [x] Create branch from validated Step 2 completion commit.
 - [x] Independently validate a released upstream v1.37.2 single-node stock-runtime baseline: Pods, exec, logs, filesystem writes, DNS and API discovery; record that this does not satisfy the Firecracker or Pod restore gates below.
@@ -62,9 +62,9 @@ branch starts at the validated completion commit of its prerequisite.
 - [ ] Document identity, networking, same-node/cross-node and alpha limitations.
 - [ ] Commit/push implementation, manifests/gates/tests, dependency pins and independent reproduction procedure; report outcome/revisions/results.
 
-## Step 4: damon-virtio-pmem (not started)
+## Step 4: damon-virtio-pmem (in progress; Step 3 remains WIP)
 
-- [ ] Create branch from validated Step 3 completion commit; scope limited to writable storage and memory reduction.
+- [x] Create branch from pinned Step 3 WIP commit `26ceead`; user explicitly authorized this ordering change on 2026-11-11. Scope remains writable storage and memory reduction; inherited restore gaps remain visible.
 - [ ] Read arXiv 2609.22978; verify current running host/guest/container storage and persistence boundaries before changes.
 - [ ] Disk-backed per-VM persistent guest/container writes; immutable base; ext4 upperdir/workdir where OverlayFS retained; only explicitly ephemeral tmpfs.
 - [ ] Verify host disk backing (no tmpfs), devices and mounts; capacity, allocation, ownership, cleanup and ENOSPC handling.

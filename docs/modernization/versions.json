@@ -280,5 +280,12 @@
     "date": "2026-11-11",
     "instruction": "Keep Step 3 incomplete and explicitly WIP, and proceed to Step 4.",
     "step_3_complete": false
+  },
+  "step_4_baseline": {
+    "branch": "damon-virtio-pmem",
+    "step_3_parent_commit": "26ceead7d0b4d1c6ea32a012c24b76efb4fb0439",
+    "step_3_status": "WIP; no whole-Pod or Kubernetes restore acceptance",
+    "firecracker_commit": "ce86b117d59ca93b1c04b791a251b445ace76703",
+    "sdk_commit": "832b1a5132e06f5e2167b64b97b5cd8946604005"
   }
 }
