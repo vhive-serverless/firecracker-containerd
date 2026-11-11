@@ -96,14 +96,16 @@ semantics. Reconnection against a live host table does not reconstruct that
 table for a new VM or shim. These limitations still prevent unqualified CRI and
 filesystem compatibility claims.
 
-Worker development validation with the new shim and static guest agent passed
+Clean committed checkout `6b3cf8fd851eeb66e3173aa2fcc2406a01c7ff5f` passed
 ordinary bind mounts and symlink host sources through real VMMs. The optional
 `TestPodVolumes` check additionally verifies guest mount information for writable,
 read-only and termination-log mounts, immediate host/guest write visibility,
 hard links and open unlinked files. It repeats ten failed guest creates in the
-same sandbox and verifies the existing workload still runs. These development
-results do not establish acceptance of the committed runtime; committed results
-must identify the tested checkout and binaries.
+same sandbox and verifies the existing workload still runs. All four selected
+upstream CRI checks, three VM resource cases and the volume check passed,
+including cleanup. The [volume receipt](evidence/6b3cf8f-cri-volume-receipt.log)
+identifies the tested checkout, image and binaries; this is partial Step 3
+validation, with the full-suite failures recorded below.
 
 ```sh
 CRI_INTEGRATION_TESTS=1 CRI_FOCUS='Runtime info|starting container with volume' \
@@ -146,7 +148,7 @@ passed all 19 tests, including four real kernel mount cases, with no skips.
 The [RPC/FUSE receipt](evidence/2057817-volfs-rpc-fuse-receipt.log) preserves
 the exact commands, dependency verification, binary/source hashes and raw
 log hashes. Its kernel mount tests use the worker host kernel `6.8.0-147-generic`;
-That receipt predates the shim/agent mount wiring and does not establish its
+that receipt predates the shim/agent mount wiring and does not establish its
 Firecracker guest acceptance.
 
 ## VM capacity from Pod resources
@@ -348,3 +350,25 @@ cleanup. The unfiltered suite again recorded **92 passes, 21 failures and
 records both selections, actual image binary hashes and raw evidence hashes.
 These results validate initial sizing; they do not establish host Pod resource
 accounting or completion of the remaining Step 3 requirements.
+
+The committed volume integration at
+`6b3cf8fd851eeb66e3173aa2fcc2406a01c7ff5f` passed a full build and installation,
+regeneration, dependency tidy, parent/CRI lint and race checks, and all 22
+privileged filesystem tests with no skips. Its focused CRI and real-VM checks
+are described above. The unfiltered CRI run completed 113 checks: **97 passed,
+16 failed and 29 were skipped**. Five ordinary volume, image-volume and private
+mount-propagation checks improved relative to the previous result. The remaining
+failures are four host namespace/host-network streaming checks, two shared/slave
+mount-propagation checks, one non-recursive read-only child-mount check and nine
+AppArmor setup failures caused by missing `sudo`. No failures were whitelisted.
+
+The base runtime regression initially passed 34 of 35 tests. Its random-number
+statistical test reported five FIPS block failures against the unchanged
+tolerance of four. One targeted repeat passed; the original failed log remains
+in the evidence. The remaining five snapshotter and 79 SDK cases passed, with
+the previously documented SDK metrics skip. The initial aggregate invocation
+is therefore not reported as an uninterrupted passing run. The
+[volume receipt](evidence/6b3cf8f-cri-volume-receipt.log) records these outcomes,
+all full-suite failed/skipped names, exact binary hashes and raw evidence
+hashes. CRI compliance, native whole-Pod restore and Kubernetes RuntimeClass
+acceptance remain incomplete.
