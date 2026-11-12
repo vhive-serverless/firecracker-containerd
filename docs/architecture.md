@@ -5,7 +5,7 @@ branch, `work/upstream-firecracker`. It selects containerd 2.3.7, **official,
 unmodified Firecracker and jailer v1.18.0 release binaries**, and runc 1.4.2.
 Release archives are checksum-pinned. The SDK is published in
 `vhive-serverless/firecracker-go-sdk`, branch `firecracker-v1.18.0`, at
-`76af8abe770941a987e6071677b8228df75cdd86`; exact inputs are in
+`dd9db322432989b96cff7a38a64703d60b6cabf9`; exact inputs are in
 [versions.json](modernization/versions.json).
 
 The [migration status](modernization/upstream-migration.md) separates current

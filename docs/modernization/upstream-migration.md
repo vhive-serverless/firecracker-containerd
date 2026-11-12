@@ -7,7 +7,7 @@ implementation head is `4f43f8d`. It uses **official, unmodified Firecracker and
 jailer v1.18.0 release binaries**, downloaded and verified against pinned archive
 checksums. The SDK is published in `vhive-serverless/firecracker-go-sdk`, branch
 `firecracker-v1.18.0`, revision
-`76af8abe770941a987e6071677b8228df75cdd86`. See
+`dd9db322432989b96cff7a38a64703d60b6cabf9`. See
 [selected inputs](versions.json) and the
 [official-release worker receipt](evidence/upstream-migration/official-release-worker.txt).
 Custom drive overrides and source/restore vsock policies are no longer used.
@@ -30,6 +30,15 @@ revisions and dependency selections as historical evidence. Step 3 CRI
 compliance remains WIP. Kubernetes Pod checkpoint/restore endpoints are deferred
 to the agreed 1.38 interface work, outside this migration goal; that deferral
 does not close the CRI compliance gaps.
+
+The first runtime VM test at `023283d` failed in both jail modes during source
+recovery after snapshot creation; restore was not reached. See the
+[failed-run receipt](evidence/upstream-migration/native-restore-023283d.json).
+SDK `dd9db32` fixes a reproduced handshake bug: a buffered acknowledgement read
+could discard the beginning of the guest's first application frame. Its vsock
+race tests, repeated regression tests and vet pass. A new runtime VM run is
+required to establish whether this resolves the observed recovery failure.
+The earlier 81-test SDK receipt remains evidence for `76af8ab` only.
 
 ## Snapshot contract
 
