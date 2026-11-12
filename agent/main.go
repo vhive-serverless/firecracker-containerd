@@ -15,11 +15,13 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	taskAPI "github.com/containerd/containerd/api/runtime/task/v3"
 	"github.com/containerd/containerd/v2/pkg/namespaces"
@@ -41,6 +43,10 @@ import (
 const (
 	defaultPort      = 10789
 	defaultNamespace = namespaces.Default
+
+	// Restored guests may retain an RPC connection to the source host. Do not
+	// let an unreachable peer prevent agent exit and the guest reboot action.
+	agentRPCShutdownGrace = time.Second
 
 	// per prctl(2), we must provide a non-zero arg when calling prctl with
 	// PR_SET_CHILD_SUBREAPER in order to enable subreaping (0 disables it)
@@ -135,13 +141,11 @@ func main() {
 	group.Go(func() error {
 		defer func() {
 			log.G(shimCtx).Info("stopping ttrpc server")
-			// use context.Background() instead of the canceled shimCtx, which should allow shutdown to
-			// flush any pending responses before actually stopping the server. We're choosing to not
-			// use any timeouts here, deferring instead to the the higher-level runtime shim's shutdown
-			// timeouts. If we get blocked here, the runtime shim will eventually force the VM to shutdown
-			// after its timeouts.
-			if err := server.Shutdown(context.Background()); err != nil {
-				log.G(shimCtx).WithError(err).Errorf("failed to close ttrpc server")
+			// Flush responses on live sessions, but bound the drain independently
+			// of the canceled shim context. A snapshot-captured stale connection
+			// can otherwise keep this goroutine, and therefore the agent, alive.
+			if err := shutdownAgentServer(server, agentRPCShutdownGrace); err != nil {
+				log.G(shimCtx).WithError(err).Warn("agent RPC drain did not finish; closing server")
 			}
 		}()
 
@@ -176,4 +180,17 @@ func showVersion() {
 	// Once https://github.com/golang/go/issues/29814 is resolved,
 	// we can use runtime/debug.BuildInfo instead of calling git(1) from Makefile
 	fmt.Printf("containerd Firecracker agent (git commit: %s)\n", revision)
+}
+
+// shutdownAgentServer lets live RPCs flush before agent exit. ttrpc Shutdown
+// waits for all connections, including captured peers that may never make
+// progress after restore. Close stops accepting work when the grace expires;
+// process exit then releases those stale transports and triggers guest reboot.
+func shutdownAgentServer(server *ttrpc.Server, grace time.Duration) error {
+	ctx, cancel := context.WithTimeout(context.Background(), grace)
+	defer cancel()
+	if err := server.Shutdown(ctx); err != nil {
+		return errors.Join(err, server.Close())
+	}
+	return nil
 }
