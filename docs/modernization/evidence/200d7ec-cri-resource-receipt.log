@@ -1,0 +1,178 @@
+Committed CRI Pod resource validation: focused checks PASSED; full suite FAILED; Step 3 is incomplete.
+Tested runtime commit: 200d7ec7294f04aa585f240defd2701a8a2c6a46
+Worker checkout: /users/nehalem/fc-ctrd-mod/cri-committed
+Worker source after suite: clean
+Build-stack, install, lint, parent/child unit and race checks, regeneration, dependency tidy and test-image revision checks passed.
+Install prefix: /users/nehalem/fc-ctrd-mod/install/200d7ec7294f
+Focused selection: Runtime info|Multiple Containers|Streaming.*Conformance; 9 passed, 0 failed, 133 unselected.
+Actual VMM resource integration: all 3 cases passed in 14.13 seconds.
+Declared quota 150000/100000 and memory 256 MiB: VMM 2 vCPUs/384 MiB; guest 2 CPUs/363988 KiB MemTotal.
+Quota 150000 with unspecified period and memory 128 MiB: VMM 2 vCPUs/256 MiB; guest 2 CPUs/235348 KiB MemTotal.
+Unlimited quota, shares 2048 and no memory limit: VMM 2 vCPUs/512 MiB; guest 2 CPUs/493012 KiB MemTotal.
+The checks use the VMM HTTP machine configuration and guest /proc via ExecSync; Pod annotations remain unchanged and cleanup passed.
+Scope: initial VM capacity only. Host Pod cgroup charging, aggregate accounting and live resource updates remain unfinished.
+Full suite: 113 run; 92 passed; 21 failed; 29 skipped (142 It specs). BeforeSuite passed separately.
+Full Docker attach and container return codes: 1 and 1; no failure whitelist was applied.
+Kubernetes RuntimeClass and native whole-Pod checkpoint/restore acceptance remain unfinished. Step 4 has not started.
+
+Focused inputs:
+script_revision=200d7ec7294f04aa585f240defd2701a8a2c6a46
+runtime_revision=200d7ec7294f04aa585f240defd2701a8a2c6a46
+image=sha256:e73493f4130a193b33ccc8dcd8f01dbdb3f2b17a1d5366a59d4ed2fd58d1affc
+focus=Runtime info|Multiple Containers|Streaming.*Conformance
+source_dirty=false
+image_override=
+websocket_streaming=0
+runtime_integration_tests=1
+8bd621febbb46f98841105afd3a8166a15cc53c11d4d6462f9191d8f8a1381ae  cri/cri-runtime.test
+5a092a439fd0ebce6bb51068e745cdb58e4c14a30a184d0ca905ad7bb251b102  tools/critest/test-cri.sh
+a228039dad7ea2b2c0bbfc9b0301dec4992dc645dabecc181c61c10bc0560f8a  tools/critest/run-in-container.sh
+
+Full-suite inputs:
+script_revision=200d7ec7294f04aa585f240defd2701a8a2c6a46
+runtime_revision=200d7ec7294f04aa585f240defd2701a8a2c6a46
+image=sha256:e73493f4130a193b33ccc8dcd8f01dbdb3f2b17a1d5366a59d4ed2fd58d1affc
+focus=all
+source_dirty=false
+image_override=
+websocket_streaming=0
+runtime_integration_tests=0
+5a092a439fd0ebce6bb51068e745cdb58e4c14a30a184d0ca905ad7bb251b102  tools/critest/test-cri.sh
+a228039dad7ea2b2c0bbfc9b0301dec4992dc645dabecc181c61c10bc0560f8a  tools/critest/run-in-container.sh
+
+Client:
+  Version:  2.3.7+unknown
+  Revision: 200d7ec7294f04aa585f240defd2701a8a2c6a46
+  Go version: go1.26.11
+
+Server:
+  Version:  2.3.7+unknown
+  Revision: 200d7ec7294f04aa585f240defd2701a8a2c6a46
+  UUID: da06ff84-fa44-40ef-bd42-a26d0ad02d46
+firecracker-cri 200d7ec7294f04aa585f240defd2701a8a2c6a46
+
+Focused passed tests:
+[k8s.io] Streaming | runtime should support streaming interfaces | runtime should support exec with tty=false and stdin=false [Conformance]
+[k8s.io] Streaming | runtime should support streaming interfaces | runtime should support exec with tty=true and stdin=true [Conformance]
+[k8s.io] Streaming | runtime should support streaming interfaces | runtime should support attach [Conformance]
+[k8s.io] Streaming | runtime should support streaming interfaces | runtime should support portforward [Conformance]
+[k8s.io] Runtime info | runtime should support returning runtime info | runtime should return version info [Conformance]
+[k8s.io] Runtime info | runtime should support returning runtime info | runtime should return runtime conditions [Conformance]
+[k8s.io] Multiple Containers [Conformance] | when running multiple containers in a pod | should support network
+[k8s.io] Multiple Containers [Conformance] | when running multiple containers in a pod | should support container log
+[k8s.io] Multiple Containers [Conformance] | when running multiple containers in a pod | should support container exec
+
+Failed full-suite test names:
+[k8s.io] Streaming | runtime should support streaming interfaces | runtime should support portforward in host network
+[k8s.io] AppArmor | runtime should support deprecated apparmor_profile field | should fail with an unloaded apparmor_profile
+[k8s.io] AppArmor | runtime should support deprecated apparmor_profile field | should enforce a apparmor_profile blocking writes
+[k8s.io] AppArmor | runtime should support deprecated apparmor_profile field | should enforce a permissive deprecated profile
+[k8s.io] AppArmor | runtime should support apparmor field | should fail with an unloaded apparmor_profile
+[k8s.io] AppArmor | runtime should support apparmor field | should enforce a apparmor_profile blocking writes
+[k8s.io] AppArmor | runtime should support apparmor field | should enforce a permissive deprecated profile
+[k8s.io] AppArmor | runtime should prefer new apparmor field | should fail with an unloaded apparmor_profile
+[k8s.io] AppArmor | runtime should prefer new apparmor field | should enforce a apparmor_profile blocking writes
+[k8s.io] AppArmor | runtime should prefer new apparmor field | should work with apparmor profile
+[k8s.io] Container Mount Readonly | runtime should support readonly mounts | should support non-recursive readonly mounts
+[k8s.io] Security Context | NamespaceOption | runtime should support HostPID
+[k8s.io] Security Context | NamespaceOption | runtime should support HostIpc is true
+[k8s.io] Security Context | NamespaceOption | runtime should support HostNetwork is true
+[k8s.io] Image Volume [Feature:ImageVolume] | should correctly mount image and enforce read-only
+[k8s.io] Image Volume [Feature:ImageVolume] | subPath | should succeed when using a valid subPath
+[k8s.io] Container Mount Propagation | runtime should support mount propagation | mount with 'rprivate' should not support propagation
+[k8s.io] Container Mount Propagation | runtime should support mount propagation | mount with 'rshared' should support propagation from host to container and vice versa
+[k8s.io] Container Mount Propagation | runtime should support mount propagation | mount with 'rslave' should support propagation from host to container
+[k8s.io] Container | runtime should support adding volume and device | runtime should support starting container with volume [Conformance]
+[k8s.io] Container | runtime should support adding volume and device | runtime should support starting container with volume when host path is a symlink [Conformance]
+
+Skipped full-suite tests and upstream reasons:
+[k8s.io] Container Mount Readonly | runtime should support readonly mounts | should support recursive readonly mounts
+  runtime does not implement recursive readonly mounts
+[k8s.io] Container Mount Readonly | runtime should support readonly mounts | should reject a recursive readonly mount with PROPAGATION_HOST_TO_CONTAINER
+  runtime does not implement recursive readonly mounts
+[k8s.io] Container Mount Readonly | runtime should support readonly mounts | should reject a recursive readonly mount with PROPAGATION_BIDIRECTIONAL
+  runtime does not implement recursive readonly mounts
+[k8s.io] Container Mount Readonly | runtime should support readonly mounts | should reject a recursive readonly mount with ReadOnly: false
+  runtime does not implement recursive readonly mounts
+[k8s.io] PodSandbox | benchmark about start a container from scratch | benchmark about start a container from scratch
+  (no skip reason recorded)
+[k8s.io] NRI | pod sandbox lifecycle | should receive RunPodSandbox, StopPodSandbox, and RemovePodSandbox in strict order with correct metadata
+  NRI socket not configured (use -nri-socket flag)
+[k8s.io] NRI | container lifecycle | should receive CreateContainer, StartContainer, StopContainer, and RemoveContainer in strict order with correct metadata
+  NRI socket not configured (use -nri-socket flag)
+[k8s.io] NRI | container lifecycle (failed container) | should receive CreateContainer, StartContainer, StopContainer, and RemoveContainer for a container that exits with a non-zero code
+  NRI socket not configured (use -nri-socket flag)
+[k8s.io] NRI | RunPodSandbox contract | should not expose sandbox while RunPodSandbox hook is in progress
+  NRI socket not configured (use -nri-socket flag)
+[k8s.io] NRI | RunPodSandbox contract | should not start workload containers until RunPodSandbox hook completes
+  NRI socket not configured (use -nri-socket flag)
+[k8s.io] NRI | RunPodSandbox contract | should fail RunPodSandbox and clean up when the NRI hook errors, then allow retry
+  NRI socket not configured (use -nri-socket flag)
+[k8s.io] NRI | StopPodSandbox contract | should stop all workload containers and keep sandbox accessible while StopPodSandbox hook is in progress
+  NRI socket not configured (use -nri-socket flag)
+[k8s.io] NRI | StopPodSandbox contract | should handle StopPodSandbox idempotently and never reuse sandbox
+  NRI socket not configured (use -nri-socket flag)
+[k8s.io] NRI | CreateContainer contract | should not expose container while CreateContainer hook is in progress
+  NRI socket not configured (use -nri-socket flag)
+[k8s.io] NRI | CreateContainer contract | should fail CreateContainer when the NRI hook errors, leak nothing, and allow retry
+  NRI socket not configured (use -nri-socket flag)
+[k8s.io] NRI | plugin synchronization | should synchronize a newly connected plugin with existing pods and containers
+  NRI socket not configured (use -nri-socket flag)
+[k8s.io] NRI | plugin synchronization | should receive a callback for container created during the Synchronize call
+  NRI socket not configured (use -nri-socket flag)
+[k8s.io] NRI | plugin synchronization | should receive information about all containers without the race condition during initialization
+  NRI socket not configured (use -nri-socket flag)
+[k8s.io] Security Context | UserNamespaces | when Host idmap mount support is needed | runtime should support NamespaceMode_POD
+  no runtime handler found which supports user namespaces
+[k8s.io] Security Context | UserNamespaces | when Host idmap mount support is not needed | runtime should support NamespaceMode_NODE
+  no runtime handler found which supports user namespaces
+[k8s.io] Security Context | UserNamespaces | when Host idmap mount support is not needed | runtime should fail if more than one mapping provided
+  no runtime handler found which supports user namespaces
+[k8s.io] Security Context | UserNamespaces | when Host idmap mount support is not needed | runtime should fail if container ID 0 is not mapped
+  no runtime handler found which supports user namespaces
+[k8s.io] Security Context | UserNamespaces | when Host idmap mount support is not needed | runtime should fail with NamespaceMode_CONTAINER
+  no runtime handler found which supports user namespaces
+[k8s.io] Security Context | UserNamespaces | when Host idmap mount support is not needed | runtime should fail with NamespaceMode_TARGET
+  no runtime handler found which supports user namespaces
+[k8s.io] Image | benchmark about operations on Image | benchmark about basic operations on Image
+  (no skip reason recorded)
+[k8s.io] Image | benchmark about operations on Image | benchmark about listing Image
+  (no skip reason recorded)
+[k8s.io] Image Volume [Feature:ImageVolume] | should return image digest in ContainerStatus mounts
+  Image Volume digest reporting (ImageSpec.image_ref tag 20) is not yet supported by the runtime.
+[k8s.io] Container | benchmark about operations on Container | benchmark about basic operations on Container
+  (no skip reason recorded)
+[k8s.io] PodSandbox | benchmark about operations on PodSandbox | benchmark about lifecycle of PodSandbox
+  (no skip reason recorded)
+
+Nine AppArmor checks fail in setup because sudo is absent in the test image; AppArmor enforcement has not been established. Other failures cover volumes and explicitly unsupported host namespaces.
+
+Actual test-image binaries:
+6fde3fd7b227c06bc9ff04e67461bd709544b7b893d75999872c0498fc24748c  /usr/local/bin/firecracker-containerd
+4d04615cec3a9e92445c5ab3f73e531f0a86dfcae9a310f1fc210ce39a9b56fd  /usr/local/bin/containerd-shim-aws-firecracker
+e2111aa131f95be89d989699906c9c0613840158d3b9dc94723a275c747c4f2e  /usr/local/bin/firecracker-cri
+635027271c6cbdf768b5f6f96e4c33150a4183edc7d0ba7f1305f614d0d8ab08  /usr/local/bin/firecracker
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  /usr/local/bin/runc
+b85704f7a239eaee78874a5d6c9610342d3373c8da1221e6bf61333015e56e84  /var/lib/firecracker-containerd/runtime/default-rootfs.img
+f7c763775c948bd8b779e432e5f4d418463a96a3e222b959df2d648c5b798dac  /var/lib/firecracker-containerd/runtime/default-vmlinux.bin
+
+Raw evidence SHA-256:
+f98e2f0749b34ae37ff7d55389c17513b7f9c87581e493b0ab670e84a6012289  /users/nehalem/fc-ctrd-mod/evidence/200d7ec-checks.log
+c2ca889b5a0cb6ec70cdbce9af0dc98f1df1630a7cb8c6a9740d002477cedcc8  /users/nehalem/fc-ctrd-mod/evidence/200d7ec-build-stack.log
+954c14ef66f870834810f7151ca047339e1ae133f2f6b058163ed154f32a6708  /users/nehalem/fc-ctrd-mod/evidence/200d7ec-test-images.log
+2618e31cc6fab9dbd1106fb46fee95b20bb82b71d002a1d3c29678bf48990a9a  /users/nehalem/fc-ctrd-mod/evidence/200d7ec-install.log
+0477bfd9484790b47dda0887794e563b75dc45ac0ed1aabfdffe3c79c6f492fc  /users/nehalem/fc-ctrd-mod/evidence/200d7ec-cri-resources.log
+b910014bfbecd2d1c235cfbb706e14d6ce37ccf02467832f436e1d874d6460c8  /users/nehalem/fc-ctrd-mod/evidence/200d7ec-cri-full.log
+16577e39286d842087dc40bc4cb990e179a0750c51c6599cd8399d924937c618  /users/nehalem/fc-ctrd-mod/evidence/200d7ec-cri-full-status
+b792e128248165f6d012e5881dcedf668740bbdd8cb5d3076f3de4c573d208d9  /users/nehalem/fc-ctrd-mod/evidence/cri-200d7ec7294f.j8E5tF15/report.json
+b8ce7ad3cfacb5367fda8782163db0d0f044f268920ecaf9e6a453d5900c284a  /users/nehalem/fc-ctrd-mod/evidence/cri-200d7ec7294f.j8E5tF15/inputs.log
+5e8b6f6d3bcb178739e1882c0ec3d6c0559b5e9253eb8127b3c86cfd4df974a0  /users/nehalem/fc-ctrd-mod/evidence/cri-200d7ec7294f.j8E5tF15/critest.log
+302d82554abaf5133b4d32e7a14a6ece841c79f90c45260c4b8e4979790a3839  /users/nehalem/fc-ctrd-mod/evidence/cri-200d7ec7294f.j8E5tF15/exit-status
+59144b604e4fcc408a8f6f4f7c681ee2400fee46366fb57e359ad872c04121c5  /users/nehalem/fc-ctrd-mod/evidence/cri-200d7ec7294f.j8E5tF15/runtime-version.log
+a37ab0b354ee0ec300771e874054ecc9a44f0dc49a50045d390344f8007d66cf  /users/nehalem/fc-ctrd-mod/evidence/cri-200d7ec7294f.j8E5tF15/cri-version.log
+edb692ab6242620bbbd9adfdf0538a2f15ba259343d318d2f997f80b8fb8b6f2  /users/nehalem/fc-ctrd-mod/evidence/cri-200d7ec7294f.lIABYhgS/report.json
+daccf8c9209e574028026379e4c5316381c0e3a22ec3400ed6266b50c2b4bc55  /users/nehalem/fc-ctrd-mod/evidence/cri-200d7ec7294f.lIABYhgS/inputs.log
+b2cd16aa3e28de09beaa742e62052bf2dfa17771f4157ebffca69509c4b0e903  /users/nehalem/fc-ctrd-mod/evidence/cri-200d7ec7294f.lIABYhgS/critest.log
+f01e8a115979ccae6133c4006d96adfba797886ecd962a800e768e4ac9132ecb  /users/nehalem/fc-ctrd-mod/evidence/cri-200d7ec7294f.lIABYhgS/exit-status
+59144b604e4fcc408a8f6f4f7c681ee2400fee46366fb57e359ad872c04121c5  /users/nehalem/fc-ctrd-mod/evidence/cri-200d7ec7294f.lIABYhgS/runtime-version.log
+a37ab0b354ee0ec300771e874054ecc9a44f0dc49a50045d390344f8007d66cf  /users/nehalem/fc-ctrd-mod/evidence/cri-200d7ec7294f.lIABYhgS/cri-version.log

@@ -1,0 +1,106 @@
+Committed released k3s Firecracker RuntimeClass validation: PASSED. Full Step 3 remains incomplete.
+Worker: nehalem@amd218.utah.cloudlab.us
+Deployment script commit: 1085202018904cff880eb7901e470a23c80cf5a9
+Worker checkout: /users/nehalem/fc-ctrd-mod/k3s-profile-committed
+Source after test: clean
+Runtime image source commit: 20727f4002990a522c4d46bc174475959c28f93c
+The deployment commit changes only scripts, manifest, documentation and the version ledger; its Go runtime/module inputs and dependency pins match the runtime image commit.
+Runtime dependencies: VMM ce86b117d59ca93b1c04b791a251b445ace76703; SDK 832b1a5132e06f5e2167b64b97b5cd8946604005; containerd 2.3.7; runc 1.4.2; guest kernel 6.18.56-fcmod.
+Required distribution: k3s v1.37.2+k3s1 (f6973cb8), SHA-256 265b3ee6a3198ef14033c63ef46cbb32370d83795199fb6d1b01f21575eddbda.
+One node Ready with this custom CRI endpoint. Ordinary system/client Pods use runc; the firecracker RuntimeClass uses aws.firecracker and one VM per Pod.
+Isolation: disposable privileged Docker node, private cgroup and network namespaces, unique thin pool; the existing upstream baseline cluster was not changed.
+CNI chains share bridge/IPAM allocation state, configure a default route and use TAP redirection only for the Firecracker handler. Kube-proxy service masquerading is explicit in this nested test profile.
+CoreDNS image pinned to docker.io/rancher/mirrored-coredns-coredns@sha256:7efd3c635b03efd68c4e8398fc45f0d993d0e9ab016f72c1cefb0fd6d01aa286.
+Workload image pinned to BusyBox 1.29-2 digest c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf.
+RuntimeClass Pod: two ready containers, zero restarts, shared emptyDir, projected service-account namespace/token readable, actual guest fuse.fcvolume mounts.
+Logs and normal kubectl exec passed. Explicit absolute-name A lookup returned Kubernetes ClusterIP 10.43.0.1. An ordinary runc client fetched the shared file through the Firecracker Pod Service.
+Assertions link Kubernetes Pod UID to the CRI sandbox, two live container IDs and the single actual VMM command line.
+Per-container CPU usage, RSS and working-set values are positive. This does not establish host VMM charging or aggregate Pod accounting.
+Namespace deletion removed Firecracker containers, sandbox and VMM before node destruction; outer cleanup removed its Docker node and thin pool.
+Limits: AppArmor disabled in this profile; host namespaces, propagation and other documented CRI limitations remain. This does not demonstrate native whole-Pod restore or Kubernetes checkpoint/restore. Step 4 has not started.
+
+Reproduction on worker after building the committed runtime test image:
+cd /users/nehalem/fc-ctrd-mod/k3s-profile-committed
+RUNTIMECLASS_BASE_IMAGE=localhost/firecracker-containerd-test:20727f400299 RUNTIMECLASS_RUNTIME_REVISION=20727f4002990a522c4d46bc174475959c28f93c tools/kubernetes/test-firecracker-node.sh
+# A fresh build of this checkout can use the driver defaults after build-stack.sh and make test-images.
+
+Inputs:
+script_revision=1085202018904cff880eb7901e470a23c80cf5a9
+runtime_revision=20727f4002990a522c4d46bc174475959c28f93c
+source_dirty=false
+image=sha256:e14539f6d79733772ae66ceea8080a2f0c812d9714d00f2223cde282fe7e4371
+k3s version v1.37.2+k3s1 (f6973cb8)
+go version go1.26.10
+265b3ee6a3198ef14033c63ef46cbb32370d83795199fb6d1b01f21575eddbda  /users/nehalem/fc-ctrd-mod/toolchains/k3s-v1.37.2/k3s
+2dce500784e70910f0db43115116760c49ff3eade7b7d1e9e4a8cec68623b7bc  tools/kubernetes/test-firecracker-node.sh
+d5d1a5c07166c1909f7e19edeb1f346d282fd2fea15e300d83699cc377852778  tools/kubernetes/run-firecracker-node.sh
+0ab556df8fd34c4820c05b076ae7a8357e4c9bac8f17e50236a3786a63b625d5  tools/kubernetes/firecracker-smoke.yaml
+
+Pod mapping:
+Kubernetes Pod UID: cf603a05-11dc-433e-9213-a88fbca4f42d
+CRI sandbox ID: aade6ac8f2fa3aa1c7b953d70bb7f531fdf5c419b009b8b9aa2f55e8d6d019eb
+VMM: 1112 firecracker --api-sock firecracker.sock --id aade6ac8f2fa3aa1c7b953d70bb7f531fdf5c419b009b8b9aa2f55e8d6d019eb --no-seccomp
+sidecar: id=dd6f4feb62d79ef144717606cf165a32da320a24448691a359562c935d465183 cpu_core_ns=11745000 rss_bytes=36864 working_set_bytes=528384
+main: id=4c390ca54236c22ab8b557ba0fc10f92f7de896e7a52997841221f19384a3e3d cpu_core_ns=22647000 rss_bytes=32768 working_set_bytes=1228800
+
+Test output:
+firecracker-cri 20727f4002990a522c4d46bc174475959c28f93c
+node/fcmod-firecracker condition met
+deployment.apps/coredns image updated
+Waiting for deployment spec update to be observed...
+Waiting for deployment spec update to be observed...
+Waiting for deployment "coredns" rollout to finish: 0 out of 1 new replicas have been updated...
+Waiting for deployment "coredns" rollout to finish: 0 of 1 updated replicas are available...
+deployment "coredns" successfully rolled out
+runtimeclass.node.k8s.io/firecracker created
+namespace/fcmod-smoke created
+pod/firecracker created
+service/firecracker created
+pod/firecracker condition met
+FIRECRACKER_KUBERNETES_STARTED
+EXEC_OK
+Server:		10.43.0.10
+Address:	10.43.0.10:53
+
+Name:	kubernetes.default.svc.cluster.local
+Address: 10.43.0.1
+
+pod/client created
+pod/client condition met
+FIRECRACKER_SHARED_VOLUME
+namespace "fcmod-smoke" deleted
+runtimeclass.node.k8s.io "firecracker" deleted
+K3S_FIRECRACKER_RUNTIMECLASS_OK
+
+Actual runtime image binary hashes:
+84512ffc8702b86e2f5f976b070a51efd661a5c2f892393a1ad94c5115a1c206  /usr/local/bin/firecracker-containerd
+e269cb7a3eb7459dc3bfd7ee0c5dd0051885c70c08a97244382899a5b6239d5b  /usr/local/bin/containerd-shim-aws-firecracker
+98c5cdfb0e863a8823214980a9bff901405a863f452423f38988685242b1ca81  /usr/local/bin/firecracker-cri
+ce15b3d35a4811fbf164371b72f57757cce5e846ad5959b547a471fd564a6e89  /usr/local/bin/firecracker
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  /usr/local/bin/runc
+a09ea9b4a61c1215bd8aced65092d3f48f3dad6d01de94910a5097eee5956afc  /var/lib/firecracker-containerd/runtime/default-rootfs.img
+f7c763775c948bd8b779e432e5f4d418463a96a3e222b959df2d648c5b798dac  /var/lib/firecracker-containerd/runtime/default-vmlinux.bin
+
+SHA-256:
+25eedef08f377a93c31c0e397cbc4e2a0104fb93e262c2754ecc549373e75a3d  /users/nehalem/fc-ctrd-mod/evidence/1085202-k3s-runtimeclass.log
+4048bc8a08a086194b4a061dbcb819cecfdd3ff7087f99c01c9c1dabd4d8ba98  /users/nehalem/fc-ctrd-mod/evidence/k3s-firecracker-108520201890.kD4vX77U/inputs.log
+d50e7b966259bf6b31a76d1438ebdb1921a455a13ae96b869e62b1d5dcd42429  /users/nehalem/fc-ctrd-mod/evidence/k3s-firecracker-108520201890.kD4vX77U/run.log
+a2821956efc1961845611b078136e7cf91935847a6659ebeccd4c6237fc43e07  /users/nehalem/fc-ctrd-mod/evidence/k3s-firecracker-108520201890.kD4vX77U/exit-status
+735fe201b53a00e9885b0c385f78320cec3f1d4159c91766db5a5e6a5d4d892a  /users/nehalem/fc-ctrd-mod/evidence/k3s-firecracker-108520201890.kD4vX77U/runtime-version.log
+a927f98fb098e0c2bb7ea49e885f868b384e70d25990c50a356635129622ddaa  /users/nehalem/fc-ctrd-mod/evidence/k3s-firecracker-108520201890.kD4vX77U/cri-version.log
+45b653c35a68802e730a93abbc8c78db41038be861224c3e3119c7556e772b20  /users/nehalem/fc-ctrd-mod/evidence/k3s-firecracker-108520201890.kD4vX77U/nodes.json
+53777fea8c35607a2ad1a7691f68772db3333b3333113deb7bf60a0240868801  /users/nehalem/fc-ctrd-mod/evidence/k3s-firecracker-108520201890.kD4vX77U/system-pods.json
+1b06dd4116eb4efc704ae1a776129bd1fca396e5f923617736dd72326dcaeac2  /users/nehalem/fc-ctrd-mod/evidence/k3s-firecracker-108520201890.kD4vX77U/pod.log
+7e49b1626d61ea8e6f43d74f4cb5e9e1106a31ef96f3ff9eb77e911544c4250f  /users/nehalem/fc-ctrd-mod/evidence/k3s-firecracker-108520201890.kD4vX77U/exec-dns.log
+cb7924a9bd45a655951a7e93c8afb242603444a3b2577ead7060b62c5bb7c60a  /users/nehalem/fc-ctrd-mod/evidence/k3s-firecracker-108520201890.kD4vX77U/guest-mounts.log
+f1c913a2a7a912613b4c516d82ca3c55bebfcffa09d05002611ef21a4edd7913  /users/nehalem/fc-ctrd-mod/evidence/k3s-firecracker-108520201890.kD4vX77U/vmm-process.log
+ab401697686eab910c51ef382af0b7cf6982b3137b3c7d2dd2053e103692b594  /users/nehalem/fc-ctrd-mod/evidence/k3s-firecracker-108520201890.kD4vX77U/sandboxes.json
+1748a6ca5cefe70abef6ca736b420bb45b404dddbfb18f057631018ab5f97714  /users/nehalem/fc-ctrd-mod/evidence/k3s-firecracker-108520201890.kD4vX77U/containers.json
+8b3257c2469841ee0083883dc0155c3e30a31376c143e2f76c30ff25827b7938  /users/nehalem/fc-ctrd-mod/evidence/k3s-firecracker-108520201890.kD4vX77U/stats.json
+e8568bbb2c90d222b6cc2c71af4608ee577c25110a8c82ca6c183295292f2a10  /users/nehalem/fc-ctrd-mod/evidence/k3s-firecracker-108520201890.kD4vX77U/network-client.log
+3fe447e5916be0840f862937d2b57cb3bdcdc00a042f2cf6d142872b3b36fbbe  /users/nehalem/fc-ctrd-mod/evidence/k3s-firecracker-108520201890.kD4vX77U/workload-pods.json
+54a0c8fde623434dfa4f403cfd1f58386950ba31328e449e1d39e74ce1495d26  /users/nehalem/fc-ctrd-mod/evidence/k3s-firecracker-108520201890.kD4vX77U/sandboxes-after.json
+0bd9bfe05d6eb4f545e266b789f98a6d8be25ae8b0acc347b9356f74af09dab2  /users/nehalem/fc-ctrd-mod/evidence/k3s-firecracker-108520201890.kD4vX77U/containers-after.json
+2dce500784e70910f0db43115116760c49ff3eade7b7d1e9e4a8cec68623b7bc  /users/nehalem/fc-ctrd-mod/k3s-profile-committed/tools/kubernetes/test-firecracker-node.sh
+d5d1a5c07166c1909f7e19edeb1f346d282fd2fea15e300d83699cc377852778  /users/nehalem/fc-ctrd-mod/k3s-profile-committed/tools/kubernetes/run-firecracker-node.sh
+0ab556df8fd34c4820c05b076ae7a8357e4c9bac8f17e50236a3786a63b625d5  /users/nehalem/fc-ctrd-mod/k3s-profile-committed/tools/kubernetes/firecracker-smoke.yaml
