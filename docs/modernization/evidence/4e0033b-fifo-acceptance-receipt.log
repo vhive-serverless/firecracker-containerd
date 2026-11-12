@@ -1,0 +1,143 @@
+Step 2 shared jailer FIFO correction: committed worker acceptance
+Tested source: 4e0033b81a17d9a32c2861263c2792ebcfe37ebd
+Cherry-picked with signoff from c7d73c703d18d33e07b39c2785dbcb1f77af039f
+Worker: nehalem@amd218.utah.cloudlab.us
+Checkout: /users/nehalem/fc-ctrd-mod/vhive-io-committed
+Checkout status: clean
+STACK_DIR=/users/nehalem/fc-ctrd-mod
+Successful acceptance TMPDIR=/tmp/s2f-4e0033b
+Private install: /users/nehalem/fc-ctrd-mod/install/4e0033b81a17
+Evidence directory: /users/nehalem/fc-ctrd-mod/evidence/step2-fifo-4e0033b81a17
+Started: Wed Nov 11 14:07:37 UTC 2026
+Finished: Wed Nov 11 14:32:26 UTC 2026
+Driver final exit status: 0
+
+Dependency pins (unchanged):
+df2d5b98ffe7e62bd367371e962fc00b0ee26e63 _submodules/firecracker (v1.18.0-1-gdf2d5b98f)
+ c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e _submodules/runc (v1.4.2)
+ 3070538befb5a6c09f93e99164762b3a76310357 _submodules/stargz-snapshotter (cmd/v0.18.2)
+
+Build binary hashes:
+635027271c6cbdf768b5f6f96e4c33150a4183edc7d0ba7f1305f614d0d8ab08  bin/firecracker
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  _submodules/runc/runc
+3dd9ea4a0c2bc1eda0aafcc751447a9ef8511281065335e0aebc569ef14dab1b  _submodules/stargz-snapshotter/out/containerd-stargz-grpc
+a44547e8e80579496af82a6940812963135036810dced262803ae3baea6400cf  volume/volume-init
+61ab2c79189a69604bd179573a271593fc6a169ac0803df10afa5b9300ab55ab  agent/agent
+5ef20ab9f85724ba95f649d70f4cb19c55b9d7d1b62e8c703b9b6ea06ee79189  runtime/containerd-shim-aws-firecracker
+751df6a185f7d5cb7fbf0ce95c5545bd816b926f8043d3cb73d54dae90419765  firecracker-control/cmd/containerd/firecracker-containerd
+1f3dc7786e9e3c81d4eb4d686b46ae70d39552680c436b73afd0530465547721  firecracker-control/cmd/containerd/firecracker-ctr
+
+Acceptance binary/image hashes:
+635027271c6cbdf768b5f6f96e4c33150a4183edc7d0ba7f1305f614d0d8ab08  bin/firecracker
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  _submodules/runc/runc
+61ab2c79189a69604bd179573a271593fc6a169ac0803df10afa5b9300ab55ab  agent/agent
+3dd9ea4a0c2bc1eda0aafcc751447a9ef8511281065335e0aebc569ef14dab1b  _submodules/stargz-snapshotter/out/containerd-stargz-grpc
+a44547e8e80579496af82a6940812963135036810dced262803ae3baea6400cf  volume/volume-init
+5ef20ab9f85724ba95f649d70f4cb19c55b9d7d1b62e8c703b9b6ea06ee79189  runtime/containerd-shim-aws-firecracker
+751df6a185f7d5cb7fbf0ce95c5545bd816b926f8043d3cb73d54dae90419765  firecracker-control/cmd/containerd/firecracker-containerd
+1f3dc7786e9e3c81d4eb4d686b46ae70d39552680c436b73afd0530465547721  firecracker-control/cmd/containerd/firecracker-ctr
+addd0715a0f8cdfd6cebb3624a04f1cd3b6f6f7b7d73dcedfcd981a39a9f748c  default-vmlinux.bin
+9434b54f80f1c3740a506c5b28b918635ebd046d45f8a767ebb5b4b4c0d17a27  tools/image-builder/rootfs.img
+bcb1431ad325e1781f1d11b092787b13bd44c10bdfd8e5f00148ae26e536d214  tools/image-builder/rootfs-stargz.img
+Test image: sha256:c48f41bcf6ee796df167a0dacc97d217cea871b15d0b52d8a3e8c8ed2400b1c9
+
+Log and driver SHA256:
+39f60d87eec5aa855dfbc116a4cee3c58a7621ff2d6691e39e050ad5cedef90e  /users/nehalem/fc-ctrd-mod/evidence/step2-fifo-4e0033b81a17/acceptance-attempt1-lint-lock.log
+b3c0784f7ce3bf632e9ee5ad5184a0925b32a24d6ce7436de99d8d8a3166a65a  /users/nehalem/fc-ctrd-mod/evidence/step2-fifo-4e0033b81a17/acceptance-attempt2-long-tmpdir.log
+28fbdc9460fdfcb817b3f86e3ec5caa5c5b091a1626774f38930d6129f66f9db  /users/nehalem/fc-ctrd-mod/evidence/step2-fifo-4e0033b81a17/acceptance.log
+53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3  /users/nehalem/fc-ctrd-mod/evidence/step2-fifo-4e0033b81a17/attempt1-exit-status
+4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865  /users/nehalem/fc-ctrd-mod/evidence/step2-fifo-4e0033b81a17/attempt2-exit-status
+ef1a17eece515d900164c910e0208caf11b7ca27751b34f39998cb5475f7022b  /users/nehalem/fc-ctrd-mod/evidence/step2-fifo-4e0033b81a17/build.log
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  /users/nehalem/fc-ctrd-mod/evidence/step2-fifo-4e0033b81a17/driver.log
+9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa  /users/nehalem/fc-ctrd-mod/evidence/step2-fifo-4e0033b81a17/exit-status
+1f58ef591fa2b8e850e1ae9856bd8546c57f636ecd93473aa9c08628f2e6857c  /users/nehalem/fc-ctrd-mod/evidence/step2-fifo-4e0033b81a17/install.log
+5e9b2cc224090e9f8522f7b09f680394e328321e8f858d1fb73204bbd9b6fd37  /users/nehalem/fc-ctrd-mod/evidence/step2-fifo-4e0033b81a17/retry-attempt2.sh
+ed419891aea37e81a54d6519433273d762aedf9c00c5207bf0b7a85f92f0f819  /users/nehalem/fc-ctrd-mod/evidence/step2-fifo-4e0033b81a17/retry-attempt3-driver.log
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  /users/nehalem/fc-ctrd-mod/evidence/step2-fifo-4e0033b81a17/retry-driver.log
+3b0d07195c1b6500311cc3896019b6890b407375788022194d09a9328c8d88bf  /users/nehalem/fc-ctrd-mod/evidence/step2-fifo-4e0033b81a17/retry.sh
+7216ec08f3a093a31cf375797f13e0a3b17ba75560c7b652e46afb33c76cdf3e  /users/nehalem/fc-ctrd-mod/evidence/step2-fifo-4e0033b81a17/run.sh
+066913a28f4ec4e6895fa75bd657ea13333a9be7e4169a18f0eb5d62ad326f13  /users/nehalem/fc-ctrd-mod/evidence/step2-fifo-4e0033b81a17/vhive-first.log
+2882e0380690c7c2c1f7acf95c6375a552c8547c36e41e9462fb53385989fcdd  /users/nehalem/fc-ctrd-mod/evidence/step2-fifo-4e0033b81a17/vhive-second.log
+
+Retained unsuccessful attempts:
+Attempt 1: build/install passed; test-stack lint stopped on parallel golangci-lint lock; exit 2.
+Attempt 2: lint/image refresh passed; unit tests failed because an overlong private TMPDIR exceeded Unix socket path limits; exit 1.
+Attempt 3: full test-stack rerun with short owned TMPDIR passed; source unchanged.
+
+Final results:
+36 runtime + 5 snapshotter + 79 SDK top-level cases passed = 120; existing SDK TestLogAndMetrics skipped.
+TestJailerTelemetryCrossFilesystem_Isolated passed: jailed VM started and both external FIFO readers received telemetry.
+Full TestCreateVM_Isolated passed (123.23s), including jailed variants.
+THINPOOL_ISOLATION_AND_CLEANUP_OK
+PINNED_SDK_PRIVILEGED_SUITE_OK
+COMMITTED_STACK_ACCEPTANCE_OK
+
+vhive-first: /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.QfPEg4aK
+runtime=4e0033b81a17d9a32c2861263c2792ebcfe37ebd
+vhive=1f373249770f51bd930939471607b14a04f9b708
+function=ghcr.io/ease-lab/helloworld@sha256:12dc6715ed1a8306f246ceaf7742c09e38a52a79d17421e4a50d7e0e09fdbc25
+base_image=sha256:c48f41bcf6ee796df167a0dacc97d217cea871b15d0b52d8a3e8c8ed2400b1c9
+76176e22e9cd9ffa431f55e98c38d27e113c7e1deb66dc321e2d3a8f85f5fba1  /users/nehalem/fc-ctrd-mod/vhive-io-committed/tmp/vhive-build.zWQpqNKl/image/vhive
+313f3ecb701cd5abf55754ec673fa2d2fdcd3b0b431a5741c10a4370c6b1a6d7  /users/nehalem/fc-ctrd-mod/vhive-io-committed/tmp/vhive-build.zWQpqNKl/image/vhive-probe
+b124b97d4e5011773f0d6eea2018360e541ed27b37182467dc2556166ffebfe1  tools/vhive/modern-stack.patch
+4a50055122b17b22061476388380bdb2059f89a71739aa10a0e955622484d64e  /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.QfPEg4aK/acceptance.log
+9c44aba386ac5ecb650edcb686a71cdbda43cfdec79a4c43932628f32bd98902  /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.QfPEg4aK/binaries.sha256
+577c8410f288dedcdcaab6c4d5781e1097290dee39ee758b1c2352fbb0385ff8  /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.QfPEg4aK/containerd.out
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.QfPEg4aK/demux-snapshotter.out
+310b16587f7b0d3b6ede4d1ed97565af0f9addfccf89d786fa1e24b90ad8efb4  /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.QfPEg4aK/http-address-resolver.out
+4975860d2ee32fe22bcdea6a0c3e46c84a0940a718fc22f9d2195d58f4b51d62  /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.QfPEg4aK/inputs
+a7e865c94794f91331a980779162a75a5313faf718bb0945969d319bccd7a651  /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.QfPEg4aK/vhive-artifacts
+51dfe37f796a4bd862c54ad7d5a8c8826e0fa89321e30e113d0dcadc4ab9f0f0  /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.QfPEg4aK/vhive-restored.json
+d3fc9b3ce6e1d6d05f0ead20c8570340fc146028f3dcdd09ac5182c1a0e1e165  /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.QfPEg4aK/vhive-runtime-version
+9822315539c145f521837e03fca1eee8698cf0b3b4bca498cae940ceba575690  /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.QfPEg4aK/vhive-snapshot-paths
+2bbbdbf53dea16eb669756c7dc6bc7e1875141dfc56e627a10cb7780b90719f3  /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.QfPEg4aK/vhive-source.json
+4f857d2a77097d51c8f70cc09a627821fe6e7ddf50d08b9bc4844e7ff4f1e04e  /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.QfPEg4aK/vhive-stock.out
+23e42ab1e2592ed6f22e62e3117f99bcf98ef28d127b76113bcc8a058039836b  /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.QfPEg4aK/vhive.out
+reply="Hello, before-one!" cold=false
+reply="Hello, before-two!" cold=false
+{"vm_id": "901-0", "vmm_pid": 300, "start_ticks": "7552772", "disk": "/dev/mapper/fc-vhive-4e0033b81a17-2854240-snap-9", "netns": "/var/run/netns/uvmns1"}
+removed VM 901-0 (PID 300) and /dev/mapper/fc-vhive-4e0033b81a17-2854240-snap-9
+reply="Hello, after-restore!" cold=true
+reply="Hello, after-warm!" cold=false
+{"vm_id": "901-1", "vmm_pid": 423, "start_ticks": "7553991", "disk": "/dev/mapper/fc-vhive-4e0033b81a17-2854240-snap-10", "netns": "/var/run/netns/uvmns1"}
+removed VM 901-1 (PID 423) and /dev/mapper/fc-vhive-4e0033b81a17-2854240-snap-10
+VHIVE_DEPLOY_INVOKE_SNAPSHOT_RESTORE_OK
+VHIVE_WORKER_ACCEPTANCE_OK
+
+vhive-second: /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.JkN7HpVA
+runtime=4e0033b81a17d9a32c2861263c2792ebcfe37ebd
+vhive=1f373249770f51bd930939471607b14a04f9b708
+function=ghcr.io/ease-lab/helloworld@sha256:12dc6715ed1a8306f246ceaf7742c09e38a52a79d17421e4a50d7e0e09fdbc25
+base_image=sha256:c48f41bcf6ee796df167a0dacc97d217cea871b15d0b52d8a3e8c8ed2400b1c9
+76176e22e9cd9ffa431f55e98c38d27e113c7e1deb66dc321e2d3a8f85f5fba1  /users/nehalem/fc-ctrd-mod/vhive-io-committed/tmp/vhive-build.nRRhrnJl/image/vhive
+313f3ecb701cd5abf55754ec673fa2d2fdcd3b0b431a5741c10a4370c6b1a6d7  /users/nehalem/fc-ctrd-mod/vhive-io-committed/tmp/vhive-build.nRRhrnJl/image/vhive-probe
+b124b97d4e5011773f0d6eea2018360e541ed27b37182467dc2556166ffebfe1  tools/vhive/modern-stack.patch
+52a093531f25181a2f9a57c3bd9dc0bb1b3b31040f75b76d582241629557e1e9  /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.JkN7HpVA/acceptance.log
+868bf32934f7ae375b046c31550656daf9b90af65b8d0e9183686a0fc5dbf1b5  /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.JkN7HpVA/binaries.sha256
+4edc69e5d7eb7ceb5c1d464da0b93e5e2d1c072f33dc88675342d86777900c91  /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.JkN7HpVA/containerd.out
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.JkN7HpVA/demux-snapshotter.out
+f6d699805e178d13fe27aa8403e0678369bb1f10ef787c7693311f7d1300e1ce  /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.JkN7HpVA/http-address-resolver.out
+4975860d2ee32fe22bcdea6a0c3e46c84a0940a718fc22f9d2195d58f4b51d62  /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.JkN7HpVA/inputs
+22ce8d616a7a82810f02a2f4f08e5acd2f9e45f948e6ca70cc1cef544e135921  /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.JkN7HpVA/vhive-artifacts
+e35f8eadf255e472fd7365603a8df0d37f7f717705875aa61063c89786507212  /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.JkN7HpVA/vhive-restored.json
+d3fc9b3ce6e1d6d05f0ead20c8570340fc146028f3dcdd09ac5182c1a0e1e165  /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.JkN7HpVA/vhive-runtime-version
+9822315539c145f521837e03fca1eee8698cf0b3b4bca498cae940ceba575690  /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.JkN7HpVA/vhive-snapshot-paths
+50a429a8fba8a5d92fb95be740f36dc0249d1650acadb28681e73258eee03bc7  /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.JkN7HpVA/vhive-source.json
+41f4492c53b7a211de4980fbef93efc869fb80f6da709c60590d21cc7945ad26  /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.JkN7HpVA/vhive-stock.out
+76a4fbd3954094bd8ee9af677c390e3a5541c9f5987eccdac6d1acea66ce9a62  /users/nehalem/fc-ctrd-mod/evidence/vhive-4e0033b81a17.JkN7HpVA/vhive.out
+reply="Hello, before-one!" cold=false
+reply="Hello, before-two!" cold=false
+{"vm_id": "901-0", "vmm_pid": 298, "start_ticks": "7557752", "disk": "/dev/mapper/fc-vhive-4e0033b81a17-2861024-snap-9", "netns": "/var/run/netns/uvmns1"}
+removed VM 901-0 (PID 298) and /dev/mapper/fc-vhive-4e0033b81a17-2861024-snap-9
+reply="Hello, after-restore!" cold=true
+reply="Hello, after-warm!" cold=false
+{"vm_id": "901-1", "vmm_pid": 431, "start_ticks": "7559157", "disk": "/dev/mapper/fc-vhive-4e0033b81a17-2861024-snap-10", "netns": "/var/run/netns/uvmns1"}
+removed VM 901-1 (PID 431) and /dev/mapper/fc-vhive-4e0033b81a17-2861024-snap-10
+VHIVE_DEPLOY_INVOKE_SNAPSHOT_RESTORE_OK
+VHIVE_WORKER_ACCEPTANCE_OK
+
+Cleanup:
+No SHA-owned runtime/snapshotter/vHive thin pools remain. Existing other pools and workloads were left intact.
+SDK native jailer cgroup /sys/fs/cgroup/firecracker/b absent: True
+Pipeline process 2549640 exited; no live Step 2 validation handles.
+No /dev/sdb operation; named file-backed pools only.
