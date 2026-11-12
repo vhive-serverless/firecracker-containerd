@@ -1,0 +1,54 @@
+=== RUN   TestCheckpointRestoresSharedTreeHandlesAndReplay
+--- PASS: TestCheckpointRestoresSharedTreeHandlesAndReplay (0.06s)
+=== RUN   TestCheckpointFreezeAndCaptureFailure
+--- PASS: TestCheckpointFreezeAndCaptureFailure (0.02s)
+=== RUN   TestCheckpointSingleFileAppendAndCorruptData
+--- PASS: TestCheckpointSingleFileAppendAndCorruptData (0.01s)
+=== RUN   TestVolumeCheckpointRealVM
+    checkpoint_vm_linux_test.go:36: run tools/modernize/test-native-volumes.sh on the worker
+--- SKIP: TestVolumeCheckpointRealVM (0.00s)
+=== RUN   TestRenameAndUnlinkPreserveOpenInode
+--- PASS: TestRenameAndUnlinkPreserveOpenInode (0.00s)
+=== RUN   TestNamesAndSymlinksStayInGuestNamespace
+--- PASS: TestNamesAndSymlinksStayInGuestNamespace (0.00s)
+=== RUN   TestHandleLimitPrecedesTruncationOrCreation
+--- PASS: TestHandleLimitPrecedesTruncationOrCreation (0.00s)
+=== RUN   TestSpecialFileCannotBlockOrOpenOnHost
+--- PASS: TestSpecialFileCannotBlockOrOpenOnHost (0.00s)
+=== RUN   TestGuestOwnershipAndSetgidInheritance
+--- PASS: TestGuestOwnershipAndSetgidInheritance (0.00s)
+=== RUN   TestSingleFileExportAndReadOnly
+--- PASS: TestSingleFileExportAndReadOnly (0.00s)
+=== RUN   TestMetadataAndHardLinkIdentity
+--- PASS: TestMetadataAndHardLinkIdentity (0.00s)
+=== RUN   TestDescriptorLimitsAndForget
+--- PASS: TestDescriptorLimitsAndForget (0.00s)
+=== RUN   TestConcurrentCloseAndForgetReleaseDescriptors
+--- PASS: TestConcurrentCloseAndForgetReleaseDescriptors (0.00s)
+=== RUN   TestGuestFilesystemLifecycleAndHostCoherence
+--- PASS: TestGuestFilesystemLifecycleAndHostCoherence (0.05s)
+=== RUN   TestGuestFilesystemDirectoryCookiesAndReconnect
+--- PASS: TestGuestFilesystemDirectoryCookiesAndReconnect (0.21s)
+=== RUN   TestGuestSingleFileAndReadOnlyMount
+--- PASS: TestGuestSingleFileAndReadOnlyMount (0.02s)
+=== RUN   TestGuestMountCloseDetachesBorrowedFile
+--- PASS: TestGuestMountCloseDetachesBorrowedFile (0.29s)
+=== RUN   TestGuestKernelPermissionsAndOwnership
+--- PASS: TestGuestKernelPermissionsAndOwnership (0.02s)
+=== RUN   TestMountExportUsesPrivateView
+--- PASS: TestMountExportUsesPrivateView (0.00s)
+=== RUN   TestHostListenerSupportsLongDirectoryAndOwnedCleanup
+--- PASS: TestHostListenerSupportsLongDirectoryAndOwnedCleanup (0.00s)
+=== RUN   TestRPCReconnectDoesNotRepeatMutations
+--- PASS: TestRPCReconnectDoesNotRepeatMutations (0.30s)
+=== RUN   TestRPCBinaryNamesLargeIOAndConcurrentCalls
+--- PASS: TestRPCBinaryNamesLargeIOAndConcurrentCalls (0.38s)
+=== RUN   TestRPCReplayRejectsChangedContentAndWrongSequence
+--- PASS: TestRPCReplayRejectsChangedContentAndWrongSequence (0.00s)
+=== RUN   TestRPCCapabilityRevocationAndSessionOwnership
+--- PASS: TestRPCCapabilityRevocationAndSessionOwnership (0.00s)
+=== RUN   TestRPCRejectsOversizedFrameBeforeReadingBody
+--- PASS: TestRPCRejectsOversizedFrameBeforeReadingBody (0.00s)
+=== RUN   TestRPCClientCancellationAndClose
+--- PASS: TestRPCClientCancellationAndClose (0.00s)
+PASS
