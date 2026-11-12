@@ -148,35 +148,54 @@ func readSnapshotDriveMetadata(state string) (*snapshotDriveMetadata, error) {
 // prepareSnapshotMounts must run after clone/configuration and before jailer
 // options are built. No mounts or original-path filesystem changes happen here.
 func (s *service) prepareSnapshotMounts(request *proto.CreateVMRequest) error {
-	if !request.LoadSnapshot {
+	if s.nativeRestore == nil && !request.LoadSnapshot {
 		return nil
 	}
 	var mounts []restoreMount
 	var inputs []string
-	metadata, err := readSnapshotDriveMetadata(request.SnapshotPath)
-	if err != nil {
-		return err
-	}
-	s.legacyRestoreCut = metadata.Transport
-	for _, drive := range metadata.Drives {
-		source := request.ContainerSnapshotPath
-		expectedID := stubPathToDriveID("ctrstub0")
-		if drive.Root {
-			if len(s.machineConfig.Drives) == 0 || s.machineConfig.Drives[0].DriveID == nil {
-				return fmt.Errorf("missing restore root drive")
+	if restore := s.nativeRestore; restore != nil {
+		if restore.manifest == nil || restore.manifest.VMConfig == nil {
+			return fmt.Errorf("missing captured VM configuration")
+		}
+		_, jailed := s.jailer.(*runcJailer)
+		metadata, err := snapshotDrivePaths(restore.manifest.VMConfig, jailed)
+		if err != nil {
+			return err
+		}
+		for index, drive := range metadata.Drives {
+			saved := restore.manifest.Drives[index]
+			if drive.ID != saved.ID || drive.ReadOnly != saved.ReadOnly {
+				return fmt.Errorf("captured drive identity mismatch")
 			}
-			source, expectedID = s.machineConfig.Drives[0].PathOnHost, *s.machineConfig.Drives[0].DriveID
+			mounts = append(mounts, restoreMount{Source: restore.files[saved.File.Path], Target: drive.Path, ReadOnly: drive.ReadOnly})
 		}
-		if drive.ID != expectedID {
-			return fmt.Errorf("captured drive ID %q differs from restore device %q", drive.ID, expectedID)
-		}
-		mounts = append(mounts, restoreMount{Source: source, Target: drive.Path, ReadOnly: drive.ReadOnly})
-	}
-	inputs = append(inputs, request.SnapshotPath)
-	if request.MemBackend != nil {
-		inputs = append(inputs, request.MemBackend.BackendPath)
+		inputs = append(inputs, restore.files["memory"], restore.files["state"])
 	} else {
-		inputs = append(inputs, request.MemFilePath)
+		metadata, err := readSnapshotDriveMetadata(request.SnapshotPath)
+		if err != nil {
+			return err
+		}
+		s.legacyRestoreCut = metadata.Transport
+		for _, drive := range metadata.Drives {
+			source := request.ContainerSnapshotPath
+			expectedID := stubPathToDriveID("ctrstub0")
+			if drive.Root {
+				if len(s.machineConfig.Drives) == 0 || s.machineConfig.Drives[0].DriveID == nil {
+					return fmt.Errorf("missing restore root drive")
+				}
+				source, expectedID = s.machineConfig.Drives[0].PathOnHost, *s.machineConfig.Drives[0].DriveID
+			}
+			if drive.ID != expectedID {
+				return fmt.Errorf("captured drive ID %q differs from restore device %q", drive.ID, expectedID)
+			}
+			mounts = append(mounts, restoreMount{Source: source, Target: drive.Path, ReadOnly: drive.ReadOnly})
+		}
+		inputs = append(inputs, request.SnapshotPath)
+		if request.MemBackend != nil {
+			inputs = append(inputs, request.MemBackend.BackendPath)
+		} else {
+			inputs = append(inputs, request.MemFilePath)
+		}
 	}
 	if err := validateRestoreMounts(mounts, s.jailer.JailPath().RootPath()); err != nil {
 		return err
