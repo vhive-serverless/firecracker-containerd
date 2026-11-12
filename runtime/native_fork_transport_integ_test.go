@@ -100,7 +100,7 @@ func testNativeForkTransport(t *testing.T, diskUpper bool) {
 			control, err := integtest.NewFCControlClient(integtest.ContainerdSockPath)
 			require.NoError(t, err)
 			t.Cleanup(func() { _ = control.Close() })
-			id := fmt.Sprintf("native-fork-disk=%v-%v", diskUpper, jailed)
+			id := fmt.Sprintf("native-fork-%t-%t", diskUpper, jailed)
 			request := &proto.CreateVMRequest{VMID: id, ContainerCount: 2,
 				MachineCfg: &proto.FirecrackerMachineConfiguration{MemSizeMib: 512}}
 			request.GuestRoot = &proto.GuestRootStorage{Mode: "ram"}
