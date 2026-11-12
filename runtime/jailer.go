@@ -111,5 +111,9 @@ func newJailer(
 		// preparation installs private mappings from the checkpoint manifest.
 		mounts = nil
 	}
-	return newRuncJailer(ctx, l, service.vmID, config, mounts)
+	jailed, err := newRuncJailer(ctx, l, service.vmID, config, mounts)
+	if err == nil {
+		jailed.trackRestoreStubs = request.NativeCheckpointDirectory != ""
+	}
+	return jailed, err
 }

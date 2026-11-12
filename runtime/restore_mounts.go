@@ -15,6 +15,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -375,6 +376,9 @@ func (j *runcJailer) prepareRestoreMounts() error {
 			return err
 		}
 		file, err := root.OpenFile(target, os.O_WRONLY|os.O_CREATE|os.O_EXCL|unix.O_NOFOLLOW, 0600)
+		if errors.Is(err, os.ErrExist) {
+			file, err = j.openOwnedRestoreStub(root, target)
+		}
 		if err != nil {
 			return err
 		}
