@@ -21,6 +21,7 @@ import (
 	"syscall"
 	"testing"
 
+	taskAPI "github.com/containerd/containerd/api/runtime/task/v3"
 	"github.com/firecracker-microvm/firecracker-containerd/config"
 	"github.com/firecracker-microvm/firecracker-containerd/internal/vm"
 	"github.com/firecracker-microvm/firecracker-containerd/proto"
@@ -29,6 +30,23 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 )
+
+func TestNativeRestoreExecStateIdentity(t *testing.T) {
+	svc, _ := nativeCloneStorageFixture(t, t.TempDir())
+	manifest := svc.nativeRestore.manifest
+	manifest.Tasks = []nativeTask{{ID: "task", Spec: json.RawMessage(`{}`)}}
+	manifest.Processes = []nativeProcess{
+		{TaskID: "task", State: &taskAPI.StateResponse{ID: "task", Pid: 10}},
+		{TaskID: "task", ExecID: "exec", State: &taskAPI.StateResponse{ID: "exec", Pid: 11}},
+	}
+	manifest.Transport.Processes = []vm.TransportProcessIO{{TaskID: "task"}, {TaskID: "task", ExecID: "exec"}}
+	require.NoError(t, validateNativeRestore(manifest), "containerd identifies exec state by exec ID")
+	manifest.Processes[1].State.ID = "task"
+	require.Error(t, validateNativeRestore(manifest), "task ID must not impersonate exec state")
+	manifest.Processes[1].State.ID = "exec"
+	manifest.Processes[0].State.ID = "exec"
+	require.Error(t, validateNativeRestore(manifest), "init state still requires task ID")
+}
 
 func nativeCloneStorageFixture(t *testing.T, destination string) (*service, *proto.CreateVMRequest) {
 	t.Helper()

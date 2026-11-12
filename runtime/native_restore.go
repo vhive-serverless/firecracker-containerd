@@ -210,7 +210,11 @@ func validateNativeRestore(manifest *nativeCheckpoint) error {
 			}
 		}
 		key := process.TaskID + "/" + process.ExecID
-		if !tasks[process.TaskID] || process.State == nil || process.State.ID != process.TaskID || process.State.Pid == 0 || processes[key] {
+		stateID := process.TaskID
+		if process.ExecID != "" {
+			stateID = process.ExecID
+		}
+		if !tasks[process.TaskID] || process.State == nil || process.State.ID != stateID || process.State.Pid == 0 || processes[key] {
 			return syscall.EINVAL
 		}
 		processes[key] = true
