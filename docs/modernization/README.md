@@ -12,7 +12,7 @@ modernize-runtime -> vhive-compatible -> cri-native-snapshot-restore -> damon-vi
 | 1 | `modernize-runtime` | Modernized OCI runtime; committed worker build and lifecycle acceptance. |
 | 2 | `vhive-compatible` | Adds the pinned standalone vHive deployment and function snapshot/restore profile. |
 | 3 | `cri-native-snapshot-restore` | Adds CRI integration, ordinary RuntimeClass Pods and native checkpoint components; **WIP**, with CRI failures and Kubernetes Pod restore deferred to the 1.38 interface work. |
-| 4 | `damon-virtio-pmem` | Adds disk-backed guest storage, pmem/DAX, DAMON/reporting and memory evaluation; direct runtime restore is accepted in its documented scope. The retained guest stargz store is migrated to disk and its storage matrix passed; native restore acceptance remains open. Inherited Step 3 limitations remain disclosed. |
+| 4 | `damon-virtio-pmem` | Adds disk-backed guest storage, pmem/DAX, DAMON/reporting and memory evaluation; direct runtime restore is accepted in its documented scope. Clean full-stack acceptance at `06b55e3` includes retained guest stargz disk storage and direct native restore. Inherited Step 3 limitations remain disclosed. |
 
 Read the milestone document on its own branch: [Step 1](step-1.md),
 [Step 2](https://github.com/vhive-serverless/firecracker-containerd/blob/vhive-compatible/docs/modernization/step-2.md),
@@ -65,4 +65,4 @@ Go/Rust comparison using a pinned Step 4 image.
 The user confirmed on 2026-11-12 that Kubernetes Pod checkpoint/restore is
 deferred to 1.38 interface availability. The [recorded API audit](step-3-api-audit.md)
 distinguishes that external dependency from the observed CRI failures and the
-independent Step 4 stargz storage gap.
+separately validated Step 4 stargz storage work.

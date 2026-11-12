@@ -30,7 +30,7 @@ flowchart LR
 ```
 
 The [control plugin](../firecracker-control) is compiled into the custom
-containerd binary. Its [control API](../proto/firecracker.proto) manages VMs
+containerd binary. Its [control API](../proto/service/fccontrol/fccontrol.proto) manages VMs
 that can contain multiple containers. It forwards requests to the per-VM shim.
 The [runtime shim](../runtime) implements containerd's runtime-v2 integration
 using the **task/v3 ttrpc API** and current shim-manager bootstrap. Runtime-v2
@@ -49,20 +49,21 @@ over vsock. The guest kernel supplies namespaces and cgroup v2 isolation.
 
 ## Storage and incremental features
 
-Step 1 preserves an immutable SquashFS guest base with a tmpfs guest overlay
-upper; default devmapper container writable roots are already separate ext4
-block devices backed by host storage. The guest-root overlay, container writable
-root, exported host volumes and temporary mounts are separate storage layers.
-The optional guest stargz path has its own storage and must be assessed separately.
-On Step 4, its store and container overlay upper/work directories bind directly
-to the private guest-upper filesystem at `/rom/overlay/stargz`; they share that
-disk's capacity and snapshot lifetime. The storage matrix passed all four
-profiles under both jailer modes at candidate revision `7588b07`; native
-capture/restore matrix acceptance is still in progress. See the
-[Step 4 completeness report](modernization/step-4-completeness.md) for current
-status and coverage limits. Stargz workload lower layers remain FUSE-backed;
-the storage tests do not establish cold lazy-fetch behavior. Optional pmem/DAX
-applies to the immutable guest base.
+The Step 1 baseline used an immutable SquashFS guest base with a tmpfs guest
+overlay upper. Step 4 defaults that upper to a private host-disk ext4 image;
+default non-stargz container writable roots remain separate devmapper-backed
+ext4 devices. The guest-root overlay, container writable root, exported host
+volumes and temporary mounts are separate storage layers. The optional guest
+stargz path has its own storage. Its store and container overlay upper/work
+directories bind to the private guest-upper filesystem at
+`/rom/overlay/stargz`; they share that disk's capacity and snapshot lifetime.
+The clean `06b55e3` acceptance run passed four stargz storage profiles under
+both jailer modes and 12 stargz native restore cases. See the
+[Step 4 completeness report](modernization/step-4-completeness.md) and
+[verification receipt](modernization/evidence/step4-stargz/clean-06b55e3/verification.json)
+for results and limits. Stargz workload lower layers remain FUSE-backed; the
+storage tests do not establish cold lazy-fetch behavior. Optional pmem/DAX
+applies to the immutable guest base, not the FUSE lowers.
 
 Step 2 adds vHive-managed snapshot/restore for its documented standalone profile.
 Step 3 adds a CRI frontend, ordinary Kubernetes RuntimeClass support and native

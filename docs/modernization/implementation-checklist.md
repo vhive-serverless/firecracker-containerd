@@ -68,7 +68,7 @@ storage work. Observed CRI conformance failures remain a separate open issue.
 - [ ] Document identity, networking, same-node/cross-node and alpha limitations.
 - [ ] Commit/push implementation, manifests/gates/tests, dependency pins and independent reproduction procedure; report outcome/revisions/results.
 
-## Step 4: damon-virtio-pmem (in progress; Step 3 remains WIP)
+## Step 4: damon-virtio-pmem (accepted storage/memory scope; Step 3 remains WIP)
 
 - [x] Create branch from pinned Step 3 WIP commit `26ceead`; user explicitly authorized this ordering change on 2026-11-11. Scope remains writable storage and memory reduction; inherited restore gaps remain visible.
 - [x] Read arXiv 2609.22978; verify running host/guest/container storage before changes (f52d26c audit).
@@ -82,8 +82,10 @@ storage work. Observed CRI conformance failures remain a separate open issue.
 - [x] Ordinary Kubernetes Pod lifecycle passed all four disk/pmem/reclaim/combined profiles with clean 06936f6 harness and pinned 72f4fc9 runtime image; raw evidence and cleanup verified. See step-4.md.
 - [x] Broader regression follow-up: initial 35 runtime cases plus targeted corrections for five storage-related test failures; all five snapshotter cases passed. Unfiltered CRI retained the same 97 passes, 16 failures and 29 skips. Failed runs and source/image distinctions remain in step-4.md.
 - [x] In-flight native capture interruption after quiescing passed both jailers from clean 5186d40: task thaw/exec, artifact cleanup and subsequent capture; production runtime unchanged from `72f4fc9`.
-- [ ] Complete retained guest stargz acceptance: disk migration and four-profile storage matrix passed at 7588b07; native restore remains open after a post-restore image-layer read failure. See step-4-completeness.md.
-- [ ] Inherited CRI conformance remains open. Kubernetes Pod checkpoint/restore is deferred to 1.38 interface availability; its future acceptance is separate from current Step 4 storage work. Direct runtime tests do not establish either result.
+- [x] Retained guest stargz acceptance at clean `06b55e3`: four storage profiles across both jailers and twelve native restore cases passed, including fixed gateway identity across TAP replacement. See step-4-completeness.md.
+- Inherited Step 3 follow-up: CRI conformance remains open. Kubernetes Pod checkpoint/restore is deferred to 1.38 interface availability; its future acceptance is separate from current Step 4 storage work. Direct runtime tests do not establish either result.
 - [x] Run identical workloads/resources for original baseline, disk baseline, pmem only, reclamation only and combined, plus matching ext4 block controls: clean 0a268c5, 21 trials, three randomized blocks.
 - [x] Measure peak/integrated host memory, guest anonymous/page cache, shared backing, CPU, faults/I/O, disk, latency and correctness; separate accounting domains and retain missing metrics and reporting-counter freshness limitations.
-- [x] Commit/push evaluation scripts/config/results; frozen 0a268c5 observations, strict summaries, independently checked integrals, plots, commands and limitations are preserved. Runtime restore acceptance remains a separate gate above.
+- [x] Commit/push evaluation scripts/config/results; frozen 0a268c5 observations, strict summaries, independently checked integrals, plots, commands and limitations are preserved. Runtime restore acceptance is separately recorded above.
+
+- [x] Final clean `06b55e3` build/install/full acceptance: 47 runtime, seven snapshotter and 79 SDK top-level passes, plus package/race/generation checks; three explicit skips documented in the receipt. Private pools, VM storage and test containers cleaned; unrelated control plane preserved.

@@ -1,49 +1,45 @@
-# Step 4 implementation completeness
+# Step 4 acceptance
 
-## Current status
+**Step 4 is complete for the authorized disk-backed storage and memory scope.**
+Clean source `06b55e3b78cc6bedfe3f0671fcdc49df73046eb2` passed build, install,
+and the full stack test on the designated worker. The checkout was clean, all
+test-owned pools and VM files were removed, and no test containers remained.
+The [verification record](evidence/step4-stargz/clean-06b55e3/verification.json)
+contains commands, source and dependency hashes, pass counts, skips, and links
+to raw output. The [CI run](https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43172572356)
+also passed.
 
-At candidate revision `7588b07`, the stargz storage matrix passed all four
-profiles (disk, reclaim, pmem, combined) under both jailer modes. The guest
-stargz store and overlay upper/work are bound to `/rom/overlay/stargz` on the
-private guest-upper filesystem. These integration tests use a static owned TAP
-setup; they do not establish default CNI coverage or cold lazy-fetch behavior.
-Stargz workload lower layers remain FUSE-backed.
+The verbose full run reported 47 runtime, 7 snapshotter, and 79 SDK top-level
+passes. The nonverbose package and CRI race checks and generation checks passed.
+Three explicit skips remain documented: `TestMemoryEvaluation_Isolated` needs
+one evaluation-trial configuration and the frozen 21-trial matrix is separately
+validated; `TestLogAndMetrics` is an existing SDK skip; and
+`TestNativeSnapshotVsockPolicy` is routed by the SDK to
+`tools/test-native-snapshot.sh`, while native restore matrices ran separately.
 
-Native capture/restore acceptance is still open. After correcting CRI
-fixture annotations, development tests passed disk with both jailers and
-ext4-block without the jailer. The ext4-block jailed case failed on a
-post-restore image-layer read after six registry header-timeout attempts.
-The cause remains under investigation; this is a real acceptance failure,
-not a waived test. Therefore this report does not mark Step 4 complete. The 21-trial memory evaluation uses the standard guest image and does
-not measure the stargz change.
+## Requirement coverage
 
-Kubernetes Pod checkpoint/restore integration is deferred to the 1.38
-interface work because the required endpoints were absent from the tested
-releases. This is separate from observed CRI conformance failures and the Step
-4 storage/restore work. It does not claim that a particular 1.38 build already
-implements those APIs.
-
-## Historical audit at `8340f72`
-
-The matrix below preserves the earlier source/evidence audit of
-`damon-virtio-pmem` against `goal.md:148-226`. Its stargz tmpfs findings and
-open follow-up describe that audited revision only; they are superseded by the
-current status above. The original requirements are restated for traceability.
-
-## Historical requirement matrix
-
-| Goal requirement | Finding and evidence | Status |
+| Goal area | Evidence and scope | Status |
 | --- | --- | --- |
-| Verify actual initial storage; distinguish guest overlay, workload layer, temporary mounts (`goal.md:156-170`) | Baseline worker audit records SquashFS + tmpfs guest upper, devmapper/ext4 workload roots, and `/dev`, `/run`, `/dev/shm` tmpfs (`docs/modernization/step-4.md:18-38`). Step 1 separately documents the guest stargz store/upper as tmpfs (`step-1.md:63-69`). | Verified for the audited revision; the stargz finding is historical. |
-| Move persistent writes to per-VM host-disk filesystem with capacity, ownership, cleanup, ENOSPC handling (`goal.md:160-175,218-220`) | `runtime/guest_storage.go:38-97` attaches a per-VM ext4 upper disk by default (512 MiB; 64–65536 MiB range), checks immutable root and UUID boot selection. `:100-198` verifies host filesystem type, formats/reserves capacity, cleans failed allocation. Tests/evidence cover mount/write/copy-up/rename/delete, ENOSPC recovery and cleanup (`step-4.md:83-145`, clean `8f8d00f` receipt). Container roots remain devmapper-backed. | Accepted for default devmapper and ordinary runtime paths in the audited revision; later stargz storage acceptance is summarized above. |
-| Preserve only appropriate temporary tmpfs (`goal.md:170`) | At the audited revision, `/dev`, `/run`, `/dev/shm` are explicitly temporary and remain tmpfs (`step-4.md:29-31`), while the stargz service used tmpfs (`step-1.md:67-69`). | Historical open finding; current stargz backing is covered by the storage matrix above. |
-| Independently configurable pmem/DAX and DAMON/free-page reporting; verify actual operation and document deviations (`goal.md:177-186`) | `runtime/pmem_root.go:75-134` configures verified read-only ext4 image as pmem/DAX; `:137-245` digest cache and explicit immutable sharing. `runtime/guest_reclamation.go:24-72` independently configures DAMON reclaim and VMM free-page reporting. Pinned-kernel behavior/deviations and config contract are described in `step-4-pmem.md:25-63`, `step-4-reclamation.md:25-70`. Actual DAX and reclaim/reporting checked in component and restore tests; clean receipts at `438c2cb`, `9706231`, `020f85b`, `72f4fc9`. | Accepted with documented constraints: immutable cache persists and requires admin GC (`step-4-pmem.md:32-39`); pmem snapshots depend on fixed path contract (`:56-63`); reporting counters can lag flush. |
-| Snapshot consistency: quiesce, flush/copy, prevent advanced source backing, private writable restores (`goal.md:188-196`) | `runtime/native_checkpoint.go:198-223` pauses tasks and VMM, freezes/saves exported volumes, then saves VMM files; `:233-255` copies every configured drive and immutable root. `:282-295` thaws before atomic publication. Restore validations and ordering/limitations are in `step-4.md:221-259`. Storage matrix advances source data, stops source VMM/removes its directory, validates captured state, hashes, private clone inodes and restored I/O (`native_restore_integ_test.go:60-72,~120-283`). | Accepted for direct same-host runtime API and tested layouts. External writers to exported volumes need independent quiescence; networked/cross-host and pmem path relocation are out of scope and disclosed (`step-4.md:227-250,270-278`). |
-| Interrupted checkpoint cleanup and continued source usability | New `TestNativeCheckpointInterrupt_Isolated` observes nonempty staged memory, disconnects the control transport, checks stage/destination removal, task running/exec, and a successful subsequent capture in both jailer modes (`native_checkpoint_interrupt_integ_test.go:37-46,100-145`). Clean committed receipt at `5186d40`, both modes/lint (`step-4.md:423-444`). | Accepted for transport interruption after quiescing. This is not an injected storage-I/O failure test; do not broaden the claim. |
-| Evaluate original, disk, pmem, reclaim, combined using identical workload/resources and required metrics (`goal.md:198-226`) | `REPORT.md` records 21/21 trials, seven arms × three randomized blocks, two VMs/trial, same guest tree/workload/resources. It reports cgroup peak/time, idle anon/file, PSS, CPU, fault, guest reactivation latency, create/readback latency, disk allocation counters, correctness and observed tradeoffs. `trials_compact.csv` includes per-file `st_blocks`/thin-pool and cumulative physical I/O; `DATA_DICTIONARY.md:4-16` defines limits. | Accepted with explicit missing views: `missing_metrics.csv` lists unavailable full-trial mapped PSS (sampler lacks brackets) and full-trial physical-I/O deltas (initial bracket unavailable); report uses valid idle PSS and cumulative end counters instead. The reporting-frame freshness limitation is also explicit (`REPORT.md` reporting paragraph; `step-4.md:72-75`). Measurements are one worker, three blocks, warmed backing, not general estimates. |
-| Step 3 lifecycle and restore tests with Step 4 storage/mechanisms; reproducible branch (`goal.md:222-226`) | Clean `72f4fc9` passes 14 direct native restore cases, source termination, task lifecycle and six restored reclaim/reporting paths; Step 4 ordinary Kubernetes tests pass four profiles on a pinned runtime image. Later runtime test-harness fixes were targeted, not one uninterrupted full-suite run (`step-4.md:204-225,288-391`). | Historical status: direct runtime/storage scope accepted; CRI suite had 16 failures/29 skips. Pod checkpoint/restore is deferred to 1.38 per current clarification, not a Step 4 storage gate. |
+| Per-VM disk-backed persistent writes (`goal.md`, Step 4A) | The default guest upper uses a private host-disk ext4 image. The retained guest stargz store and its container overlay upper/work paths use that same per-VM filesystem. `TestStargzGuestDiskStorage_Isolated` passed four profiles (disk, reclaim, pmem, combined) under both jailer modes in 84.80 s. It checks private backing, ownership/capacity, ext4 store and overlay paths, copy-up/rename/delete, ENOSPC recovery, synced persistence, and cleanup. Default non-stargz container writable roots remain devmapper-backed. | Accepted for tested storage paths and profiles. |
+| Snapshot/restore with new storage (`goal.md`, Step 4C) | `TestStargzNativeRestore_Isolated` passed 12 cases: six storage profiles under both jailer modes, in 308.74 s. The full run also passed 14 standard native restore cases. Tests verify source termination, restored task state and I/O, private writable clone state, lower-file access, and cleanup. | Accepted for the tested same-host runtime API and storage layouts. |
+| Pmem/DAX and DAMON/free-page reporting (`goal.md`, Step 4B) | Independent mechanism configuration and runtime checks are documented in [Step 4](step-4.md). Stargz `pmem` cases use the DAX-capable guest base image and check DAX on `/rom`; stargz workload lowers remain FUSE-backed. Reclamation-enabled profiles check the guest reclaim/reporting path. | Accepted in the documented configurations; this does not establish pmem/DAX for FUSE lowers. |
+| Controlled memory evaluation (`goal.md`, Step 4D) | The frozen 21-trial evaluation uses the standard guest image: seven arms across three randomized blocks. It does not exercise the retained stargz storage path and supports no stargz-specific memory-savings claim. `missing_metrics.csv` records unbracketed full-trial mapped-PSS windows and unavailable full-trial physical-I/O deltas; the report presents idle PSS and cumulative end counters with those limits. | Accepted as a bounded evaluation of the measured standard-image workload; full-trial PSS/I/O views remain unavailable. |
+| Ordinary Kubernetes and inherited Step 3 behavior | Ordinary Pod profile results are recorded in [Step 4](step-4.md). The unfiltered CRI conformance suite still has 16 failures and 29 skips, so Step 3 CRI compliance remains WIP. Kubernetes Pod checkpoint/restore is deferred to the 1.38 interface work under the current user clarification. | Step 3 remains WIP; this does not invalidate Step 4's storage and runtime-level acceptance. |
 
-## Historical follow-up at `8340f72`
+## Stargz test limits
 
-1. The audited source had an unresolved guest stargz tmpfs path. The current storage matrix addresses its disk-backing coverage; native restore acceptance remains in progress.
-2. Preserve the distinction between Step 4 completion and inherited Step 3 status. CRI conformance remains work in progress. Kubernetes Pod checkpoint/restore is deferred to 1.38 interface availability.
+The stargz integration matrices use a purpose-built static bridge and TAP
+devices; they do not validate default CNI for that path. The image wrapper
+prefetches 10 MiB, so lower-file reads are not a cold lazy-fetch measurement.
+The container image lowers remain FUSE-backed. The pmem check is for the guest
+base image at `/rom`, not those FUSE lowers. Restore exercises the direct runtime
+API with replacement TAPs on one host; it does not validate CRI conformance,
+Kubernetes Pod restore, or preservation of arbitrary network connections.
+
+The [stargz evidence README](evidence/step4-stargz/README.md) records the
+fixture investigation and component history. The final clean run's
+[verification JSON](evidence/step4-stargz/clean-06b55e3/verification.json),
+[test log](evidence/step4-stargz/clean-06b55e3/test.log), and
+[cleanup receipt](evidence/step4-stargz/clean-06b55e3/cleanup.txt) provide the
+committed acceptance record.

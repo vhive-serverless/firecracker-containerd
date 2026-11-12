@@ -15,32 +15,27 @@ remaining Kubernetes/CRI acceptance gates.
 
 ## Completion assessment
 
-**Step 4 is not complete across all retained storage modes.** The default
-devmapper path has accepted disk-backed guest-upper storage, memory mechanisms,
-ordinary Pod profiles and direct runtime restore. The optional guest stargz
-image now binds `/var/lib/containerd-stargz-grpc` to `/rom/overlay/stargz`, on
-the private guest-upper filesystem (`de2e471`). This replaces its former tmpfs
-store, including the container overlay upper/work directories. The initializer
-rejects missing or unsupported backing and permits tmpfs only for an explicit
-`overlay_root=ram` baseline. The clean `7588b07` storage matrix passed four
-profiles with both jailers. Native restore and final full-stack acceptance for
-this change are still pending; earlier snapshotter passes do not validate them.
-The [stargz receipts](evidence/step4-stargz/README.md) distinguish the storage
-pass from the subsequent native-test fixture failure and shared demux fix.
+**Step 4 is complete in the authorized storage and memory scope.** Clean
+worker source `06b55e3b78cc6bedfe3f0671fcdc49df73046eb2` passed build, private
+installation and the full acceptance script. It recorded 47 runtime, seven
+snapshotter and 79 SDK top-level passes, with three explicit skips listed in
+the [final receipt](evidence/step4-stargz/clean-06b55e3/verification.json).
+Package tests, CRI unit/race tests, generation checks, initializer checks and
+cleanup also passed. [CI passed for that same source](https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43172572356).
 
-The [initializer development receipt](evidence/de2e471-stargz-init.log) records
-passing rejection, explicit RAM, ext4 device/inode, write-through, idempotence
-and cleanup checks against the newly built `de2e471` test image. Read-only
-inspection also verifies that the guest image contains the executable helper
-and service configuration matching source. The test script was transferred
-separately at its recorded hash; this is not full committed-stack acceptance.
+The retained guest stargz store now binds `/var/lib/containerd-stargz-grpc` to
+`/rom/overlay/stargz` on the private guest-upper filesystem, including container
+overlay upper/work. Four storage profiles across both jailers and twelve native
+restore cases passed. These use static owned TAPs; they do not establish default
+CNI or cold lazy-fetch coverage. Stargz workload lowers remain FUSE-backed;
+pmem/DAX applies to the immutable guest base. The frozen 21-trial standard-image
+memory evaluation is unchanged and supplies no stargz-specific savings claim.
 
-See the [implementation audit](step-4-completeness.md) for the requirement
-matrix and the concrete follow-up. CRI conformance retains its observed failures.
-Kubernetes Pod checkpoint/restore is a separate, user-confirmed deferral to the
-1.38 interface work; it is not an active 1.37 endpoint requirement for this
-storage milestone. The reported memory improvements
-are measured tradeoffs, not a universal reduction across all configurations.
+See the [current requirement matrix](step-4-completeness.md) and
+[stargz evidence](evidence/step4-stargz/README.md). Step 3 remains explicitly WIP
+for CRI conformance. Kubernetes Pod checkpoint/restore is separately deferred
+to the 1.38 interface work; no particular 1.38 build is claimed to implement it.
+The measured memory results remain mixed rather than a universal reduction.
 
 ## Baseline evidence
 
@@ -450,7 +445,7 @@ race repetitions and the full cache package under the race detector.
 The [shared receipt](evidence/step4-cache-test/verification.json) records all four
 validated milestone backports, exact commands and raw hashes. The old failure
 was not reproduced in 30 baseline repetitions; these checks are test maintenance,
-not new full-stack acceptance. Step 3 CRI and Kubernetes restore remain WIP.
+not new full-stack acceptance. Step 3 CRI remains WIP; Kubernetes Pod restore is deferred to 1.38 interface work.
 
 ## Capture interruption after quiescing
 
@@ -474,3 +469,55 @@ Clean committed worker validation at `5186d40` passed both jailer modes in
 31.54 seconds and both modules' lint. Production Go sources, module manifests
 and submodule pins match the retained `72f4fc9` runtime image. The private pool
 and storage were removed; the unrelated control-plane workload was preserved.
+
+## Retained stargz path and final regression
+
+The disk migration at `de2e471` places the guest snapshotter's persistent cache,
+metadata and overlay upper/work on raw ext4 backing rather than the guest-root
+OverlayFS. The initializer rejects missing/unsupported backing, checks bind
+identity, and accepts RAM only for an explicit `overlay_root=ram` baseline.
+The store shares the private guest-upper disk's capacity and snapshot lifetime.
+
+The final clean run at `06b55e3` passed stargz disk, reclaim, pmem and combined
+storage profiles with both jailers in 84.80 seconds. It verifies actual host and
+guest backing, private inodes and ownership, capacity, overlay copy-up,
+rename/delete, exhaustion/recovery and writeback. The twelve-case stargz restore
+matrix passed in 308.74 seconds: disk, ext4-block, pmem, reclaim, combined and
+ext4-reclaim, each jailed and unjailed. It terminates the source VMM, restores a
+new VMM, verifies memory and disk cutoff, private writable copies, lower reads,
+exec, guest-to-host TCP, host snapshotter reconnection, artifact immutability
+and cleanup. This is same-host direct runtime restore with preserved guest
+network identity and a replacement TAP, not containerd/CRI ownership recovery.
+
+The development runs exposed two inherited production defects: jailed VM
+socket paths and host demux shutdown on SIGPIPE. Both were fixed on Step 1,
+validated there and merged forward. The final real-VM suite exercises those
+corrections. Two test-fixture defects were also corrected: CRI annotations
+incorrectly routed guest-only bind sources through host-volume preparation,
+and automatic bridge MAC selection changed gateway identity during TAP
+replacement. A fixed bridge MAC preserves the restored guest's ARP mapping.
+No snapshotter refresh, TCP-reset workaround or enlarged test timeout remains.
+The [failed and corrected runs](evidence/step4-stargz/README.md) are retained.
+
+The uninterrupted full acceptance run passed 47 runtime and seven snapshotter
+isolated cases plus 79 SDK top-level cases. Its explicit verbose skips are the
+separately driven memory-evaluation case, the SDK's existing `TestLogAndMetrics`,
+and its dedicated-script `TestNativeSnapshotVsockPolicy`. The generic SDK suite
+did not run that dedicated policy test; the full runtime native restore matrices
+did run. The separately pinned 21 memory trials remain the evaluation evidence.
+Both private pools were removed, VM storage was empty, no candidate test
+container remained, and the unrelated control plane stayed running.
+
+Reproduce from a clean committed checkout on the designated worker:
+
+```sh
+export STACK_DIR=/users/nehalem/fc-ctrd-mod
+tools/modernize/build-stack.sh
+tools/modernize/install-stack.sh
+tools/modernize/test-stack.sh
+```
+
+After build/install, `tools/modernize/test-stargz-storage.sh` selects just the
+initializer and two stargz matrices. The final recorded run used the broader
+`test-stack.sh`. Exact input hashes, test-image identity, source cleanliness,
+commands and raw output are in the [receipt](evidence/step4-stargz/clean-06b55e3/verification.json).

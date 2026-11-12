@@ -1,17 +1,20 @@
 # firecracker-containerd
 
 This branch pins Firecracker v1.18.0 and containerd v2.3.7. See the
-[modernization procedure and validation status](docs/modernization/step-1.md)
+[modernization procedure and validation status](docs/modernization/README.md)
 for the complete worker build, installation, tests, and dependency revisions.
 
 On `damon-virtio-pmem`, see [Step 4 status](docs/modernization/step-4.md) and the
 [21-trial memory evaluation](tools/memory-eval/results/0a268c5589c3/REPORT.md).
-Step 4's guest stargz store has been migrated to the private disk-backed upper;
-Its storage matrix passed; native restore acceptance remains open after a
-post-restore image-layer read failure. See the
-[completion audit](docs/modernization/step-4-completeness.md).
+Step 4's disk-backed storage, memory mechanisms and direct runtime restore
+passed clean worker acceptance at `06b55e3`, including the retained guest
+stargz path. See the [completion report](docs/modernization/step-4-completeness.md)
+for tested profiles, evidence and limitations.
 Step 3 remains explicitly WIP: full CRI conformance has not been accepted, and
 Kubernetes Pod checkpoint/restore is deferred to the 1.38 interface work.
+
+The upstream overview below is historical. Use the branch-specific modernization
+documents for current build and reproduction commands.
 
 [![BuildKite](https://badge.buildkite.com/aab4ae547d5e5079a5915522e8cdb18492349aef67aae5a8c5.svg?branch=main)](https://buildkite.com/firecracker-microvm/firecracker-containerd)
 [![GitHub Actions](https://github.com/firecracker-microvm/firecracker-containerd/actions/workflows/build.yaml/badge.svg)](https://github.com/firecracker-microvm/firecracker-containerd/actions)

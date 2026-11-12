@@ -1,7 +1,15 @@
 # Guest stargz storage validation
 
-These receipts separate component acceptance from the remaining full-stack
-validation. `checksums.json` records the included raw files.
+The [clean final receipt](clean-06b55e3/verification.json) records full acceptance
+at `06b55e3b78cc6bedfe3f0671fcdc49df73046eb2`: build/install/test exit zero,
+47 runtime, seven snapshotter and 79 SDK top-level passes, with three named
+skips. Both new stargz matrices passed. Cleanup removed private pools, VM files
+and test containers while preserving the unrelated control plane. The full
+[test output](clean-06b55e3/test.log) and exact inputs are retained.
+`checksums.json` records all included evidence files.
+
+The sections below preserve component and diagnostic history; their failed
+runs are not the final acceptance result.
 
 ## Storage component
 
@@ -44,5 +52,23 @@ The corrected development fixture passed disk with both jailers and ext4-block
 without the jailer, but ext4-block with the jailer failed while reading
 `/etc/system-release` after restore. The guest stargz client exhausted six
 registry header-timeout attempts and returned an I/O error. Fresh host and
-Docker-container probes reached the same blob. This narrows the failure but
-does not establish its cause; restore acceptance remains open.
+Docker-container probes reached the same blob. This initially left the cause unresolved. Subsequent packet captures and the
+bridge-MAC experiment below identified a changing gateway identity in the
+fixture; the failed run remains part of the evidence.
+
+A separate network-only container on the worker's actual host kernel
+`6.8.0-147-generic` reproduced the fixture hazard: an automatically addressed
+bridge changed from the source TAP's MAC to the replacement TAP's MAC. Setting
+an explicit bridge MAC before attaching either TAP preserved it across the same
+operations. See [raw output](bridge-mac-reproduction.log). The test used a
+private network namespace, two TAPs with deterministic distinct MACs, and no VMs.
+This establishes the fixture behavior; restore acceptance still requires the
+corrected VM matrix.
+
+The fixed-MAC focused restore run passed in 32.48 seconds without a snapshotter
+refresh or connection-reset workaround. Its guest ARP entry and packet capture
+matched the fixed gateway MAC, fresh connections worked, and the lower-file
+read succeeded without registry timeout logs. `06b55e3` retains the fixed MAC,
+assertions across TAP replacement, ARP logging and the original read checks;
+temporary packet capture and refresh experiments are removed. The final clean full-suite run passed both matrices without these temporary
+diagnostics.

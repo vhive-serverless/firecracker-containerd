@@ -1,0 +1,61 @@
+{
+  "source": "06b55e3b78cc6bedfe3f0671fcdc49df73046eb2",
+  "worker": "nehalem@amd218.utah.cloudlab.us",
+  "checkout": "/users/nehalem/fc-ctrd-mod/step4-stargz-closeout",
+  "commands": [
+    "STACK_DIR=/users/nehalem/fc-ctrd-mod tools/modernize/build-stack.sh",
+    "STACK_DIR=/users/nehalem/fc-ctrd-mod tools/modernize/install-stack.sh",
+    "STACK_DIR=/users/nehalem/fc-ctrd-mod tools/modernize/test-stack.sh"
+  ],
+  "build_install_test_exit": [
+    0,
+    0,
+    0
+  ],
+  "source_clean": true,
+  "runtime_isolated_passes": 47,
+  "snapshotter_isolated_passes": 7,
+  "sdk_verbose_top_level_passes": 79,
+  "verbose_top_level_passes": 133,
+  "explicit_verbose_skips": {
+    "TestMemoryEvaluation_Isolated": "Requires one explicit evaluate-memory.sh trial configuration; frozen 21-trial evaluation remains separately pinned.",
+    "TestLogAndMetrics": "Existing SDK skip.",
+    "TestNativeSnapshotVsockPolicy": "SDK directs this test to tools/test-native-snapshot.sh; not run by generic SDK suite. Runtime native restore matrices did run."
+  },
+  "stargz_storage_profiles": 4,
+  "stargz_storage_jailer_modes": 2,
+  "stargz_storage_seconds": 84.8,
+  "stargz_native_restore_cases": 12,
+  "stargz_native_restore_seconds": 308.74,
+  "standard_native_restore_cases": 14,
+  "standard_native_storage_seconds": 477.0,
+  "ci_success": "https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43172572356",
+  "cleanup_receipt": "cleanup.txt",
+  "scope": "Clean committed full acceptance script, including user/root package tests, CRI race tests, generation checks, runtime/snapshotter VMs and SDK. Not CRI conformance or Kubernetes Pod restore; no new memory evaluation.",
+  "files": {
+    "acceptance/agent-build-info": "adcef2a1891a8507663f71525eaf19a0033e6fcdbfdf3afd6383b3f6f36707f5",
+    "acceptance/binaries.sha256": "e1f635325c1a16a8706f3548ddc297b112eef2bfc19109f8f6fa2a5fed4b72bb",
+    "acceptance/cri-build-info": "e4104bd5b966c3b9f3a05343df19dbb68dddaacddd634de49dab9746459645ca",
+    "acceptance/cri-go-modules.json": "8119e9f8905c594909b7626fbf581e249f937a2e5451153a6749c6a79d96d006",
+    "acceptance/go-modules.json": "9205a85360f99ab51b444a2a31455eba191c462f7a1cd12140bf0e5e9c4ca70a",
+    "acceptance/runtime-revision": "2900a3d97022f0d079fb332035f94bf742efcfe4311e1f7bfb23ea143086cc8f",
+    "acceptance/test-image.json": "7e82ef32dfa90e6ab875b0679b3308144c45e1df56c6a4d6b469f2f230f95424",
+    "build/agent-build-info": "adcef2a1891a8507663f71525eaf19a0033e6fcdbfdf3afd6383b3f6f36707f5",
+    "build/binaries.sha256": "cf4a8a81ec75c938593ce7103b437e9398c021e77451542fed9fa5c9b2616906",
+    "build/cri-build-info": "e4104bd5b966c3b9f3a05343df19dbb68dddaacddd634de49dab9746459645ca",
+    "build/cri-go-modules.json": "8119e9f8905c594909b7626fbf581e249f937a2e5451153a6749c6a79d96d006",
+    "build/go-modules.json": "9205a85360f99ab51b444a2a31455eba191c462f7a1cd12140bf0e5e9c4ca70a",
+    "build/runtime-revision": "2900a3d97022f0d079fb332035f94bf742efcfe4311e1f7bfb23ea143086cc8f",
+    "build/submodules": "e028aba41228fc5cedfd358f149474553f618a1859f5e261228cf84e15b5182b",
+    "build-06b55e3.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "cleanup.txt": "1b14414ce7a3a48a1cc5304569915358a9aa2ae87a9530bc94731d379355ed01",
+    "host-backing.txt": "08a963fe097850bbb7646121c7f3c3a3fe305bd83ea0dbe9d303742e81f4262b",
+    "install-06b55e3.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "source.txt": "2900a3d97022f0d079fb332035f94bf742efcfe4311e1f7bfb23ea143086cc8f",
+    "status.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "storage-inputs.sha256": "4684f46807c60f0c9d7184e79a8ab9a8202f08751d4ffa78a33dff5cc73a45a8",
+    "submodules.txt": "e028aba41228fc5cedfd358f149474553f618a1859f5e261228cf84e15b5182b",
+    "test-06b55e3.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "test.log": "a940a52007ad53987f95f78f19c6c9f24c59c8b746be18bfe289a21b56213d6a"
+  }
+}

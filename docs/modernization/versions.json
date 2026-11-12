@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "Steps 1 and 2 preserved; Step 3 explicitly WIP; user authorized proceeding to Step 4 on 2026-11-11",
+  "status": "Steps 1 and 2 preserved; Step 3 CRI explicitly WIP and Kubernetes Pod restore deferred to 1.38 interface work; Step 4 storage/memory scope accepted at 06b55e3",
   "step_1_validation": {
     "runtime_branch": "modernize-runtime",
     "completion_commit": "06bd2058ba7938ad31eec9e17ac4d2e4c33a958f",
@@ -172,7 +172,7 @@
       "server_archive_sha256": "38e16f4ef1a3bf1406efa58f177b170b941e9aa6dedd0b8f1e27c2a52f1bdf38",
       "base_image": "docker.io/kindest/base@sha256:8098fa3cae05bc15d9c4b93a566d19e1f8e65a25e26ebeb993b6cb41142cf791",
       "smoke_image": "docker.io/library/alpine:3.23.0@sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375",
-      "runtime": "kind base containerd v2.3.4; stock runtime baseline only; Firecracker acceptance pending",
+      "runtime": "kind base containerd v2.3.4; stock runtime baseline only; not a Firecracker acceptance result",
       "script": "tools/kubernetes/one-node-baseline.sh"
     },
     "cri_conformance": {
@@ -189,7 +189,7 @@
       "go_mod_sum": "h1:aU7NkGYZUmuJrZapoI3mEcNve7PZTySUOLBuch/vR6U=",
       "vsock_port": 10901,
       "protocol_version": 1,
-      "status": "Committed guest bind-volume validation at 6b3cf8f and direct native runtime restore at 72f4fc9; remaining mount semantics and Kubernetes/CRI integration stay WIP."
+      "status": "Committed guest bind-volume validation at 6b3cf8f and direct native runtime restore at 72f4fc9; remaining mount semantics and CRI integration stay WIP; Kubernetes Pod restore is deferred."
     },
     "cri_integration": {
       "binary": "cri/firecracker-cri",
@@ -199,7 +199,7 @@
       "frontend_cri_streaming": "v0.37.2",
       "module_manifest": "cri-modules.txt",
       "port_forward_vsock_port": 10900,
-      "checkpoint_restore_status": "RPC definitions present; native whole-Pod implementation pending",
+      "checkpoint_restore_status": "Frontend protocol defines CheckpointPod/RestorePod; tested Kubernetes workflow absent. Integration is deferred to 1.38 interface work and is not accepted.",
       "initial_vm_resources": {
         "source": "containerd 2.3.7 standard sandbox CPU/memory OCI annotations",
         "default_memory_mib": 512,
@@ -292,7 +292,7 @@
     "sdk_commit": "832b1a5132e06f5e2167b64b97b5cd8946604005"
   },
   "step_4_guest_storage": {
-    "status": "Disk-backed storage/capture passed at 8f8d00f; direct native runtime restore passed at 72f4fc9; inherited Step3 Kubernetes/CRI gates remain WIP",
+    "status": "Default disk-backed storage/capture and native restore accepted at their recorded revisions; retained guest stargz storage and native restore plus full regression accepted at 06b55e3. Step 3 CRI remains WIP; Kubernetes Pod restore is deferred.",
     "default_mode": "disk",
     "default_capacity_mib": 512,
     "capacity_range_mib": [
@@ -304,7 +304,7 @@
     "host_backing": "direct ext3/ext4, XFS or Btrfs filesystem required",
     "ownership": "private file inside each VM jail; removed on VM cleanup",
     "boot_device_selection": "filesystem UUID; direct device probing before proc/udev startup",
-    "native_restore": "Direct runtime storage restore accepted at 72f4fc9; see step_4_native_runtime_restore. Kubernetes/CRI Pod restore remains WIP.",
+    "native_restore": "Direct runtime storage restore accepted at 72f4fc9; see step_4_native_runtime_restore. CRI remains WIP; Kubernetes Pod restore is deferred to 1.38 interface work.",
     "validation": {
       "tested_runtime_commit": "8f8d00fc2fb122d40c2e034f62e67978ba194c1e",
       "worker_checkout": "/users/nehalem/fc-ctrd-mod/step4-storage-dev",
@@ -315,7 +315,7 @@
     "test_state_directory": "FICD_VM_STORAGE; defaults to ../.ficd-test-vms/<checkout-name>, outside source/build contexts"
   },
   "step_4_memory": {
-    "status": "Incomplete across retained modes: default devmapper storage/mechanisms/evaluation/direct runtime restore accepted; guest stargz disk storage matrix passed at 7588b07, native restore acceptance remains open; inherited Step 3 CRI remains WIP and Kubernetes Pod restore is deferred to 1.38 interface work",
+    "status": "Accepted in documented storage/memory scope: standard-image mechanisms and frozen 21-trial evaluation, plus clean full regression and retained stargz storage/native restore at 06b55e3. No stargz-specific memory savings claim; inherited Step 3 CRI remains WIP and Kubernetes Pod restore is deferred to 1.38 interface work.",
     "free_page_reporting": "FirecrackerBalloonDevice.FreePageReporting; independent of target amount",
     "damon": "Bounded non-anonymous reclamation and reporting passed clean committed worker acceptance at 9706231",
     "pmem_dax": "Clean committed pmem/DAX, both jailers, shared immutable backing, private writes, combined DAMON capture and matching block capture passed at 438c2cb",
@@ -450,7 +450,7 @@
     "reporting_rss_drop_kib_max": 65328,
     "reporting_interpretation": "Physical VMM RSS release after freeing a resident file, retained checksum and fresh allocations; target/actual balloon zero; not a net physical-memory saving estimate",
     "scope": "Same host/namespace and pmem cache prefix; source VMM gone; private disk copies, real disk backing/full guest-upper reservation, unchanged artifacts, memory token/counter, matched logs and task lifecycle",
-    "limitations": "No accepted containerd/Kubernetes sandbox ownership reconstruction, networked restore or cross-host relocation; full inherited Step3 CRI/Kubernetes gates remain WIP",
+    "limitations": "No accepted containerd/Kubernetes sandbox ownership reconstruction, networked restore or cross-host relocation; Step3 CRI remains WIP and Kubernetes Pod restore is deferred",
     "ci_success": "https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43072956487"
   },
   "task_wait_test_maintenance": {
@@ -521,7 +521,7 @@
     "all_five_failed_cases_passed_after_targeted_corrections": true,
     "snapshotter_cases_passed": 5,
     "interruption_cleanup_seconds": 5,
-    "scope": "Initial baseline plus targeted committed corrections; not an uninterrupted full-suite run. Production Go and dependency pins unchanged; CRI and Kubernetes restore remain WIP."
+    "scope": "Initial baseline plus targeted committed corrections; not an uninterrupted full-suite run. Production Go and dependency pins unchanged; CRI remains WIP and Kubernetes Pod restore is deferred."
   },
   "cache_eviction_test_maintenance": {
     "tested_revision": "a67e5e6c1e270b199d5b8493ef04d7f2a0fa5401",
@@ -547,12 +547,13 @@
     "scope": "Transport interruption after quiescing; thaw, artifact cleanup, exec and subsequent capture. Runtime API only; Step 3 remains WIP."
   },
   "step_4_completion_audit": {
-    "audited_revision": "8340f724c8e0b5bdd81a1fed984183b95c7ab67b",
+    "audited_revision": "06b55e3b78cc6bedfe3f0671fcdc49df73046eb2",
     "report": "step-4-completeness.md",
-    "result": "Incomplete",
-    "open_storage_path": "Guest stargz disk migration implemented at de2e471; clean storage matrix passed four profiles with both jailers at 7588b070418513587558f57ee038000ae9ee6df0. Native restore remains open after a corrected development fixture failed a post-restore image-layer read in ext4-block/jailed mode. Existing memory evaluation did not test stargz.",
+    "result": "Complete in authorized storage/memory scope",
     "inherited_gates": "Observed CRI conformance failures remain open; Kubernetes Pod checkpoint/restore is deferred by the user to 1.38 interface availability, separately from current Step4 storage requirements.",
-    "scope": "Original source/evidence audit plus subsequent storage component acceptance; full native stargz restore and final stack validation remain open."
+    "scope": "Clean build/install/full acceptance and cleanup passed. Frozen memory evaluation retains its original source and missing-metric limitations.",
+    "initial_audited_revision": "8340f724c8e0b5bdd81a1fed984183b95c7ab67b",
+    "retained_stargz_path": "Disk-backed guest store/overlay; four storage profiles across both jailers and twelve native restore cases passed on clean 06b55e3. Static owned TAP topology, FUSE workload lowers, DAX guest base; no cold-fetch or stargz-memory-savings claim."
   },
   "step_2_previous_validation": {
     "runtime_branch": "vhive-compatible",
@@ -610,5 +611,46 @@
     "status": "Deferred pending usable upstream interfaces; not accepted",
     "last_interface_probe": "2026-11-11; k3s1.37.2, upstream1.37.2, upstream1.38.0-beta.0 lacked required workflow",
     "scope": "External API deferral is separate from CRI conformance failures and current Step4 storage work."
+  },
+  "shared_socket_sigpipe_maintenance": {
+    "scope": "Production socket-path and demux SIGPIPE fixes; focused worker tests and lint passed. Historical full acceptance revisions remain unchanged.",
+    "step_1_tested": "e09cf274139bfff7b276d7be775f898b4c6b6d1c",
+    "step_2_tested": "7c8d2ce1fd562323b447f08a64b0d0f5e557247c",
+    "step_3_tested": "aacebc90f4fe7d87819bb91ad736816a2ee0300f",
+    "receipt": "evidence/step4-stargz/README.md",
+    "pushed_documentation_tips": {
+      "modernize-runtime": "6856c5ce61667c1feb5a058459460440219ca3d1",
+      "vhive-compatible": "33179b3c2d046bb1340a117e1378ef5acb52f53c",
+      "cri-native-snapshot-restore": "2835aa8f442854d597744de6faaf407a94384406"
+    },
+    "ci_successes": {
+      "modernize-runtime": "https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43169093885",
+      "vhive-compatible": "https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43169093694",
+      "cri-native-snapshot-restore": "https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43169094114"
+    }
+  },
+  "step_4_final_validation": {
+    "tested_runtime_commit": "06b55e3b78cc6bedfe3f0671fcdc49df73046eb2",
+    "runtime_branch": "damon-virtio-pmem",
+    "worker_checkout": "/users/nehalem/fc-ctrd-mod/step4-stargz-closeout",
+    "install_prefix": "/users/nehalem/fc-ctrd-mod/install/06b55e3b78cc",
+    "verification": "evidence/step4-stargz/clean-06b55e3/verification.json",
+    "verification_sha256": "74ee0e6cbccc9ff81e89c4a05176f9dab164e087fdfba96fec161784a1829dac",
+    "runtime_isolated_passes": 47,
+    "snapshotter_isolated_passes": 7,
+    "sdk_top_level_passes": 79,
+    "explicit_verbose_skips": [
+      "TestMemoryEvaluation_Isolated",
+      "TestLogAndMetrics",
+      "TestNativeSnapshotVsockPolicy"
+    ],
+    "stargz_native_restore_cases": 12,
+    "stargz_storage_profiles": 4,
+    "stargz_jailer_modes": 2,
+    "source_clean": true,
+    "private_pools_storage_and_containers_cleaned": true,
+    "unrelated_control_plane_preserved": true,
+    "ci_success": "https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43172572356",
+    "scope": "Uninterrupted full acceptance script including package/CRI race/generation checks; not CRI conformance, Kubernetes Pod restore, or a new memory evaluation."
   }
 }
