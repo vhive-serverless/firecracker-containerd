@@ -48,7 +48,8 @@ import (
 // network address and port specified in listener config.
 func Run(config config.Config) error {
 	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM, syscall.SIGPIPE, syscall.SIGHUP, syscall.SIGQUIT)
+	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGQUIT)
+	defer signal.Stop(stop)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
