@@ -400,6 +400,7 @@ tools/runc-builder-$(DOCKER_IMAGE_TAG)-stamp: tools/docker/Dockerfile.runc-build
 	touch $@
 
 $(RUNC_BIN): $(RUNC_DIR)/VERSION tools/runc-builder-$(DOCKER_IMAGE_TAG)-stamp
+	runc_revision=$$(git -C $(RUNC_DIR) rev-parse --verify HEAD) && \
 	docker run --rm --user $(UID) \
 		--volume $(CURDIR)/$(RUNC_DIR):/gopath/src/github.com/opencontainers/runc \
 		--volume $(CURDIR)/deps:/target \
@@ -407,7 +408,7 @@ $(RUNC_BIN): $(RUNC_DIR)/VERSION tools/runc-builder-$(DOCKER_IMAGE_TAG)-stamp
 		-e GOPATH=/gopath \
 		--workdir /gopath/src/github.com/opencontainers/runc \
 		localhost/$(RUNC_BUILDER_NAME):$(DOCKER_IMAGE_TAG) \
-		make static
+		make static COMMIT="$$runc_revision"
 
 .PHONY: install-runc
 install-runc: $(RUNC_BIN)
