@@ -209,6 +209,10 @@ func (s *service) CheckpointVM(ctx context.Context, req *proto.CheckpointVMReque
 	if err := os.Mkdir(filepath.Join(stage, "drives"), 0700); err != nil {
 		return nil, err
 	}
+	created := &proto.CreateVMRequest{}
+	if err := json.Unmarshal(manifest.CreateRequest, created); err != nil {
+		return nil, err
+	}
 	for index, drive := range manifest.VMConfig.Drives {
 		if drive == nil || drive.DriveID == nil {
 			return nil, fmt.Errorf("missing live drive identity")
@@ -220,11 +224,22 @@ func (s *service) CheckpointVM(ctx context.Context, req *proto.CheckpointVMReque
 				path = filepath.Join(s.jailer.JailPath().RootPath(), strings.TrimPrefix(path, "/"))
 			}
 		}
+		if drive.IsRootDevice != nil && *drive.IsRootDevice && drive.IsReadOnly && created.GetRootDrive().GetImageSha256() != "" {
+			// Shared immutable block controls are bind-mounted only inside the
+			// VMM namespace. The host jail path is an empty mount placeholder.
+			path = created.RootDrive.HostPath
+			if err := verifyImmutableImage(ctx, path, created.RootDrive.ImageSha256); err != nil {
+				return nil, err
+			}
+		}
 		file, err := copySnapshotFile(ctx, path, stage, fmt.Sprintf("drives/%08x", index))
 		if err != nil {
 			return nil, fmt.Errorf("capture drive %s: %w", *drive.DriveID, err)
 		}
 		manifest.Drives = append(manifest.Drives, nativeDrive{ID: *drive.DriveID, ReadOnly: drive.IsReadOnly, File: file})
+	}
+	if err := s.captureImmutableRoot(ctx, stage, manifest); err != nil {
+		return nil, err
 	}
 	data, err := json.Marshal(manifest)
 	if err != nil {
