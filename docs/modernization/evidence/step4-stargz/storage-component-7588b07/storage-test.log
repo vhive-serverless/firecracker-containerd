@@ -1,0 +1,421 @@
+=== RUN   TestStargzGuestDiskStorage_Isolated
+    stargz_storage_integ_test.go:75: isolated storage network bridge=fc-sgs0 subnet=198.18.43.0/24 uplink=eth0 nameservers=[128.110.156.4]
+=== RUN   TestStargzGuestDiskStorage_Isolated/disk
+    stargz_storage_integ_test.go:83: guest overlay id=sgz-d-0 jailed=false host_fs=0xef53 uid=0 inode=9759282 blocks=262408 size=134217728
+    stargz_storage_integ_test.go:83: guest overlay id=sgz-d-1 jailed=true host_fs=0xef53 uid=300001 inode=9759292 blocks=262408 size=134217728
+    stargz_storage_integ_test.go:83: stargz storage VM=sgz-d-0 jailed=false stdout:
+        stargz_store_magic=ef53
+        guest_upper_magic=ef53
+        stargz_upper_magic=ef53
+        stargz_overlay_upper_magic=ef53
+        stargz_overlay_work_magic=ef53
+        stargz_overlay_upper_source=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/fs
+        stargz_overlay_work_source=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/work
+        damon_reclaim_enabled=N
+        stargz-lower-file=/etc/os-release
+        stargz-copy-up-rename-delete=passed
+        stargz-enospc-recovery=passed
+        stargz-storage-copyup-rename-delete-enospc=passed
+        stargz-storage-sync-readback=passed
+        {"path":"/rom/usr/local/bin/agent","statx_mask":6143,"attributes":0,"attributes_mask":2109440,"statx_dax_supported":true,"statx_dax":false,"size_bytes":18682018,"mode":33261,"uid":0,"gid":0,"inode":2756,"links":1,"blocks_512_bytes":36489,"block_size_bytes":1024,"device_major":254,"device_minor":0,"mount_id":165,"mtime_unix_sec":1794462515,"mtime_nsec":0}
+        overlay / overlay rw,relatime,lowerdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/1/fs,upperdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/fs,workdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/work 0 0
+        proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /dev tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        devpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=666 0 0
+        shm /dev/shm tmpfs rw,nosuid,nodev,noexec,relatime,size=65536k 0 0
+        mqueue /dev/mqueue mqueue rw,nosuid,nodev,noexec,relatime 0 0
+        sysfs /sys sysfs ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /run tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        proc /etc/resolv.conf proc ro,relatime 0 0
+        overlayfs:/overlay/root /etc/hosts overlay ro,noatime,lowerdir=/,upperdir=/overlay/root,workdir=/overlay/work,uuid=on 0 0
+        /dev/root /rom squashfs ro,relatime,errors=continue 0 0
+        /dev/vdc /guest-upper ext4 ro,noatime 0 0
+        /dev/vdc /guest-stargz-upper ext4 rw,noatime 0 0
+        /dev/vdc /stargz-store ext4 rw,noatime 0 0
+        stargz /stargz-store/snapshotter/snapshots/1/fs fuse.rawBridge rw,nosuid,nodev,relatime,user_id=0,group_id=0,allow_other,max_read=131072 0 0
+        proc /proc/bus proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/fs proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/irq proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sys proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sysrq-trigger proc ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /proc/acpi tmpfs ro,relatime 0 0
+        tmpfs /proc/interrupts tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/kcore tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/keys tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/timer_list tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /sys/firmware tmpfs ro,relatime 0 0
+        tmpfs /proc/scsi tmpfs ro,relatime 0 0
+        
+        stderr:
+        cmp: EOF on /tmp/stargz-lower-before
+    stargz_storage_integ_test.go:83: stargz storage VM=sgz-d-1 jailed=true stdout:
+        stargz_store_magic=ef53
+        guest_upper_magic=ef53
+        stargz_upper_magic=ef53
+        stargz_overlay_upper_magic=ef53
+        stargz_overlay_work_magic=ef53
+        stargz_overlay_upper_source=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/fs
+        stargz_overlay_work_source=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/work
+        damon_reclaim_enabled=N
+        stargz-lower-file=/etc/os-release
+        stargz-copy-up-rename-delete=passed
+        stargz-enospc-recovery=passed
+        stargz-storage-copyup-rename-delete-enospc=passed
+        stargz-storage-sync-readback=passed
+        {"path":"/rom/usr/local/bin/agent","statx_mask":6143,"attributes":0,"attributes_mask":2109440,"statx_dax_supported":true,"statx_dax":false,"size_bytes":18682018,"mode":33261,"uid":0,"gid":0,"inode":2756,"links":1,"blocks_512_bytes":36489,"block_size_bytes":1024,"device_major":254,"device_minor":0,"mount_id":165,"mtime_unix_sec":1794462515,"mtime_nsec":0}
+        overlay / overlay rw,relatime,lowerdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/1/fs,upperdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/fs,workdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/work 0 0
+        proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /dev tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        devpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=666 0 0
+        shm /dev/shm tmpfs rw,nosuid,nodev,noexec,relatime,size=65536k 0 0
+        mqueue /dev/mqueue mqueue rw,nosuid,nodev,noexec,relatime 0 0
+        sysfs /sys sysfs ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /run tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        proc /etc/resolv.conf proc ro,relatime 0 0
+        overlayfs:/overlay/root /etc/hosts overlay ro,noatime,lowerdir=/,upperdir=/overlay/root,workdir=/overlay/work,uuid=on 0 0
+        /dev/root /rom squashfs ro,relatime,errors=continue 0 0
+        /dev/vdc /guest-upper ext4 ro,noatime 0 0
+        /dev/vdc /guest-stargz-upper ext4 rw,noatime 0 0
+        /dev/vdc /stargz-store ext4 rw,noatime 0 0
+        stargz /stargz-store/snapshotter/snapshots/1/fs fuse.rawBridge rw,nosuid,nodev,relatime,user_id=0,group_id=0,allow_other,max_read=131072 0 0
+        proc /proc/bus proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/fs proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/irq proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sys proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sysrq-trigger proc ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /proc/acpi tmpfs ro,relatime 0 0
+        tmpfs /proc/interrupts tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/kcore tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/keys tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/timer_list tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /sys/firmware tmpfs ro,relatime 0 0
+        tmpfs /proc/scsi tmpfs ro,relatime 0 0
+        
+        stderr:
+        cmp: EOF on /tmp/stargz-lower-before
+=== RUN   TestStargzGuestDiskStorage_Isolated/reclaim
+    stargz_storage_integ_test.go:83: guest overlay id=sgz-r-0 jailed=false host_fs=0xef53 uid=0 inode=9759282 blocks=262408 size=134217728
+    stargz_storage_integ_test.go:83: guest overlay id=sgz-r-1 jailed=true host_fs=0xef53 uid=300001 inode=9759292 blocks=262408 size=134217728
+    stargz_storage_integ_test.go:83: stargz storage VM=sgz-r-0 jailed=false stdout:
+        stargz_store_magic=ef53
+        guest_upper_magic=ef53
+        stargz_upper_magic=ef53
+        stargz_overlay_upper_magic=ef53
+        stargz_overlay_work_magic=ef53
+        stargz_overlay_upper_source=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/fs
+        stargz_overlay_work_source=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/work
+        damon_reclaim_enabled=Y
+        stargz-lower-file=/etc/os-release
+        stargz-copy-up-rename-delete=passed
+        stargz-enospc-recovery=passed
+        stargz-storage-copyup-rename-delete-enospc=passed
+        stargz-storage-sync-readback=passed
+        {"path":"/rom/usr/local/bin/agent","statx_mask":6143,"attributes":0,"attributes_mask":2109440,"statx_dax_supported":true,"statx_dax":false,"size_bytes":18682018,"mode":33261,"uid":0,"gid":0,"inode":2756,"links":1,"blocks_512_bytes":36489,"block_size_bytes":1024,"device_major":254,"device_minor":0,"mount_id":165,"mtime_unix_sec":1794462515,"mtime_nsec":0}
+        overlay / overlay rw,relatime,lowerdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/1/fs,upperdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/fs,workdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/work 0 0
+        proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /dev tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        devpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=666 0 0
+        shm /dev/shm tmpfs rw,nosuid,nodev,noexec,relatime,size=65536k 0 0
+        mqueue /dev/mqueue mqueue rw,nosuid,nodev,noexec,relatime 0 0
+        sysfs /sys sysfs ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /run tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        proc /etc/resolv.conf proc ro,relatime 0 0
+        overlayfs:/overlay/root /etc/hosts overlay ro,noatime,lowerdir=/,upperdir=/overlay/root,workdir=/overlay/work,uuid=on 0 0
+        /dev/root /rom squashfs ro,relatime,errors=continue 0 0
+        /dev/vdc /guest-upper ext4 ro,noatime 0 0
+        /dev/vdc /guest-stargz-upper ext4 rw,noatime 0 0
+        /dev/vdc /stargz-store ext4 rw,noatime 0 0
+        stargz /stargz-store/snapshotter/snapshots/1/fs fuse.rawBridge rw,nosuid,nodev,relatime,user_id=0,group_id=0,allow_other,max_read=131072 0 0
+        proc /proc/bus proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/fs proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/irq proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sys proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sysrq-trigger proc ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /proc/acpi tmpfs ro,relatime 0 0
+        tmpfs /proc/interrupts tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/kcore tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/keys tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/timer_list tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /sys/firmware tmpfs ro,relatime 0 0
+        tmpfs /proc/scsi tmpfs ro,relatime 0 0
+        
+        stderr:
+        cmp: EOF on /tmp/stargz-lower-before
+    stargz_storage_integ_test.go:83: stargz storage VM=sgz-r-1 jailed=true stdout:
+        stargz_store_magic=ef53
+        guest_upper_magic=ef53
+        stargz_upper_magic=ef53
+        stargz_overlay_upper_magic=ef53
+        stargz_overlay_work_magic=ef53
+        stargz_overlay_upper_source=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/fs
+        stargz_overlay_work_source=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/work
+        damon_reclaim_enabled=Y
+        stargz-lower-file=/etc/os-release
+        stargz-copy-up-rename-delete=passed
+        stargz-enospc-recovery=passed
+        stargz-storage-copyup-rename-delete-enospc=passed
+        stargz-storage-sync-readback=passed
+        {"path":"/rom/usr/local/bin/agent","statx_mask":6143,"attributes":0,"attributes_mask":2109440,"statx_dax_supported":true,"statx_dax":false,"size_bytes":18682018,"mode":33261,"uid":0,"gid":0,"inode":2756,"links":1,"blocks_512_bytes":36489,"block_size_bytes":1024,"device_major":254,"device_minor":0,"mount_id":165,"mtime_unix_sec":1794462515,"mtime_nsec":0}
+        overlay / overlay rw,relatime,lowerdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/1/fs,upperdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/fs,workdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/work 0 0
+        proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /dev tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        devpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=666 0 0
+        shm /dev/shm tmpfs rw,nosuid,nodev,noexec,relatime,size=65536k 0 0
+        mqueue /dev/mqueue mqueue rw,nosuid,nodev,noexec,relatime 0 0
+        sysfs /sys sysfs ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /run tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        proc /etc/resolv.conf proc ro,relatime 0 0
+        overlayfs:/overlay/root /etc/hosts overlay ro,noatime,lowerdir=/,upperdir=/overlay/root,workdir=/overlay/work,uuid=on 0 0
+        /dev/root /rom squashfs ro,relatime,errors=continue 0 0
+        /dev/vdc /guest-upper ext4 ro,noatime 0 0
+        /dev/vdc /guest-stargz-upper ext4 rw,noatime 0 0
+        /dev/vdc /stargz-store ext4 rw,noatime 0 0
+        stargz /stargz-store/snapshotter/snapshots/1/fs fuse.rawBridge rw,nosuid,nodev,relatime,user_id=0,group_id=0,allow_other,max_read=131072 0 0
+        proc /proc/bus proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/fs proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/irq proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sys proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sysrq-trigger proc ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /proc/acpi tmpfs ro,relatime 0 0
+        tmpfs /proc/interrupts tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/kcore tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/keys tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/timer_list tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /sys/firmware tmpfs ro,relatime 0 0
+        tmpfs /proc/scsi tmpfs ro,relatime 0 0
+        
+        stderr:
+        cmp: EOF on /tmp/stargz-lower-before
+=== RUN   TestStargzGuestDiskStorage_Isolated/pmem
+    stargz_storage_integ_test.go:83: guest overlay id=sgz-p-0 jailed=false host_fs=0xef53 uid=0 inode=9759283 blocks=262408 size=134217728
+    stargz_storage_integ_test.go:83: guest overlay id=sgz-p-1 jailed=true host_fs=0xef53 uid=300001 inode=9759294 blocks=262408 size=134217728
+    stargz_storage_integ_test.go:83: stargz storage VM=sgz-p-0 jailed=false stdout:
+        stargz_store_magic=ef53
+        guest_upper_magic=ef53
+        stargz_upper_magic=ef53
+        stargz_overlay_upper_magic=ef53
+        stargz_overlay_work_magic=ef53
+        stargz_overlay_upper_source=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/fs
+        stargz_overlay_work_source=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/work
+        damon_reclaim_enabled=N
+        stargz-lower-file=/etc/os-release
+        stargz-copy-up-rename-delete=passed
+        stargz-enospc-recovery=passed
+        stargz-storage-copyup-rename-delete-enospc=passed
+        stargz-storage-sync-readback=passed
+        {"path":"/rom/usr/local/bin/agent","statx_mask":6143,"attributes":2097152,"attributes_mask":3160180,"statx_dax_supported":true,"statx_dax":true,"size_bytes":18682018,"mode":33261,"uid":0,"gid":0,"inode":2767,"links":1,"blocks_512_bytes":36488,"block_size_bytes":4096,"device_major":259,"device_minor":0,"mount_id":165,"mtime_unix_sec":1794268800,"mtime_nsec":0}
+        overlay / overlay rw,relatime,lowerdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/1/fs,upperdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/fs,workdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/work 0 0
+        proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /dev tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        devpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=666 0 0
+        shm /dev/shm tmpfs rw,nosuid,nodev,noexec,relatime,size=65536k 0 0
+        mqueue /dev/mqueue mqueue rw,nosuid,nodev,noexec,relatime 0 0
+        sysfs /sys sysfs ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /run tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        proc /etc/resolv.conf proc ro,relatime 0 0
+        overlayfs:/overlay/root /etc/hosts overlay ro,noatime,lowerdir=/,upperdir=/overlay/root,workdir=/overlay/work,uuid=on 0 0
+        /dev/root /rom ext4 ro,relatime,norecovery,dax=always 0 0
+        /dev/vdb /guest-upper ext4 ro,noatime 0 0
+        /dev/vdb /guest-stargz-upper ext4 rw,noatime 0 0
+        /dev/vdb /stargz-store ext4 rw,noatime 0 0
+        stargz /stargz-store/snapshotter/snapshots/1/fs fuse.rawBridge rw,nosuid,nodev,relatime,user_id=0,group_id=0,allow_other,max_read=131072 0 0
+        proc /proc/bus proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/fs proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/irq proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sys proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sysrq-trigger proc ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /proc/acpi tmpfs ro,relatime 0 0
+        tmpfs /proc/interrupts tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/kcore tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/keys tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/timer_list tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /sys/firmware tmpfs ro,relatime 0 0
+        tmpfs /proc/scsi tmpfs ro,relatime 0 0
+        
+        stderr:
+        cmp: EOF on /tmp/stargz-lower-before
+    stargz_storage_integ_test.go:83: stargz storage VM=sgz-p-1 jailed=true stdout:
+        stargz_store_magic=ef53
+        guest_upper_magic=ef53
+        stargz_upper_magic=ef53
+        stargz_overlay_upper_magic=ef53
+        stargz_overlay_work_magic=ef53
+        stargz_overlay_upper_source=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/fs
+        stargz_overlay_work_source=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/work
+        damon_reclaim_enabled=N
+        stargz-lower-file=/etc/os-release
+        stargz-copy-up-rename-delete=passed
+        stargz-enospc-recovery=passed
+        stargz-storage-copyup-rename-delete-enospc=passed
+        stargz-storage-sync-readback=passed
+        {"path":"/rom/usr/local/bin/agent","statx_mask":6143,"attributes":2097152,"attributes_mask":3160180,"statx_dax_supported":true,"statx_dax":true,"size_bytes":18682018,"mode":33261,"uid":0,"gid":0,"inode":2767,"links":1,"blocks_512_bytes":36488,"block_size_bytes":4096,"device_major":259,"device_minor":0,"mount_id":165,"mtime_unix_sec":1794268800,"mtime_nsec":0}
+        overlay / overlay rw,relatime,lowerdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/1/fs,upperdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/fs,workdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/work 0 0
+        proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /dev tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        devpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=666 0 0
+        shm /dev/shm tmpfs rw,nosuid,nodev,noexec,relatime,size=65536k 0 0
+        mqueue /dev/mqueue mqueue rw,nosuid,nodev,noexec,relatime 0 0
+        sysfs /sys sysfs ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /run tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        proc /etc/resolv.conf proc ro,relatime 0 0
+        overlayfs:/overlay/root /etc/hosts overlay ro,noatime,lowerdir=/,upperdir=/overlay/root,workdir=/overlay/work,uuid=on 0 0
+        /dev/root /rom ext4 ro,relatime,norecovery,dax=always 0 0
+        /dev/vdb /guest-upper ext4 ro,noatime 0 0
+        /dev/vdb /guest-stargz-upper ext4 rw,noatime 0 0
+        /dev/vdb /stargz-store ext4 rw,noatime 0 0
+        stargz /stargz-store/snapshotter/snapshots/1/fs fuse.rawBridge rw,nosuid,nodev,relatime,user_id=0,group_id=0,allow_other,max_read=131072 0 0
+        proc /proc/bus proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/fs proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/irq proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sys proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sysrq-trigger proc ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /proc/acpi tmpfs ro,relatime 0 0
+        tmpfs /proc/interrupts tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/kcore tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/keys tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/timer_list tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /sys/firmware tmpfs ro,relatime 0 0
+        tmpfs /proc/scsi tmpfs ro,relatime 0 0
+        
+        stderr:
+        cmp: EOF on /tmp/stargz-lower-before
+=== RUN   TestStargzGuestDiskStorage_Isolated/combined
+    stargz_storage_integ_test.go:83: guest overlay id=sgz-c-0 jailed=false host_fs=0xef53 uid=0 inode=9759283 blocks=262408 size=134217728
+    stargz_storage_integ_test.go:83: guest overlay id=sgz-c-1 jailed=true host_fs=0xef53 uid=300001 inode=9759294 blocks=262408 size=134217728
+    stargz_storage_integ_test.go:83: stargz storage VM=sgz-c-0 jailed=false stdout:
+        stargz_store_magic=ef53
+        guest_upper_magic=ef53
+        stargz_upper_magic=ef53
+        stargz_overlay_upper_magic=ef53
+        stargz_overlay_work_magic=ef53
+        stargz_overlay_upper_source=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/fs
+        stargz_overlay_work_source=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/work
+        damon_reclaim_enabled=Y
+        stargz-lower-file=/etc/os-release
+        stargz-copy-up-rename-delete=passed
+        stargz-enospc-recovery=passed
+        stargz-storage-copyup-rename-delete-enospc=passed
+        stargz-storage-sync-readback=passed
+        {"path":"/rom/usr/local/bin/agent","statx_mask":6143,"attributes":2097152,"attributes_mask":3160180,"statx_dax_supported":true,"statx_dax":true,"size_bytes":18682018,"mode":33261,"uid":0,"gid":0,"inode":2767,"links":1,"blocks_512_bytes":36488,"block_size_bytes":4096,"device_major":259,"device_minor":0,"mount_id":165,"mtime_unix_sec":1794268800,"mtime_nsec":0}
+        overlay / overlay rw,relatime,lowerdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/1/fs,upperdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/fs,workdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/work 0 0
+        proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /dev tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        devpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=666 0 0
+        shm /dev/shm tmpfs rw,nosuid,nodev,noexec,relatime,size=65536k 0 0
+        mqueue /dev/mqueue mqueue rw,nosuid,nodev,noexec,relatime 0 0
+        sysfs /sys sysfs ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /run tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        proc /etc/resolv.conf proc ro,relatime 0 0
+        overlayfs:/overlay/root /etc/hosts overlay ro,noatime,lowerdir=/,upperdir=/overlay/root,workdir=/overlay/work,uuid=on 0 0
+        /dev/root /rom ext4 ro,relatime,norecovery,dax=always 0 0
+        /dev/vdb /guest-upper ext4 ro,noatime 0 0
+        /dev/vdb /guest-stargz-upper ext4 rw,noatime 0 0
+        /dev/vdb /stargz-store ext4 rw,noatime 0 0
+        stargz /stargz-store/snapshotter/snapshots/1/fs fuse.rawBridge rw,nosuid,nodev,relatime,user_id=0,group_id=0,allow_other,max_read=131072 0 0
+        proc /proc/bus proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/fs proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/irq proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sys proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sysrq-trigger proc ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /proc/acpi tmpfs ro,relatime 0 0
+        tmpfs /proc/interrupts tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/kcore tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/keys tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/timer_list tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /sys/firmware tmpfs ro,relatime 0 0
+        tmpfs /proc/scsi tmpfs ro,relatime 0 0
+        
+        stderr:
+        cmp: EOF on /tmp/stargz-lower-before
+    stargz_storage_integ_test.go:83: stargz storage VM=sgz-c-1 jailed=true stdout:
+        stargz_store_magic=ef53
+        guest_upper_magic=ef53
+        stargz_upper_magic=ef53
+        stargz_overlay_upper_magic=ef53
+        stargz_overlay_work_magic=ef53
+        stargz_overlay_upper_source=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/fs
+        stargz_overlay_work_source=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/work
+        damon_reclaim_enabled=Y
+        stargz-lower-file=/etc/os-release
+        stargz-copy-up-rename-delete=passed
+        stargz-enospc-recovery=passed
+        stargz-storage-copyup-rename-delete-enospc=passed
+        stargz-storage-sync-readback=passed
+        {"path":"/rom/usr/local/bin/agent","statx_mask":6143,"attributes":2097152,"attributes_mask":3160180,"statx_dax_supported":true,"statx_dax":true,"size_bytes":18682018,"mode":33261,"uid":0,"gid":0,"inode":2767,"links":1,"blocks_512_bytes":36488,"block_size_bytes":4096,"device_major":259,"device_minor":0,"mount_id":165,"mtime_unix_sec":1794268800,"mtime_nsec":0}
+        overlay / overlay rw,relatime,lowerdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/1/fs,upperdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/fs,workdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/work 0 0
+        proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /dev tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        devpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=666 0 0
+        shm /dev/shm tmpfs rw,nosuid,nodev,noexec,relatime,size=65536k 0 0
+        mqueue /dev/mqueue mqueue rw,nosuid,nodev,noexec,relatime 0 0
+        sysfs /sys sysfs ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /run tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        proc /etc/resolv.conf proc ro,relatime 0 0
+        overlayfs:/overlay/root /etc/hosts overlay ro,noatime,lowerdir=/,upperdir=/overlay/root,workdir=/overlay/work,uuid=on 0 0
+        /dev/root /rom ext4 ro,relatime,norecovery,dax=always 0 0
+        /dev/vdb /guest-upper ext4 ro,noatime 0 0
+        /dev/vdb /guest-stargz-upper ext4 rw,noatime 0 0
+        /dev/vdb /stargz-store ext4 rw,noatime 0 0
+        stargz /stargz-store/snapshotter/snapshots/1/fs fuse.rawBridge rw,nosuid,nodev,relatime,user_id=0,group_id=0,allow_other,max_read=131072 0 0
+        proc /proc/bus proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/fs proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/irq proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sys proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sysrq-trigger proc ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /proc/acpi tmpfs ro,relatime 0 0
+        tmpfs /proc/interrupts tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/kcore tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/keys tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/timer_list tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /sys/firmware tmpfs ro,relatime 0 0
+        tmpfs /proc/scsi tmpfs ro,relatime 0 0
+        
+        stderr:
+        cmp: EOF on /tmp/stargz-lower-before
+--- PASS: TestStargzGuestDiskStorage_Isolated (90.29s)
+    --- PASS: TestStargzGuestDiskStorage_Isolated/disk (23.20s)
+    --- PASS: TestStargzGuestDiskStorage_Isolated/reclaim (22.17s)
+    --- PASS: TestStargzGuestDiskStorage_Isolated/pmem (23.52s)
+    --- PASS: TestStargzGuestDiskStorage_Isolated/combined (21.32s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter	90.308s
+make: Leaving directory '/users/nehalem/fc-ctrd-mod/step4-stargz-closeout/snapshotter'
+make: Entering directory '/users/nehalem/fc-ctrd-mod/step4-stargz-closeout/snapshotter'
+make -C .. test-deps-in-docker
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/step4-stargz-closeout'
+docker run --rm \
+	--volume /users/nehalem/fc-ctrd-mod/step4-stargz-closeout:/src \
+	--volume gocache:/go \
+	--workdir /src \
+	public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 go mod download
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/step4-stargz-closeout'
+/users/nehalem/fc-ctrd-mod/step4-stargz-closeout/snapshotter/../tools/thinpool.sh reset "fc-stargz-7588b0704185"
+Name:              fc-stargz-7588b0704185
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 6
+Number of targets: 1
+
+/users/nehalem/fc-ctrd-mod/step4-stargz-closeout/snapshotter/../tools/modernize/run-isolated-vm-test.sh "/users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-stargz-closeout" --rm \
+	--privileged \
+	--ipc=host \
+	--network=bridge \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-stargz-closeout/snapshotter/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-stargz-closeout/snapshotter/..:/src \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env GO111MODULE=on \
+	--env NUMBER_OF_VMS= \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-stargz-7588b0704185 \
+	--workdir="/src/snapshotter" \
+	--init \
+	localhost/firecracker-containerd-test:7588b0704185 \
+	"go test -v -count=1 -timeout=1200s -run '^TestStargzNativeRestore_Isolated$'"

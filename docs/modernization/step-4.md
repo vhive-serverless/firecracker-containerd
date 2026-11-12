@@ -22,8 +22,11 @@ image now binds `/var/lib/containerd-stargz-grpc` to `/rom/overlay/stargz`, on
 the private guest-upper filesystem (`de2e471`). This replaces its former tmpfs
 store, including the container overlay upper/work directories. The initializer
 rejects missing or unsupported backing and permits tmpfs only for an explicit
-`overlay_root=ram` baseline. VM storage and native restore acceptance for this
-change is still pending; earlier snapshotter passes do not validate it.
+`overlay_root=ram` baseline. The clean `7588b07` storage matrix passed four
+profiles with both jailers. Native restore and final full-stack acceptance for
+this change are still pending; earlier snapshotter passes do not validate them.
+The [stargz receipts](evidence/step4-stargz/README.md) distinguish the storage
+pass from the subsequent native-test fixture failure and shared demux fix.
 
 The [initializer development receipt](evidence/de2e471-stargz-init.log) records
 passing rejection, explicit RAM, ext4 device/inode, write-through, idempotence
@@ -57,11 +60,12 @@ The successful [guest log](evidence/step4-storage-audit.log) proves:
 | Explicit runtime temporary mounts | tmpfs for `/dev`, `/run`, `/dev/shm` |
 | Host checkout and Docker data | `/dev/sda3`, ext3; [mount inspection](evidence/step4-storage-audit-host.log) |
 
-DAMON sysfs exists in the running guest. This does not prove reclamation was
-enabled. Source inspection found pmem, DAX, balloon reporting and DAMON support
-in the pinned VMM/SDK/kernel; runtime configuration and activation still need
-implementation. The kernel currently disables EROFS, and SquashFS cannot supply
-the required DAX lower, so the pmem path needs a suitable filesystem and image.
+At the initial audit, DAMON sysfs existed in the running guest; this did not
+prove reclamation was enabled. Source inspection found pmem, DAX, balloon
+reporting and DAMON support in the pinned VMM/SDK/kernel. The runtime controls
+and activation were subsequently implemented and validated as described below.
+The kernel disables EROFS, and SquashFS cannot supply a DAX lower, so the
+implemented pmem path uses a separately built ext4 image.
 
 ## Mechanisms and evaluation
 

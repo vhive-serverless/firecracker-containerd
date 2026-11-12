@@ -1,0 +1,14 @@
+commit e09cf274139bfff7b276d7be775f898b4c6b6d1c
+Author:     JooYoung Park <jooyoung.park73@gmail.com>
+AuthorDate: Wed Nov 11 22:39:23 2026 -0700
+Commit:     JooYoung Park <jooyoung.park73@gmail.com>
+CommitDate: Wed Nov 11 22:39:23 2026 -0700
+
+    Ignore SIGPIPE in demux service lifecycle
+    
+    Signed-off-by: JooYoung Park <jooyoung.park73@gmail.com>
+
+ snapshotter/app/service.go             |   3 +-
+ snapshotter/app/service_signal_test.go | 187 +++++++++++++++++++++++++++++++++
+ 2 files changed, 189 insertions(+), 1 deletion(-)
+ create mode 100644 snapshotter/app/service_signal_test.go

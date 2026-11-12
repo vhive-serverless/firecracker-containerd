@@ -1,0 +1,24 @@
+=== RUN   TestBuildVMConfiguration
+=== RUN   TestBuildVMConfiguration/Only_Config
+=== RUN   TestBuildVMConfiguration/Only_Request
+=== RUN   TestBuildVMConfiguration/Request_is_prioritized_over_Config
+=== RUN   TestBuildVMConfiguration/Request_can_omit_some_fields
+=== RUN   TestBuildVMConfiguration/Container_Count_affects_StubDriveCount
+--- PASS: TestBuildVMConfiguration (0.00s)
+    --- PASS: TestBuildVMConfiguration/Only_Config (0.00s)
+    --- PASS: TestBuildVMConfiguration/Only_Request (0.00s)
+    --- PASS: TestBuildVMConfiguration/Request_is_prioritized_over_Config (0.00s)
+    --- PASS: TestBuildVMConfiguration/Request_can_omit_some_fields (0.00s)
+    --- PASS: TestBuildVMConfiguration/Container_Count_affects_StubDriveCount (0.00s)
+=== RUN   TestGetVMInfoSocketPaths
+=== RUN   TestGetVMInfoSocketPaths/noop_relative_path_is_resolved_from_shim_working_directory
+=== RUN   TestGetVMInfoSocketPaths/runc_jailed_path_is_resolved_from_shim_directory
+=== RUN   TestGetVMInfoSocketPaths/noop_absolute_path_is_preserved
+=== RUN   TestGetVMInfoSocketPaths/runc_jailed_absolute_path_is_preserved
+--- PASS: TestGetVMInfoSocketPaths (0.00s)
+    --- PASS: TestGetVMInfoSocketPaths/noop_relative_path_is_resolved_from_shim_working_directory (0.00s)
+    --- PASS: TestGetVMInfoSocketPaths/runc_jailed_path_is_resolved_from_shim_directory (0.00s)
+    --- PASS: TestGetVMInfoSocketPaths/noop_absolute_path_is_preserved (0.00s)
+    --- PASS: TestGetVMInfoSocketPaths/runc_jailed_absolute_path_is_preserved (0.00s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	0.019s

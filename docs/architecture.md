@@ -56,16 +56,22 @@ root, exported host volumes and temporary mounts are separate storage layers.
 The optional guest stargz path has its own storage and must be assessed separately.
 On Step 4, its store and container overlay upper/work directories bind directly
 to the private guest-upper filesystem at `/rom/overlay/stargz`; they share that
-disk's capacity and snapshot lifetime. This migration's VM acceptance is pending
-in the [Step 4 report](modernization/step-4.md). Stargz workload lower layers
-remain FUSE-backed; optional pmem/DAX applies to the immutable guest base.
+disk's capacity and snapshot lifetime. The storage matrix passed all four
+profiles under both jailer modes at candidate revision `7588b07`; native
+capture/restore matrix acceptance is still in progress. See the
+[Step 4 completeness report](modernization/step-4-completeness.md) for current
+status and coverage limits. Stargz workload lower layers remain FUSE-backed;
+the storage tests do not establish cold lazy-fetch behavior. Optional pmem/DAX
+applies to the immutable guest base.
 
 Step 2 adds vHive-managed snapshot/restore for its documented standalone profile.
 Step 3 adds a CRI frontend, ordinary Kubernetes RuntimeClass support and native
 checkpoint/restore components. Step 4 adds a private disk-backed guest upper,
 optional immutable pmem/DAX backing, and DAMON with free-page reporting. These
-features do not imply full CRI conformance or Kubernetes Pod restore. Consult
-the milestone documents for supported profiles, measured results and open gates.
+features do not imply full CRI conformance or Kubernetes Pod restore. Kubernetes
+Pod checkpoint/restore is deferred to the 1.38 interface work; this is separate
+from CRI conformance and Step 4's native runtime restore. Consult the milestone
+documents for supported profiles, measured results and open gates.
 
 The original [design alternatives](design-approaches.md) and
 [shim design](shim-design.md) explain historical decisions. Their proposals and
