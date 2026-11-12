@@ -454,6 +454,10 @@ func nativeForkFinish(ctx context.Context, t *testing.T, instance *nativeForkIns
 				continue
 			}
 			require.NoError(t, stream.io.Stdin.Close())
+			// The guest runc shim retains its own stdin FIFO writer until
+			// CloseIO; closing the client writer alone cannot deliver EOF.
+			_, err := instance.backend.CloseIO(ctx, &taskAPI.CloseIORequest{ID: stream.taskID, ExecID: stream.execID, Stdin: true})
+			require.NoError(t, err)
 			result, err := instance.backend.Wait(ctx, &taskAPI.WaitRequest{ID: stream.taskID, ExecID: stream.execID})
 			require.NoError(t, err)
 			require.EqualValues(t, 23, result.ExitStatus)
