@@ -76,8 +76,10 @@ type TaskService struct {
 	//
 	// This approach is also taken by containerd's current reference runc shim
 	// v2 implementation
-	shimCtx    context.Context
-	shimCancel context.CancelFunc
+	shimCtx        context.Context
+	shimCancel     context.CancelFunc
+	criForwardOnce sync.Once
+	criForwardErr  error
 }
 
 // TaskExecID provides a unique string for a given (taskID, execID) pair
@@ -258,6 +260,17 @@ func (ts *TaskService) Create(requestCtx context.Context, req *taskAPI.CreateTas
 		if err != nil {
 			return nil, fmt.Errorf("failed to update spec: %w", err)
 		}
+	}
+	volumeSources, err := ts.prepareCRIVolumes(requestCtx, taskExecID, specData, extraData.CriVolumes, bundleDir.RootPath())
+	if err != nil {
+		return nil, fmt.Errorf("failed to prepare CRI guest volumes: %w", err)
+	}
+	specData, err = prepareCRIFiles(specData, extraData.CriFiles, bundleDir.RootPath(), volumeSources)
+	if err != nil {
+		return nil, fmt.Errorf("failed to prepare CRI guest configuration: %w", err)
+	}
+	if err := ts.ensureCRIPortForward(specData); err != nil {
+		return nil, fmt.Errorf("failed to start guest port-forward listener: %w", err)
 	}
 	err = bundleDir.OCIConfig().Write(specData)
 	if err != nil {

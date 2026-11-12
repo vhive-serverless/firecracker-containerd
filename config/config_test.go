@@ -32,6 +32,8 @@ func TestLoadConfigDefaults(t *testing.T) {
 	assert.Equal(t, defaultKernelArgs, cfg.KernelArgs, "expected default kernel args")
 	assert.Equal(t, defaultKernelPath, cfg.KernelImagePath, "expected default kernel path")
 	assert.Equal(t, defaultRootfsPath, cfg.RootDrive, "expected default rootfs path")
+	assert.Equal(t, DefaultCRIMemoryMiB, cfg.CRIDefaultMemoryMiB)
+	assert.Equal(t, DefaultCRIMemoryOverheadMiB, cfg.CRIMemoryOverheadMiB)
 }
 
 func TestLoadConfigOverrides(t *testing.T) {
