@@ -21,8 +21,13 @@ currently adds a containerd CRI adapter, RuntimeClass deployment tests and nativ
 snapshot capture and restore components. Full CRI compliance, whole-Pod restore
 and Kubernetes checkpoint/restore remain incomplete.
 
-The [API audit](step-3-api-audit.md) records the v1.38 alpha target and the missing
-workflow in the released builds tested so far. Step 4 proceeds from a pinned WIP baseline by explicit user instruction.
+The [API audit](step-3-api-audit.md) records the v1.38 alpha target and missing
+workflow in the released builds tested on November 11. On November 12 the user
+confirmed that Kubernetes Pod checkpoint/restore integration is **deferred to
+1.38 interface availability**. Do not treat the old 1.37 requirement as a current
+Step 4 blocker, or confuse this external deferral with the 16 observed CRI
+failures. The deferred integration is not accepted or implemented merely because
+RPC definitions exist. Step 4 proceeds from a pinned WIP baseline by instruction.
 
 This branch also carries the validated task creation cleanup correction from
 Step 1 commit `6585eba` through Step 2 commit `d959a78`. Their receipts are linked

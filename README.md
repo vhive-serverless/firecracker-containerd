@@ -8,8 +8,8 @@ On `damon-virtio-pmem`, see [Step 4 status](docs/modernization/step-4.md) and th
 [21-trial memory evaluation](tools/memory-eval/results/0a268c5589c3/REPORT.md).
 Step 4 also retains an unresolved tmpfs-backed guest stargz store; see the
 [completion audit](docs/modernization/step-4-completeness.md).
-Step 3 remains explicitly WIP: Kubernetes Pod checkpoint/restore and full CRI
-conformance have not been accepted.
+Step 3 remains explicitly WIP: full CRI conformance has not been accepted, and
+Kubernetes Pod checkpoint/restore is deferred to the 1.38 interface work.
 
 [![BuildKite](https://badge.buildkite.com/aab4ae547d5e5079a5915522e8cdb18492349aef67aae5a8c5.svg?branch=main)](https://buildkite.com/firecracker-microvm/firecracker-containerd)
 [![GitHub Actions](https://github.com/firecracker-microvm/firecracker-containerd/actions/workflows/build.yaml/badge.svg)](https://github.com/firecracker-microvm/firecracker-containerd/actions)

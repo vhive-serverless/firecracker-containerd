@@ -2,6 +2,13 @@
 
 Audited current `damon-virtio-pmem` HEAD `8340f72` against `goal.md:148-226`, implementation, tests, and recorded worker evidence. This source/evidence audit did not rerun worker tests. The original requirement source is the workspace `goal.md`; its relevant requirements are restated below.
 
+User clarification on 2026-11-12: the Kubernetes Pod checkpoint/restore portion
+of the original specification is deferred to 1.38 interface availability. The
+original requirement matrix below preserves that historical scope, but missing
+1.37 endpoints are not an active blocker for current Step 4 storage work. CRI
+failures are observed runtime limitations; the stargz storage gap is an
+independent Step 4 requirement.
+
 ## Decision
 
 Step 4 has substantial committed acceptance for the default devmapper runtime, disk-backed guest upper, pmem/DAX, DAMON/free-page reporting, controlled evaluation, native runtime capture/restore, and interrupted capture cleanup. **Step 4 is not complete yet**: the optional guest stargz profile still mounts its persistent overlay/store on tmpfs, despite Step 1 explicitly saying Step 4 must account for it. Either migrate and validate that supported path or make a deliberate scope decision to disable/exclude it. Step 3’s CRI and Kubernetes Pod restore gates remain inherited WIP and are separate from the direct runtime results; they must stay disclosed.

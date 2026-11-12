@@ -551,7 +551,7 @@
     "report": "step-4-completeness.md",
     "result": "Incomplete",
     "open_storage_path": "Optional guest stargz image mounts /var/lib/containerd-stargz-grpc on tmpfs; default devmapper acceptance does not cover disk backing of this store.",
-    "inherited_gates": "CRI conformance and Kubernetes Pod checkpoint/restore remain WIP",
+    "inherited_gates": "Observed CRI conformance failures remain open; Kubernetes Pod checkpoint/restore is deferred by the user to 1.38 interface availability, separately from current Step4 storage requirements.",
     "scope": "Source and recorded-evidence audit; no new runtime tests."
   },
   "step_2_previous_validation": {
@@ -603,5 +603,12 @@
       "initial_tested_runtime_commit": "e666612819bc1efa71c645434bc36385f92e6423",
       "worker_toolchains": "evidence/e666612819bc-worker-toolchains.log"
     }
-  ]
+  ],
+  "kubernetes_pod_restore_deferral": {
+    "confirmed_by_user": "2026-11-12",
+    "target": "Kubernetes 1.38 interface work",
+    "status": "Deferred pending usable upstream interfaces; not accepted",
+    "last_interface_probe": "2026-11-11; k3s1.37.2, upstream1.37.2, upstream1.38.0-beta.0 lacked required workflow",
+    "scope": "External API deferral is separate from CRI conformance failures and current Step4 storage work."
+  }
 }

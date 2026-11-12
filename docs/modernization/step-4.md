@@ -24,8 +24,10 @@ The image remains built and exercised by snapshotter tests. Those test passes
 do not establish disk backing for this guest store.
 
 See the [implementation audit](step-4-completeness.md) for the requirement
-matrix and the concrete follow-up. The inherited Step 3 CRI/Kubernetes restore
-gates are a separate source of incompleteness. The reported memory improvements
+matrix and the concrete follow-up. CRI conformance retains its observed failures.
+Kubernetes Pod checkpoint/restore is a separate, user-confirmed deferral to the
+1.38 interface work; it is not an active 1.37 endpoint requirement for this
+storage milestone. The reported memory improvements
 are measured tradeoffs, not a universal reduction across all configurations.
 
 ## Baseline evidence

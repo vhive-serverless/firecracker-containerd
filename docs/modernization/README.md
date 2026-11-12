@@ -59,3 +59,8 @@ The [forward-merge receipt](evidence/branch-chain-audit.json) records the origin
 and reconciled tips, all three ancestor checks and unchanged source/dependency
 selections. The [agent footprint audit](agent-footprint.md) answers the DSec and
 Go/Rust comparison using a pinned Step 4 image.
+
+The user confirmed on 2026-11-12 that Kubernetes Pod checkpoint/restore is
+deferred to 1.38 interface availability. The [recorded API audit](step-3-api-audit.md)
+distinguishes that external dependency from the observed CRI failures and the
+independent Step 4 stargz storage gap.

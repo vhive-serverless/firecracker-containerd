@@ -48,6 +48,11 @@ not establish acceptance of the unfinished CRI or Kubernetes restore gates.
 
 ## Step 3: cri-native-snapshot-restore — WIP
 
+Kubernetes Pod checkpoint/restore is deferred to 1.38 interface availability,
+as confirmed by the user on 2026-11-12. Related unchecked items retain future
+acceptance requirements; missing 1.37 endpoints do not block current Step 4
+storage work. Observed CRI conformance failures remain a separate open issue.
+
 - [x] Create branch from validated Step 2 completion commit.
 - [x] Independently validate a released upstream v1.37.2 single-node stock-runtime baseline: Pods, exec, logs, filesystem writes, DNS and API discovery; record that this does not satisfy the Firecracker or Pod restore gates below.
 - [x] Validate ordinary Firecracker RuntimeClass Pods on required k3s v1.37.2+k3s1 from a clean deployment checkout: two containers in one VMM, shared/projected volumes, exec/logs, exact IPv4 DNS answer, Service networking from a runc Pod, positive container statistics and cleanup; receipt 1085202. This does not satisfy the remaining CRI or restore gates.
@@ -78,7 +83,7 @@ not establish acceptance of the unfinished CRI or Kubernetes restore gates.
 - [x] Broader regression follow-up: initial 35 runtime cases plus targeted corrections for five storage-related test failures; all five snapshotter cases passed. Unfiltered CRI retained the same 97 passes, 16 failures and 29 skips. Failed runs and source/image distinctions remain in step-4.md.
 - [x] In-flight native capture interruption after quiescing passed both jailers from clean 5186d40: task thaw/exec, artifact cleanup and subsequent capture; production runtime unchanged from `72f4fc9`.
 - [ ] Move the retained guest stargz writable store/overlay off tmpfs and validate actual disk backing, writes, exhaustion, cleanup and supported capture/restore; existing snapshotter passes do not prove this. See step-4-completeness.md.
-- [ ] Full inherited Step 3 integration acceptance: CRI failures and Kubernetes Pod checkpoint/restore remain explicitly WIP; direct runtime tests do not satisfy those gates.
+- [ ] Inherited CRI conformance remains open. Kubernetes Pod checkpoint/restore is deferred to 1.38 interface availability; its future acceptance is separate from current Step 4 storage work. Direct runtime tests do not establish either result.
 - [x] Run identical workloads/resources for original baseline, disk baseline, pmem only, reclamation only and combined, plus matching ext4 block controls: clean 0a268c5, 21 trials, three randomized blocks.
 - [x] Measure peak/integrated host memory, guest anonymous/page cache, shared backing, CPU, faults/I/O, disk, latency and correctness; separate accounting domains and retain missing metrics and reporting-counter freshness limitations.
 - [x] Commit/push evaluation scripts/config/results; frozen 0a268c5 observations, strict summaries, independently checked integrals, plots, commands and limitations are preserved. Runtime restore acceptance remains a separate gate above.
