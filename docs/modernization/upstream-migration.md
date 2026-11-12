@@ -3,7 +3,7 @@
 ## Current status (2026-11-13)
 
 The runtime development branch is `work/upstream-firecracker`; the reviewed
-implementation head is `4f43f8d`. It uses **official, unmodified Firecracker and
+implementation head is `c4af54e` (diagnostic evidence through `f35bbf4`). It uses **official, unmodified Firecracker and
 jailer v1.18.0 release binaries**, downloaded and verified against pinned archive
 checksums. The SDK is published in `vhive-serverless/firecracker-go-sdk`, branch
 `firecracker-v1.18.0`, revision
@@ -13,15 +13,14 @@ checksums. The SDK is published in `vhive-serverless/firecracker-go-sdk`, branch
 Custom drive overrides and source/restore vsock policies are no longer used.
 
 Private disk namespaces and resumable control, events and I/O were integrated in
-`1de30c6`. **Full VM snapshot/restore, continuing-source and vHive acceptance of
-the migrated runtime remain pending.** The designated worker build is pinned to
-`023283d` and is creating guest images; it does not yet validate later commits.
-The worker log is
-`upstream-migration/evidence/runtime-build-023283d.log` in the worker workspace.
-Later changes fix embedded runc revision metadata (`8559ebe`), strengthen and
-enable interrupted-capture recovery acceptance (`97cd1e2`, `ea6738b`), and remove
-custom-VMM toolchain provisioning (`4f43f8d`); those changes still need the
-appropriate committed worker validation.
+`1de30c6`. Clean worker build `57b93fc` completed with the official release
+binaries and pinned runc metadata. Subsequent host fixes restored source stream
+reattachment (`b526339`) and corrected existing-exec identity validation
+(`59dddca`, `19599d0`). Mixed-revision diagnostics now pass basic restore,
+live-source/two-clone transport and storage isolation, and interrupted-capture
+recovery in both jail modes. These diagnostics use guest/daemon `57b93fc` and
+newer host shims; **complete single-revision stack acceptance and separate
+legacy vHive acceptance remain pending**. See the scoped receipts below.
 
 Step 1/2 branch renames, reconstruction of clean sequential milestone histories,
 final runtime branch publication and obsolete branch cleanup are planned, not
@@ -31,18 +30,17 @@ compliance remains WIP. Kubernetes Pod checkpoint/restore endpoints are deferred
 to the agreed 1.38 interface work, outside this migration goal; that deferral
 does not close the CRI compliance gaps.
 
-The first runtime VM test at `023283d` failed in both jail modes during source
-recovery after snapshot creation; restore was not reached. See the
-[failed-run receipt](evidence/upstream-migration/native-restore-023283d.json).
-SDK `dd9db32` fixes a reproduced handshake bug: a buffered acknowledgement read
-could discard the beginning of the guest's first application frame. Its vsock
-race tests, repeated regression tests and vet pass. A new runtime VM run is
-required to establish whether this resolves the observed recovery failure.
-The earlier 81-test SDK receipt remains evidence for `76af8ab` only.
+Runtime VM tests at `023283d` and `57b93fc` failed during source recovery;
+those failures remain recorded. SDK `dd9db32` fixes a separately reproduced
+handshake bug where a buffered acknowledgement read discarded the start of an
+application frame. It passed 86 top-level privileged SDK tests, with one existing
+metrics-test skip. That SDK correction alone did not resolve source recovery;
+the later runtime reattachment fix was also required.
 
 ## Snapshot contract
 
-The following describes the implemented contract, not completed VM acceptance.
+The following describes the implemented contract. Diagnostic coverage is scoped
+below; final single-revision and legacy vHive acceptance remain incomplete.
 Coordinated preparation closes host task admission, freezes running workload
 tasks, drains both directions of framed container I/O to matching acknowledged
 byte positions, and acknowledges lifecycle events only after host publication.
@@ -98,11 +96,22 @@ copies or devices described above. See
 
 ## Evidence and outstanding gates
 
-- The [SDK worker summary](evidence/upstream-migration/sdk-76af8ab-worker.json)
-  and [raw log](evidence/upstream-migration/sdk-76af8ab-worker.log) record 81
-  passing top-level privileged tests at exact SDK revision `76af8ab`, with the
-  official release VMM/jailer. The existing SDK metrics test is skipped. The
-  reused test environment is not runtime acceptance.
+- The [current SDK worker summary](evidence/upstream-migration/sdk-dd9db32-worker.json)
+  and [raw log](evidence/upstream-migration/sdk-dd9db32-worker.log) record 86
+  passing top-level privileged tests at SDK `dd9db32`, with one existing skip.
+  The older 81-test receipt applies only to `76af8ab`.
+- [Basic restore](evidence/upstream-migration/native-restore-b526339-host-diagnostic.json)
+  passed both jail modes using host `b526339` and guest/daemon `57b93fc`.
+- [Fork transport](evidence/upstream-migration/native-fork-c4af54e-host-diagnostic.json)
+  passed both jail modes in 79.32 seconds: continuing source and two clones,
+  pre-existing execs, numbered bidirectional streams, independent writable disks
+  and volumes, exit events, stdin closure and output EOF. Test source `c4af54e`
+  uses host `19599d0` and guest/daemon `57b93fc`. The test uses containerd's
+  standard CloseIO call to release the guest shim's retained stdin writer.
+- [Interrupted capture](evidence/upstream-migration/native-interrupt-c4af54e-host-diagnostic.json)
+  passed both jail modes in 51.07 seconds with the same mixed revisions. It
+  checks source continuity after interruption and subsequent capture/restore.
+  These three runtime results are diagnostics, not final full-stack acceptance.
 - The [namespace component receipt](evidence/upstream-migration/namespace-dev.json)
   records independent roots, missing source paths, read-only backing, dynamic
   disk attachments and an official-VMM preboot API probe. Its source archive and
@@ -112,7 +121,7 @@ copies or devices described above. See
   `eventbridge`, `agent` and `runtime`; parent-module packages compiled. These
   component checks do not establish KVM behavior, disk consistency or transport
   correctness across a real upstream snapshot reset.
-- The committed worker build and runtime acceptance remain open. Required VM
+- Final single-revision worker build and runtime acceptance remain open. Required VM
   evidence includes a continuing source, independent restored disks and VMs,
   reconnecting control, lifecycle events and stdin/stdout/stderr across capture,
   plus recovery after interrupted capture. Older tests that stop the source
