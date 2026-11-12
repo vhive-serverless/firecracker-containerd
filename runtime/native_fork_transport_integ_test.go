@@ -161,7 +161,13 @@ func TestNativeForkTransport_Isolated(t *testing.T) {
 			// Subscribe before capture and retain counts through both restores.
 			// Unique exec IDs distinguish VM events even though captured task IDs match.
 			eventIDs := []string{id + "-event-before", id + "-event-source", id + "-event-a", id + "-event-b"}
-			events := nativeForkSubscribe(ctx, t, client, source.streams[0].taskID, eventIDs)
+			taskIDs := make([]string, 0, 2)
+			for _, stream := range source.streams {
+				if stream.execID == "" {
+					taskIDs = append(taskIDs, stream.taskID)
+				}
+			}
+			events := nativeForkSubscribe(ctx, t, client, source.streams[0].taskID, eventIDs, taskIDs)
 			nativeForkEventProbe(ctx, t, source.backend, source.streams[0].taskID, eventIDs[0])
 			events.check(t, eventIDs[:1])
 			for _, stream := range source.streams {
@@ -279,17 +285,25 @@ func TestNativeForkTransport_Isolated(t *testing.T) {
 
 			// EOF is part of the stream contract. Drain through real FIFO EOF before
 			// Delete; this also catches trailing duplicates after the last expected line.
+			// Init IDs are shared across clones. Sequential teardown provides phase
+			// correlation: one exit per task after A, then source, then B. This does
+			// not establish VM attribution for simultaneous exits with the same ID.
+			events.checkInitExits(t, 0)
+			events.beginInitTeardown(t, 1)
 			nativeForkFinish(ctx, t, instances[1])
+			events.checkInitExits(t, 1)
 			stop(instances[1].id)
 			_, err = os.Stat(instances[1].dir.RootPath())
 			require.True(t, os.IsNotExist(err))
-			for _, survivor := range []*nativeForkInstance{source, instances[2]} {
+			for index, survivor := range []*nativeForkInstance{source, instances[2]} {
 				nativeForkIdentity(t, survivor)
 				for _, stream := range survivor.streams {
 					nativeForkExchange(ctx, t, stream, "survived-"+survivor.id, 32)
 				}
 				require.Equal(t, survivor.id+"\n"+survivor.id, nativeRestoredExec(ctx, t, survivor.backend, survivor.streams[0].taskID, "cat /fork-state; cat /shared/state"))
+				events.beginInitTeardown(t, index+2)
 				nativeForkFinish(ctx, t, survivor)
+				events.checkInitExits(t, index+2)
 			}
 			// Continue observing after teardown, so delayed replay cannot hide behind
 			// the first successful receipt of the expected event count.
@@ -301,6 +315,7 @@ func TestNativeForkTransport_Isolated(t *testing.T) {
 				t.Fatal(ctx.Err())
 			}
 			events.check(t, eventIDs)
+			events.checkInitExits(t, 3)
 		})
 	}
 }
@@ -448,17 +463,22 @@ func nativeForkFinish(ctx context.Context, t *testing.T, instance *nativeForkIns
 }
 
 type nativeForkEventLog struct {
-	mu       sync.Mutex
-	actual   map[string][]string
-	err      error
-	deadline context.Context
+	mu        sync.Mutex
+	actual    map[string][]string
+	initExits map[string][]uint32
+	initLimit int
+	err       error
+	deadline  context.Context
 }
 
-func nativeForkSubscribe(ctx context.Context, t *testing.T, client *containerd.Client, taskID string, ids []string) *nativeForkEventLog {
+func nativeForkSubscribe(ctx context.Context, t *testing.T, client *containerd.Client, taskID string, ids, initTaskIDs []string) *nativeForkEventLog {
 	t.Helper()
-	log := &nativeForkEventLog{actual: make(map[string][]string), deadline: ctx}
+	log := &nativeForkEventLog{actual: make(map[string][]string), initExits: make(map[string][]uint32), deadline: ctx}
 	for _, id := range ids {
 		log.actual[id] = nil
+	}
+	for _, id := range initTaskIDs {
+		log.initExits[id] = nil
 	}
 	events, failures := client.Subscribe(ctx, `topic~="/tasks/"`)
 	go func() {
@@ -489,6 +509,12 @@ func nativeForkSubscribe(ctx context.Context, t *testing.T, client *containerd.C
 					}
 					log.actual[id] = append(log.actual[id], envelope.Topic)
 				}
+				if exits, wanted := log.initExits[id]; wanted && id == containerID && envelope.Topic == "/tasks/exit" {
+					log.initExits[id] = append(exits, status)
+					if status != 23 || len(exits) >= log.initLimit {
+						log.err = fmt.Errorf("premature, duplicate or incorrect init exit: task=%s status=%d count=%d allowed=%d", id, status, len(exits)+1, log.initLimit)
+					}
+				}
 				log.mu.Unlock()
 			case err := <-failures:
 				if ctx.Err() == nil {
@@ -503,6 +529,42 @@ func nativeForkSubscribe(ctx context.Context, t *testing.T, client *containerd.C
 		}
 	}()
 	return log
+}
+
+func (log *nativeForkEventLog) beginInitTeardown(t *testing.T, count int) {
+	t.Helper()
+	log.checkInitExits(t, count-1)
+	log.mu.Lock()
+	defer log.mu.Unlock()
+	require.NoError(t, log.err)
+	require.Equal(t, log.initLimit+1, count, "init exits must be correlated by sequential teardown")
+	log.initLimit = count
+}
+
+func (log *nativeForkEventLog) checkInitExits(t *testing.T, count int) {
+	t.Helper()
+	require.Eventually(t, func() bool {
+		log.mu.Lock()
+		defer log.mu.Unlock()
+		if log.err != nil || log.deadline.Err() != nil {
+			return true
+		}
+		for _, exits := range log.initExits {
+			if len(exits) < count {
+				return false
+			}
+		}
+		return true
+	}, 15*time.Second, 10*time.Millisecond, "init exits must reach the subscriber after each VM teardown")
+	log.mu.Lock()
+	defer log.mu.Unlock()
+	require.NoError(t, log.err)
+	for taskID, exits := range log.initExits {
+		require.Len(t, exits, count, "init exit count for %s after teardown phase %d", taskID, count)
+		for _, status := range exits {
+			require.EqualValues(t, 23, status, "init exit status for %s", taskID)
+		}
+	}
 }
 
 func (log *nativeForkEventLog) check(t *testing.T, ids []string) {
