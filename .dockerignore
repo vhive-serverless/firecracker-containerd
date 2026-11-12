@@ -1,5 +1,8 @@
 tools/image-builder/rootfs/
 tmp/
+runtime/logs/
+runtime/vm-storage/
+runtime/.vm-storage/
 
 _submodules/firecracker/
 !_submodules/firecracker/build/kernel/linux-4.14/*.bin
