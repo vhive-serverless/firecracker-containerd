@@ -13,6 +13,21 @@ at `72f4fc9173bef33cc1c981ad285758716f635e02`, alongside storage, mechanisms and
 the controlled memory evaluation. That result does not complete Step 3 or its
 remaining Kubernetes/CRI acceptance gates.
 
+## Completion assessment
+
+**Step 4 is not complete across all retained storage modes.** The default
+devmapper path has accepted disk-backed guest-upper storage, memory mechanisms,
+ordinary Pod profiles and direct runtime restore. The optional guest stargz
+image still mounts `/var/lib/containerd-stargz-grpc` on tmpfs; its container
+writable overlay state therefore has not been migrated and validated on host disk.
+The image remains built and exercised by snapshotter tests. Those test passes
+do not establish disk backing for this guest store.
+
+See the [implementation audit](step-4-completeness.md) for the requirement
+matrix and the concrete follow-up. The inherited Step 3 CRI/Kubernetes restore
+gates are a separate source of incompleteness. The reported memory improvements
+are measured tradeoffs, not a universal reduction across all configurations.
+
 ## Baseline evidence
 
 Before storage changes, the worker ran `TestStorageBaseline_Isolated` using the
@@ -47,8 +62,9 @@ memory reductions are reference results, not expected outcomes for this worker.
 
 Implementation order is a bounded private ext4 guest upper, independently
 configurable pmem/DAX and DAMON/reporting, then five controlled evaluation arms.
-Container writable roots already use disk, so the storage comparison applies
-to the guest upper. Writable files must be private to each VM and allocated on
+Default devmapper container writable roots already use disk, so the controlled
+storage comparison applies to the guest upper. It does not cover the optional
+guest stargz store, which still uses tmpfs. Writable files must be private to each VM and allocated on
 verified disk storage; immutable sharing must be explicit.
 
 The committed evaluation at `0a268c5589c37832e1c3dc89a7b60ed2701e0b9e`

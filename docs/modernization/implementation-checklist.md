@@ -2,7 +2,8 @@
 
 Step 1 has passed worker acceptance from a committed checkout. See `step-1.md`
 for the tested revision, pushed dependency references, and evidence. Each later
-branch starts at the validated completion commit of its prerequisite.
+branch preserves its predecessor's functionality. Step 4 started from an explicitly
+authorized Step 3 WIP baseline; see the branch guide for forward-merge maintenance.
 
 ## Initial audit
 
@@ -76,6 +77,7 @@ branch starts at the validated completion commit of its prerequisite.
 - [x] Ordinary Kubernetes Pod lifecycle passed all four disk/pmem/reclaim/combined profiles with clean 06936f6 harness and pinned 72f4fc9 runtime image; raw evidence and cleanup verified. See step-4.md.
 - [x] Broader regression follow-up: initial 35 runtime cases plus targeted corrections for five storage-related test failures; all five snapshotter cases passed. Unfiltered CRI retained the same 97 passes, 16 failures and 29 skips. Failed runs and source/image distinctions remain in step-4.md.
 - [x] In-flight native capture interruption after quiescing passed both jailers from clean 5186d40: task thaw/exec, artifact cleanup and subsequent capture; production runtime unchanged from `72f4fc9`.
+- [ ] Move the retained guest stargz writable store/overlay off tmpfs and validate actual disk backing, writes, exhaustion, cleanup and supported capture/restore; existing snapshotter passes do not prove this. See step-4-completeness.md.
 - [ ] Full inherited Step 3 integration acceptance: CRI failures and Kubernetes Pod checkpoint/restore remain explicitly WIP; direct runtime tests do not satisfy those gates.
 - [x] Run identical workloads/resources for original baseline, disk baseline, pmem only, reclamation only and combined, plus matching ext4 block controls: clean 0a268c5, 21 trials, three randomized blocks.
 - [x] Measure peak/integrated host memory, guest anonymous/page cache, shared backing, CPU, faults/I/O, disk, latency and correctness; separate accounting domains and retain missing metrics and reporting-counter freshness limitations.
