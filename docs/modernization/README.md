@@ -56,9 +56,9 @@ verified. See the [Step 1 procedure](step-1.md) and
 
 Use this checkout's [versions.json](versions.json), module manifests and gitlinks.
 `selected_inputs` describes this branch's dependency selection; `existing`
-describes the historical pre-modernization baseline. `modules.txt` is the
-historical captured module inventory, not the current selected graph. Generate
-the current graph with `go list -m -json all` from the exact checkout.
+describes the historical pre-modernization baseline. `modules.txt` and `cri-modules.txt` record the resolved module graphs captured
+for this candidate. Regenerate the graph with `go list -m -json all` from the
+exact checkout.
 Validation entries name the exact tested source and scope. Later documentation, test-only maintenance, and
 production fixes may not have repeated broader acceptance; use each maintenance
 receipt to distinguish focused checks from full VM acceptance. Never substitute a
@@ -75,13 +75,12 @@ and are not the reproduction procedure for these branches.
 
 ## Propagating maintenance
 
-Land common fixes on the earliest affected branch, validate them there, then
-merge forward one branch at a time. Preserve each branch's extra functionality,
-dependency pins and acceptance scope while resolving conflicts. Do not merge
-Step 4 storage changes backwards into the Step 1 baseline. Prefer forward
-merges to separate cherry-picks so Git records that the earlier fixes are present.
-Historical maintenance was cherry-picked; patch equivalence is different from
-commit ancestry and can explain different hashes for the same fix.
+Land common fixes on the earliest affected branch, validate them there, and
+rebuild the descendant logical cohorts while preserving each stage's additional
+functionality and acceptance scope. These reconstructed candidate histories
+are linear; archived milestone tips and their historical merge graph stay
+separate. Historical maintenance was cherry-picked or merged, so patch
+equivalence and exact ancestry are distinct evidence.
 
 For each adjacent pair, `git merge-base --is-ancestor <lower> <upper>` must
 succeed after propagation. Inspect the resulting source diff, run the checks
@@ -89,3 +88,12 @@ appropriate to that diff and preserve receipts before pushing. Use separate
 checkouts, install prefixes, test storage and thin pools for concurrent builds.
 The branch chain does not make Step 3 complete: Step 4 was started from its WIP
 baseline by explicit exception on 2026-11-11.
+
+## Preserved historical evidence
+
+The [original branch audit](evidence/branch-chain-audit.json) records its old
+tips and source selections; it is not the reconstructed candidate ancestry.
+The [agent footprint audit](agent-footprint.md) retains original artifact sizes
+and DSec comparison limits. The [upstream reference receipt](upstream-migration.md)
+records 20 native VM cases at `fc2a8c2`; the reconstructed Step 4 runner selects
+24 cases and requires fresh acceptance of its exact commit.

@@ -14,3 +14,7 @@ See the [architecture](architecture.md) and [milestone guide](modernization/READ
 for branch-specific additions and validation. Binary size, guest RSS/PSS and total
 VM memory are different metrics; an agent language change alone does not establish
 lower VM memory consumption.
+
+The [pinned Step 4 footprint audit](modernization/agent-footprint.md) records
+actual agent/runc file sizes, the limits of available memory measurements, and
+the DSec comparison. These measurements do not describe every earlier branch.

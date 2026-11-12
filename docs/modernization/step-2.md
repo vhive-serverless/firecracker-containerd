@@ -255,3 +255,10 @@ The [shared receipt](evidence/step4-cache-test/verification.json) records all fo
 validated milestone backports, exact commands and raw hashes. The old failure
 was not reproduced in 30 baseline repetitions; these checks are test maintenance,
 not new full-stack acceptance. Step 3 CRI and Kubernetes restore remain WIP.
+
+## Optional Step 4 legacy harness profile
+
+The Step 4 test image selects `guest_root_mode=ram` explicitly and records its
+configuration. The runtime defaults remain disk. This preserves the legacy
+two-drive capture profile without requiring Step 4 API fields in the actual
+vHive release, which consumes the Step 2 branch.
