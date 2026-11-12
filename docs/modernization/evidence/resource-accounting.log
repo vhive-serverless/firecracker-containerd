@@ -1,0 +1,48 @@
+make: Entering directory '/users/nehalem/fc-ctrd-mod/runtime/runtime'
+make -C .. test-deps-in-docker
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/runtime'
+docker run --rm \
+	--volume /users/nehalem/fc-ctrd-mod/runtime:/src \
+	--volume gocache:/go \
+	--workdir /src \
+	public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 go mod download
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/runtime'
+/users/nehalem/fc-ctrd-mod/runtime/runtime/../tools/thinpool.sh reset "fc-test-resource"
+Name:              fc-test-resource
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 7
+Number of targets: 1
+
+device-mapper: message ioctl on fc-test-resource  failed: No data available
+Command failed.
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/runtime/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/runtime/runtime/..:/src \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-test-resource \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:latest \
+	"go test -v -count=1 -timeout=120s -run '^TestResourceAccounting_Isolated$'"
+=== RUN   TestResourceAccounting_Isolated
+    resources_integ_test.go:76: guest cgroup v2 accounting: pids:{current:1 limit:18446744073709551615} cpu:{usage_usec:555362 user_usec:446618 system_usec:108743 nr_periods:10 nr_throttled:9 throttled_usec:448567} memory:{anon:118784 file:1282048 kernel_stack:16384 slab:214968 file_mapped:925696 inactive_anon:114688 active_anon:4096 inactive_file:348160 active_file:933888 slab_reclaimable:79368 slab_unreclaimable:135600 pgfault:823 pgmajfault:15 pgactivate:220 usage:1777664 usage_limit:67108864 swap_limit:18446744073709551615 max_usage:2310144} rdma:{} io:{usage:{major:254 minor:16 rbytes:1282048 rios:251} usage:{major:254 rbytes:5120 rios:3}} hugetlb:{max:18446744073709551615 pagesize:"2MB"} hugetlb:{max:18446744073709551615 pagesize:"1GB"} memory_events:{}
+    resources_integ_test.go:65: resource test stdout=RESOURCE_LIMITS_OK
+         stderr=
+--- PASS: TestResourceAccounting_Isolated (4.35s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	4.366s
+make: Leaving directory '/users/nehalem/fc-ctrd-mod/runtime/runtime'

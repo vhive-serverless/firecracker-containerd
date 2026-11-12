@@ -1,0 +1,63 @@
+2026-11-11T11:46:13Z
+b7e5c426e2f91ad90adb67dbbbe4ecb91dc62e9f
+Drain replaced I/O proxies and cancel blocked stream initialization
+Signed-off-by: JooYoung Park <jooyoung.park73@gmail.com>
+
+Result: PASS; clean committed build, install, full base acceptance and I/O race tests
+Worker: nehalem@amd218.utah.cloudlab.us
+Checkout: /users/nehalem/fc-ctrd-mod/step1-io-committed
+Commands: tools/modernize/build-stack.sh; tools/modernize/install-stack.sh; tools/modernize/test-stack.sh; go test -mod=readonly -race -count=1 -timeout=180s -v ./internal/vm
+9d6c1876564e6cafefaade17cbc3e415cf243c520613f3e388e32154ab562e89  bin/firecracker
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  _submodules/runc/runc
+83eb80a47b32b38b2a54504321398580b4dc49152d8d97645fdf0586539b1e66  agent/agent
+3dd9ea4a0c2bc1eda0aafcc751447a9ef8511281065335e0aebc569ef14dab1b  _submodules/stargz-snapshotter/out/containerd-stargz-grpc
+d95c75225530d7378a39c140953a9854d77f0ba7d6c077b2abb7e3184d610e64  volume/volume-init
+308d131309df718ad0ce9849395afce223ee1d1d7c90d65b23e1699d6f836452  runtime/containerd-shim-aws-firecracker
+1d6e34e2ee9e6693568b4d28d6e868718d45059886b0a6b3df3cb317306732c1  firecracker-control/cmd/containerd/firecracker-containerd
+d82c7fea35837110ea3f2ba38f0b82227957ad28a8554da62c539ef0119312a3  firecracker-control/cmd/containerd/firecracker-ctr
+ab4650aeef3188318704e55a6149c99a4ca66663630d824f3853826bcdd0954a  default-vmlinux.bin
+3063f380a81a5e1d6a8717213d8a6872ec092a7800d528642f799bdfc4398603  tools/image-builder/rootfs.img
+a805f735cb220a33ef35da98b37e95391ff93e00e1ac368e094a02e7bb4fbcdb  tools/image-builder/rootfs-stargz.img
+ eaf83bb718a559d324613d566eaf776b31a62340 _submodules/firecracker (v1.18.0)
+ c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e _submodules/runc (v1.4.2)
+ 3070538befb5a6c09f93e99164762b3a76310357 _submodules/stargz-snapshotter (cmd/v0.18.2)
+
+Evidence: b7e5c42-build.log
+9da3c7495f22a4c3216dc8d37bd78fcc0fef6c3826c8dec22dc5d2a7ab0742b9  /users/nehalem/fc-ctrd-mod/evidence/b7e5c42-build.log
+runc version 1.4.2
+spec: 1.3.0
+go: go1.26.11
+libseccomp: 2.5.4
+containerd github.com/containerd/containerd/v2 2.3.7+unknown b7e5c426e2f91ad90adb67dbbbe4ecb91dc62e9f
+
+Evidence: b7e5c42-install.log
+195bce8b741d76b6f0d46a218ede03e16ecd8b2395c5c12796a14c5aaa3e9a9f  /users/nehalem/fc-ctrd-mod/evidence/b7e5c42-install.log
+9d6c1876564e6cafefaade17cbc3e415cf243c520613f3e388e32154ab562e89  /users/nehalem/fc-ctrd-mod/install/b7e5c426e2f9/bin/firecracker
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  /users/nehalem/fc-ctrd-mod/install/b7e5c426e2f9/bin/runc
+ab4650aeef3188318704e55a6149c99a4ca66663630d824f3853826bcdd0954a  /users/nehalem/fc-ctrd-mod/install/b7e5c426e2f9/share/runtime/default-vmlinux.bin
+543acc2eaa81062416c3ef3442adedcabe41622ce201e90fe733344c54d81f71  /users/nehalem/fc-ctrd-mod/install/b7e5c426e2f9/share/runtime/default-rootfs.img
+INSTALL_DIR=/users/nehalem/fc-ctrd-mod/install/b7e5c426e2f9
+
+Evidence: b7e5c42-acceptance.log
+f425fa6df6904a070335d2e91bbe98cf8ce4a113e6d935a4f9f5d72b4a0ea930  /users/nehalem/fc-ctrd-mod/evidence/b7e5c42-acceptance.log
+--- PASS: TestTemporaryNetErr (0.00s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-go-sdk/vsock	0.003s
+PINNED_SDK_PRIVILEGED_SUITE_OK
+COMMITTED_STACK_ACCEPTANCE_OK
+
+Evidence: b7e5c42-io-race.log
+fcf3a87379c884c7a8d7c5e8357877eb4d8660aeddd66192b0a730354e22856c  /users/nehalem/fc-ctrd-mod/evidence/b7e5c42-io-race.log
+    task_test.go:487: time="2026-11-11T04:42:04-07:00" level=error ExecID= TaskID=fakeTask error="error initializing io: nothing works" stream=stdin test=TestTaskManager_IOCreateFails
+        
+--- PASS: TestTaskManager_IOCreateFails (0.10s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/internal/vm	3.363s
+
+Regression before correction:
+cb0602da8b1efd1784d344f91b0c30324820128bbc8e6d57827d62dca9403f41  /users/nehalem/fc-ctrd-mod/evidence/step1-io-close-before.log
+--- FAIL: TestProxyCloseDrainsBlockedOutput (1.10s)
+    ioproxy_test.go:84: closed proxy retained its blocked reader; replacing it can leave competing output consumers
+FAIL
+FAIL	github.com/firecracker-microvm/firecracker-containerd/internal/vm	1.134s
+FAIL

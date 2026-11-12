@@ -1,0 +1,8 @@
+=== RUN   TestRecoveryRefusesReusedPID
+--- PASS: TestRecoveryRefusesReusedPID (0.00s)
+=== RUN   TestRecoverVMActiveShimAndCrash
+--- PASS: TestRecoverVMActiveShimAndCrash (0.04s)
+=== RUN   TestRecoveryRejectsWrongVM
+--- PASS: TestRecoveryRejectsWrongVM (0.00s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/internal/vm	0.048s

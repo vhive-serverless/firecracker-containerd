@@ -1,0 +1,22 @@
+revision=a67e5e6c1e270b199d5b8493ef04d7f2a0fa5401
+go=go version go1.26.11 linux/amd64
+
+COMMAND: make lint
+GOBIN=/users/nehalem/fc-ctrd-mod/step4-cache-test-committed/damon-virtio-pmem/bin go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.15.0
+/users/nehalem/fc-ctrd-mod/step4-cache-test-committed/damon-virtio-pmem/bin/golangci-lint --version
+golangci-lint has version 2.15.0 built with go1.26.11 from (unknown, modified: ?, mod sum: "h1:w94zf8HAYI7hm3164kwKsvZRuqXvY+YxeFoTbu1OLg8=") on (unknown)
+GOBIN=/users/nehalem/fc-ctrd-mod/step4-cache-test-committed/damon-virtio-pmem/bin go install github.com/vbatts/git-validation@v1.2.0
+GOBIN=/users/nehalem/fc-ctrd-mod/step4-cache-test-committed/damon-virtio-pmem/bin go install github.com/kunalkushwaha/ltag@v0.2.5
+/users/nehalem/fc-ctrd-mod/step4-cache-test-committed/damon-virtio-pmem/bin/ltag -t ./.headers -excludes "tools _submodules tmp bin" -check -v
+No template file for Dockerfile, shall skip all Dockerfile
+No template file for bash scripts, shall skip all bash scripts
+/users/nehalem/fc-ctrd-mod/step4-cache-test-committed/damon-virtio-pmem/bin/git-validation -run DCO,short-subject -range HEAD~1..HEAD
+ * a67e5e6 "Synchronize eviction failure test with the reaper error log" ... PASS
+/users/nehalem/fc-ctrd-mod/step4-cache-test-committed/damon-virtio-pmem/bin/golangci-lint run
+0 issues.
+cd cri && /users/nehalem/fc-ctrd-mod/step4-cache-test-committed/damon-virtio-pmem/bin/golangci-lint run --config ../.golangci.yml
+0 issues.
+
+RESULT make-lint exit=0 duration_ms=12541
+source_status:
+source_clean_after=true
