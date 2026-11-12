@@ -22,6 +22,7 @@ DOCKER_IMAGE_TAG?=latest
 GO_CACHE_VOLUME_NAME?=gocache
 FIRECRACKER_CONTAINERD_TEST_IMAGE?=localhost/firecracker-containerd-test
 FICD_DM_POOL?=fc-test-thinpool
+FICD_VM_STORAGE?=$(abspath $(CURDIR)/../../.ficd-test-vms/$(notdir $(abspath $(CURDIR)/..)))
 
 REVISION=$(shell git rev-parse HEAD)
 
@@ -54,7 +55,7 @@ integ-test: test-deps
 
 integ-test-%: logs test-deps
 	$(CURDIR)/../tools/thinpool.sh reset "$(FICD_DM_POOL)"
-	docker run --rm \
+	$(CURDIR)/../tools/modernize/run-isolated-vm-test.sh "$(FICD_VM_STORAGE)" --rm \
 		--privileged \
 		--ipc=host \
 		--network=none \
@@ -76,7 +77,7 @@ integ-test-%: logs test-deps
 
 benchmark-%: logs
 	$(CURDIR)/../tools/thinpool.sh reset "$(FICD_DM_POOL)"
-	docker run --rm \
+	$(CURDIR)/../tools/modernize/run-isolated-vm-test.sh "$(FICD_VM_STORAGE)" --rm \
 		--privileged \
 		--ipc=host \
 		--network=none \

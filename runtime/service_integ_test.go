@@ -885,6 +885,7 @@ func TestStubBlockDevices_Isolated(t *testing.T) {
 			},
 		},
 		ContainerCount: 5,
+		GuestRoot:      &proto.GuestRootStorage{Mode: "disk", SizeMib: 512},
 	})
 	require.NoError(t, err, "failed to create VM")
 
@@ -941,7 +942,8 @@ vdb  254:16   0 1073741824B  0 |    0   0   0   0   0   0   0   0
 vdc  254:32   0        512B  0 |  214 244 216 245 215 177 177 177
 vdd  254:48   0        512B  0 |  214 244 216 245 215 177 177 177
 vde  254:64   0        512B  0 |  214 244 216 245 215 177 177 177
-vdf  254:80   0        512B  0 |  214 244 216 245 215 177 177 177`
+vdf  254:80   0        512B  0 |  214 244 216 245 215 177 177 177
+vdg  254:96   0  536870912B  0 |    0   0   0   0   0   0   0   0`
 
 		parts := strings.Split(stdout.String(), "vdb")
 		require.Equal(t, strings.TrimSpace(expectedOutput), strings.TrimSpace("vdb"+parts[1]))
