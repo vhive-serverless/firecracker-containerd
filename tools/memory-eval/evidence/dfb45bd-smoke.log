@@ -1,0 +1,4 @@
+COMMAND ["/usr/bin/python3", "/users/nehalem/fc-ctrd-mod/step4-host-sampler/tools/memory-eval/sample_host.py", "--pid", "3371949", "--pid", "3371947", "--interval", "0.2", "--duration", "1.2", "--output", "/users/nehalem/fc-ctrd-mod/evidence/dfb45bd-host-sampler/owned-process/owned-process.jsonl", "--cgroup", "/sys/fs/cgroup/user.slice/user-20005.slice/session-2331.scope"]
+OWNED_PID 3371949 EXPLICIT_CGROUP /sys/fs/cgroup/user.slice/user-20005.slice/session-2331.scope
+EXPLICIT_CGROUP_READ_OK
+OWNED_PROCESS_CPU_IO_PSS_EXIT_AND_TIMESTAMPS_OK
