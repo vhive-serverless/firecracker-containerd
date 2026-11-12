@@ -1,0 +1,209 @@
+Committed Step 3 FIFO maintenance: PASS. Step 3 remains WIP and incomplete.
+Date: 2026-11-11
+Branch: cri-native-snapshot-restore
+Tested source: 3c0d1ce5ce8fc47e80607a8a9a11330746c2972b
+Previous WIP source: 26ceead7d0b4d1c6ea32a012c24b76efb4fb0439
+Backported common correction: c7d73c703d18d33e07b39c2785dbcb1f77af039f
+Source diff: runtime/runc_jailer.go and runtime/jailer_telemetry_integ_test.go only.
+Worker: nehalem@amd218.utah.cloudlab.us
+Worker checkout: /users/nehalem/fc-ctrd-mod/step3-fifo-committed
+Installed prefix: /users/nehalem/fc-ctrd-mod/install/3c0d1ce5ce8f
+Worker checkout was clean before build and after validation.
+Go: go1.26.11; Rust: rustc 1.97.0 (2d8144b78 2026-07-07).
+SDK unchanged: 832b1a5132e06f5e2167b64b97b5cd8946604005.
+VMM unchanged: ce86b117d59ca93b1c04b791a251b445ace76703.
+
+The jailer now prepares the telemetry hard links or cross-filesystem bind mounts
+before runc startup. The real-VM regression puts the caller's log/metrics FIFOs
+on /dev/shm and proves both streams reach the original readers after startup.
+
+Passed: immutable-input verification, full build-stack.sh, install-stack.sh,
+SHA-tagged make test-images, make lint, three root race tests, cross-filesystem
+real-VM regression, and full TestCreateVM_Isolated (all eight subcases, no skips).
+The dedicated fc-step3-fifo-3c0d1ce5ce8f thin pool and its loop devices were removed.
+No /dev/sdb operations, new k3s deployment, or NativeRestore test were performed.
+The native-checkpoint-committed checkout's existing untracked inspection test was
+preserved. No source changes or acceptance claim cover native restore, full CRI
+compliance, whole-Pod restore or Kubernetes checkpoint/restore. Step 3 remains
+explicitly WIP; Step 4 proceeds under the user's existing instruction.
+
+Preserved harness failures (not suppressed):
+- The first root race invocation ran from the repository root. TestBuildJailedRootHandler
+  failed opening ./firecracker-runc-config.json.example; the other two tests passed.
+  The identical compiled binary passed all three tests after changing cwd to runtime/.
+- The first make lint invocation inherited runtime/ and returned "No rule to make
+  target 'lint'". Running make lint from the repository root passed.
+Both original logs and their hashes remain in the worker evidence below. There was
+no runtime-test retry after a runtime failure and no source change for these cwd fixes.
+The image build contains worktree Git-path diagnostics inside Docker; its explicit
+RUNTIME_REVISION argument and the actual image binary versions identify the source.
+
+Reproduction (all builds and tests run on the worker):
+export STACK_DIR=/users/nehalem/fc-ctrd-mod
+cd "$STACK_DIR/step3-fifo-committed"
+export PATH="$STACK_DIR/toolchains/go1.26.11/bin:$STACK_DIR/toolchains/cargo/bin:$PATH"
+export RUSTUP_HOME="$STACK_DIR/toolchains/rustup" CARGO_HOME="$STACK_DIR/toolchains/cargo"
+export GOTOOLCHAIN=local
+# Kernel reused only after checking binary/config SHA-256 and comparing the input
+# kernel config and build-kernel.sh to native-checkpoint-committed (details below).
+tools/modernize/build-stack.sh
+tools/modernize/install-stack.sh
+export DOCKER_IMAGE_TAG=$(git rev-parse --short=12 HEAD)
+make test-images
+go test -mod=readonly -race -c -o bin/step3-jailer-race.test ./runtime
+(cd runtime && sudo -n env -u ENABLE_ISOLATED_TESTS ../bin/step3-jailer-race.test \
+  -test.v -test.count=1 -test.timeout=180s \
+  -test.run='^(TestBuildJailedRootHandler|TestFifoHandler|TestPrepareBindMount)$')
+make lint
+export FICD_DM_VOLUME_GROUP=''
+export FICD_DM_POOL=fc-step3-fifo-$DOCKER_IMAGE_TAG
+make -C runtime integ-test-TestJailerTelemetryCrossFilesystem_Isolated EXTRAGOARGS='-v -count=1 -timeout=300s'
+make -C runtime integ-test-TestCreateVM_Isolated EXTRAGOARGS='-v -count=1 -timeout=300s'
+tools/thinpool.sh remove "$FICD_DM_POOL"
+# Actual test driver includes an EXIT cleanup trap and captures both exit codes:
+# /users/nehalem/fc-ctrd-mod/evidence/3c0d1ce-step3-validate.sh
+
+The test image build refreshes guest filesystem artifacts; actual tested image
+and rootfs hashes are recorded below independently of the earlier install log.
+
+Kernel reuse verification:
+3c0d1ce5ce8fc47e80607a8a9a11330746c2972b
+/users/nehalem/fc-ctrd-mod/native-checkpoint-committed/bin/vmlinux-6.18.56-fcmod: OK
+/users/nehalem/fc-ctrd-mod/native-checkpoint-committed/bin/vmlinux-6.18.56-fcmod.config: OK
+8fa45f9c6d91f1c91e16393a921abeec74adf94a245849c8f54ba04545264e92  tools/kernel-configs/microvm-kernel-x86_64-6.18.config
+f75d4d4af61da72168b3e67c12d703e60a99bddde040b2d5e8c26ec2322159c8  tools/modernize/build-kernel.sh
+f7c763775c948bd8b779e432e5f4d418463a96a3e222b959df2d648c5b798dac  bin/vmlinux-6.18.56-fcmod
+14d7f85447cf18090154b4d85f853e21ecb93f998621025697e6bcf0fdc94914  bin/vmlinux-6.18.56-fcmod.config
+
+Actual source, module selection, image identity and tested binary hashes:
+Wed Nov 11 14:18:54 UTC 2026
+Linux node-005.cluster.ntu-cloud-pg0.utah.cloudlab.us 6.8.0-147-generic #147-Ubuntu SMP PREEMPT_DYNAMIC Thu Sep 24 11:33:16 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+go version go1.26.11 linux/amd64
+3c0d1ce5ce8fc47e80607a8a9a11330746c2972b
+ ce86b117d59ca93b1c04b791a251b445ace76703 _submodules/firecracker (v1.18.0-2-gce86b117d)
+ c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e _submodules/runc (v1.4.2)
+ 3070538befb5a6c09f93e99164762b3a76310357 _submodules/stargz-snapshotter (cmd/v0.18.2)
+{
+	"Path": "github.com/firecracker-microvm/firecracker-go-sdk",
+	"Version": "v1.0.1-0.20250818195323-ed6ff32aa924",
+	"Replace": {
+		"Path": "github.com/JooyoungPark73/firecracker-go-sdk",
+		"Version": "v0.0.0-20261111093432-832b1a5132e0",
+		"Time": "2026-11-11T09:34:32Z",
+		"Dir": "/users/nehalem/go/pkg/mod/github.com/!jooyoung!park73/firecracker-go-sdk@v0.0.0-20261111093432-832b1a5132e0",
+		"GoMod": "/users/nehalem/go/pkg/mod/cache/download/github.com/!jooyoung!park73/firecracker-go-sdk/@v/v0.0.0-20261111093432-832b1a5132e0.mod",
+		"GoVersion": "1.24.11",
+		"Sum": "h1:ZtzehkvEl/RfFFMq0UwXyONM35MUqRDyA5P+BnFQEhY=",
+		"GoModSum": "h1:IKSxd5Gsx+H4cFowjf6q4kuzbcCWkYsYGKxf/WKKNL4="
+	},
+	"Dir": "/users/nehalem/go/pkg/mod/github.com/!jooyoung!park73/firecracker-go-sdk@v0.0.0-20261111093432-832b1a5132e0",
+	"GoMod": "/users/nehalem/go/pkg/mod/cache/download/github.com/!jooyoung!park73/firecracker-go-sdk/@v/v0.0.0-20261111093432-832b1a5132e0.mod",
+	"GoVersion": "1.24.11"
+}
+sha256:504f90fcf51d7760aa4871a6e365cb97815e258d804e8cb6066d04b1ebf3f2f4
+containerd github.com/containerd/containerd/v2 2.3.7+unknown 3c0d1ce5ce8fc47e80607a8a9a11330746c2972b
+firecracker-cri 3c0d1ce5ce8fc47e80607a8a9a11330746c2972b
+da79e77bb83b9e309a0629f7b031950cefddd36899a2dfd707f01e6c22226627  /usr/local/bin/firecracker-containerd
+909cb44e4c15020eaa17aab0aa23f1dc376c572a3f6ccc2ceef63b8119696e0f  /usr/local/bin/containerd-shim-aws-firecracker
+e9c96a84e9484f45a9e9135ad00e46b076c79257021f077ed683c1a9a7000c1c  /usr/local/bin/firecracker-cri
+ce15b3d35a4811fbf164371b72f57757cce5e846ad5959b547a471fd564a6e89  /usr/local/bin/firecracker
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  /usr/local/bin/runc
+1e17ea1e6970558001e8ea8cf617b3152608afb30ff3c709ad5039d502fececd  /var/lib/firecracker-containerd/runtime/default-rootfs.img
+f7c763775c948bd8b779e432e5f4d418463a96a3e222b959df2d648c5b798dac  /var/lib/firecracker-containerd/runtime/default-vmlinux.bin
+ce15b3d35a4811fbf164371b72f57757cce5e846ad5959b547a471fd564a6e89  bin/firecracker
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  _submodules/runc/runc
+691b0d4715cbe53d98cb368d3a8debf80969fadae567d0010bd0bd05c59cd9b2  agent/agent
+909cb44e4c15020eaa17aab0aa23f1dc376c572a3f6ccc2ceef63b8119696e0f  runtime/containerd-shim-aws-firecracker
+da79e77bb83b9e309a0629f7b031950cefddd36899a2dfd707f01e6c22226627  firecracker-control/cmd/containerd/firecracker-containerd
+e9c96a84e9484f45a9e9135ad00e46b076c79257021f077ed683c1a9a7000c1c  cri/firecracker-cri
+f7c763775c948bd8b779e432e5f4d418463a96a3e222b959df2d648c5b798dac  default-vmlinux.bin
+1e17ea1e6970558001e8ea8cf617b3152608afb30ff3c709ad5039d502fececd  tools/image-builder/rootfs.img
+1a1a844ce78612f08f234565786b42b988999831453de943add3a04299d48ba0  bin/step3-jailer-race.test
+
+Root race result:
+=== RUN   TestBuildJailedRootHandler
+time="2026-11-11T07:11:17-07:00" level=info msg="Successfully ran jailer handler" ociBundlePath=/tmp/TestBuildJailedRootHandler458435810/001 runcBinaryPath=bin-path
+--- PASS: TestBuildJailedRootHandler (0.05s)
+=== RUN   TestFifoHandler
+=== RUN   TestFifoHandler/Different_basename
+=== RUN   TestFifoHandler/Same_basename
+--- PASS: TestFifoHandler (0.00s)
+    --- PASS: TestFifoHandler/Different_basename (0.00s)
+    --- PASS: TestFifoHandler/Same_basename (0.00s)
+=== RUN   TestPrepareBindMount
+=== RUN   TestPrepareBindMount/no_mounts
+=== RUN   TestPrepareBindMount/absolute_path
+=== RUN   TestPrepareBindMount/use_dots_to_access_the_original_directory
+--- PASS: TestPrepareBindMount (0.00s)
+    --- PASS: TestPrepareBindMount/no_mounts (0.00s)
+    --- PASS: TestPrepareBindMount/absolute_path (0.00s)
+    --- PASS: TestPrepareBindMount/use_dots_to_access_the_original_directory (0.00s)
+PASS
+
+Cross-filesystem real-VM result:
+=== RUN   TestJailerTelemetryCrossFilesystem_Isolated
+    jailer_telemetry_integ_test.go:52: jailed VM started; external log and metric FIFOs both delivered telemetry
+--- PASS: TestJailerTelemetryCrossFilesystem_Isolated (3.74s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	3.757s
+make: Leaving directory '/users/nehalem/fc-ctrd-mod/step3-fifo-committed/runtime'
+
+Full CreateVM real-VM result:
+=== RUN   TestCreateVM_Isolated
+=== RUN   TestCreateVM_Isolated/Happy_Case
+=== RUN   TestCreateVM_Isolated/Happy_Case/Jailer
+=== RUN   TestCreateVM_Isolated/No_Agent
+=== RUN   TestCreateVM_Isolated/No_Agent/Jailer
+=== RUN   TestCreateVM_Isolated/Slow_Root_FS
+    service_integ_test.go:2389: received error: rpc error: code = DeadlineExceeded desc = VM "TestCreateVM-Isolated-Slow-Root-FS" didn't start within 5s: failed to dial the VM over vsock: context deadline exceeded
+=== RUN   TestCreateVM_Isolated/Slow_Root_FS/Jailer
+    service_integ_test.go:2389: received error: rpc error: code = DeadlineExceeded desc = VM "TestCreateVM-Isolated-Slow-Root-FS-Jailer" didn't start within 5s: failed to dial the VM over vsock: context deadline exceeded
+=== RUN   TestCreateVM_Isolated/Slow_Root_FS_and_Longer_Timeout
+=== RUN   TestCreateVM_Isolated/Slow_Root_FS_and_Longer_Timeout/Jailer
+--- PASS: TestCreateVM_Isolated (124.69s)
+    --- PASS: TestCreateVM_Isolated/Happy_Case (3.05s)
+    --- PASS: TestCreateVM_Isolated/Happy_Case/Jailer (3.41s)
+    --- PASS: TestCreateVM_Isolated/No_Agent (20.07s)
+    --- PASS: TestCreateVM_Isolated/No_Agent/Jailer (20.04s)
+    --- PASS: TestCreateVM_Isolated/Slow_Root_FS (5.07s)
+    --- PASS: TestCreateVM_Isolated/Slow_Root_FS/Jailer (5.05s)
+    --- PASS: TestCreateVM_Isolated/Slow_Root_FS_and_Longer_Timeout (33.73s)
+    --- PASS: TestCreateVM_Isolated/Slow_Root_FS_and_Longer_Timeout/Jailer (34.26s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	124.709s
+make: Leaving directory '/users/nehalem/fc-ctrd-mod/step3-fifo-committed/runtime'
+
+Final status:
+cross_filesystem_exit=0
+create_vm_exit=0
+private_pool_cleanup=complete
+source_clean=true
+
+Final source audit, daemon logs and raw evidence SHA-256:
+3c0d1ce5ce8fc47e80607a8a9a11330746c2972b
+source_clean=true
+?? runtime/storage_baseline_integ_test.go
+75f55f1e8c3ef9f7bbb318eaac5d6c76bda4b5dbb9261044fcb8df25d21c2102  runtime/logs/containerd.out
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  runtime/logs/demux-snapshotter.out
+caee4d76f6a8a9a03476a69bf80f21c2a99d052ab253b0d72e32658fb645a4e2  runtime/logs/http-address-resolver.out
+ee054ed24292a2ac94415e5ddfbce38d5a2f5a2619f541c49dcc83973d9dd421  /users/nehalem/fc-ctrd-mod/evidence/3c0d1ce-step3-build.log
+8b89cb3dc5c1f0d59d0d0dfe8fb8c3f0e83b632071861709eb9dca924aa83e15  /users/nehalem/fc-ctrd-mod/evidence/3c0d1ce-step3-create-vm.log
+1a2c06101b6896f5cf69021a5a98c85344a36d72931dfb0c9683f2d548384751  /users/nehalem/fc-ctrd-mod/evidence/3c0d1ce-step3-cross-filesystem.log
+82d9c8b1d8cbd195ea4833df39f1905513a40ba5515c8c0ba406a9eb9922d98e  /users/nehalem/fc-ctrd-mod/evidence/3c0d1ce-step3-inputs.log
+670397a00a52f0f028aba847ab539491cbfe22af4044e8f85fd2cb5873f4c8d4  /users/nehalem/fc-ctrd-mod/evidence/3c0d1ce-step3-install.log
+9b8b8e3b5eb26837a544545048f1f62784c3c29353aef483d95b56c64be4f749  /users/nehalem/fc-ctrd-mod/evidence/3c0d1ce-step3-jailer-race-correct-cwd.log
+d2c5b8f8ad7fbdaadc4e55b5aaefd5ef18c5e07038207c6c861eb5b827586757  /users/nehalem/fc-ctrd-mod/evidence/3c0d1ce-step3-jailer-race.log
+d599c029b75994482b701ca130f5a15ab2725d1b11db21502465298ab189d8c9  /users/nehalem/fc-ctrd-mod/evidence/3c0d1ce-step3-kernel-reuse.log
+f3e2b9b0f923d02655f79e1be721246ae8d236ea55ee70cc58c6a87470f02e9c  /users/nehalem/fc-ctrd-mod/evidence/3c0d1ce-step3-lint-repo-cwd.log
+b19e6824766a737e5687a6685480056910a2756b3a322e9760ad426fda451af2  /users/nehalem/fc-ctrd-mod/evidence/3c0d1ce-step3-lint.log
+1f8304c576206e1e50fc85094cee3f2359ff197d37e373dc5fff29910bb92f5c  /users/nehalem/fc-ctrd-mod/evidence/3c0d1ce-step3-status.log
+3022f1d85738936839d32251ca4de9d7e5edd207ad8ba801694ce96df76ba6c5  /users/nehalem/fc-ctrd-mod/evidence/3c0d1ce-step3-test-images.log
+1a6e3c9f4c0166feafc85fc12dbb89d6280d9adad0881040338c8b5018c40256  /users/nehalem/fc-ctrd-mod/evidence/3c0d1ce-step3-validate.sh
+9fbe3ce82c67b56b52c23406e061b9dfe5c5f30566e907ba63754a21fb826916  bin/receipts/build/agent-build-info
+7a4f2d74e8dca1d7f4669ab624c2586db6f2d79ac9f4887befc4d62056dccd53  bin/receipts/build/binaries.sha256
+3d8eca958bab2c979ab9b4b46f09ab7ffb56f9bc3431ac81460eb63b45d5336d  bin/receipts/build/cri-build-info
+b6ab7e6648a1e69c95baea02dedf9e542ff227de3f1334be995480660a551e40  bin/receipts/build/cri-go-modules.json
+8a35f5ee0735ac3ca851d461e4ecd8fea9b3a254e0f3f4423fbbc4a89a1f2e24  bin/receipts/build/go-modules.json
+3c64380682580bc886a313edf7913f41479dcdef980228e53c74a8b7f998cea0  bin/receipts/build/runtime-revision
+e028aba41228fc5cedfd358f149474553f618a1859f5e261228cf84e15b5182b  bin/receipts/build/submodules
+6fac3061a1837ec478987495a0d1f104eb380ca9fefee7d39fd41878128142c8  /users/nehalem/fc-ctrd-mod/evidence/3c0d1ce-step3-final-audit.log

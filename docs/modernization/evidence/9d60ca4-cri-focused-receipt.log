@@ -1,0 +1,34 @@
+Focused CRI acceptance only; Step 3 remains incomplete.
+Tested committed checkout: 9d60ca4adf9a911eee2f18c667465c6c7ec4633e
+Worker checkout: /users/nehalem/fc-ctrd-mod/cri-committed
+Worker source status: clean
+script_revision=9d60ca4adf9a911eee2f18c667465c6c7ec4633e
+runtime_revision=9d60ca4adf9a911eee2f18c667465c6c7ec4633e
+image=sha256:855164619b45ddd7ff15a3b16b7954798571e41e002ef9bd1af17c93ee22a430
+focus=Multiple Containers|Networking|PodSandbox runtime should support basic operations|PodSandbox runtime should support sysctls|Runtime info
+source_dirty=false
+image_override=
+b8616e076891131396e38072ec03ca5961d37f9bd7c2c28b5a7b3b19f27d383e  tools/critest/test-cri.sh
+6c73f5150c8f7206c5f501b600ee17a9e8ed6fb235b27ac03e87127f72cf6183  tools/critest/run-in-container.sh
+
+Client:
+  Version:  2.3.7+unknown
+  Revision: 9d60ca4adf9a911eee2f18c667465c6c7ec4633e
+  Go version: go1.26.11
+
+Server:
+  Version:  2.3.7+unknown
+  Revision: 9d60ca4adf9a911eee2f18c667465c6c7ec4633e
+  UUID: dc7ef82d-78c8-4421-b66d-2483c1a29476
+
+Ran 15 of 142 Specs in 54.447 seconds
+SUCCESS! -- 15 Passed | 0 Failed | 0 Pending | 127 Skipped
+CRI_RUNTIME_CLEANUP_OK
+CRI_TESTS_PASSED
+docker_attach_exit=0
+container_exit=0
+CRI_WORKER_TESTS_PASSED
+
+ef21799c01d86f722a742260c34346838004cce5818190137585f2391452f0b4 /users/nehalem/fc-ctrd-mod/evidence/9d60ca4-build-stack.log
+f67a2aa54af656d863b77fd9d5d405bbd8fb268e28c8e145b91f11268928bf76 /users/nehalem/fc-ctrd-mod/evidence/9d60ca4-checks-images.log
+4348999a2f6ab3b2b75ad7ff8512215204d8f874033a6016ac6d543242f7859c /users/nehalem/fc-ctrd-mod/evidence/9d60ca4-cri-focused.log

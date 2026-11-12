@@ -1,0 +1,78 @@
+Committed native snapshot vsock component validation: PASSED. Full native Pod restore and Step 3 remain incomplete.
+Worker: nehalem@amd218.utah.cloudlab.us
+Host kernel: 6.8.0-147-generic
+VMM branch: cri-native-snapshot-restore
+VMM commit: ce86b117d59ca93b1c04b791a251b445ace76703
+VMM checkout: /users/nehalem/fc-ctrd-mod/vmm-native-dev
+SDK branch: cri-native-snapshot-restore
+SDK commit: 832b1a5132e06f5e2167b64b97b5cd8946604005
+SDK checkout: /users/nehalem/fc-ctrd-mod/sdk-native-dev
+Both worker checkouts are clean. Both dependency commits are pushed.
+VMM base: v1.18.0 eaf83bb718a559d324613d566eaf776b31a62340 with the preserved vHive-compatible fork changes.
+Toolchains: Go 1.26.11; Rust 1.97.0; release target x86_64-unknown-linux-musl.
+SDK generator: go-swagger v0.33.1 via go generate ./; regeneration changed no committed files. SDK and VMM Swagger bytes match.
+VMM checks: rustfmt, clippy for all VMM/Firecracker targets with -D warnings, 14 targeted vsock device tests, 3 snapshot API parser tests and release Firecracker/jailer build passed.
+SDK checks: license/format checks, all-package unprivileged race tests and go vet passed.
+Committed full privileged SDK regression: 79 top-level tests passed, 2 skipped. The skips are TestLogMetrics (pre-existing) and the separately gated native snapshot test, which passed explicitly below.
+Committed backward-compatibility check: TestCreateSnapshot and TestLoadSnapshot passed using the prior vHive-compatible VMM df2d5b98ffe7e62bd367371e962fc00b0ee26e63. Default SDK load requests omit the new option.
+Native real-VMM cases: MMIO legacy, MMIO retain, PCI legacy and PCI retain all passed.
+Each case boots a minimal static PID 1 guest, captures a nonzero memory counter, terminates the source VMM, verifies its PID is absent, and restores into a different VMM PID.
+Retained cases keep the identical source connection after an invalid-path snapshot failure and after a successful snapshot; the source advances its counter to 42 after capturing 41.
+Restored guests return the captured counter 41, accept a new connection, report only one active connection after transport reset, and can advance to 42. The captured memory/state file hashes stay unchanged.
+Legacy cases omit both new options and retain the original source-reset behavior. Both API options default to false and do not change the serialized snapshot state format.
+This validates VMM memory and transport policy, not complete Pod restore. The fixture has no persistent disks, Pod/task metadata, container IO/events, CNI or host volume state. Those runtime integration requirements remain unfinished.
+No Kubernetes-initiated checkpoint/restore or Step 3 completion is claimed. Step 4 has not started.
+
+Reproduction on the worker with the exact committed checkouts:
+export PATH=/users/nehalem/fc-ctrd-mod/toolchains/go1.26.11/bin:/users/nehalem/fc-ctrd-mod/toolchains/cargo/bin:$PATH
+export RUSTUP_HOME=/users/nehalem/fc-ctrd-mod/toolchains/rustup CARGO_HOME=/users/nehalem/fc-ctrd-mod/toolchains/cargo
+cd /users/nehalem/fc-ctrd-mod/vmm-native-dev
+cargo fmt --all --check
+cargo clippy --locked -p vmm -p firecracker --all-targets -- -D warnings
+cargo test --locked -p vmm --lib devices::virtio::vsock::device::tests
+cargo test --locked -p firecracker --lib api_server::request::snapshot::tests
+cargo build --locked --release --target x86_64-unknown-linux-musl -p firecracker -p jailer
+cd /users/nehalem/fc-ctrd-mod/sdk-native-dev
+go generate ./
+git diff --exit-code
+go vet ./...
+FC_NATIVE_VMM=/users/nehalem/fc-ctrd-mod/vmm-native-dev/build/cargo_target/x86_64-unknown-linux-musl/release/firecracker FC_NATIVE_KERNEL=/users/nehalem/fc-ctrd-mod/cri-committed/default-vmlinux.bin tools/test-native-snapshot.sh
+
+Actual native test output:
+=== RUN   TestNativeSnapshotVsockPolicy
+=== RUN   TestNativeSnapshotVsockPolicy/mmio/legacy
+    native_snapshot_test.go:155: source_pid=319496 restored_pid=319507 counter=42 connection=2 active=1
+=== RUN   TestNativeSnapshotVsockPolicy/mmio/retain
+    native_snapshot_test.go:155: source_pid=319520 restored_pid=319525 counter=42 connection=2 active=1
+=== RUN   TestNativeSnapshotVsockPolicy/pci/legacy
+    native_snapshot_test.go:155: source_pid=319534 restored_pid=319546 counter=42 connection=2 active=1
+=== RUN   TestNativeSnapshotVsockPolicy/pci/retain
+    native_snapshot_test.go:155: source_pid=319559 restored_pid=319570 counter=42 connection=2 active=1
+--- PASS: TestNativeSnapshotVsockPolicy (5.92s)
+    --- PASS: TestNativeSnapshotVsockPolicy/mmio/legacy (1.51s)
+    --- PASS: TestNativeSnapshotVsockPolicy/mmio/retain (1.49s)
+    --- PASS: TestNativeSnapshotVsockPolicy/pci/legacy (1.48s)
+    --- PASS: TestNativeSnapshotVsockPolicy/pci/retain (1.43s)
+PASS
+
+Source tree IDs:
+973471ddf6405b9455c5b2c30271fa1741e33398
+5c9ab171d1a8947d952d3b3da4a319955fbd3a7b
+
+SHA-256:
+ce15b3d35a4811fbf164371b72f57757cce5e846ad5959b547a471fd564a6e89  /users/nehalem/fc-ctrd-mod/vmm-native-dev/build/cargo_target/x86_64-unknown-linux-musl/release/firecracker
+977b7e2d4cd863741f9cee2da51677f514854d06b9f7710e70507cd21286f29c  /users/nehalem/fc-ctrd-mod/vmm-native-dev/build/cargo_target/x86_64-unknown-linux-musl/release/jailer
+f7c763775c948bd8b779e432e5f4d418463a96a3e222b959df2d648c5b798dac  /users/nehalem/fc-ctrd-mod/cri-committed/default-vmlinux.bin
+bf73b43daf2124cc4077e2bade1469e893e635efdc230a85b51372c6581613f4  /users/nehalem/fc-ctrd-mod/vmm-native-dev/src/firecracker/swagger/firecracker.yaml
+bf73b43daf2124cc4077e2bade1469e893e635efdc230a85b51372c6581613f4  /users/nehalem/fc-ctrd-mod/sdk-native-dev/client/swagger.yaml
+743bc2bf18d93093fea895ec38d38e61a4fee5a44ef84b99e88068a86946ed10  /users/nehalem/fc-ctrd-mod/sdk-native-dev/tools/test-native-snapshot.sh
+638e1db5e59240f3725dda92aee2c2371477b9cf44079a0e2f2a9757cf45b23c  /users/nehalem/fc-ctrd-mod/sdk-native-dev/tools/native-snapshot-guest/main.go
+f9e919fca3d2abaff70b3d77dce18c268a3a0547b828dc088253afa5db14f5b7  /users/nehalem/fc-ctrd-mod/sdk-native-dev/native_snapshot_test.go
+e8afbf5c454b7835040891b89cbf913d0cd7fff9e58bd33d77507a0998a772f6  /users/nehalem/fc-ctrd-mod/sdk-native-dev/go.mod
+7d72a1a6624e0fbd45c3933c12e8aa1b3a62933e4fab01773d6ef9d5721fc10a  /users/nehalem/fc-ctrd-mod/sdk-native-dev/go.sum
+a437f5bc2b502c578580ad95cdc2a4e586432ee244f672682f4f0161efcc68ff  /users/nehalem/fc-ctrd-mod/evidence/native-committed-vmm.log
+531ecd656d48acb70ab660ebc3e694fc4d6d815bddbe335ab19925a9ccab6d2e  /users/nehalem/fc-ctrd-mod/evidence/native-committed-sdk-generate.log
+7d89594d87d8de005e4d1f1974f093c47d97d4dcc68360ba0ec8d9dfca9983cb  /users/nehalem/fc-ctrd-mod/evidence/native-committed-sdk-checks.log
+da45269ee26502623672647fb50fe256e1b41f84546bfcb5e048be97fd6f3d4e  /users/nehalem/fc-ctrd-mod/evidence/native-committed-actual.log
+7b40c5c3f25f215b123775d218399143b2d1eb2cd9e3e2aeee0731728b39a75b  /users/nehalem/fc-ctrd-mod/evidence/native-committed-sdk-privileged.log
+3157b0cf491f1124d622140bfa47b4de0205e19837dae9e2c8ed7ae5bb006cc7  /users/nehalem/fc-ctrd-mod/evidence/native-committed-sdk-legacy-snapshot.log
