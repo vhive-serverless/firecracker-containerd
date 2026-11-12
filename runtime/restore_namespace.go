@@ -31,6 +31,15 @@ import (
 const restoreNamespaceArg = "__firecracker_restore_namespace"
 const restoreNamespaceMountArg = "__firecracker_restore_mount"
 const restoreExecutable = "/.firecracker-restore-vmm"
+const (
+	restoreKVMDevice     = "/dev/kvm"
+	restoreTunDevice     = "/dev/net/tun"
+	restoreNullDevice    = "/dev/null"
+	restoreZeroDevice    = "/dev/zero"
+	restoreRandomDevice  = "/dev/random"
+	restoreURandomDevice = "/dev/urandom"
+	restoreProcDirectory = "/proc"
+)
 
 type restoreNamespacePlan struct {
 	Root            string         `json:"root"`
@@ -114,6 +123,7 @@ func enterRestoreNamespace(configPath string) error {
 	if err := unix.Unshare(unix.CLONE_NEWNS); err != nil {
 		return err
 	}
+	// #nosec G703 -- Internal self-exec argument names the caller-created plan; absolute plan paths are intentional and O_NOFOLLOW rejects a symlink at the final component.
 	file, err := os.OpenFile(configPath, os.O_RDONLY|unix.O_NOFOLLOW, 0)
 	if err != nil {
 		return err
@@ -147,8 +157,8 @@ func enterRestoreNamespace(configPath string) error {
 		source, target      string
 		directory, readOnly bool
 	}
-	bindings := []binding{{"/proc", "/proc", true, true}, {plan.SharedDirectory, plan.SharedDirectory, true, false}, {plan.Binary, restoreExecutable, false, true}}
-	for _, device := range []string{"/dev/kvm", "/dev/net/tun", "/dev/null", "/dev/zero", "/dev/random", "/dev/urandom"} {
+	bindings := []binding{{restoreProcDirectory, restoreProcDirectory, true, true}, {plan.SharedDirectory, plan.SharedDirectory, true, false}, {plan.Binary, restoreExecutable, false, true}}
+	for _, device := range []string{restoreKVMDevice, restoreTunDevice, restoreNullDevice, restoreZeroDevice, restoreRandomDevice, restoreURandomDevice} {
 		if _, err := os.Stat(device); err == nil {
 			bindings = append(bindings, binding{device, device, false, false})
 		}
@@ -170,7 +180,7 @@ func enterRestoreNamespace(configPath string) error {
 		if seen[input] {
 			return fmt.Errorf("restore input overlaps device or executable")
 		}
-		for _, reserved := range []string{"/dev/kvm", "/dev/net/tun", "/dev/null", "/dev/zero", "/dev/random", "/dev/urandom", "/proc"} {
+		for _, reserved := range []string{restoreKVMDevice, restoreTunDevice, restoreNullDevice, restoreZeroDevice, restoreRandomDevice, restoreURandomDevice, restoreProcDirectory} {
 			if pathWithin(input, reserved) || pathWithin(reserved, input) {
 				return fmt.Errorf("restore input overlaps system mount")
 			}
@@ -255,6 +265,7 @@ func addRestoreMount(ctx context.Context, process vm.ProcessIdentity, shared str
 
 func installRestoreMount(path string) (retErr error) {
 	runtime.LockOSThread()
+	// #nosec G703 -- Internal self-exec argument names the caller-created plan; decoded mounts and the target process are validated below.
 	file, err := os.OpenFile(path, os.O_RDONLY|unix.O_NOFOLLOW, 0)
 	if err != nil {
 		return err

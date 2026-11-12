@@ -61,6 +61,7 @@ type JournalClient struct {
 	Client func(context.Context) (*ttrpc.Client, error)
 }
 
+// Next retrieves the event after the given sequence through the current RPC client.
 func (c JournalClient) Next(ctx context.Context, after uint64) (*apitypes.Envelope, error) {
 	client, err := c.Client(ctx)
 	if err != nil {
@@ -73,6 +74,7 @@ func (c JournalClient) Next(ctx context.Context, after uint64) (*apitypes.Envelo
 	return &response, nil
 }
 
+// Ack acknowledges successful publication through the given sequence.
 func (c JournalClient) Ack(ctx context.Context, sequence uint64) error {
 	client, err := c.Client(ctx)
 	if err != nil {
@@ -81,6 +83,7 @@ func (c JournalClient) Ack(ctx context.Context, sequence uint64) error {
 	return client.Call(ctx, journalServiceName, "Ack", wrapperspb.UInt64(sequence), &types.Empty{})
 }
 
+// Cursor reads the last sequence acknowledged by the guest journal.
 func (c JournalClient) Cursor(ctx context.Context) (uint64, error) {
 	client, err := c.Client(ctx)
 	if err != nil {
@@ -91,6 +94,7 @@ func (c JournalClient) Cursor(ctx context.Context) (uint64, error) {
 	return response.Value, err
 }
 
+// JournalReader provides replayable event reads and publication acknowledgements.
 type JournalReader interface {
 	Next(context.Context, uint64) (*apitypes.Envelope, error)
 	Ack(context.Context, uint64) error
@@ -105,10 +109,12 @@ type JournalForwarder struct {
 	cursor uint64
 }
 
+// NewJournalForwarder starts forwarding after the given acknowledged sequence.
 func NewJournalForwarder(initialCursor uint64) *JournalForwarder {
 	return &JournalForwarder{cursor: initialCursor}
 }
 
+// Cursor returns the last sequence successfully published to the host.
 func (f *JournalForwarder) Cursor() uint64 { f.mu.Lock(); defer f.mu.Unlock(); return f.cursor }
 
 // Step forwards one event. Cancel its context to stop a long poll before sealing

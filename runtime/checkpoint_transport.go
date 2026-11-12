@@ -25,6 +25,12 @@ import (
 	ioproxy "github.com/firecracker-microvm/firecracker-containerd/proto/service/ioproxy/ttrpc"
 )
 
+const (
+	transportStdin  = "stdin"
+	transportStdout = "stdout"
+	transportStderr = "stderr"
+)
+
 // checkpointTransportCut is written only after both FIFO endpoints agree on
 // every accepted byte and the guest has acknowledged host event publication.
 // External unread host stdin remains source-owned, outside the captured cut.
@@ -87,11 +93,11 @@ func transportProcessesFromWire(processes []*ioproxy.TransportProcess) ([]vm.Tra
 		entry := vm.TransportProcessIO{TaskID: p.TaskID, ExecID: p.ExecID}
 		names := make(map[string]bool)
 		for _, stream := range p.Streams {
-			if stream == nil || stream.Cursor == nil || names[stream.Name] || (stream.Name != "stdin" && stream.Name != "stdout" && stream.Name != "stderr") {
+			if stream == nil || stream.Cursor == nil || names[stream.Name] || (stream.Name != transportStdin && stream.Name != transportStdout && stream.Name != transportStderr) {
 				return nil, errors.New("invalid transport stream")
 			}
 			c := stream.Cursor
-			if c.StreamID != key+"/"+stream.Name || c.SessionID == "" || len(c.SessionID) > 128 || stream.Sender != (stream.Name != "stdin") {
+			if c.StreamID != key+"/"+stream.Name || c.SessionID == "" || len(c.SessionID) > 128 || stream.Sender != (stream.Name != transportStdin) {
 				return nil, errors.New("transport stream identity or direction mismatch")
 			}
 			names[stream.Name] = true

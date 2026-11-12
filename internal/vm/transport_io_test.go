@@ -63,7 +63,10 @@ func (in *transportTestInput) read(ctx context.Context, p []byte) (int, error) {
 	active := in.active.Add(1)
 	defer in.active.Add(-1)
 	in.calls.Add(1)
-	for old := in.max.Load(); active > old && !in.max.CompareAndSwap(old, active); old = in.max.Load() {
+	for old := in.max.Load(); active > old; old = in.max.Load() {
+		if in.max.CompareAndSwap(old, active) {
+			break
+		}
 	}
 	select {
 	case <-ctx.Done():
@@ -159,7 +162,7 @@ func (c *transportFaultConn) Write(p []byte) (int, error) {
 		if c.header >= 0 {
 			c.fired.Store(true)
 			n, err := c.Conn.Write(p[:c.header])
-			_ = c.Conn.Close()
+			_ = c.Close()
 			if err != nil {
 				return n, err
 			}
@@ -171,7 +174,7 @@ func (c *transportFaultConn) Write(p []byte) (int, error) {
 	if c.inPayload && !c.fired.Load() {
 		c.fired.Store(true)
 		n, err := c.Conn.Write(p[:c.payload])
-		_ = c.Conn.Close()
+		_ = c.Close()
 		if err != nil {
 			return n, err
 		}
@@ -252,7 +255,7 @@ type transportFINAckFault struct{ net.Conn }
 
 func (c *transportFINAckFault) Write(p []byte) (int, error) {
 	if len(p) == transportHeaderSize && p[4] == transportAck && p[5] == 1 {
-		_ = c.Conn.Close()
+		_ = c.Close()
 		return 0, io.ErrClosedPipe
 	}
 	return c.Conn.Write(p)

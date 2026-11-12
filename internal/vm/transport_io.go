@@ -301,6 +301,7 @@ func (s *TransportSender) Resume() {
 	s.signal()
 }
 
+// Status returns the current byte cursor and checkpoint preparation state.
 func (s *TransportSender) Status() TransportStatus {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -602,15 +603,16 @@ func (r *TransportReceiver) accept(ctx context.Context, frame transportFrame) er
 		r.mu.Unlock()
 		return ErrTransportProtocol
 	}
-	if r.last != nil && (frame.offset < r.cursor.Offset || r.cursor.Offset < r.last.offset+r.last.length) {
+	switch {
+	case r.last != nil && (frame.offset < r.cursor.Offset || r.cursor.Offset < r.last.offset+r.last.length):
 		if frame.offset != r.last.offset || uint64(len(frame.payload)) != r.last.length || hash != r.last.hash || r.cursor.Offset > end {
 			r.mu.Unlock()
 			return ErrTransportProtocol
 		}
-	} else if frame.offset != r.cursor.Offset {
+	case frame.offset != r.cursor.Offset:
 		r.mu.Unlock()
 		return ErrTransportProtocol
-	} else {
+	default:
 		r.last = &transportReplay{offset: frame.offset, length: uint64(len(frame.payload)), hash: hash}
 	}
 	accepted := r.cursor.Offset - frame.offset

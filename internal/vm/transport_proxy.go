@@ -176,8 +176,8 @@ func newTransportProxy(stdin, stdout, stderr *IOConnectorPair) *transportProxy {
 			p.configErr = errors.New("cannot mix raw and checkpoint-framed IO connectors")
 			continue
 		}
-		copy := *pair.transport
-		p.configs[name] = &copy
+		config := *pair.transport
+		p.configs[name] = &config
 	}
 	return p
 }
@@ -501,7 +501,7 @@ func (s *transportProxyStream) startNetwork() {
 				conn, ok := result.ReadWriteCloser.(net.Conn)
 				if !ok {
 					if result.ReadWriteCloser != nil {
-						_ = result.ReadWriteCloser.Close()
+						_ = result.Close()
 					}
 					err = errors.New("framed IO connector must return net.Conn")
 				} else {
@@ -604,7 +604,7 @@ func (p *transportProxy) DescribeIO() ([]TransportStreamIO, error) {
 		if err != nil {
 			return nil, err
 		}
-		cursor := TransportCursor{}
+		var cursor TransportCursor
 		if stream.sender != nil {
 			state := stream.sender.Status()
 			if !state.Prepared {

@@ -110,9 +110,11 @@ func TestRestoreNamespaceProbe(t *testing.T) {
 		t.Skip("private namespace subprocess")
 	}
 	writable, readonly := os.Getenv("FC_RESTORE_PROBE_WRITABLE"), os.Getenv("FC_RESTORE_PROBE_READONLY")
+	// #nosec G703 -- The parent test supplies this fixture path to the private namespace probe.
 	data, err := os.ReadFile(writable)
 	require.NoError(t, err)
 	require.Equal(t, "captured", string(data))
+	// #nosec G703 -- The parent test supplies this fixture path to the private namespace probe.
 	file, err := os.OpenFile(readonly, os.O_WRONLY, 0)
 	if file != nil {
 		_ = file.Close()
@@ -130,11 +132,14 @@ func TestRestoreNamespaceProbe(t *testing.T) {
 	_, err = io.ReadFull(conn, token)
 	require.NoError(t, err)
 	dynamic := os.Getenv("FC_RESTORE_PROBE_DYNAMIC")
+	// #nosec G703 -- The parent test supplies this fixture path to the private namespace probe.
 	data, err = os.ReadFile(dynamic)
 	require.NoError(t, err)
 	require.Equal(t, "future-content", string(data))
 	content := os.Getenv("FC_RESTORE_PROBE_CONTENT")
+	// #nosec G703 -- The parent test supplies this fixture path to the private namespace probe.
 	require.NoError(t, os.WriteFile(writable, []byte(content), 0600))
+	// #nosec G703 -- The parent test supplies this fixture path to the private namespace probe.
 	require.NoError(t, os.WriteFile(dynamic, []byte("updated-"+content), 0600))
 }
 

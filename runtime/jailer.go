@@ -27,6 +27,7 @@ import (
 )
 
 const (
+	vmmIDArg              = "--id"
 	kernelImageFileName   = "kernel-image"
 	jailerHandlerName     = "firecracker-containerd-jail-handler"
 	jailerFifoHandlerName = "firecracker-containerd-jail-fifo-handler"

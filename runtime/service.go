@@ -722,11 +722,12 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 	if err := s.verifyRestoredEventCursor(requestCtx); err != nil {
 		return err
 	}
-	if s.nativeRestore != nil {
+	switch {
+	case s.nativeRestore != nil:
 		err = s.adoptNativeProcesses(requestCtx)
-	} else if request.LoadSnapshot {
+	case request.LoadSnapshot:
 		err = s.adoptLegacyTransport(requestCtx)
-	} else {
+	default:
 		err = s.mountDrives(requestCtx)
 	}
 	if err != nil {

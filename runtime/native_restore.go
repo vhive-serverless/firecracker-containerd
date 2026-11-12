@@ -496,7 +496,7 @@ func (s *service) adoptNativeProcesses(ctx context.Context) error {
 			original string
 			target   *string
 			name     string
-		}{{saved.FIFOs.Stdin, &fifos.Stdin, "stdin"}, {saved.FIFOs.Stdout, &fifos.Stdout, "stdout"}, {saved.FIFOs.Stderr, &fifos.Stderr, "stderr"}} {
+		}{{saved.FIFOs.Stdin, &fifos.Stdin, transportStdin}, {saved.FIFOs.Stdout, &fifos.Stdout, transportStdout}, {saved.FIFOs.Stderr, &fifos.Stderr, transportStderr}} {
 			if stream.original == "" {
 				continue
 			}

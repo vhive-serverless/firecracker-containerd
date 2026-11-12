@@ -61,11 +61,11 @@ func (s *service) adoptLegacyTransport(ctx context.Context) error {
 				return err
 			}
 			switch streams[index].Name {
-			case "stdin":
+			case transportStdin:
 				fifos.Stdin = path
-			case "stdout":
+			case transportStdout:
 				fifos.Stdout = path
-			case "stderr":
+			case transportStderr:
 				fifos.Stderr = path
 			}
 		}

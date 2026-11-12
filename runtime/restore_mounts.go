@@ -61,7 +61,7 @@ func capturedDevicePath(path string, jailed bool) (string, error) {
 		}
 		path = "/" + path
 	}
-	for _, reserved := range []string{"/dev/kvm", "/dev/net/tun", "/dev/null", "/dev/zero", "/dev/random", "/dev/urandom", "/proc", "/sys", "/.firecracker-restore-vmm", "/firecracker", "/api.socket", "/fc-vsock.sock"} {
+	for _, reserved := range []string{restoreKVMDevice, restoreTunDevice, restoreNullDevice, restoreZeroDevice, restoreRandomDevice, restoreURandomDevice, restoreProcDirectory, "/sys", restoreExecutable, "/firecracker", "/api.socket", "/fc-vsock.sock"} {
 		if pathWithin(path, reserved) || pathWithin(reserved, path) {
 			return "", fmt.Errorf("captured device path overlaps reserved VMM path %q", path)
 		}
@@ -130,11 +130,12 @@ func readSnapshotDriveMetadata(state string) (*snapshotDriveMetadata, error) {
 			return nil, fmt.Errorf("duplicate or invalid snapshot drive identity/path")
 		}
 		ids[drive.ID], paths[path] = true, true
-		if drive.Root && drive.ReadOnly {
+		switch {
+		case drive.Root && drive.ReadOnly:
 			roots++
-		} else if !drive.Root && !drive.ReadOnly {
+		case !drive.Root && !drive.ReadOnly:
 			workloads++
-		} else {
+		default:
 			return nil, fmt.Errorf("legacy snapshot requires a read-only root and writable workload")
 		}
 	}
@@ -159,7 +160,7 @@ func (s *service) prepareSnapshotMounts(request *proto.CreateVMRequest) error {
 		}
 		metadata, err := snapshotDrivePaths(restore.manifest.VMConfig, jailed)
 		// A pmem-only guest can have no block devices.
-		if err != nil && !(len(restore.manifest.VMConfig.Drives) == 0 && len(restore.manifest.Pmem) > 0) {
+		if err != nil && (len(restore.manifest.VMConfig.Drives) != 0 || len(restore.manifest.Pmem) == 0) {
 			return err
 		}
 		if metadata != nil {

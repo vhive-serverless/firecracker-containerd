@@ -75,7 +75,7 @@ func (j *noopJailer) BuildJailedMachine(cfg *config.Config, machineConfig *firec
 	cmd := firecracker.VMCommandBuilder{}.
 		WithBin(cfg.FirecrackerBinaryPath).
 		WithSocketPath(relSocketPath).
-		WithArgs([]string{"--id", vmID}).
+		WithArgs([]string{vmmIDArg, vmID}).
 		Build(j.ctx)
 
 	if len(j.restoreMounts) > 0 {
@@ -99,15 +99,15 @@ func (j *noopJailer) BuildJailedMachine(cfg *config.Config, machineConfig *firec
 				inputs = append(inputs, *path)
 			}
 		}
-		args := []string{"--api-sock", filepath.Base(j.shimDir.FirecrackerSockPath()), "--id", vmID}
+		args := []string{"--api-sock", filepath.Base(j.shimDir.FirecrackerSockPath()), vmmIDArg, vmID}
 		cmd, err = restoreNamespaceCommand(j.ctx, j.shimDir.RootPath(), binary, args, j.restoreMounts, inputs)
 		if err != nil {
 			return nil, fmt.Errorf("build restore namespace: %w", err)
 		}
 	}
 	if cfg.DebugHelper.LogFirecrackerOutput() {
-		cmd.Stdout = j.logger.WithField("vmm_stream", "stdout").WriterLevel(logrus.DebugLevel)
-		cmd.Stderr = j.logger.WithField("vmm_stream", "stderr").WriterLevel(logrus.DebugLevel)
+		cmd.Stdout = j.logger.WithField("vmm_stream", transportStdout).WriterLevel(logrus.DebugLevel)
+		cmd.Stderr = j.logger.WithField("vmm_stream", transportStderr).WriterLevel(logrus.DebugLevel)
 	}
 
 	return []firecracker.Opt{trackProcess, firecracker.WithProcessRunner(cmd)}, nil

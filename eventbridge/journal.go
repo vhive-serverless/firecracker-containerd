@@ -28,6 +28,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
+// ErrJournalClosed reports an operation that cannot proceed after journal shutdown.
 var ErrJournalClosed = errors.New("event journal closed")
 
 // Journal retains events until the host acknowledges successful publication.
@@ -42,6 +43,7 @@ type Journal struct {
 	records     []*apitypes.Envelope
 }
 
+// NewJournal creates a journal with the given positive byte capacity.
 func NewJournal(limitBytes int) *Journal {
 	if limitBytes <= 0 {
 		panic("event journal requires a positive byte limit")
@@ -154,6 +156,7 @@ func (j *Journal) Ack(sequence uint64) error {
 // Cursor is the last acknowledged sequence, used when attaching a fresh clone.
 func (j *Journal) Cursor() uint64 { j.mu.Lock(); defer j.mu.Unlock(); return j.ack }
 
+// Close stops publication and wakes readers waiting for further events.
 func (j *Journal) Close() error {
 	j.mu.Lock()
 	defer j.mu.Unlock()
