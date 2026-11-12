@@ -6,6 +6,8 @@ if ! command -v route >/dev/null 2>&1; then
     echo "vHive networking requires route (net-tools) in the acceptance image" >&2
     exit 1
 fi
+grep -q '"guest_root_mode": "ram"' /etc/containerd/firecracker-runtime.json
+cp /etc/containerd/firecracker-runtime.json "$FICD_LOG_DIR/vhive-runtime-profile.json"
 socket=/run/firecracker-containerd/containerd.sock
 for attempt in $(seq 1 30); do
     if ctr --address "$socket" version >/dev/null 2>&1; then break; fi
