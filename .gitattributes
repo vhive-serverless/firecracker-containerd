@@ -1,3 +1,6 @@
 # Worker evidence retains terminal formatting and is not source code.
 docs/modernization/evidence/*.log -whitespace
 tools/vhive/*.patch -whitespace
+
+# Preserve verbatim go version -m output, including terminal tabs.
+docs/modernization/evidence/agent-footprint/*-buildinfo.txt -whitespace
