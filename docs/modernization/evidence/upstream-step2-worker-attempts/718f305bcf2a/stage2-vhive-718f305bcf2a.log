@@ -1,0 +1,128 @@
+VHIVE_LOGS=/users/nehalem/fc-ctrd-mod/evidence/vhive-718f305bcf2a.UMNtWA8L
+From /users/nehalem/fc-ctrd-mod/upstream-migration/vhive-source
+ * branch            89593103ac667cc096f89770c94a77b2b93c3a7d -> FETCH_HEAD
+HEAD is now at 8959310 Track guest and container PIDs separately in snapshot continuity test
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 430B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for localhost/firecracker-containerd-test:718f305bcf2a
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/4] FROM localhost/firecracker-containerd-test:718f305bcf2a@sha256:bb0cb48f97f602bfeb54fcafc43737a0c0667acd3e542e9b99f42607af735baf
+#4 resolve localhost/firecracker-containerd-test:718f305bcf2a@sha256:bb0cb48f97f602bfeb54fcafc43737a0c0667acd3e542e9b99f42607af735baf 0.0s done
+#4 DONE 0.2s
+
+#5 [internal] load build context
+#5 transferring context: 32.29MB 0.2s done
+#5 DONE 0.2s
+
+#6 [2/4] RUN apt-get update && apt-get install --yes --no-install-recommends net-tools &&     command -v route >/dev/null && rm -rf /var/lib/apt/lists/*
+#6 0.352 Hit:1 http://deb.debian.org/debian bookworm InRelease
+#6 0.359 Get:2 http://deb.debian.org/debian bookworm-updates InRelease [55.4 kB]
+#6 0.385 Get:3 http://deb.debian.org/debian-security bookworm-security InRelease [34.8 kB]
+#6 0.588 Get:4 http://deb.debian.org/debian-security bookworm-security/main amd64 Packages [368 kB]
+#6 0.666 Fetched 459 kB in 0s (1100 kB/s)
+#6 0.666 Reading package lists...
+#6 1.207 Reading package lists...
+#6 1.699 Building dependency tree...
+#6 1.811 Reading state information...
+#6 1.951 The following NEW packages will be installed:
+#6 1.951   net-tools
+#6 1.997 0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+#6 1.997 Need to get 243 kB of archives.
+#6 1.997 After this operation, 1001 kB of additional disk space will be used.
+#6 1.997 Get:1 http://deb.debian.org/debian bookworm/main amd64 net-tools amd64 2.10-0.1+deb12u2 [243 kB]
+#6 2.196 debconf: delaying package configuration, since apt-utils is not installed
+#6 2.224 Fetched 243 kB in 0s (2992 kB/s)
+#6 2.242 Selecting previously unselected package net-tools.
+#6 2.242 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 17549 files and directories currently installed.)
+#6 2.293 Preparing to unpack .../net-tools_2.10-0.1+deb12u2_amd64.deb ...
+#6 2.295 Unpacking net-tools (2.10-0.1+deb12u2) ...
+#6 2.357 Setting up net-tools (2.10-0.1+deb12u2) ...
+#6 DONE 2.4s
+
+#7 [3/4] COPY vhive-acceptance.test /usr/local/bin/
+#7 DONE 0.1s
+
+#8 [4/4] COPY run-in-container.sh /usr/local/bin/run-vhive-acceptance
+#8 DONE 0.0s
+
+#9 exporting to image
+#9 exporting layers
+#9 exporting layers 1.3s done
+#9 exporting manifest sha256:51a12df7bcecc381cc812ec100da67018d25b3ecff5f67c0ce99ac51e2e27193 done
+#9 exporting config sha256:d701f65c6f66f5b37f592ad73d4a2a972a589c0a10145f66b0466a206ee92cb9 done
+#9 exporting attestation manifest sha256:add792ab5bcd224009a8db9f028752215e4bb6e6d842fd22e8f5aae9deac898b done
+#9 exporting manifest list sha256:d6d847a94b6e13b418c52a83704689c4355902f694e57586f7a933db7ec9ad21 done
+#9 naming to localhost/fcmod-vhive-test:718f305bcf2a done
+#9 unpacking to localhost/fcmod-vhive-test:718f305bcf2a
+#9 unpacking to localhost/fcmod-vhive-test:718f305bcf2a 0.4s done
+#9 DONE 1.7s
+Client:
+  Version:  2.3.7+unknown
+  Revision: 718f305bcf2a481e98e854ca5960cda5880ce362
+  Go version: go1.26.11
+
+Server:
+  Version:  2.3.7+unknown
+  Revision: 718f305bcf2a481e98e854ca5960cda5880ce362
+  UUID: d1c90fe6-999c-42fb-964a-95437b43f399
+=== RUN   TestPauseSnapResume
+time="2026-11-12T20:02:20.495983525Z" level=warning msg="Failed to Fetch k8s dns clusterIP exec: \"kubectl\": executable file not found in $PATH\n\n"
+time="2026-11-12T20:02:20.496067053Z" level=warning msg="Using google dns 8.8.8.8\n"
+time="2026-11-12T20:02:20.659723558Z" level=info msg="Creating containerd client"
+time="2026-11-12T20:02:20.659836691Z" level=info msg="Created containerd client"
+time="2026-11-12T20:02:20.659843193Z" level=info msg="Creating firecracker client"
+time="2026-11-12T20:02:20.659951336Z" level=info msg="Created firecracker client"
+time="2026-11-12T20:02:20.659971344Z" level=info msg="Creating image manager"
+time="2026-11-12T20:02:36.855060414Z" level=info msg="Cleaning up network manager"
+--- PASS: TestPauseSnapResume (16.59s)
+=== RUN   TestSnapshotConcurrentClones
+time="2026-11-12T20:02:37.087680126Z" level=warning msg="Failed to Fetch k8s dns clusterIP exec: \"kubectl\": executable file not found in $PATH\n\n"
+time="2026-11-12T20:02:37.087699853Z" level=warning msg="Using google dns 8.8.8.8\n"
+time="2026-11-12T20:02:37.822867257Z" level=info msg="Creating containerd client"
+time="2026-11-12T20:02:37.822963218Z" level=info msg="Created containerd client"
+time="2026-11-12T20:02:37.822971594Z" level=info msg="Creating firecracker client"
+time="2026-11-12T20:02:37.823068216Z" level=info msg="Created firecracker client"
+time="2026-11-12T20:02:37.823077423Z" level=info msg="Creating image manager"
+time="2026-11-12T20:02:54.447867157Z" level=error msg="failed to load snapshot of the VM" containerSnapshotPath=/dev/mapper/fc-vhive-718f305bcf2a-1692161-snap-11 error="rpc error: code = Unknown desc = failed to create VM: prepare private restore disk mappings: open /dev/mapper/fc-vhive-718f305bcf2a-1692161-snap-11: too many levels of symbolic links" memFilePath=/fccd/snapshots/concurrent-clones/mem_file memoryBackendPath=/fccd/snapshots/concurrent-clones/mem_file memoryBackendType=File snapFilePath=/fccd/snapshots/concurrent-clones/snap_file vmID=concurrent-clone-one
+    snapshot_clones_test.go:65: 
+        	Error Trace:	github.com/vhive-serverless/vhive/ctriface/snapshot_clones_test.go:65
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Unknown desc = failed to create VM: prepare private restore disk mappings: open /dev/mapper/fc-vhive-718f305bcf2a-1692161-snap-11: too many levels of symbolic links
+        	Test:       	TestSnapshotConcurrentClones
+time="2026-11-12T20:02:54.449554354Z" level=info msg="waiting for goroutines"
+time="2026-11-12T20:02:56.959579170Z" level=info msg="waiting done"
+time="2026-11-12T20:02:56.959600180Z" level=info msg="Closing fcClient"
+time="2026-11-12T20:02:56.959605840Z" level=info msg="Closing containerd client"
+time="2026-11-12T20:02:56.959776191Z" level=info msg="Cleaning up network manager"
+--- FAIL: TestSnapshotConcurrentClones (20.33s)
+=== RUN   TestSnapshotSourceMemoryAndDiskIsolation
+time="2026-11-12T20:02:57.419275848Z" level=warning msg="Failed to Fetch k8s dns clusterIP exec: \"kubectl\": executable file not found in $PATH\n\n"
+time="2026-11-12T20:02:57.419294242Z" level=warning msg="Using google dns 8.8.8.8\n"
+time="2026-11-12T20:02:57.608628611Z" level=info msg="Creating containerd client"
+time="2026-11-12T20:02:57.608737626Z" level=info msg="Created containerd client"
+time="2026-11-12T20:02:57.608745862Z" level=info msg="Creating firecracker client"
+time="2026-11-12T20:02:57.608824049Z" level=info msg="Created firecracker client"
+time="2026-11-12T20:02:57.608833036Z" level=info msg="Creating image manager"
+    snapshot_continuity_test.go:77: function_image=ghcr.io/ease-lab/helloworld@sha256:12dc6715ed1a8306f246ceaf7742c09e38a52a79d17421e4a50d7e0e09fdbc25 digest=sha256:12dc6715ed1a8306f246ceaf7742c09e38a52a79d17421e4a50d7e0e09fdbc25
+time="2026-11-12T20:03:14.702185232Z" level=error msg="failed to load snapshot of the VM" containerSnapshotPath=/dev/mapper/fc-vhive-718f305bcf2a-1692161-snap-13 error="rpc error: code = Unknown desc = failed to create VM: prepare private restore disk mappings: open /dev/mapper/fc-vhive-718f305bcf2a-1692161-snap-13: too many levels of symbolic links" memFilePath=/fccd/continuity-dmti1kjaor1x/continuity/mem_file memoryBackendPath=/fccd/continuity-dmti1kjaor1x/continuity/mem_file memoryBackendType=File snapFilePath=/fccd/continuity-dmti1kjaor1x/continuity/snap_file vmID=continuity-clone
+    snapshot_continuity_test.go:125: 
+        	Error Trace:	github.com/vhive-serverless/vhive/ctriface/snapshot_continuity_test.go:125
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Unknown desc = failed to create VM: prepare private restore disk mappings: open /dev/mapper/fc-vhive-718f305bcf2a-1692161-snap-13: too many levels of symbolic links
+        	Test:       	TestSnapshotSourceMemoryAndDiskIsolation
+time="2026-11-12T20:03:14.703489678Z" level=info msg="waiting for goroutines"
+time="2026-11-12T20:03:17.068628486Z" level=info msg="waiting done"
+time="2026-11-12T20:03:17.068648904Z" level=info msg="Closing fcClient"
+time="2026-11-12T20:03:17.068653112Z" level=info msg="Closing containerd client"
+time="2026-11-12T20:03:17.068825737Z" level=info msg="Cleaning up network manager"
+--- FAIL: TestSnapshotSourceMemoryAndDiskIsolation (20.13s)
+FAIL

@@ -1,0 +1,50 @@
+Client:
+  Version:  2.3.7+unknown
+  Revision: b0498f3a598e06fa54f7bf0089cb8c7e6b01a7c1
+  Go version: go1.26.11
+
+Server:
+  Version:  2.3.7+unknown
+  Revision: b0498f3a598e06fa54f7bf0089cb8c7e6b01a7c1
+  UUID: 8219645e-a8f5-4d24-931e-e2b32ac73980
+=== RUN   TestPauseSnapResume
+time="2026-11-12T19:52:09.978095204Z" level=warning msg="Failed to Fetch k8s dns clusterIP exec: \"kubectl\": executable file not found in $PATH\n\n"
+time="2026-11-12T19:52:09.978172229Z" level=warning msg="Using google dns 8.8.8.8\n"
+time="2026-11-12T19:52:09.978301974Z" level=warning msg="Failed to fetch host net interfaces exec: \"route\": executable file not found in $PATH\n\n"
+time="2026-11-12T19:52:09.978311111Z" level=info msg="exec: \"route\": executable file not found in $PATH"
+time="2026-11-12T19:52:09.978922933Z" level=info msg="Creating containerd client"
+time="2026-11-12T19:52:09.979027179Z" level=info msg="Created containerd client"
+time="2026-11-12T19:52:09.979036567Z" level=info msg="Creating firecracker client"
+time="2026-11-12T19:52:09.979170269Z" level=info msg="Created firecracker client"
+time="2026-11-12T19:52:09.979190817Z" level=info msg="Creating image manager"
+--- FAIL: TestPauseSnapResume (0.00s)
+panic: runtime error: invalid memory address or nil pointer dereference [recovered, repanicked]
+[signal SIGSEGV: segmentation violation code=0x1 addr=0x0 pc=0xd57a60]
+
+goroutine 8 [running]:
+testing.tRunner.func1.2({0xf33160, 0x192e310})
+	testing/testing.go:1974 +0x232
+testing.tRunner.func1()
+	testing/testing.go:1977 +0x349
+panic({0xf33160?, 0x192e310?})
+	runtime/panic.go:860 +0x13a
+internal/sync.(*Mutex).Lock(...)
+	internal/sync/mutex.go:63
+sync.(*Mutex).Lock(...)
+	sync/mutex.go:46
+github.com/vhive-serverless/vhive/networking.(*NetworkManager).allocNetConfig(0x0, {0x1102a08, 0x1})
+	github.com/vhive-serverless/vhive/networking@v0.0.0-00010101000000-000000000000/networkManager.go:148 +0x180
+github.com/vhive-serverless/vhive/networking.(*NetworkManager).CreateNetwork(0x0, {0x1102a08, 0x1})
+	github.com/vhive-serverless/vhive/networking@v0.0.0-00010101000000-000000000000/networkManager.go:224 +0x16b
+github.com/vhive-serverless/vhive/misc.(*VMPool).Allocate(0xe3a3fcee880, {0x1102a08, 0x1})
+	github.com/vhive-serverless/vhive/misc/vm_pool.go:58 +0x218
+github.com/vhive-serverless/vhive/ctriface.(*Orchestrator).StartVMWithEnvironment(0xe3a3fb2d2c0, {0x1119700, 0xe3a3fcf0070}, {0x1102a08, 0x1}, {0x7ffe647d8c9f, 0x63}, {0x19e5be0, 0x0, 0x0})
+	github.com/vhive-serverless/vhive/ctriface/iface.go:93 +0x2a5
+github.com/vhive-serverless/vhive/ctriface.(*Orchestrator).StartVM(...)
+	github.com/vhive-serverless/vhive/ctriface/iface.go:81
+github.com/vhive-serverless/vhive/ctriface.TestPauseSnapResume(0xe3a3fb72908)
+	github.com/vhive-serverless/vhive/ctriface/iface_test.go:262 +0x21a
+testing.tRunner(0xe3a3fb72908, 0x10ff158)
+	testing/testing.go:2036 +0xea
+created by testing.(*T).Run in goroutine 1
+	testing/testing.go:2101 +0x4c5
