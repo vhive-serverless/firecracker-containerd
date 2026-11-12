@@ -1,0 +1,9 @@
+Name:              fc-step4-capture-interrupt-clean-5186d40
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 6
+Number of targets: 1
+

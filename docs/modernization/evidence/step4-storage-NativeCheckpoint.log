@@ -1,0 +1,50 @@
+make: Entering directory '/users/nehalem/fc-ctrd-mod/step4-storage-dev/runtime'
+make -C .. test-deps-in-docker
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/step4-storage-dev'
+docker run --rm \
+	--volume /users/nehalem/fc-ctrd-mod/step4-storage-dev:/src \
+	--volume gocache:/go \
+	--workdir /src \
+	public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 go mod download
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/step4-storage-dev'
+/users/nehalem/fc-ctrd-mod/step4-storage-dev/runtime/../tools/thinpool.sh reset "fc-step4-storage-dev"
+Name:              fc-step4-storage-dev
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 6
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-storage-dev/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-storage-dev/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/step4-storage-dev/runtime/vm-storage:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-storage-dev \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:step4-storage-dev \
+	"go test -v -count=1 -timeout=360s -run '^TestNativeCheckpoint_Isolated$'"
+=== RUN   TestNativeCheckpoint_Isolated
+=== RUN   TestNativeCheckpoint_Isolated/jailed=false
+time="2026-11-11T13:27:20.688345905Z" level=error msg="ttrpc: received message on inactive stream" stream=11
+=== RUN   TestNativeCheckpoint_Isolated/jailed=true
+time="2026-11-11T13:28:07.128767251Z" level=error msg="ttrpc: received message on inactive stream" stream=11
+--- PASS: TestNativeCheckpoint_Isolated (88.05s)
+    --- PASS: TestNativeCheckpoint_Isolated/jailed=false (41.63s)
+    --- PASS: TestNativeCheckpoint_Isolated/jailed=true (46.41s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	88.068s
+make: Leaving directory '/users/nehalem/fc-ctrd-mod/step4-storage-dev/runtime'

@@ -1,0 +1,2698 @@
+Client:
+  Version:  2.3.7+unknown
+  Revision: 72f4fc9173bef33cc1c981ad285758716f635e02
+  Go version: go1.26.11
+
+Server:
+  Version:  2.3.7+unknown
+  Revision: 72f4fc9173bef33cc1c981ad285758716f635e02
+  UUID: aa6d5210-19a0-449e-9ad5-abe30882951b
+firecracker-cri 72f4fc9173bef33cc1c981ad285758716f635e02
+critest version: v1.37.0
+time="2026-11-11T18:39:14Z" level=warning msg="Config \"/etc/crictl.yaml\" does not exist, trying next: \"/crictl.yaml\""
+Running Suite: CRI validation - /go
+===================================
+Random Seed: 1794422354
+
+Will run 137 of 142 specs
+------------------------------
+[BeforeSuite] 
+sigs.k8s.io/cri-tools/pkg/framework/util.go:98
+  Nov 11 18:39:14.583: INFO: Attempting to load YAML file "/tmp/test-images.yaml" into &{DefaultTestContainerImage:registry.k8s.io/e2e-test-images/busybox:1.29-2 WebServerTestImage:}
+  Nov 11 18:39:14.584: INFO: Successfully loaded YAML file "/tmp/test-images.yaml" into &{DefaultTestContainerImage:registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf WebServerTestImage:}
+  Nov 11 18:39:14.584: INFO: Testing context container image list: {DefaultTestContainerImage:registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf WebServerTestImage:}
+  Nov 11 18:39:14.584: INFO: Testing context benchmarking params: {ContainersNumber:0 ContainersNumberParallel:0 ContainerBenchmarkTimeoutSeconds:0 PodsNumber:0 PodsNumberParallel:0 PodBenchmarkTimeoutSeconds:0 ImagesNumber:0 ImagesNumberParallel:0 ImageBenchmarkTimeoutSeconds:0 ImagePullingBenchmarkImage: ImageListingBenchmarkImages:[] PodContainerStartBenchmarkTimeoutSeconds:0}
+[BeforeSuite] PASSED [0.000 seconds]
+------------------------------
+[k8s.io] Image Volume [Feature:ImageVolume] should return image digest in ContainerStatus mounts
+sigs.k8s.io/cri-tools/pkg/validate/image_volume.go:97
+  STEP: Pulling image: gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:39:14.59
+  STEP: Pull image : gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:39:14.59
+  STEP: Creating pod sandbox @ 11/11/26 18:39:17.438
+  STEP: Creating container with Image Volume @ 11/11/26 18:39:23.147
+  STEP: Checking ContainerStatus for image volume digest @ 11/11/26 18:39:23.234
+  STEP: delete Container @ 11/11/26 18:39:23.236
+  STEP: stop PodSandbox @ 11/11/26 18:39:23.238
+  STEP: delete PodSandbox @ 11/11/26 18:39:23.744
+  [SKIPPED] in [It] - sigs.k8s.io/cri-tools/pkg/validate/image_volume.go:158 @ 11/11/26 18:39:23.775
+S [SKIPPED] [9.191 seconds]
+[k8s.io] Image Volume [Feature:ImageVolume] [It] should return image digest in ContainerStatus mounts
+sigs.k8s.io/cri-tools/pkg/validate/image_volume.go:97
+
+  [SKIPPED] Image Volume digest reporting (ImageSpec.image_ref tag 20) is not yet supported by the runtime.
+  In [It] at: sigs.k8s.io/cri-tools/pkg/validate/image_volume.go:158 @ 11/11/26 18:39:23.775
+------------------------------
+[k8s.io] Image Volume [Feature:ImageVolume] should correctly mount image and enforce read-only
+sigs.k8s.io/cri-tools/pkg/validate/image_volume.go:176
+  STEP: Pulling image: gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:39:23.777
+  STEP: Pull image : gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:39:23.777
+  STEP: Creating pod sandbox @ 11/11/26 18:39:24.091
+  STEP: Creating container with Image Volume @ 11/11/26 18:39:28.513
+  STEP: Starting the container @ 11/11/26 18:39:28.618
+  STEP: Verifying image content is visible at the mount point @ 11/11/26 18:39:28.75
+  STEP: Verifying the image volume is read-only @ 11/11/26 18:39:28.879
+  Nov 11 18:39:29.001: INFO: Write attempt to image volume failed as expected: touch: /mnt/image-volume/test-write: Read-only file system
+
+  STEP: Verifying the image volume is NOT mounted with noexec @ 11/11/26 18:39:29.001
+  Nov 11 18:39:29.144: INFO: Binary execution from image volume succeeded as expected
+  STEP: stop Container @ 11/11/26 18:39:29.145
+  STEP: delete Container @ 11/11/26 18:39:29.174
+  STEP: stop PodSandbox @ 11/11/26 18:39:29.176
+  STEP: delete PodSandbox @ 11/11/26 18:39:29.722
+• [5.977 seconds]
+------------------------------
+[k8s.io] Image Volume [Feature:ImageVolume] should reject Image Volume with Readonly set to false
+sigs.k8s.io/cri-tools/pkg/validate/image_volume.go:271
+  STEP: Pulling image: gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:39:29.754
+  STEP: Pull image : gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:39:29.754
+  STEP: Creating pod sandbox @ 11/11/26 18:39:30.102
+  STEP: Creating container with Image Volume and Readonly=false @ 11/11/26 18:39:34.892
+E1111 18:39:34.895127     138 remote_runtime.go:498] "CreateContainer in sandbox from runtime service failed" err="rpc error: code = Unknown desc = failed to mount image volume: ImageVolumeMountFailed: readonly must be true while mount image: container_path:\"/mnt/image-volume\"  image:{image:\"sha256:552a946d71c1a27bd126431c3af69b3ded9eea21a2e98b6e93305927f37edb49\"  user_specified_image:\"gcr.io/k8s-staging-cri-tools/test-image-tag:test\"}" podSandboxID="28a1e918f2bc5705cf8233e1167996d98a8e411245ea43bfbaccffe1138a904f"
+  STEP: Verified that Runtime rejected invalid Readonly=false configuration: rpc error: code = Unknown desc = failed to mount image volume: ImageVolumeMountFailed: readonly must be true while mount image: container_path:"/mnt/image-volume"  image:{image:"sha256:552a946d71c1a27bd126431c3af69b3ded9eea21a2e98b6e93305927f37edb49"  user_specified_image:"gcr.io/k8s-staging-cri-tools/test-image-tag:test"} @ 11/11/26 18:39:34.895
+  STEP: stop PodSandbox @ 11/11/26 18:39:34.895
+  STEP: delete PodSandbox @ 11/11/26 18:39:35.385
+• [5.664 seconds]
+------------------------------
+[k8s.io] Image Volume [Feature:ImageVolume] subPath should succeed when using a valid subPath
+sigs.k8s.io/cri-tools/pkg/validate/image_volume.go:329
+  STEP: Pulling image: gcr.io/k8s-staging-cri-tools/test-image-predefined-group @ 11/11/26 18:39:35.417
+  Nov 11 18:39:35.417: INFO: Use latest as default image tag.
+  STEP: Pull image : gcr.io/k8s-staging-cri-tools/test-image-predefined-group:latest @ 11/11/26 18:39:35.417
+  STEP: Creating pod sandbox @ 11/11/26 18:39:36.807
+  STEP: Creating container with Image Volume and subPath @ 11/11/26 18:39:41.55
+  STEP: Starting the container @ 11/11/26 18:39:41.637
+  STEP: Checking whether the image volume mount point exists @ 11/11/26 18:39:41.771
+  STEP: Verifying subPath was applied and not the full image root @ 11/11/26 18:39:41.905
+  STEP: Verifying subPath content is visible at the mount point @ 11/11/26 18:39:42.027
+  STEP: stop Container @ 11/11/26 18:39:42.148
+  STEP: delete Container @ 11/11/26 18:39:42.178
+  STEP: stop PodSandbox @ 11/11/26 18:39:42.18
+  STEP: delete PodSandbox @ 11/11/26 18:39:42.728
+• [7.344 seconds]
+------------------------------
+[k8s.io] Image Volume [Feature:ImageVolume] subPath should fail when subPath does not exist in the image
+sigs.k8s.io/cri-tools/pkg/validate/image_volume.go:421
+  STEP: Pulling image: gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:39:42.761
+  STEP: Pull image : gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:39:42.762
+  STEP: Creating pod sandbox @ 11/11/26 18:39:43.058
+  STEP: Creating container with Image Volume and non-existing subPath @ 11/11/26 18:39:47.782
+E1111 18:39:47.833564     138 remote_runtime.go:498] "CreateContainer in sandbox from runtime service failed" err="rpc error: code = Unknown desc = failed to mount image volume: ImageVolumeMountFailed: failed to ensure image subpath \"not-existing\" in \"/run/containerd/io.containerd.grpc.v1.cri/image-volumes/c355484922d1abbb69801e8d1152b421fdc7c7a76c6a252738279bb186127321/7790d76e1fd8a5b3ae026fc29ec87b1d622828cd5539b1c0a79acecf4c4821be\": openat not-existing: no such file or directory" podSandboxID="c355484922d1abbb69801e8d1152b421fdc7c7a76c6a252738279bb186127321"
+  Nov 11 18:39:47.833: INFO: Container creation failed as expected: rpc error: code = Unknown desc = failed to mount image volume: ImageVolumeMountFailed: failed to ensure image subpath "not-existing" in "/run/containerd/io.containerd.grpc.v1.cri/image-volumes/c355484922d1abbb69801e8d1152b421fdc7c7a76c6a252738279bb186127321/7790d76e1fd8a5b3ae026fc29ec87b1d622828cd5539b1c0a79acecf4c4821be": openat not-existing: no such file or directory
+  STEP: stop PodSandbox @ 11/11/26 18:39:47.833
+  STEP: delete PodSandbox @ 11/11/26 18:39:48.327
+• [5.597 seconds]
+------------------------------
+[k8s.io] PodSandbox runtime should support sysctls should support safe sysctls
+sigs.k8s.io/cri-tools/pkg/validate/pod_linux.go:56
+  STEP: create a PodSandbox with sysctls @ 11/11/26 18:39:48.359
+  STEP: create a default container @ 11/11/26 18:39:52.485
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:39:52.485
+  STEP: Pull image : registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:39:52.486
+  STEP: Create container. @ 11/11/26 18:39:53.445
+  Nov 11 18:39:53.510: INFO: Created container "433587a36cddb7f24893579f1d955c855820f2a6409e25f8eee99a5ebc4b1cde"
+
+  STEP: start container @ 11/11/26 18:39:53.51
+  STEP: Start container for containerID: 433587a36cddb7f24893579f1d955c855820f2a6409e25f8eee99a5ebc4b1cde @ 11/11/26 18:39:53.51
+  Nov 11 18:39:53.636: INFO: Started container "433587a36cddb7f24893579f1d955c855820f2a6409e25f8eee99a5ebc4b1cde"
+
+  STEP: check sysctls kernel.shm_rmid_forced @ 11/11/26 18:39:53.636
+  STEP: stop PodSandbox @ 11/11/26 18:39:53.758
+  STEP: delete PodSandbox @ 11/11/26 18:39:54.292
+• [5.966 seconds]
+------------------------------
+[k8s.io] PodSandbox runtime should support sysctls should support unsafe sysctls
+sigs.k8s.io/cri-tools/pkg/validate/pod_linux.go:72
+  STEP: create a PodSandbox with sysctls @ 11/11/26 18:39:54.326
+  STEP: create a default container @ 11/11/26 18:39:58.774
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:39:58.774
+  STEP: Create container. @ 11/11/26 18:39:58.775
+  Nov 11 18:39:58.823: INFO: Created container "011a845ba13eb8836ba1b66bbca355a0a392c90fdb4f5f83769260db25fbd3d7"
+
+  STEP: start container @ 11/11/26 18:39:58.823
+  STEP: Start container for containerID: 011a845ba13eb8836ba1b66bbca355a0a392c90fdb4f5f83769260db25fbd3d7 @ 11/11/26 18:39:58.823
+  Nov 11 18:39:58.948: INFO: Started container "011a845ba13eb8836ba1b66bbca355a0a392c90fdb4f5f83769260db25fbd3d7"
+
+  STEP: check sysctls fs.mqueue.msg_max @ 11/11/26 18:39:58.948
+  STEP: stop PodSandbox @ 11/11/26 18:39:59.07
+  STEP: delete PodSandbox @ 11/11/26 18:39:59.623
+• [5.332 seconds]
+------------------------------
+S
+------------------------------
+[k8s.io] Image Manager public image with tag should be pulled and removed [Conformance] [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/image.go:46
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:39:59.658
+  STEP: Remove image by ID : sha256:552a946d71c1a27bd126431c3af69b3ded9eea21a2e98b6e93305927f37edb49 @ 11/11/26 18:39:59.658
+  STEP: Pull image : gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:39:59.779
+  STEP: Check image list to make sure pulling image success : gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:40:01.154
+  STEP: Get image status for image: gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:40:01.154
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:40:01.155
+  STEP: Remove image by ID : sha256:552a946d71c1a27bd126431c3af69b3ded9eea21a2e98b6e93305927f37edb49 @ 11/11/26 18:40:01.155
+  STEP: Check image list empty @ 11/11/26 18:40:01.165
+  STEP: Get image status for image: gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:40:01.165
+• [1.510 seconds]
+------------------------------
+[k8s.io] Image Manager public image should timeout if requested [Conformance] [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/image.go:52
+E1111 18:40:01.169177     138 remote_image.go:334] "PullImage from image service failed" err="rpc error: code = DeadlineExceeded desc = context deadline exceeded" image="gcr.io/k8s-staging-cri-tools/test-image-tag:test"
+• [0.004 seconds]
+------------------------------
+[k8s.io] Image Manager public image without tag should be pulled and removed [Conformance] [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/image.go:68
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-latest @ 11/11/26 18:40:01.172
+  Nov 11 18:40:01.173: INFO: Use latest as default image tag.
+  STEP: Pull image : gcr.io/k8s-staging-cri-tools/test-image-latest:latest @ 11/11/26 18:40:01.173
+  STEP: Check image list to make sure pulling image success : gcr.io/k8s-staging-cri-tools/test-image-latest @ 11/11/26 18:40:02.467
+  STEP: Get image status for image: gcr.io/k8s-staging-cri-tools/test-image-latest @ 11/11/26 18:40:02.467
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-latest @ 11/11/26 18:40:02.468
+  STEP: Remove image by ID : sha256:57a996e7ef598edd438ce3caee6cd7deef5f00acc2b42a0fb4c61d5b96b02c06 @ 11/11/26 18:40:02.468
+  STEP: Check image list empty @ 11/11/26 18:40:02.478
+  STEP: Get image status for image: gcr.io/k8s-staging-cri-tools/test-image-latest @ 11/11/26 18:40:02.478
+• [1.309 seconds]
+------------------------------
+[k8s.io] Image Manager public image with digest should be pulled and removed [Conformance] [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/image.go:74
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-digest@sha256:9700f9a2f5bf2c45f2f605a0bd3bce7cf37420ec9d3ed50ac2758413308766bf @ 11/11/26 18:40:02.481
+  STEP: Pull image : gcr.io/k8s-staging-cri-tools/test-image-digest@sha256:9700f9a2f5bf2c45f2f605a0bd3bce7cf37420ec9d3ed50ac2758413308766bf @ 11/11/26 18:40:02.481
+  STEP: Check image list to make sure pulling image success : gcr.io/k8s-staging-cri-tools/test-image-digest@sha256:9700f9a2f5bf2c45f2f605a0bd3bce7cf37420ec9d3ed50ac2758413308766bf @ 11/11/26 18:40:04.209
+  STEP: Get image status for image: gcr.io/k8s-staging-cri-tools/test-image-digest@sha256:9700f9a2f5bf2c45f2f605a0bd3bce7cf37420ec9d3ed50ac2758413308766bf @ 11/11/26 18:40:04.209
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-digest@sha256:9700f9a2f5bf2c45f2f605a0bd3bce7cf37420ec9d3ed50ac2758413308766bf @ 11/11/26 18:40:04.21
+  STEP: Remove image by ID : sha256:37ebe32bf529799c3da461f55d37ba94f5232e34b8c9488ff70d87749b1d157b @ 11/11/26 18:40:04.211
+  STEP: Check image list empty @ 11/11/26 18:40:04.223
+  STEP: Get image status for image: gcr.io/k8s-staging-cri-tools/test-image-digest@sha256:9700f9a2f5bf2c45f2f605a0bd3bce7cf37420ec9d3ed50ac2758413308766bf @ 11/11/26 18:40:04.223
+• [1.745 seconds]
+------------------------------
+[k8s.io] Image Manager image status should support all kinds of references [Conformance] [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/image.go:81
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-tag:all @ 11/11/26 18:40:04.226
+  STEP: Pull image : gcr.io/k8s-staging-cri-tools/test-image-tag:all @ 11/11/26 18:40:04.227
+  STEP: Get image status for image: gcr.io/k8s-staging-cri-tools/test-image-tag:all @ 11/11/26 18:40:05.736
+  STEP: Get image status for image: sha256:9960f0b67562d1a8b8f02be1c3f203276202d2d6a128b88f1e063a29c59b0b23 @ 11/11/26 18:40:05.737
+  STEP: Get image status for image: gcr.io/k8s-staging-cri-tools/test-image-tag:all @ 11/11/26 18:40:05.737
+  STEP: Get image status for image: gcr.io/k8s-staging-cri-tools/test-image-tag@sha256:4b3a18f5931005be9ff424b584f738862215a9af84748e28702b102ee2ca5cb6 @ 11/11/26 18:40:05.738
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-tag:all @ 11/11/26 18:40:05.738
+  STEP: Remove image by ID : sha256:9960f0b67562d1a8b8f02be1c3f203276202d2d6a128b88f1e063a29c59b0b23 @ 11/11/26 18:40:05.739
+  STEP: Check image list empty @ 11/11/26 18:40:05.753
+  STEP: Get image status for image: gcr.io/k8s-staging-cri-tools/test-image-tag:all @ 11/11/26 18:40:05.753
+• [1.529 seconds]
+------------------------------
+[k8s.io] Image Manager image status get image fields should not have Uid|Username empty [Conformance] [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/image.go:107
+  Nov 11 18:40:05.755: INFO: Use latest as default image tag.
+  STEP: Pull image : gcr.io/k8s-staging-cri-tools/test-image-user-uid:latest @ 11/11/26 18:40:05.755
+  STEP: Get image status for image: gcr.io/k8s-staging-cri-tools/test-image-user-uid @ 11/11/26 18:40:06.718
+  Nov 11 18:40:06.719: INFO: Use latest as default image tag.
+  STEP: Pull image : gcr.io/k8s-staging-cri-tools/test-image-user-username:latest @ 11/11/26 18:40:06.719
+  STEP: Get image status for image: gcr.io/k8s-staging-cri-tools/test-image-user-username @ 11/11/26 18:40:07.687
+  Nov 11 18:40:07.688: INFO: Use latest as default image tag.
+  STEP: Pull image : gcr.io/k8s-staging-cri-tools/test-image-user-uid-group:latest @ 11/11/26 18:40:07.688
+  STEP: Get image status for image: gcr.io/k8s-staging-cri-tools/test-image-user-uid-group @ 11/11/26 18:40:08.684
+  Nov 11 18:40:08.685: INFO: Use latest as default image tag.
+  STEP: Pull image : gcr.io/k8s-staging-cri-tools/test-image-user-username-group:latest @ 11/11/26 18:40:08.685
+  STEP: Get image status for image: gcr.io/k8s-staging-cri-tools/test-image-user-username-group @ 11/11/26 18:40:09.645
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-user-username-group @ 11/11/26 18:40:09.646
+  STEP: Remove image by ID : sha256:e4e6b8ec2f19e0a9846a7c3d5488746a48354ac5b1987b9df8a7cd5b062ed5c2 @ 11/11/26 18:40:09.646
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-user-uid-group @ 11/11/26 18:40:09.649
+  STEP: Remove image by ID : sha256:099fddc6afc2bbcb999084bd615eefd3e21cc8f46ceab8797f9ce93b06348856 @ 11/11/26 18:40:09.65
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-user-username @ 11/11/26 18:40:09.653
+  STEP: Remove image by ID : sha256:12cd94108430b81a468209a457f2b4470952c4fc4d06726b57ab37d68841520e @ 11/11/26 18:40:09.654
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-user-uid @ 11/11/26 18:40:09.656
+  STEP: Remove image by ID : sha256:e40c45ce4fbae90a647c02b4dda58fc2540e3a814510d41ba9018e7a8e7032ec @ 11/11/26 18:40:09.657
+• [3.906 seconds]
+------------------------------
+[k8s.io] Image Manager listImage should get exactly 3 image in the result list [Conformance] [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/image.go:149
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-1:latest @ 11/11/26 18:40:09.662
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-2:latest @ 11/11/26 18:40:09.662
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-3:latest @ 11/11/26 18:40:09.662
+  STEP: Pull image : gcr.io/k8s-staging-cri-tools/test-image-1:latest @ 11/11/26 18:40:09.663
+  STEP: Pull image : gcr.io/k8s-staging-cri-tools/test-image-2:latest @ 11/11/26 18:40:10.982
+  STEP: Pull image : gcr.io/k8s-staging-cri-tools/test-image-3:latest @ 11/11/26 18:40:12.379
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-1:latest @ 11/11/26 18:40:13.793
+  STEP: Remove image by ID : sha256:a3367f9c4a06062739f80da4b51bb662fe75ee8edda87113872327f73ea1789c @ 11/11/26 18:40:13.794
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-2:latest @ 11/11/26 18:40:13.802
+  STEP: Remove image by ID : sha256:cf8440e3f87b467204bc76fb43c8c6a3c2414897017ea5ef31a39a5f04c65df9 @ 11/11/26 18:40:13.803
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-3:latest @ 11/11/26 18:40:13.811
+  STEP: Remove image by ID : sha256:c9980767f9bf912dbf477da21b4139d7cdebe940954595799ce1186a9cdf27b0 @ 11/11/26 18:40:13.811
+• [4.161 seconds]
+------------------------------
+[k8s.io] Image Manager listImage should get exactly 3 repoTags in the result image [Conformance] [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/image.go:171
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-tags:1 @ 11/11/26 18:40:13.822
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-tags:2 @ 11/11/26 18:40:13.822
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-tags:3 @ 11/11/26 18:40:13.823
+  STEP: Pull image : gcr.io/k8s-staging-cri-tools/test-image-tags:1 @ 11/11/26 18:40:13.823
+  STEP: Pull image : gcr.io/k8s-staging-cri-tools/test-image-tags:2 @ 11/11/26 18:40:15.339
+  STEP: Pull image : gcr.io/k8s-staging-cri-tools/test-image-tags:3 @ 11/11/26 18:40:15.642
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-tags:1 @ 11/11/26 18:40:15.937
+  STEP: Remove image by ID : sha256:5f7e6e743257afec05d909136bfc41f244a1015eb102c3c4dd077ee9b8cc387a @ 11/11/26 18:40:15.938
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-tags:2 @ 11/11/26 18:40:15.949
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-tags:3 @ 11/11/26 18:40:15.949
+• [2.129 seconds]
+------------------------------
+[k8s.io] Image Manager removing image by one tag should remove all tags [Conformance] [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/image.go:195
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-tags:1 @ 11/11/26 18:40:15.951
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-tags:2 @ 11/11/26 18:40:15.952
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-tags:3 @ 11/11/26 18:40:15.952
+  STEP: Pulling image with multiple tags @ 11/11/26 18:40:15.953
+  STEP: Pull image : gcr.io/k8s-staging-cri-tools/test-image-tags:1 @ 11/11/26 18:40:15.953
+  STEP: Pull image : gcr.io/k8s-staging-cri-tools/test-image-tags:2 @ 11/11/26 18:40:17.199
+  STEP: Pull image : gcr.io/k8s-staging-cri-tools/test-image-tags:3 @ 11/11/26 18:40:17.474
+  STEP: Verifying all tags are present on a single image @ 11/11/26 18:40:17.765
+  STEP: Removing image by a single tag: gcr.io/k8s-staging-cri-tools/test-image-tags:1 @ 11/11/26 18:40:17.766
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-tags:1 @ 11/11/26 18:40:17.766
+  STEP: Remove image by ID : sha256:5f7e6e743257afec05d909136bfc41f244a1015eb102c3c4dd077ee9b8cc387a @ 11/11/26 18:40:17.766
+  STEP: Verifying the image is completely removed @ 11/11/26 18:40:17.777
+  STEP: Get image status for image: gcr.io/k8s-staging-cri-tools/test-image-tags:1 @ 11/11/26 18:40:17.777
+  STEP: Get image status for image: gcr.io/k8s-staging-cri-tools/test-image-tags:2 @ 11/11/26 18:40:17.778
+  STEP: Get image status for image: gcr.io/k8s-staging-cri-tools/test-image-tags:3 @ 11/11/26 18:40:17.778
+  STEP: Get image status for image: sha256:5f7e6e743257afec05d909136bfc41f244a1015eb102c3c4dd077ee9b8cc387a @ 11/11/26 18:40:17.779
+• [1.829 seconds]
+------------------------------
+[k8s.io] Image Manager removing image from one registry should remove all tags from other registries [Conformance] [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/image.go:247
+  STEP: Remove image : registry.k8s.io/pause:3.9 @ 11/11/26 18:40:17.782
+  STEP: Remove image : k8s.gcr.io/pause:3.9 @ 11/11/26 18:40:17.783
+  STEP: Pulling the same image from different registries @ 11/11/26 18:40:17.783
+  STEP: Pull image : registry.k8s.io/pause:3.9 @ 11/11/26 18:40:17.783
+  STEP: Pull image : k8s.gcr.io/pause:3.9 @ 11/11/26 18:40:18.709
+  STEP: Verifying all tags are present on a single image @ 11/11/26 18:40:19.013
+  STEP: Removing image by a single tag: registry.k8s.io/pause:3.9 @ 11/11/26 18:40:19.013
+  STEP: Remove image : registry.k8s.io/pause:3.9 @ 11/11/26 18:40:19.013
+  STEP: Remove image by ID : sha256:e6f1816883972d4be47bd48879a08919b96afcd344132622e4d444987919323c @ 11/11/26 18:40:19.014
+  STEP: Verifying the image is completely removed @ 11/11/26 18:40:19.023
+  STEP: Get image status for image: registry.k8s.io/pause:3.9 @ 11/11/26 18:40:19.023
+  STEP: Get image status for image: k8s.gcr.io/pause:3.9 @ 11/11/26 18:40:19.023
+  STEP: Get image status for image: sha256:e6f1816883972d4be47bd48879a08919b96afcd344132622e4d444987919323c @ 11/11/26 18:40:19.024
+• [1.245 seconds]
+------------------------------
+[k8s.io] Security Context NamespaceOption runtime should support HostPID
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:83
+  STEP: create podSandbox for security context HostPID @ 11/11/26 18:40:19.026
+  STEP: create NamespaceOption podSandbox @ 11/11/26 18:40:19.026
+E1111 18:40:19.320758     138 remote_runtime.go:325] "RunPodSandbox from runtime service failed" err="rpc error: code = Unknown desc = failed to start sandbox \"f1145f89542ce221ead9dbb6b552e0780fab4efbc20894d06aaf489121123498\": failed to create containerd task: failed to start shim: start failed: aws.firecracker: rpc error: code = Unimplemented desc = Firecracker CRI host-PID and host-IPC Pods are not supported: exit status 1"
+  Nov 11 18:40:19.320: INFO: Unexpected error occurred: rpc error: code = Unknown desc = failed to start sandbox "f1145f89542ce221ead9dbb6b552e0780fab4efbc20894d06aaf489121123498": failed to create containerd task: failed to start shim: start failed: aws.firecracker: rpc error: code = Unimplemented desc = Firecracker CRI host-PID and host-IPC Pods are not supported: exit status 1
+  [FAILED] in [It] - sigs.k8s.io/cri-tools/pkg/framework/util.go:241 @ 11/11/26 18:40:19.321
+• [FAILED] [0.296 seconds]
+[k8s.io] Security Context NamespaceOption [It] runtime should support HostPID
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:83
+
+  [FAILED] failed to create PodSandbox
+  Unexpected error:
+      <*status.Error | 0x2bcebcb068e0>: 
+      rpc error: code = Unknown desc = failed to start sandbox "f1145f89542ce221ead9dbb6b552e0780fab4efbc20894d06aaf489121123498": failed to create containerd task: failed to start shim: start failed: aws.firecracker: rpc error: code = Unimplemented desc = Firecracker CRI host-PID and host-IPC Pods are not supported: exit status 1
+      {
+          s: {
+              s: {
+                  state: {
+                      NoUnkeyedLiterals: {},
+                      DoNotCompare: [],
+                      DoNotCopy: [],
+                      atomicMessageInfo: nil,
+                  },
+                  sizeCache: 0,
+                  unknownFields: nil,
+                  Code: 2,
+                  Message: "failed to start sandbox \"f1145f89542ce221ead9dbb6b552e0780fab4efbc20894d06aaf489121123498\": failed to create containerd task: failed to start shim: start failed: aws.firecracker: rpc error: code = Unimplemented desc = Firecracker CRI host-PID and host-IPC Pods are not supported: exit status 1",
+                  Details: nil,
+              },
+          },
+      }
+  occurred
+  In [It] at: sigs.k8s.io/cri-tools/pkg/framework/util.go:241 @ 11/11/26 18:40:19.321
+------------------------------
+[k8s.io] Security Context NamespaceOption runtime should support HostIpc is true
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:187
+  STEP: create shared memory segment on the host @ 11/11/26 18:40:19.323
+  STEP: create podSandbox for security context HostIPC is NODE @ 11/11/26 18:40:19.325
+  STEP: create NamespaceOption podSandbox @ 11/11/26 18:40:19.325
+  Nov 11 18:40:19.607: INFO: Unexpected error occurred: rpc error: code = Unknown desc = failed to start sandbox "447d8fabcbb2c3eb34d153452cf8fd9f4915f8c93020391be89660d4d9c82421": failed to create containerd task: failed to start shim: start failed: aws.firecracker: rpc error: code = Unimplemented desc = Firecracker CRI host-PID and host-IPC Pods are not supported: exit status 1
+E1111 18:40:19.607516     138 remote_runtime.go:325] "RunPodSandbox from runtime service failed" err="rpc error: code = Unknown desc = failed to start sandbox \"447d8fabcbb2c3eb34d153452cf8fd9f4915f8c93020391be89660d4d9c82421\": failed to create containerd task: failed to start shim: start failed: aws.firecracker: rpc error: code = Unimplemented desc = Firecracker CRI host-PID and host-IPC Pods are not supported: exit status 1"
+  [FAILED] in [It] - sigs.k8s.io/cri-tools/pkg/framework/util.go:241 @ 11/11/26 18:40:19.607
+• [FAILED] [0.287 seconds]
+[k8s.io] Security Context NamespaceOption [It] runtime should support HostIpc is true
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:187
+
+  [FAILED] failed to create PodSandbox
+  Unexpected error:
+      <*status.Error | 0x2bcebcb069d0>: 
+      rpc error: code = Unknown desc = failed to start sandbox "447d8fabcbb2c3eb34d153452cf8fd9f4915f8c93020391be89660d4d9c82421": failed to create containerd task: failed to start shim: start failed: aws.firecracker: rpc error: code = Unimplemented desc = Firecracker CRI host-PID and host-IPC Pods are not supported: exit status 1
+      {
+          s: {
+              s: {
+                  state: {
+                      NoUnkeyedLiterals: {},
+                      DoNotCompare: [],
+                      DoNotCopy: [],
+                      atomicMessageInfo: nil,
+                  },
+                  sizeCache: 0,
+                  unknownFields: nil,
+                  Code: 2,
+                  Message: "failed to start sandbox \"447d8fabcbb2c3eb34d153452cf8fd9f4915f8c93020391be89660d4d9c82421\": failed to create containerd task: failed to start shim: start failed: aws.firecracker: rpc error: code = Unimplemented desc = Firecracker CRI host-PID and host-IPC Pods are not supported: exit status 1",
+                  Details: nil,
+              },
+          },
+      }
+  occurred
+  In [It] at: sigs.k8s.io/cri-tools/pkg/framework/util.go:241 @ 11/11/26 18:40:19.607
+------------------------------
+[k8s.io] Security Context NamespaceOption runtime should support HostIpc is false
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:191
+  STEP: create shared memory segment on the host @ 11/11/26 18:40:19.61
+  STEP: create podSandbox for security context HostIPC is POD @ 11/11/26 18:40:19.611
+  STEP: create NamespaceOption podSandbox @ 11/11/26 18:40:19.611
+  STEP: create a default container with namespace @ 11/11/26 18:40:24.241
+  STEP: create NamespaceOption container @ 11/11/26 18:40:24.241
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:40:24.241
+  STEP: Create container. @ 11/11/26 18:40:24.242
+  Nov 11 18:40:24.293: INFO: Created container "5055db86bd43a193418392104cb2040c1fb11091ebf28290c6425922ed44e142"
+
+  STEP: start container @ 11/11/26 18:40:24.293
+  STEP: Start container for containerID: 5055db86bd43a193418392104cb2040c1fb11091ebf28290c6425922ed44e142 @ 11/11/26 18:40:24.293
+  Nov 11 18:40:24.417: INFO: Started container "5055db86bd43a193418392104cb2040c1fb11091ebf28290c6425922ed44e142"
+
+  STEP: Get container status for containerID: 5055db86bd43a193418392104cb2040c1fb11091ebf28290c6425922ed44e142 @ 11/11/26 18:40:24.417
+  STEP: check if the shared memory segment is (not) included in the container @ 11/11/26 18:40:24.419
+  STEP: execSync for containerID: 5055db86bd43a193418392104cb2040c1fb11091ebf28290c6425922ed44e142 @ 11/11/26 18:40:24.419
+  Nov 11 18:40:24.541: INFO: Execsync succeed
+  STEP: stop PodSandbox @ 11/11/26 18:40:24.541
+  STEP: delete PodSandbox @ 11/11/26 18:40:25.102
+• [5.526 seconds]
+------------------------------
+[k8s.io] Security Context NamespaceOption runtime should support PodPID
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:195
+  STEP: create podSandbox for sharing process namespace @ 11/11/26 18:40:25.137
+  Nov 11 18:40:25.137: INFO: Pid namespace is "POD"
+  STEP: create NamespaceOption podSandbox @ 11/11/26 18:40:25.137
+  STEP: create nginx container @ 11/11/26 18:40:29.684
+  STEP: create NamespaceOption container @ 11/11/26 18:40:29.684
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/nginx:1.14-2 @ 11/11/26 18:40:29.684
+  STEP: Pull image : registry.k8s.io/e2e-test-images/nginx:1.14-2 @ 11/11/26 18:40:29.685
+  STEP: Create container. @ 11/11/26 18:40:31.435
+  Nov 11 18:40:31.479: INFO: Created container "f7e11ea5657f64d76016f2af912bea180fdf18fdd69e3a120c64e2e0654d983f"
+
+  STEP: start container @ 11/11/26 18:40:31.479
+  STEP: Start container for containerID: f7e11ea5657f64d76016f2af912bea180fdf18fdd69e3a120c64e2e0654d983f @ 11/11/26 18:40:31.479
+  Nov 11 18:40:31.605: INFO: Started container "f7e11ea5657f64d76016f2af912bea180fdf18fdd69e3a120c64e2e0654d983f"
+
+  STEP: Get container status for containerID: f7e11ea5657f64d76016f2af912bea180fdf18fdd69e3a120c64e2e0654d983f @ 11/11/26 18:40:31.605
+  STEP: get nginx container pid @ 11/11/26 18:40:31.606
+  STEP: execSync for containerID: f7e11ea5657f64d76016f2af912bea180fdf18fdd69e3a120c64e2e0654d983f @ 11/11/26 18:40:32.607
+  Nov 11 18:40:32.737: INFO: Execsync succeed
+  STEP: stop PodSandbox @ 11/11/26 18:40:32.737
+  STEP: delete PodSandbox @ 11/11/26 18:40:33.287
+• [8.185 seconds]
+------------------------------
+[k8s.io] Security Context NamespaceOption runtime should support ContainerPID
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:226
+  STEP: create podSandbox with PID set to container @ 11/11/26 18:40:33.32
+  Nov 11 18:40:33.320: INFO: Pid namespace is "CONTAINER"
+  STEP: create NamespaceOption podSandbox @ 11/11/26 18:40:33.32
+  STEP: create nginx container @ 11/11/26 18:40:37.424
+  STEP: create NamespaceOption container @ 11/11/26 18:40:37.424
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/nginx:1.14-2 @ 11/11/26 18:40:37.424
+  STEP: Create container. @ 11/11/26 18:40:37.425
+  Nov 11 18:40:37.476: INFO: Created container "1e5a5ffddb442328af5da1491b6caa5d2a2e48dfddf17d2ba94188472f49d7a4"
+
+  STEP: start container @ 11/11/26 18:40:37.477
+  STEP: Start container for containerID: 1e5a5ffddb442328af5da1491b6caa5d2a2e48dfddf17d2ba94188472f49d7a4 @ 11/11/26 18:40:37.477
+  Nov 11 18:40:37.599: INFO: Started container "1e5a5ffddb442328af5da1491b6caa5d2a2e48dfddf17d2ba94188472f49d7a4"
+
+  STEP: Get container status for containerID: 1e5a5ffddb442328af5da1491b6caa5d2a2e48dfddf17d2ba94188472f49d7a4 @ 11/11/26 18:40:37.599
+  STEP: get nginx container pid @ 11/11/26 18:40:37.6
+  STEP: execSync for containerID: 1e5a5ffddb442328af5da1491b6caa5d2a2e48dfddf17d2ba94188472f49d7a4 @ 11/11/26 18:40:37.6
+  Nov 11 18:40:37.732: INFO: Execsync succeed
+  STEP: stop PodSandbox @ 11/11/26 18:40:37.732
+  STEP: delete PodSandbox @ 11/11/26 18:40:38.291
+• [5.005 seconds]
+------------------------------
+[k8s.io] Security Context NamespaceOption runtime should support HostNetwork is true
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:253
+  STEP: creating a podSandbox with hostNetwork true @ 11/11/26 18:40:38.325
+  STEP: create NamespaceOption podSandbox @ 11/11/26 18:40:38.326
+E1111 18:40:38.411039     138 remote_runtime.go:325] "RunPodSandbox from runtime service failed" err="rpc error: code = Unknown desc = failed to start sandbox \"15a90df9b5318870883e1a82b1c5e801f338bd729e63e0aa9da1fb2edbf24927\": failed to create containerd task: failed to start shim: start failed: aws.firecracker: rpc error: code = Unimplemented desc = Firecracker CRI host-network Pods are not supported: exit status 1"
+  Nov 11 18:40:38.411: INFO: Unexpected error occurred: rpc error: code = Unknown desc = failed to start sandbox "15a90df9b5318870883e1a82b1c5e801f338bd729e63e0aa9da1fb2edbf24927": failed to create containerd task: failed to start shim: start failed: aws.firecracker: rpc error: code = Unimplemented desc = Firecracker CRI host-network Pods are not supported: exit status 1
+  [FAILED] in [It] - sigs.k8s.io/cri-tools/pkg/framework/util.go:241 @ 11/11/26 18:40:38.411
+  STEP: stop PodSandbox @ 11/11/26 18:40:38.411
+  STEP: delete PodSandbox @ 11/11/26 18:40:38.412
+• [FAILED] [0.089 seconds]
+[k8s.io] Security Context NamespaceOption [It] runtime should support HostNetwork is true
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:253
+
+  [FAILED] failed to create PodSandbox
+  Unexpected error:
+      <*status.Error | 0x2bcebc5821d8>: 
+      rpc error: code = Unknown desc = failed to start sandbox "15a90df9b5318870883e1a82b1c5e801f338bd729e63e0aa9da1fb2edbf24927": failed to create containerd task: failed to start shim: start failed: aws.firecracker: rpc error: code = Unimplemented desc = Firecracker CRI host-network Pods are not supported: exit status 1
+      {
+          s: {
+              s: {
+                  state: {
+                      NoUnkeyedLiterals: {},
+                      DoNotCompare: [],
+                      DoNotCopy: [],
+                      atomicMessageInfo: nil,
+                  },
+                  sizeCache: 0,
+                  unknownFields: nil,
+                  Code: 2,
+                  Message: "failed to start sandbox \"15a90df9b5318870883e1a82b1c5e801f338bd729e63e0aa9da1fb2edbf24927\": failed to create containerd task: failed to start shim: start failed: aws.firecracker: rpc error: code = Unimplemented desc = Firecracker CRI host-network Pods are not supported: exit status 1",
+                  Details: nil,
+              },
+          },
+      }
+  occurred
+  In [It] at: sigs.k8s.io/cri-tools/pkg/framework/util.go:241 @ 11/11/26 18:40:38.411
+------------------------------
+[k8s.io] Security Context NamespaceOption runtime should support HostNetwork is false
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:279
+  STEP: creating a podSandbox with hostNetwork false @ 11/11/26 18:40:38.414
+  STEP: create NamespaceOption podSandbox @ 11/11/26 18:40:38.414
+  STEP: create a container in the sandbox @ 11/11/26 18:40:43.379
+  STEP: create NamespaceOption container @ 11/11/26 18:40:43.379
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:40:43.379
+  STEP: Create container. @ 11/11/26 18:40:43.379
+  Nov 11 18:40:43.428: INFO: Created container "bf817a3413bcf079467fcbe8128c0e7ef4e71f9b2f3d0aec18092a09002ce727"
+
+  STEP: start container @ 11/11/26 18:40:43.428
+  STEP: Start container for containerID: bf817a3413bcf079467fcbe8128c0e7ef4e71f9b2f3d0aec18092a09002ce727 @ 11/11/26 18:40:43.428
+  Nov 11 18:40:43.552: INFO: Started container "bf817a3413bcf079467fcbe8128c0e7ef4e71f9b2f3d0aec18092a09002ce727"
+
+  STEP: checking host http service port in the container @ 11/11/26 18:40:43.552
+  Nov 11 18:40:43.553: INFO: Open log file /tmp/podLogTest859985672/NamespaceOption-PodSandbox-3eac8fdd-be73-4e32-8d58-43cc9f5ba12b/container-with-HostNetwork-test-34265b0d-871f-49ad-a98c-d6a97506f849.log
+  Nov 11 18:40:43.553: INFO: Parse container log succeed
+  STEP: stop PodSandbox @ 11/11/26 18:40:43.553
+  STEP: delete PodSandbox @ 11/11/26 18:40:44.096
+• [5.716 seconds]
+------------------------------
+[k8s.io] Security Context bucket runtime should support SupplementalGroups
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:307
+  STEP: create pod @ 11/11/26 18:40:44.131
+  STEP: create container for security context SupplementalGroups @ 11/11/26 18:40:48.214
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:40:48.214
+  STEP: Create container. @ 11/11/26 18:40:48.215
+  Nov 11 18:40:48.266: INFO: Created container "fbf099f689f2261ed11de7c9f514a5db64f955db88350ef47a14c088c6d4b70e"
+
+  STEP: start container @ 11/11/26 18:40:48.266
+  STEP: Start container for containerID: fbf099f689f2261ed11de7c9f514a5db64f955db88350ef47a14c088c6d4b70e @ 11/11/26 18:40:48.266
+  Nov 11 18:40:48.389: INFO: Started container "fbf099f689f2261ed11de7c9f514a5db64f955db88350ef47a14c088c6d4b70e"
+
+  STEP: Get container status for containerID: fbf099f689f2261ed11de7c9f514a5db64f955db88350ef47a14c088c6d4b70e @ 11/11/26 18:40:48.389
+  STEP: verify SupplementalGroups for container @ 11/11/26 18:40:48.39
+  STEP: execSync for containerID: fbf099f689f2261ed11de7c9f514a5db64f955db88350ef47a14c088c6d4b70e @ 11/11/26 18:40:48.39
+  Nov 11 18:40:48.514: INFO: Execsync succeed
+  STEP: stop PodSandbox @ 11/11/26 18:40:48.514
+  STEP: delete PodSandbox @ 11/11/26 18:40:49.235
+• [5.139 seconds]
+------------------------------
+[k8s.io] Security Context bucket runtime should support RunAsUser
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:344
+  STEP: create pod @ 11/11/26 18:40:49.27
+  STEP: create container for security context RunAsUser @ 11/11/26 18:40:54.075
+  STEP: create RunAsUser container @ 11/11/26 18:40:54.075
+  STEP: create a container with RunAsUser @ 11/11/26 18:40:54.075
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:40:54.075
+  STEP: Create container. @ 11/11/26 18:40:54.076
+  Nov 11 18:40:54.120: INFO: Created container "cbfb9e6add55749f4b633c3a946d93f4183db557c6200bfaf82490fd6dda6594"
+
+  STEP: start container @ 11/11/26 18:40:54.12
+  STEP: Start container for containerID: cbfb9e6add55749f4b633c3a946d93f4183db557c6200bfaf82490fd6dda6594 @ 11/11/26 18:40:54.12
+  Nov 11 18:40:54.246: INFO: Started container "cbfb9e6add55749f4b633c3a946d93f4183db557c6200bfaf82490fd6dda6594"
+
+  STEP: Get container status for containerID: cbfb9e6add55749f4b633c3a946d93f4183db557c6200bfaf82490fd6dda6594 @ 11/11/26 18:40:54.246
+  STEP: verify RunAsUser for container @ 11/11/26 18:40:54.247
+  STEP: verify execSync output @ 11/11/26 18:40:54.247
+  STEP: execSync for containerID: cbfb9e6add55749f4b633c3a946d93f4183db557c6200bfaf82490fd6dda6594 @ 11/11/26 18:40:54.247
+  Nov 11 18:40:54.368: INFO: Execsync succeed
+  Nov 11 18:40:54.368: INFO: verify Execsync output succeed
+  STEP: stop PodSandbox @ 11/11/26 18:40:54.369
+  STEP: delete PodSandbox @ 11/11/26 18:40:54.915
+• [5.680 seconds]
+------------------------------
+[k8s.io] Security Context bucket runtime should support RunAsUserName
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:365
+  STEP: create pod @ 11/11/26 18:40:54.949
+  STEP: create container for security context RunAsUser @ 11/11/26 18:40:59.446
+  STEP: create RunAsUserName container @ 11/11/26 18:40:59.446
+  STEP: create a container with RunAsUserName @ 11/11/26 18:40:59.446
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:40:59.446
+  STEP: Create container. @ 11/11/26 18:40:59.446
+  Nov 11 18:40:59.495: INFO: Created container "302aaa44d150f7f44e1417f2a004eeb75da9e9c436ca5e37abdb299058c36f35"
+
+  STEP: start container @ 11/11/26 18:40:59.495
+  STEP: Start container for containerID: 302aaa44d150f7f44e1417f2a004eeb75da9e9c436ca5e37abdb299058c36f35 @ 11/11/26 18:40:59.495
+  Nov 11 18:40:59.619: INFO: Started container "302aaa44d150f7f44e1417f2a004eeb75da9e9c436ca5e37abdb299058c36f35"
+
+  STEP: Get container status for containerID: 302aaa44d150f7f44e1417f2a004eeb75da9e9c436ca5e37abdb299058c36f35 @ 11/11/26 18:40:59.619
+  STEP: verify RunAsUserName for container @ 11/11/26 18:40:59.62
+  STEP: verify execSync output @ 11/11/26 18:40:59.62
+  STEP: execSync for containerID: 302aaa44d150f7f44e1417f2a004eeb75da9e9c436ca5e37abdb299058c36f35 @ 11/11/26 18:40:59.62
+  Nov 11 18:40:59.741: INFO: Execsync succeed
+  Nov 11 18:40:59.741: INFO: verify Execsync output succeed
+  STEP: stop PodSandbox @ 11/11/26 18:40:59.742
+  STEP: delete PodSandbox @ 11/11/26 18:41:00.29
+• [5.375 seconds]
+------------------------------
+[k8s.io] Security Context bucket runtime should support RunAsGroup
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:386
+  STEP: create pod @ 11/11/26 18:41:00.324
+  STEP: create a PodSandbox with log directory @ 11/11/26 18:41:00.324
+  STEP: create container for security context RunAsGroup @ 11/11/26 18:41:04.53
+  STEP: create RunAsGroup container @ 11/11/26 18:41:04.53
+  STEP: create a container with RunAsUser and RunAsGroup @ 11/11/26 18:41:04.53
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:41:04.53
+  STEP: Create container. @ 11/11/26 18:41:04.531
+  Nov 11 18:41:04.581: INFO: Created container "448293d93573cb1e8b19168a6c8f99c72f294ed3111bd45a05fe693f6a886c52"
+
+  STEP: start container @ 11/11/26 18:41:04.581
+  STEP: Start container for containerID: 448293d93573cb1e8b19168a6c8f99c72f294ed3111bd45a05fe693f6a886c52 @ 11/11/26 18:41:04.581
+  Nov 11 18:41:04.706: INFO: Started container "448293d93573cb1e8b19168a6c8f99c72f294ed3111bd45a05fe693f6a886c52"
+
+  STEP: Get container status for containerID: 448293d93573cb1e8b19168a6c8f99c72f294ed3111bd45a05fe693f6a886c52 @ 11/11/26 18:41:04.706
+  STEP: Get container status for containerID: 448293d93573cb1e8b19168a6c8f99c72f294ed3111bd45a05fe693f6a886c52 @ 11/11/26 18:41:08.71
+  STEP: verify RunAsGroup for container @ 11/11/26 18:41:08.711
+  STEP: check container output @ 11/11/26 18:41:08.711
+  STEP: verify log contents @ 11/11/26 18:41:08.711
+  Nov 11 18:41:08.711: INFO: Open log file /tmp/podLogTest1927705644/PodSandbox-with-log-directory-1c3330c7-5b58-46db-8607-97b55880c1bb/container-with-RunAsGroup-test-32478d57-469a-4077-af5d-ec840d424d94.log
+  Nov 11 18:41:08.712: INFO: Parse container log succeed
+  STEP: stop PodSandbox @ 11/11/26 18:41:08.712
+  STEP: delete PodSandbox @ 11/11/26 18:41:09.22
+• [8.931 seconds]
+------------------------------
+[k8s.io] Security Context bucket runtime should return error if RunAsGroup is set without RunAsUser
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:406
+  STEP: create pod @ 11/11/26 18:41:09.255
+  STEP: create container with invalid RunAsGroup @ 11/11/26 18:41:14.079
+  STEP: create invalid RunAsGroup container @ 11/11/26 18:41:14.079
+  STEP: create a container with RunAsGroup without RunAsUser @ 11/11/26 18:41:14.079
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:41:14.079
+  STEP: Create container. @ 11/11/26 18:41:14.08
+E1111 18:41:14.082286     138 remote_runtime.go:498] "CreateContainer in sandbox from runtime service failed" err="rpc error: code = Unknown desc = failed to get container spec opts: failed to generate user string: user group \"1002\" is specified without user" podSandboxID="7dcb753d4c39a7fe7a55ed2852259fda16b67f6b55c63b550773a17670406cf2"
+  STEP: stop PodSandbox @ 11/11/26 18:41:14.082
+  STEP: delete PodSandbox @ 11/11/26 18:41:14.572
+• [5.349 seconds]
+------------------------------
+[k8s.io] Security Context bucket runtime should support that ReadOnlyRootfs is false
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:417
+  STEP: create pod with log @ 11/11/26 18:41:14.604
+  STEP: create a PodSandbox with log directory @ 11/11/26 18:41:14.604
+  STEP: create container with ReadOnlyRootfs_false @ 11/11/26 18:41:19.12
+  STEP: create ReadOnlyRootfs container @ 11/11/26 18:41:19.12
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:41:19.12
+  STEP: Create container. @ 11/11/26 18:41:19.121
+  Nov 11 18:41:19.172: INFO: Created container "df58fc7c9b7990aa88766c0e60c26c2628e9661ea8cc604fe03a1ba189008881"
+
+  STEP: start container @ 11/11/26 18:41:19.173
+  STEP: Start container for containerID: df58fc7c9b7990aa88766c0e60c26c2628e9661ea8cc604fe03a1ba189008881 @ 11/11/26 18:41:19.173
+  Nov 11 18:41:19.296: INFO: Started container "df58fc7c9b7990aa88766c0e60c26c2628e9661ea8cc604fe03a1ba189008881"
+
+  STEP: Get container status for containerID: df58fc7c9b7990aa88766c0e60c26c2628e9661ea8cc604fe03a1ba189008881 @ 11/11/26 18:41:19.296
+  STEP: Get container status for containerID: df58fc7c9b7990aa88766c0e60c26c2628e9661ea8cc604fe03a1ba189008881 @ 11/11/26 18:41:23.3
+  STEP: Check whether rootfs is writable @ 11/11/26 18:41:23.301
+  STEP: verify log contents @ 11/11/26 18:41:23.301
+  Nov 11 18:41:23.301: INFO: Open log file /tmp/podLogTest2088679392/PodSandbox-with-log-directory-ad5c801c-f083-42b2-bab1-763792d36f42/container-with-ReadOnlyRootfs-false-test-b2f629ac-6698-43b4-82a8-ad222c041dcc.log
+  Nov 11 18:41:23.302: INFO: Parse container log succeed
+  STEP: stop PodSandbox @ 11/11/26 18:41:23.302
+  STEP: delete PodSandbox @ 11/11/26 18:41:23.801
+• [9.232 seconds]
+------------------------------
+[k8s.io] Security Context bucket runtime should support that ReadOnlyRootfs is true
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:437
+  STEP: create pod with log @ 11/11/26 18:41:23.836
+  STEP: create a PodSandbox with log directory @ 11/11/26 18:41:23.836
+  STEP: create container with ReadOnlyRootfs_true @ 11/11/26 18:41:27.982
+  STEP: create ReadOnlyRootfs container @ 11/11/26 18:41:27.982
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:41:27.982
+  STEP: Create container. @ 11/11/26 18:41:27.983
+  Nov 11 18:41:28.031: INFO: Created container "e4484e85c42ccc5349010ada5982d63c19eb3dded6584bbf2ae3f024c829a7d9"
+
+  STEP: start container @ 11/11/26 18:41:28.031
+  STEP: Start container for containerID: e4484e85c42ccc5349010ada5982d63c19eb3dded6584bbf2ae3f024c829a7d9 @ 11/11/26 18:41:28.031
+  Nov 11 18:41:28.156: INFO: Started container "e4484e85c42ccc5349010ada5982d63c19eb3dded6584bbf2ae3f024c829a7d9"
+
+  STEP: Get container status for containerID: e4484e85c42ccc5349010ada5982d63c19eb3dded6584bbf2ae3f024c829a7d9 @ 11/11/26 18:41:28.156
+  STEP: Get container status for containerID: e4484e85c42ccc5349010ada5982d63c19eb3dded6584bbf2ae3f024c829a7d9 @ 11/11/26 18:41:32.159
+  STEP: Check whether rootfs is read-only @ 11/11/26 18:41:32.161
+  STEP: verify log contents @ 11/11/26 18:41:32.161
+  Nov 11 18:41:32.161: INFO: Open log file /tmp/podLogTest2581284196/PodSandbox-with-log-directory-20d07287-b404-4f99-957f-bca61d497d46/container-with-ReadOnlyRootfs-true-test-32712ea6-d07a-42b9-b63f-71ea0d0b65b1.log
+  Nov 11 18:41:32.161: INFO: Parse container log succeed
+  STEP: stop PodSandbox @ 11/11/26 18:41:32.161
+  STEP: delete PodSandbox @ 11/11/26 18:41:32.665
+• [8.864 seconds]
+------------------------------
+[k8s.io] Security Context bucket runtime should support Privileged is true
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:457
+  STEP: create pod @ 11/11/26 18:41:32.7
+  STEP: create Privileged podSandbox @ 11/11/26 18:41:32.7
+  STEP: create container for security context Privileged is true @ 11/11/26 18:41:36.946
+  STEP: create Privileged container @ 11/11/26 18:41:36.946
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:41:36.946
+  STEP: Create container. @ 11/11/26 18:41:36.947
+  Nov 11 18:41:37.004: INFO: Created container "253ce3bfb1779d27f5bdf38a7bcdab7277ba68cec2f36dc56aaea3facb765988"
+
+  STEP: start container @ 11/11/26 18:41:37.004
+  STEP: Start container for containerID: 253ce3bfb1779d27f5bdf38a7bcdab7277ba68cec2f36dc56aaea3facb765988 @ 11/11/26 18:41:37.004
+  Nov 11 18:41:37.136: INFO: Started container "253ce3bfb1779d27f5bdf38a7bcdab7277ba68cec2f36dc56aaea3facb765988"
+
+  STEP: Get container status for containerID: 253ce3bfb1779d27f5bdf38a7bcdab7277ba68cec2f36dc56aaea3facb765988 @ 11/11/26 18:41:37.136
+  STEP: check the Privileged container @ 11/11/26 18:41:37.137
+  STEP: stop PodSandbox @ 11/11/26 18:41:37.268
+  STEP: delete PodSandbox @ 11/11/26 18:41:37.785
+• [5.120 seconds]
+------------------------------
+[k8s.io] Security Context bucket runtime should support Privileged is false
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:477
+  STEP: create pod @ 11/11/26 18:41:37.821
+  STEP: create Privileged podSandbox @ 11/11/26 18:41:37.821
+  STEP: create container for security context Privileged is true @ 11/11/26 18:41:42.297
+  STEP: create Privileged container @ 11/11/26 18:41:42.297
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:41:42.297
+  STEP: Create container. @ 11/11/26 18:41:42.298
+  Nov 11 18:41:42.352: INFO: Created container "966c0d350cf4ba36a379c0dc0db905f5be107643a786a91742e6fe524761b3c5"
+
+  STEP: start container @ 11/11/26 18:41:42.352
+  STEP: Start container for containerID: 966c0d350cf4ba36a379c0dc0db905f5be107643a786a91742e6fe524761b3c5 @ 11/11/26 18:41:42.352
+  Nov 11 18:41:42.475: INFO: Started container "966c0d350cf4ba36a379c0dc0db905f5be107643a786a91742e6fe524761b3c5"
+
+  STEP: Get container status for containerID: 966c0d350cf4ba36a379c0dc0db905f5be107643a786a91742e6fe524761b3c5 @ 11/11/26 18:41:42.475
+  STEP: check the Privileged container @ 11/11/26 18:41:42.476
+  STEP: stop PodSandbox @ 11/11/26 18:41:42.598
+  STEP: delete PodSandbox @ 11/11/26 18:41:43.136
+• [5.349 seconds]
+------------------------------
+[k8s.io] Security Context bucket runtime should support adding capability
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:497
+  STEP: create pod @ 11/11/26 18:41:43.17
+  STEP: create container with security context Capability and test @ 11/11/26 18:41:47.539
+  STEP: create Capability container @ 11/11/26 18:41:47.539
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:41:47.539
+  STEP: Create container. @ 11/11/26 18:41:47.54
+  Nov 11 18:41:47.593: INFO: Created container "7c09970e265860765feaf3b5422140909c72cbf577b933537786d830f74c8331"
+
+  STEP: Start container for containerID: 7c09970e265860765feaf3b5422140909c72cbf577b933537786d830f74c8331 @ 11/11/26 18:41:47.593
+  Nov 11 18:41:47.717: INFO: Started container "7c09970e265860765feaf3b5422140909c72cbf577b933537786d830f74c8331"
+
+  STEP: Get container status for containerID: 7c09970e265860765feaf3b5422140909c72cbf577b933537786d830f74c8331 @ 11/11/26 18:41:47.718
+  STEP: create container without security context Capability and test @ 11/11/26 18:41:47.845
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:41:47.846
+  STEP: Create container. @ 11/11/26 18:41:47.846
+  Nov 11 18:41:47.896: INFO: Created container "d6de676ae45590e4039c2db159a80dc1010eae78cdf4c2fb51060b25da1285c7"
+
+  STEP: Start container for containerID: d6de676ae45590e4039c2db159a80dc1010eae78cdf4c2fb51060b25da1285c7 @ 11/11/26 18:41:47.896
+  Nov 11 18:41:48.022: INFO: Started container "d6de676ae45590e4039c2db159a80dc1010eae78cdf4c2fb51060b25da1285c7"
+
+  STEP: Get container status for containerID: d6de676ae45590e4039c2db159a80dc1010eae78cdf4c2fb51060b25da1285c7 @ 11/11/26 18:41:48.022
+  STEP: stop PodSandbox @ 11/11/26 18:41:48.147
+  STEP: delete PodSandbox @ 11/11/26 18:41:48.788
+• [5.654 seconds]
+------------------------------
+[k8s.io] Security Context bucket runtime should support dropping capability
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:525
+  STEP: create pod @ 11/11/26 18:41:48.824
+  STEP: create container with security context Capability and test @ 11/11/26 18:41:54.127
+  STEP: create Capability container @ 11/11/26 18:41:54.127
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:41:54.127
+  STEP: Create container. @ 11/11/26 18:41:54.127
+  Nov 11 18:41:54.182: INFO: Created container "394eadfea9ec30f3cd24ef6b9132ee712f13064cf0756ddfebf4396108103c8f"
+
+  STEP: Start container for containerID: 394eadfea9ec30f3cd24ef6b9132ee712f13064cf0756ddfebf4396108103c8f @ 11/11/26 18:41:54.182
+  Nov 11 18:41:54.306: INFO: Started container "394eadfea9ec30f3cd24ef6b9132ee712f13064cf0756ddfebf4396108103c8f"
+
+  STEP: Get container status for containerID: 394eadfea9ec30f3cd24ef6b9132ee712f13064cf0756ddfebf4396108103c8f @ 11/11/26 18:41:54.306
+  STEP: stop PodSandbox @ 11/11/26 18:41:54.428
+  STEP: delete PodSandbox @ 11/11/26 18:41:55.034
+• [6.245 seconds]
+------------------------------
+[k8s.io] Security Context bucket runtime should support adding ALL capabilities
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:548
+  STEP: create pod @ 11/11/26 18:41:55.069
+  STEP: create container with security context Capability and test @ 11/11/26 18:42:00.601
+  STEP: create Capability container @ 11/11/26 18:42:00.601
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:42:00.601
+  STEP: Create container. @ 11/11/26 18:42:00.601
+  Nov 11 18:42:00.643: INFO: Created container "b91357ef9f89cc23f4b01cd9bb96ef01e47a5d8962bf3452cc2b2d961148fc85"
+
+  STEP: Start container for containerID: b91357ef9f89cc23f4b01cd9bb96ef01e47a5d8962bf3452cc2b2d961148fc85 @ 11/11/26 18:42:00.643
+  Nov 11 18:42:00.768: INFO: Started container "b91357ef9f89cc23f4b01cd9bb96ef01e47a5d8962bf3452cc2b2d961148fc85"
+
+  STEP: Get container status for containerID: b91357ef9f89cc23f4b01cd9bb96ef01e47a5d8962bf3452cc2b2d961148fc85 @ 11/11/26 18:42:00.768
+  STEP: stop PodSandbox @ 11/11/26 18:42:00.891
+  STEP: delete PodSandbox @ 11/11/26 18:42:01.445
+• [6.410 seconds]
+------------------------------
+[k8s.io] Security Context bucket runtime should support dropping ALL capabilities
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:571
+  STEP: create pod @ 11/11/26 18:42:01.478
+  STEP: create container with security context Capability and test @ 11/11/26 18:42:05.577
+  STEP: create Capability container @ 11/11/26 18:42:05.577
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:42:05.577
+  STEP: Create container. @ 11/11/26 18:42:05.578
+  Nov 11 18:42:05.656: INFO: Created container "46de8974f04eda3393a4821c507f0e2cc5c5a2284f064aa3ce9dde5e79be3443"
+
+  STEP: Start container for containerID: 46de8974f04eda3393a4821c507f0e2cc5c5a2284f064aa3ce9dde5e79be3443 @ 11/11/26 18:42:05.656
+  Nov 11 18:42:05.781: INFO: Started container "46de8974f04eda3393a4821c507f0e2cc5c5a2284f064aa3ce9dde5e79be3443"
+
+  STEP: Get container status for containerID: 46de8974f04eda3393a4821c507f0e2cc5c5a2284f064aa3ce9dde5e79be3443 @ 11/11/26 18:42:05.781
+  STEP: stop PodSandbox @ 11/11/26 18:42:05.902
+  STEP: delete PodSandbox @ 11/11/26 18:42:07.897
+• [6.452 seconds]
+------------------------------
+[k8s.io] Security Context bucket runtime should support MaskedPaths
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:594
+  STEP: create pod @ 11/11/26 18:42:07.931
+  STEP: create container with MaskedPaths @ 11/11/26 18:42:11.815
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:42:11.815
+  STEP: Create container. @ 11/11/26 18:42:11.816
+  Nov 11 18:42:11.877: INFO: Created container "0079a4975554ecb9a99d13a13bb1b12bd82e0e7211294a1a7fb0e7a730c3f878"
+
+  STEP: Start container for containerID: 0079a4975554ecb9a99d13a13bb1b12bd82e0e7211294a1a7fb0e7a730c3f878 @ 11/11/26 18:42:11.877
+  Nov 11 18:42:12.000: INFO: Started container "0079a4975554ecb9a99d13a13bb1b12bd82e0e7211294a1a7fb0e7a730c3f878"
+
+  STEP: Get container status for containerID: 0079a4975554ecb9a99d13a13bb1b12bd82e0e7211294a1a7fb0e7a730c3f878 @ 11/11/26 18:42:12
+  STEP: stop PodSandbox @ 11/11/26 18:42:12.122
+  STEP: delete PodSandbox @ 11/11/26 18:42:12.693
+• [4.796 seconds]
+------------------------------
+[k8s.io] Security Context bucket runtime should support ReadonlyPaths
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:625
+  STEP: create pod @ 11/11/26 18:42:12.726
+  STEP: create container with ReadonlyPaths @ 11/11/26 18:42:16.854
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:42:16.854
+  STEP: Create container. @ 11/11/26 18:42:16.855
+  Nov 11 18:42:16.902: INFO: Created container "78513e9a09cfd8a6ce910c6a2f15c86a4eb493d1b1cac4a6ca9e80f18cae69e1"
+
+  STEP: Start container for containerID: 78513e9a09cfd8a6ce910c6a2f15c86a4eb493d1b1cac4a6ca9e80f18cae69e1 @ 11/11/26 18:42:16.902
+  Nov 11 18:42:17.026: INFO: Started container "78513e9a09cfd8a6ce910c6a2f15c86a4eb493d1b1cac4a6ca9e80f18cae69e1"
+
+  STEP: Get container status for containerID: 78513e9a09cfd8a6ce910c6a2f15c86a4eb493d1b1cac4a6ca9e80f18cae69e1 @ 11/11/26 18:42:17.026
+  STEP: stop PodSandbox @ 11/11/26 18:42:17.172
+  STEP: delete PodSandbox @ 11/11/26 18:42:18.958
+• [6.265 seconds]
+------------------------------
+[k8s.io] Security Context SupplementalGroupsPolicy when SupplementalGroupsPolicy=Merge (Default) if the container's primary UID belongs to some groups in the image, runtime should add SupplementalGroups to them
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:670
+  STEP: skip if the runtime does not support SupplementalGroupsPolicy @ 11/11/26 18:42:18.992
+  STEP: create pod @ 11/11/26 18:42:18.993
+  STEP: create a PodSandbox with log directory @ 11/11/26 18:42:18.993
+  STEP: create container for security context SupplementalGroups @ 11/11/26 18:42:24.286
+  Nov 11 18:42:24.286: INFO: Use latest as default image tag.
+  STEP: Get image status for image: gcr.io/k8s-staging-cri-tools/test-image-predefined-group:latest @ 11/11/26 18:42:24.286
+  STEP: Create container. @ 11/11/26 18:42:24.287
+  Nov 11 18:42:24.387: INFO: Created container "c53916362c04975da6705277995f213919741358a42d5574599088b743dc4893"
+
+  STEP: start container @ 11/11/26 18:42:24.387
+  STEP: Start container for containerID: c53916362c04975da6705277995f213919741358a42d5574599088b743dc4893 @ 11/11/26 18:42:24.387
+  Nov 11 18:42:24.513: INFO: Started container "c53916362c04975da6705277995f213919741358a42d5574599088b743dc4893"
+
+  STEP: Get container status for containerID: c53916362c04975da6705277995f213919741358a42d5574599088b743dc4893 @ 11/11/26 18:42:24.513
+  Nov 11 18:42:24.514: INFO: Open log file /tmp/podLogTest4222701004/PodSandbox-with-log-directory-ddeb7b9b-927f-40ec-ae3b-8951b7be4aa7/container-with-SupplementalGroupsPolicyMerge-43e2b964-f9eb-4d8e-9cbf-b3b0992fa9db.log
+  Nov 11 18:42:24.514: INFO: Parse container log succeed
+  STEP: Get container status for containerID: c53916362c04975da6705277995f213919741358a42d5574599088b743dc4893 @ 11/11/26 18:42:28.518
+  Nov 11 18:42:28.519: INFO: Open log file /tmp/podLogTest4222701004/PodSandbox-with-log-directory-ddeb7b9b-927f-40ec-ae3b-8951b7be4aa7/container-with-SupplementalGroupsPolicyMerge-43e2b964-f9eb-4d8e-9cbf-b3b0992fa9db.log
+  Nov 11 18:42:28.519: INFO: Parse container log succeed
+  STEP: verify groups for the first process of the container @ 11/11/26 18:42:28.519
+  STEP: verify log contents @ 11/11/26 18:42:28.519
+  Nov 11 18:42:28.519: INFO: Open log file /tmp/podLogTest4222701004/PodSandbox-with-log-directory-ddeb7b9b-927f-40ec-ae3b-8951b7be4aa7/container-with-SupplementalGroupsPolicyMerge-43e2b964-f9eb-4d8e-9cbf-b3b0992fa9db.log
+  Nov 11 18:42:28.519: INFO: Parse container log succeed
+  STEP: verify groups for 'exec'-ed process of container @ 11/11/26 18:42:28.519
+  STEP: execSync for containerID: c53916362c04975da6705277995f213919741358a42d5574599088b743dc4893 @ 11/11/26 18:42:28.519
+  Nov 11 18:42:28.764: INFO: Execsync succeed
+  STEP: stop PodSandbox @ 11/11/26 18:42:28.764
+  STEP: delete PodSandbox @ 11/11/26 18:42:29.337
+• [10.550 seconds]
+------------------------------
+[k8s.io] Security Context SupplementalGroupsPolicy when SupplementalGroupsPolicy=Strict even if the container's primary UID belongs to some groups in the image, runtime should not add SupplementalGroups to them
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:741
+  STEP: skip if the runtime does not support SupplementalGroupsPolicy @ 11/11/26 18:42:29.541
+  STEP: create pod @ 11/11/26 18:42:29.542
+  STEP: create a PodSandbox with log directory @ 11/11/26 18:42:29.542
+  STEP: create container for security context SupplementalGroups @ 11/11/26 18:42:38.505
+  Nov 11 18:42:38.505: INFO: Use latest as default image tag.
+  STEP: Get image status for image: gcr.io/k8s-staging-cri-tools/test-image-predefined-group:latest @ 11/11/26 18:42:38.505
+  STEP: Create container. @ 11/11/26 18:42:38.506
+  Nov 11 18:42:38.554: INFO: Created container "5eea5175d76adbf7efa0d919ba9d9a7eea94cb52c01a14b0bb39124334d5d0f9"
+
+  STEP: start container @ 11/11/26 18:42:38.554
+  STEP: Start container for containerID: 5eea5175d76adbf7efa0d919ba9d9a7eea94cb52c01a14b0bb39124334d5d0f9 @ 11/11/26 18:42:38.554
+  Nov 11 18:42:38.681: INFO: Started container "5eea5175d76adbf7efa0d919ba9d9a7eea94cb52c01a14b0bb39124334d5d0f9"
+
+  STEP: Get container status for containerID: 5eea5175d76adbf7efa0d919ba9d9a7eea94cb52c01a14b0bb39124334d5d0f9 @ 11/11/26 18:42:38.681
+  Nov 11 18:42:38.682: INFO: Open log file /tmp/podLogTest1370334984/PodSandbox-with-log-directory-7c6892e3-c5bd-4beb-97b9-6bbc6a71c438/container-with-SupplementalGroupsPolicyMerge-2bf5b577-d87c-46bf-b163-f8873d356f66.log
+  Nov 11 18:42:38.682: INFO: Parse container log succeed
+  STEP: Get container status for containerID: 5eea5175d76adbf7efa0d919ba9d9a7eea94cb52c01a14b0bb39124334d5d0f9 @ 11/11/26 18:42:42.685
+  Nov 11 18:42:42.687: INFO: Open log file /tmp/podLogTest1370334984/PodSandbox-with-log-directory-7c6892e3-c5bd-4beb-97b9-6bbc6a71c438/container-with-SupplementalGroupsPolicyMerge-2bf5b577-d87c-46bf-b163-f8873d356f66.log
+  Nov 11 18:42:42.687: INFO: Parse container log succeed
+  STEP: verify groups for the first process of the container @ 11/11/26 18:42:42.687
+  STEP: verify log contents @ 11/11/26 18:42:42.687
+  Nov 11 18:42:42.687: INFO: Open log file /tmp/podLogTest1370334984/PodSandbox-with-log-directory-7c6892e3-c5bd-4beb-97b9-6bbc6a71c438/container-with-SupplementalGroupsPolicyMerge-2bf5b577-d87c-46bf-b163-f8873d356f66.log
+  Nov 11 18:42:42.687: INFO: Parse container log succeed
+  STEP: verify groups for 'exec'-ed process of container @ 11/11/26 18:42:42.687
+  STEP: execSync for containerID: 5eea5175d76adbf7efa0d919ba9d9a7eea94cb52c01a14b0bb39124334d5d0f9 @ 11/11/26 18:42:42.687
+  Nov 11 18:42:44.138: INFO: Execsync succeed
+  STEP: stop PodSandbox @ 11/11/26 18:42:44.138
+  STEP: delete PodSandbox @ 11/11/26 18:42:44.704
+• [15.196 seconds]
+------------------------------
+[k8s.io] Security Context SeccompProfilePath should support seccomp unconfined on the container
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:881
+  STEP: create seccomp sandbox and container @ 11/11/26 18:42:44.737
+  STEP: create seccomp sandbox @ 11/11/26 18:42:44.737
+  STEP: create container @ 11/11/26 18:42:48.579
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:42:48.579
+  STEP: Create container. @ 11/11/26 18:42:48.58
+  Nov 11 18:42:48.622: INFO: Created container "00dac1ef781e2b263fb99d46eac3b331c42ba660b673bdb7a3b3b5f5744c4604"
+
+  STEP: start container @ 11/11/26 18:42:48.622
+  STEP: Start container for containerID: 00dac1ef781e2b263fb99d46eac3b331c42ba660b673bdb7a3b3b5f5744c4604 @ 11/11/26 18:42:48.622
+  Nov 11 18:42:48.752: INFO: Started container "00dac1ef781e2b263fb99d46eac3b331c42ba660b673bdb7a3b3b5f5744c4604"
+
+  STEP: Get container status for containerID: 00dac1ef781e2b263fb99d46eac3b331c42ba660b673bdb7a3b3b5f5744c4604 @ 11/11/26 18:42:48.752
+  STEP: verify seccomp profile @ 11/11/26 18:42:48.753
+  STEP: stop PodSandbox @ 11/11/26 18:42:48.876
+  STEP: delete PodSandbox @ 11/11/26 18:42:49.44
+• [4.738 seconds]
+------------------------------
+[k8s.io] Security Context SeccompProfilePath should support seccomp localhost profile on the container
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:894
+  STEP: create seccomp sandbox and container @ 11/11/26 18:42:49.476
+  STEP: create seccomp sandbox @ 11/11/26 18:42:49.476
+  STEP: create container @ 11/11/26 18:42:54.66
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:42:54.66
+  STEP: Create container. @ 11/11/26 18:42:54.661
+  Nov 11 18:42:54.715: INFO: Created container "df3cc3ec9d16f5f4ca2a3183b1293326a87b173418e59fe776fb5c2751b65247"
+
+  STEP: start container @ 11/11/26 18:42:54.715
+  STEP: Start container for containerID: df3cc3ec9d16f5f4ca2a3183b1293326a87b173418e59fe776fb5c2751b65247 @ 11/11/26 18:42:54.715
+  Nov 11 18:42:54.839: INFO: Started container "df3cc3ec9d16f5f4ca2a3183b1293326a87b173418e59fe776fb5c2751b65247"
+
+  STEP: Get container status for containerID: df3cc3ec9d16f5f4ca2a3183b1293326a87b173418e59fe776fb5c2751b65247 @ 11/11/26 18:42:54.839
+  STEP: verify seccomp profile @ 11/11/26 18:42:54.84
+  STEP: stop PodSandbox @ 11/11/26 18:42:54.961
+  STEP: delete PodSandbox @ 11/11/26 18:42:55.541
+• [6.100 seconds]
+------------------------------
+[k8s.io] Security Context SeccompProfilePath should support seccomp default on the container
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:909
+  STEP: create seccomp sandbox and container @ 11/11/26 18:42:55.576
+  STEP: create seccomp sandbox @ 11/11/26 18:42:55.576
+  STEP: create container @ 11/11/26 18:43:00.114
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:43:00.114
+  STEP: Create container. @ 11/11/26 18:43:00.115
+  Nov 11 18:43:00.165: INFO: Created container "54cf4106120a814bfc8d9e598a24ac95966fc0c0fbe071c1a3c2243f47fda706"
+
+  STEP: start container @ 11/11/26 18:43:00.165
+  STEP: Start container for containerID: 54cf4106120a814bfc8d9e598a24ac95966fc0c0fbe071c1a3c2243f47fda706 @ 11/11/26 18:43:00.165
+  Nov 11 18:43:00.292: INFO: Started container "54cf4106120a814bfc8d9e598a24ac95966fc0c0fbe071c1a3c2243f47fda706"
+
+  STEP: Get container status for containerID: 54cf4106120a814bfc8d9e598a24ac95966fc0c0fbe071c1a3c2243f47fda706 @ 11/11/26 18:43:00.292
+  STEP: verify seccomp profile @ 11/11/26 18:43:00.293
+  STEP: stop PodSandbox @ 11/11/26 18:43:00.436
+  STEP: delete PodSandbox @ 11/11/26 18:43:00.948
+• [5.407 seconds]
+------------------------------
+[k8s.io] Security Context SeccompProfilePath should support nil profile, which is unconfined
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:922
+  STEP: create seccomp sandbox and container @ 11/11/26 18:43:00.983
+  STEP: create seccomp sandbox @ 11/11/26 18:43:00.983
+  STEP: create container @ 11/11/26 18:43:05.309
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:43:05.309
+  STEP: Create container. @ 11/11/26 18:43:05.31
+  Nov 11 18:43:05.378: INFO: Created container "9bf9cc67f887edc180984e7deeb879ec681b4c2fb67438883145013624d2e8fe"
+
+  STEP: start container @ 11/11/26 18:43:05.378
+  STEP: Start container for containerID: 9bf9cc67f887edc180984e7deeb879ec681b4c2fb67438883145013624d2e8fe @ 11/11/26 18:43:05.378
+  Nov 11 18:43:05.503: INFO: Started container "9bf9cc67f887edc180984e7deeb879ec681b4c2fb67438883145013624d2e8fe"
+
+  STEP: Get container status for containerID: 9bf9cc67f887edc180984e7deeb879ec681b4c2fb67438883145013624d2e8fe @ 11/11/26 18:43:05.503
+  STEP: verify seccomp profile @ 11/11/26 18:43:05.504
+  STEP: stop PodSandbox @ 11/11/26 18:43:05.624
+  STEP: delete PodSandbox @ 11/11/26 18:43:06.39
+• [5.440 seconds]
+------------------------------
+[k8s.io] Security Context SeccompProfilePath runtime should not block setting host name with unconfined seccomp and SYS_ADMIN
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:934
+  STEP: create pod @ 11/11/26 18:43:06.423
+  STEP: create container with seccompBlockHostNameProfile and test @ 11/11/26 18:43:11.181
+  STEP: create Unconfined Seccomp container @ 11/11/26 18:43:11.181
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:43:11.181
+  STEP: Create container. @ 11/11/26 18:43:11.182
+  Nov 11 18:43:11.229: INFO: Created container "e2b2e5db78f32ad9e7ef2c87e1a11cbf7641ba83a70c73a025633046c5936e17"
+
+  STEP: Start container for containerID: e2b2e5db78f32ad9e7ef2c87e1a11cbf7641ba83a70c73a025633046c5936e17 @ 11/11/26 18:43:11.229
+  Nov 11 18:43:11.352: INFO: Started container "e2b2e5db78f32ad9e7ef2c87e1a11cbf7641ba83a70c73a025633046c5936e17"
+
+  STEP: Get container status for containerID: e2b2e5db78f32ad9e7ef2c87e1a11cbf7641ba83a70c73a025633046c5936e17 @ 11/11/26 18:43:11.352
+  STEP: set hostname in container to determine whether sethostname is blocked @ 11/11/26 18:43:11.353
+  STEP: stop PodSandbox @ 11/11/26 18:43:11.474
+  STEP: delete PodSandbox @ 11/11/26 18:43:12.002
+• [5.613 seconds]
+------------------------------
+[k8s.io] Security Context SeccompProfilePath runtime should support an seccomp profile that blocks setting hostname with SYS_ADMIN
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:956
+  STEP: create pod @ 11/11/26 18:43:12.036
+  STEP: create container with seccompBlockHostNameProfile and test @ 11/11/26 18:43:16.113
+  STEP: create Localhost Seccomp container @ 11/11/26 18:43:16.113
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:43:16.113
+  STEP: Create container. @ 11/11/26 18:43:16.114
+  Nov 11 18:43:16.161: INFO: Created container "ac36764ae02a524df3992490b03868edee87414d953b7df11fd2e72476148530"
+
+  STEP: Start container for containerID: ac36764ae02a524df3992490b03868edee87414d953b7df11fd2e72476148530 @ 11/11/26 18:43:16.161
+  Nov 11 18:43:16.286: INFO: Started container "ac36764ae02a524df3992490b03868edee87414d953b7df11fd2e72476148530"
+
+  STEP: Get container status for containerID: ac36764ae02a524df3992490b03868edee87414d953b7df11fd2e72476148530 @ 11/11/26 18:43:16.286
+  STEP: set hostname in container to determine whether sethostname is blocked @ 11/11/26 18:43:16.287
+  STEP: stop PodSandbox @ 11/11/26 18:43:16.41
+  STEP: delete PodSandbox @ 11/11/26 18:43:16.99
+• [4.992 seconds]
+------------------------------
+[k8s.io] Security Context SeccompProfilePath runtime should ignore a seccomp profile that blocks setting hostname when privileged
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:980
+  STEP: create privileged pod @ 11/11/26 18:43:17.028
+  STEP: create Privileged podSandbox @ 11/11/26 18:43:17.028
+  STEP: create privileged container with seccompBlockHostNameProfile and test @ 11/11/26 18:43:22.653
+  STEP: create Localhost Seccomp container @ 11/11/26 18:43:22.653
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:43:22.653
+  STEP: Create container. @ 11/11/26 18:43:22.654
+  Nov 11 18:43:22.710: INFO: Created container "0f8485a94d8c8a2e36a046f5d4683466d3c72a6f8b7093b1a0c15264afd74e3c"
+
+  STEP: Start container for containerID: 0f8485a94d8c8a2e36a046f5d4683466d3c72a6f8b7093b1a0c15264afd74e3c @ 11/11/26 18:43:22.71
+  Nov 11 18:43:22.846: INFO: Started container "0f8485a94d8c8a2e36a046f5d4683466d3c72a6f8b7093b1a0c15264afd74e3c"
+
+  STEP: Get container status for containerID: 0f8485a94d8c8a2e36a046f5d4683466d3c72a6f8b7093b1a0c15264afd74e3c @ 11/11/26 18:43:22.846
+  STEP: set hostname in container to determine whether sethostname is blocked @ 11/11/26 18:43:22.848
+  STEP: stop PodSandbox @ 11/11/26 18:43:22.972
+  STEP: delete PodSandbox @ 11/11/26 18:43:23.501
+• [6.507 seconds]
+------------------------------
+[k8s.io] Security Context NoNewPrivs should not allow privilege escalation when true
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1036
+  STEP: create a PodSandbox with log directory @ 11/11/26 18:43:23.536
+  STEP: create container alpine-nnp-true-70099d46-1550-44fd-bac3-553c84e878a7 @ 11/11/26 18:43:27.36
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/nonewprivs:1.3 @ 11/11/26 18:43:27.36
+  STEP: Pull image : registry.k8s.io/e2e-test-images/nonewprivs:1.3 @ 11/11/26 18:43:27.361
+  STEP: Create container. @ 11/11/26 18:43:29.853
+  Nov 11 18:43:29.925: INFO: Created container "5227fecc0cd621d231ddf943a388167a785496665d58567fc7f85d49bd98b943"
+
+  STEP: Start container for containerID: 5227fecc0cd621d231ddf943a388167a785496665d58567fc7f85d49bd98b943 @ 11/11/26 18:43:29.925
+  Nov 11 18:43:30.051: INFO: Started container "5227fecc0cd621d231ddf943a388167a785496665d58567fc7f85d49bd98b943"
+
+  STEP: Get container status for containerID: 5227fecc0cd621d231ddf943a388167a785496665d58567fc7f85d49bd98b943 @ 11/11/26 18:43:30.051
+  STEP: Get container status for containerID: 5227fecc0cd621d231ddf943a388167a785496665d58567fc7f85d49bd98b943 @ 11/11/26 18:43:34.055
+  STEP: check container output @ 11/11/26 18:43:34.057
+  STEP: verify log contents @ 11/11/26 18:43:34.057
+  Nov 11 18:43:34.057: INFO: Open log file /tmp/podLogTest2081543040/PodSandbox-with-log-directory-94dd7c4a-c677-41cd-9b66-f20be64ec934/alpine-nnp-true-70099d46-1550-44fd-bac3-553c84e878a7.log
+  Nov 11 18:43:34.057: INFO: Parse container log succeed
+  STEP: stop PodSandbox @ 11/11/26 18:43:34.057
+  STEP: delete PodSandbox @ 11/11/26 18:43:34.603
+• [11.103 seconds]
+------------------------------
+[k8s.io] Security Context NoNewPrivs should allow privilege escalation when false
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1042
+  STEP: create a PodSandbox with log directory @ 11/11/26 18:43:34.638
+  STEP: create container alpine-nnp-false-348705f6-a5d9-4269-93f5-ca0556af639c @ 11/11/26 18:43:39.576
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/nonewprivs:1.3 @ 11/11/26 18:43:39.576
+  STEP: Create container. @ 11/11/26 18:43:39.577
+  Nov 11 18:43:39.634: INFO: Created container "a780694a7fbecbfee834c3933bdbb7a5cfaf966f75dc04518a02211a2a22f3aa"
+
+  STEP: Start container for containerID: a780694a7fbecbfee834c3933bdbb7a5cfaf966f75dc04518a02211a2a22f3aa @ 11/11/26 18:43:39.634
+  Nov 11 18:43:39.759: INFO: Started container "a780694a7fbecbfee834c3933bdbb7a5cfaf966f75dc04518a02211a2a22f3aa"
+
+  STEP: Get container status for containerID: a780694a7fbecbfee834c3933bdbb7a5cfaf966f75dc04518a02211a2a22f3aa @ 11/11/26 18:43:39.759
+  STEP: Get container status for containerID: a780694a7fbecbfee834c3933bdbb7a5cfaf966f75dc04518a02211a2a22f3aa @ 11/11/26 18:43:43.763
+  STEP: check container output @ 11/11/26 18:43:43.764
+  STEP: verify log contents @ 11/11/26 18:43:43.764
+  Nov 11 18:43:43.764: INFO: Open log file /tmp/podLogTest794543348/PodSandbox-with-log-directory-99640339-ac46-4505-839a-5ce7b4127835/alpine-nnp-false-348705f6-a5d9-4269-93f5-ca0556af639c.log
+  Nov 11 18:43:43.764: INFO: Parse container log succeed
+  STEP: stop PodSandbox @ 11/11/26 18:43:43.764
+  STEP: delete PodSandbox @ 11/11/26 18:43:44.279
+• [9.675 seconds]
+------------------------------
+[k8s.io] Security Context UserNamespaces when Host idmap mount support is needed runtime should support NamespaceMode_POD
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1109
+  STEP: searching for runtime handler which supports user namespaces @ 11/11/26 18:43:44.313
+  [SKIPPED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1097 @ 11/11/26 18:43:44.314
+  STEP: stop PodSandbox @ 11/11/26 18:43:44.314
+  STEP: delete PodSandbox @ 11/11/26 18:43:44.315
+S [SKIPPED] [0.004 seconds]
+[k8s.io] Security Context UserNamespaces [BeforeEach] when Host idmap mount support is needed runtime should support NamespaceMode_POD
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1064
+  [It] sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1109
+
+  [SKIPPED] no runtime handler found which supports user namespaces
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1097 @ 11/11/26 18:43:44.314
+------------------------------
+[k8s.io] Security Context UserNamespaces when Host idmap mount support is not needed runtime should support NamespaceMode_NODE
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1129
+  STEP: searching for runtime handler which supports user namespaces @ 11/11/26 18:43:44.317
+  [SKIPPED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1097 @ 11/11/26 18:43:44.317
+  STEP: stop PodSandbox @ 11/11/26 18:43:44.317
+  STEP: delete PodSandbox @ 11/11/26 18:43:44.317
+S [SKIPPED] [0.002 seconds]
+[k8s.io] Security Context UserNamespaces [BeforeEach] when Host idmap mount support is not needed runtime should support NamespaceMode_NODE
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1064
+  [It] sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1129
+
+  [SKIPPED] no runtime handler found which supports user namespaces
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1097 @ 11/11/26 18:43:44.317
+------------------------------
+[k8s.io] Security Context UserNamespaces when Host idmap mount support is not needed runtime should fail if more than one mapping provided
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1168
+  STEP: searching for runtime handler which supports user namespaces @ 11/11/26 18:43:44.319
+  [SKIPPED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1097 @ 11/11/26 18:43:44.319
+  STEP: stop PodSandbox @ 11/11/26 18:43:44.319
+  STEP: delete PodSandbox @ 11/11/26 18:43:44.32
+S [SKIPPED] [0.003 seconds]
+[k8s.io] Security Context UserNamespaces [BeforeEach] when Host idmap mount support is not needed runtime should fail if more than one mapping provided
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1064
+  [It] sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1168
+
+  [SKIPPED] no runtime handler found which supports user namespaces
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1097 @ 11/11/26 18:43:44.319
+------------------------------
+[k8s.io] Security Context UserNamespaces when Host idmap mount support is not needed runtime should fail if container ID 0 is not mapped
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1189
+  STEP: searching for runtime handler which supports user namespaces @ 11/11/26 18:43:44.322
+  [SKIPPED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1097 @ 11/11/26 18:43:44.322
+  STEP: stop PodSandbox @ 11/11/26 18:43:44.322
+  STEP: delete PodSandbox @ 11/11/26 18:43:44.323
+S [SKIPPED] [0.003 seconds]
+[k8s.io] Security Context UserNamespaces [BeforeEach] when Host idmap mount support is not needed runtime should fail if container ID 0 is not mapped
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1064
+  [It] sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1189
+
+  [SKIPPED] no runtime handler found which supports user namespaces
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1097 @ 11/11/26 18:43:44.322
+------------------------------
+[k8s.io] Security Context UserNamespaces when Host idmap mount support is not needed runtime should fail with NamespaceMode_CONTAINER
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1206
+  STEP: searching for runtime handler which supports user namespaces @ 11/11/26 18:43:44.325
+  [SKIPPED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1097 @ 11/11/26 18:43:44.325
+  STEP: stop PodSandbox @ 11/11/26 18:43:44.325
+  STEP: delete PodSandbox @ 11/11/26 18:43:44.325
+S [SKIPPED] [0.002 seconds]
+[k8s.io] Security Context UserNamespaces [BeforeEach] when Host idmap mount support is not needed runtime should fail with NamespaceMode_CONTAINER
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1064
+  [It] sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1206
+
+  [SKIPPED] no runtime handler found which supports user namespaces
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1097 @ 11/11/26 18:43:44.325
+------------------------------
+[k8s.io] Security Context UserNamespaces when Host idmap mount support is not needed runtime should fail with NamespaceMode_TARGET
+sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1214
+  STEP: searching for runtime handler which supports user namespaces @ 11/11/26 18:43:44.327
+  [SKIPPED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1097 @ 11/11/26 18:43:44.327
+  STEP: stop PodSandbox @ 11/11/26 18:43:44.327
+  STEP: delete PodSandbox @ 11/11/26 18:43:44.328
+S [SKIPPED] [0.002 seconds]
+[k8s.io] Security Context UserNamespaces [BeforeEach] when Host idmap mount support is not needed runtime should fail with NamespaceMode_TARGET
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1064
+  [It] sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1214
+
+  [SKIPPED] no runtime handler found which supports user namespaces
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/security_context_linux.go:1097 @ 11/11/26 18:43:44.327
+------------------------------
+SS
+------------------------------
+[k8s.io] Idempotence StopPodSandbox should not return an error if not found
+sigs.k8s.io/cri-tools/pkg/validate/idempotence.go:44
+  STEP: stop not existing sandbox @ 11/11/26 18:43:44.33
+• [0.002 seconds]
+------------------------------
+[k8s.io] Idempotence StopPodSandbox should not return an error if already stopped
+sigs.k8s.io/cri-tools/pkg/validate/idempotence.go:49
+  STEP: run PodSandbox @ 11/11/26 18:43:44.332
+  STEP: stop sandbox @ 11/11/26 18:43:55.52
+  STEP: Stop PodSandbox for podID: c05109801fe867f8b415f589bab4bd04d060f21048d1b4598a8fbffe144c2d75 @ 11/11/26 18:43:55.52
+  Nov 11 18:43:56.032: INFO: Stopped PodSandbox "c05109801fe867f8b415f589bab4bd04d060f21048d1b4598a8fbffe144c2d75"
+
+  STEP: Get PodSandbox status for podID: c05109801fe867f8b415f589bab4bd04d060f21048d1b4598a8fbffe144c2d75 @ 11/11/26 18:43:56.032
+  STEP: stop sandbox again @ 11/11/26 18:43:56.033
+  STEP: Stop PodSandbox for podID: c05109801fe867f8b415f589bab4bd04d060f21048d1b4598a8fbffe144c2d75 @ 11/11/26 18:43:56.033
+  Nov 11 18:43:56.062: INFO: Stopped PodSandbox "c05109801fe867f8b415f589bab4bd04d060f21048d1b4598a8fbffe144c2d75"
+
+  STEP: Get PodSandbox status for podID: c05109801fe867f8b415f589bab4bd04d060f21048d1b4598a8fbffe144c2d75 @ 11/11/26 18:43:56.062
+  STEP: delete sandbox as cleanup @ 11/11/26 18:43:56.063
+• [11.762 seconds]
+------------------------------
+[k8s.io] Idempotence RemovePodSandbox should not return an error if not found
+sigs.k8s.io/cri-tools/pkg/validate/idempotence.go:67
+  STEP: remove not existing sandbox @ 11/11/26 18:43:56.095
+• [0.003 seconds]
+------------------------------
+[k8s.io] Idempotence StopContainer should not return an error if not found
+sigs.k8s.io/cri-tools/pkg/validate/idempotence.go:75
+  STEP: test stop not existing container @ 11/11/26 18:43:56.098
+• [0.003 seconds]
+------------------------------
+[k8s.io] Idempotence StopContainer should not return an error if already stopped
+sigs.k8s.io/cri-tools/pkg/validate/idempotence.go:80
+  STEP: create sandbox @ 11/11/26 18:43:56.1
+  STEP: create container @ 11/11/26 18:44:00.123
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:44:00.123
+  STEP: Create container. @ 11/11/26 18:44:00.124
+  Nov 11 18:44:00.194: INFO: Created container "5ac7902922148557ac46f8c52f11b5a14abe3f34a3fb925cf1831e84ff0da170"
+
+  STEP: start container @ 11/11/26 18:44:00.194
+  STEP: Start container for containerID: 5ac7902922148557ac46f8c52f11b5a14abe3f34a3fb925cf1831e84ff0da170 @ 11/11/26 18:44:00.194
+  Nov 11 18:44:00.319: INFO: Started container "5ac7902922148557ac46f8c52f11b5a14abe3f34a3fb925cf1831e84ff0da170"
+
+  STEP: stop container @ 11/11/26 18:44:00.319
+  STEP: Stop container for containerID: 5ac7902922148557ac46f8c52f11b5a14abe3f34a3fb925cf1831e84ff0da170 @ 11/11/26 18:44:00.319
+  Nov 11 18:44:00.350: INFO: Stopped container "5ac7902922148557ac46f8c52f11b5a14abe3f34a3fb925cf1831e84ff0da170"
+
+  STEP: Get container status for containerID: 5ac7902922148557ac46f8c52f11b5a14abe3f34a3fb925cf1831e84ff0da170 @ 11/11/26 18:44:00.35
+  STEP: remove container @ 11/11/26 18:44:00.351
+  STEP: Remove container for containerID: 5ac7902922148557ac46f8c52f11b5a14abe3f34a3fb925cf1831e84ff0da170 @ 11/11/26 18:44:00.351
+  Nov 11 18:44:00.353: INFO: Removed container "5ac7902922148557ac46f8c52f11b5a14abe3f34a3fb925cf1831e84ff0da170"
+
+  STEP: remove container again @ 11/11/26 18:44:00.353
+  STEP: Remove container for containerID: 5ac7902922148557ac46f8c52f11b5a14abe3f34a3fb925cf1831e84ff0da170 @ 11/11/26 18:44:00.353
+  Nov 11 18:44:00.353: INFO: Removed container "5ac7902922148557ac46f8c52f11b5a14abe3f34a3fb925cf1831e84ff0da170"
+
+  STEP: stop sandbox as cleanup @ 11/11/26 18:44:00.353
+  STEP: delete sandbox as cleanup @ 11/11/26 18:44:00.926
+• [4.858 seconds]
+------------------------------
+[k8s.io] Idempotence RemoveContainer should not return an error if not found
+sigs.k8s.io/cri-tools/pkg/validate/idempotence.go:111
+  STEP: remove not existing container @ 11/11/26 18:44:00.959
+• [0.003 seconds]
+------------------------------
+[k8s.io] Idempotence RemoveImage should not return an error if not found
+sigs.k8s.io/cri-tools/pkg/validate/idempotence.go:119
+  STEP: remove not existing image @ 11/11/26 18:44:00.961
+  STEP: remove the image again @ 11/11/26 18:44:00.962
+• [0.003 seconds]
+------------------------------
+[k8s.io] PodSandbox runtime should support basic operations on PodSandbox runtime should support running PodSandbox [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/pod.go:149
+  STEP: test run a default PodSandbox @ 11/11/26 18:44:00.964
+  STEP: Get PodSandbox status for podID: 2b7c400bfa7f8566742f7e654ce5962723d17c6d8dac0ec13e040dcdc686ea78 @ 11/11/26 18:44:06.422
+  STEP: test list PodSandbox @ 11/11/26 18:44:06.423
+  STEP: List PodSandbox for podID: 2b7c400bfa7f8566742f7e654ce5962723d17c6d8dac0ec13e040dcdc686ea78 @ 11/11/26 18:44:06.423
+  STEP: List PodSandbox. @ 11/11/26 18:44:06.423
+  Nov 11 18:44:06.425: INFO: List PodSandbox succeed
+  STEP: stop PodSandbox @ 11/11/26 18:44:06.425
+  STEP: delete PodSandbox @ 11/11/26 18:44:06.928
+• [5.996 seconds]
+------------------------------
+[k8s.io] PodSandbox runtime should support basic operations on PodSandbox runtime should support stopping PodSandbox [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/pod.go:160
+  STEP: run PodSandbox @ 11/11/26 18:44:06.96
+  STEP: test stop PodSandbox @ 11/11/26 18:44:12.079
+  STEP: Stop PodSandbox for podID: ab61340d2753d135a22be87c788668dfccb66cc139f876ca5d316f66b800657e @ 11/11/26 18:44:12.079
+  Nov 11 18:44:12.594: INFO: Stopped PodSandbox "ab61340d2753d135a22be87c788668dfccb66cc139f876ca5d316f66b800657e"
+
+  STEP: Get PodSandbox status for podID: ab61340d2753d135a22be87c788668dfccb66cc139f876ca5d316f66b800657e @ 11/11/26 18:44:12.594
+  STEP: stop PodSandbox @ 11/11/26 18:44:12.594
+  STEP: delete PodSandbox @ 11/11/26 18:44:12.622
+• [5.693 seconds]
+------------------------------
+[k8s.io] PodSandbox runtime should support basic operations on PodSandbox runtime should support removing PodSandbox [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/pod.go:169
+  STEP: run PodSandbox @ 11/11/26 18:44:12.652
+  STEP: stop PodSandbox @ 11/11/26 18:44:18.103
+  STEP: Stop PodSandbox for podID: 06c9b405a2872fe6c159de889c175e0c6b44fa3ba671ab687d47fffb69cfb48b @ 11/11/26 18:44:18.103
+  Nov 11 18:44:18.603: INFO: Stopped PodSandbox "06c9b405a2872fe6c159de889c175e0c6b44fa3ba671ab687d47fffb69cfb48b"
+
+  STEP: test remove PodSandbox @ 11/11/26 18:44:18.603
+  STEP: Remove PodSandbox for podID: 06c9b405a2872fe6c159de889c175e0c6b44fa3ba671ab687d47fffb69cfb48b @ 11/11/26 18:44:18.603
+  Nov 11 18:44:18.633: INFO: Removed PodSandbox "06c9b405a2872fe6c159de889c175e0c6b44fa3ba671ab687d47fffb69cfb48b"
+
+  STEP: List PodSandbox for podID: 06c9b405a2872fe6c159de889c175e0c6b44fa3ba671ab687d47fffb69cfb48b @ 11/11/26 18:44:18.633
+  STEP: List PodSandbox. @ 11/11/26 18:44:18.633
+  Nov 11 18:44:18.633: INFO: List PodSandbox succeed
+• [5.982 seconds]
+------------------------------
+[k8s.io] PodSandbox runtime should support basic operations on PodSandbox runtime should support preserving PodSandbox attributes [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/pod.go:182
+  STEP: test run a PodSandbox with attributes @ 11/11/26 18:44:18.635
+  STEP: test get PodSandbox status @ 11/11/26 18:44:22.791
+  STEP: Get PodSandbox status for podID: 74eb8d26d7d1ac1e602c57d95aeb70f0ecd992851a84a5a377e4f0af26968f79 @ 11/11/26 18:44:22.791
+  STEP: test list PodSandbox @ 11/11/26 18:44:22.792
+  STEP: List PodSandbox. @ 11/11/26 18:44:22.792
+  Nov 11 18:44:22.792: INFO: List PodSandbox succeed
+  STEP: stop PodSandbox @ 11/11/26 18:44:22.792
+  STEP: delete PodSandbox @ 11/11/26 18:44:23.313
+• [4.710 seconds]
+------------------------------
+[k8s.io] PodSandbox runtime should support metrics operations runtime should support returning metrics descriptors [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/pod.go:259
+  STEP: list metric descriptors @ 11/11/26 18:44:23.347
+  STEP: List MetricDescriptors. @ 11/11/26 18:44:23.347
+  Nov 11 18:44:23.348: INFO: List MetricDescriptors succeed
+  STEP: verify expected metric descriptors are present @ 11/11/26 18:44:23.348
+• [0.004 seconds]
+------------------------------
+[k8s.io] PodSandbox runtime should support metrics operations runtime should support listing pod sandbox metrics [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/pod.go:268
+  STEP: create pod sandbox @ 11/11/26 18:44:23.352
+  STEP: create container in pod @ 11/11/26 18:44:28.164
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:44:28.164
+  STEP: Create container. @ 11/11/26 18:44:28.165
+  Nov 11 18:44:28.236: INFO: Created container "5f7b02fde0ae484fb4072673395d413491f436abc1ccc1ceabf237d1b5a18eb8"
+
+  STEP: start container @ 11/11/26 18:44:28.236
+  STEP: Start container for containerID: 5f7b02fde0ae484fb4072673395d413491f436abc1ccc1ceabf237d1b5a18eb8 @ 11/11/26 18:44:28.236
+  Nov 11 18:44:28.360: INFO: Started container "5f7b02fde0ae484fb4072673395d413491f436abc1ccc1ceabf237d1b5a18eb8"
+
+  STEP: list metric descriptors @ 11/11/26 18:44:28.487
+  STEP: List MetricDescriptors. @ 11/11/26 18:44:28.487
+  Nov 11 18:44:28.488: INFO: List MetricDescriptors succeed
+  STEP: list pod sandbox metrics @ 11/11/26 18:44:28.488
+  STEP: List PodSandboxMetrics. @ 11/11/26 18:44:28.488
+  Nov 11 18:44:28.502: INFO: List PodSandboxMetrics succeed
+  STEP: verify pod metrics are present @ 11/11/26 18:44:28.502
+  STEP: stop PodSandbox @ 11/11/26 18:44:28.502
+  STEP: delete PodSandbox @ 11/11/26 18:44:29.056
+• [5.739 seconds]
+------------------------------
+[k8s.io] Networking runtime should support networking runtime should support DNS config [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/networking.go:55
+  STEP: create a PodSandbox with DNS config @ 11/11/26 18:44:29.089
+  STEP: create container @ 11/11/26 18:44:34.441
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:44:34.441
+  STEP: Create container. @ 11/11/26 18:44:34.442
+  Nov 11 18:44:34.498: INFO: Created container "7cee25ff1c6bb819b5f0d5ac400332057dbc1b42b55b94f96b45680db7eeb337"
+
+  STEP: start container @ 11/11/26 18:44:34.498
+  STEP: Start container for containerID: 7cee25ff1c6bb819b5f0d5ac400332057dbc1b42b55b94f96b45680db7eeb337 @ 11/11/26 18:44:34.498
+  Nov 11 18:44:34.622: INFO: Started container "7cee25ff1c6bb819b5f0d5ac400332057dbc1b42b55b94f96b45680db7eeb337"
+
+  STEP: check DNS config @ 11/11/26 18:44:34.622
+  STEP: get the current dns config via execSync @ 11/11/26 18:44:34.622
+  Nov 11 18:44:34.745: INFO: check DNS config succeed
+  STEP: stop PodSandbox @ 11/11/26 18:44:34.745
+  STEP: delete PodSandbox @ 11/11/26 18:44:35.315
+• [6.260 seconds]
+------------------------------
+[k8s.io] Networking runtime should support networking runtime should support set hostname [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/networking.go:75
+  STEP: create a PodSandbox with hostname @ 11/11/26 18:44:35.349
+  STEP: create container @ 11/11/26 18:44:40.441
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:44:40.441
+  STEP: Create container. @ 11/11/26 18:44:40.442
+  Nov 11 18:44:40.492: INFO: Created container "74995c69a94e23d733bc4babf374ef19f601595dfa5eeba0b30e30a3df5a7db6"
+
+  STEP: start container @ 11/11/26 18:44:40.492
+  STEP: Start container for containerID: 74995c69a94e23d733bc4babf374ef19f601595dfa5eeba0b30e30a3df5a7db6 @ 11/11/26 18:44:40.493
+  Nov 11 18:44:40.618: INFO: Started container "74995c69a94e23d733bc4babf374ef19f601595dfa5eeba0b30e30a3df5a7db6"
+
+  STEP: check hostname @ 11/11/26 18:44:40.618
+  STEP: get the current hostname via execSync @ 11/11/26 18:44:40.618
+  Nov 11 18:44:40.741: INFO: check hostname succeed
+  STEP: stop PodSandbox @ 11/11/26 18:44:40.741
+  STEP: delete PodSandbox @ 11/11/26 18:44:41.307
+• [5.993 seconds]
+------------------------------
+[k8s.io] Networking runtime should support networking runtime should support port mapping with only container port [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/networking.go:95
+  STEP: create a PodSandbox with container port mapping @ 11/11/26 18:44:41.341
+  STEP: create a web server container @ 11/11/26 18:44:45.934
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/nginx:1.14-2 @ 11/11/26 18:44:45.934
+  STEP: Create container. @ 11/11/26 18:44:45.934
+  Nov 11 18:44:45.991: INFO: Created container "c686101a03056e7f5d8525878593c58549d548aa68fc071ae9601b60994df07b"
+
+  STEP: start the web server container @ 11/11/26 18:44:45.991
+  STEP: Start container for containerID: c686101a03056e7f5d8525878593c58549d548aa68fc071ae9601b60994df07b @ 11/11/26 18:44:45.991
+  Nov 11 18:44:46.117: INFO: Started container "c686101a03056e7f5d8525878593c58549d548aa68fc071ae9601b60994df07b"
+
+  STEP: check the port mapping with only container port @ 11/11/26 18:44:46.117
+  STEP: get the IP:port needed to be checked @ 11/11/26 18:44:46.117
+  STEP: Get PodSandbox status for podID: 5765bec8679032738c80c6d56bbf101f4605372f931006db5340262a018ddf3f @ 11/11/26 18:44:46.117
+  Nov 11 18:44:46.117: INFO: the IP:port is http://198.20.0.50:80
+  STEP: check the content of http://198.20.0.50:80 @ 11/11/26 18:44:46.117
+  Nov 11 18:44:47.120: INFO: check port mapping succeed
+  STEP: stop PodSandbox @ 11/11/26 18:44:47.12
+  STEP: delete PodSandbox @ 11/11/26 18:44:47.972
+• [6.664 seconds]
+------------------------------
+[k8s.io] Networking runtime should support networking runtime should support port mapping with host port and container port [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/networking.go:118
+  STEP: create a PodSandbox with host port and container port mapping @ 11/11/26 18:44:48.005
+  STEP: create a web server container @ 11/11/26 18:44:53.793
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/nginx:1.14-2 @ 11/11/26 18:44:53.794
+  STEP: Create container. @ 11/11/26 18:44:53.794
+  Nov 11 18:44:53.869: INFO: Created container "a7502c55d3594b48f4b204a0bbc4e794be651be3d35bc8e08a0135f812019d40"
+
+  STEP: start the web server container @ 11/11/26 18:44:53.869
+  STEP: Start container for containerID: a7502c55d3594b48f4b204a0bbc4e794be651be3d35bc8e08a0135f812019d40 @ 11/11/26 18:44:53.869
+  Nov 11 18:44:54.070: INFO: Started container "a7502c55d3594b48f4b204a0bbc4e794be651be3d35bc8e08a0135f812019d40"
+
+  STEP: check the port mapping with host port and container port @ 11/11/26 18:44:54.07
+  STEP: get the IP:port needed to be checked @ 11/11/26 18:44:54.07
+  Nov 11 18:44:54.070: INFO: the IP:port is http://127.0.0.1:12000
+  STEP: check the content of http://127.0.0.1:12000 @ 11/11/26 18:44:54.07
+  Nov 11 18:44:54.072: INFO: check port mapping succeed
+  STEP: stop PodSandbox @ 11/11/26 18:44:54.072
+  STEP: delete PodSandbox @ 11/11/26 18:44:56.25
+• [8.290 seconds]
+------------------------------
+[k8s.io] Container Mount Propagation runtime should support mount propagation mount with 'rprivate' should not support propagation
+sigs.k8s.io/cri-tools/pkg/validate/container_linux.go:115
+  STEP: create Privileged podSandbox @ 11/11/26 18:44:56.295
+  STEP: create host path and flag file @ 11/11/26 18:45:01.114
+  STEP: create container with volume @ 11/11/26 18:45:01.114
+  STEP: create a container with volume and name @ 11/11/26 18:45:01.114
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:45:01.114
+  STEP: Create container. @ 11/11/26 18:45:01.115
+  Nov 11 18:45:02.050: INFO: Created container "e034090d1d1eb44c907e20309db194d242f639a020c8569b6ae89993bd57e823"
+
+  STEP: verifying container status @ 11/11/26 18:45:02.05
+  STEP: verifying container status mount propagation @ 11/11/26 18:45:02.053
+  STEP: test start container with volume @ 11/11/26 18:45:02.053
+  STEP: Start container for containerID: e034090d1d1eb44c907e20309db194d242f639a020c8569b6ae89993bd57e823 @ 11/11/26 18:45:02.053
+  Nov 11 18:45:02.199: INFO: Started container "e034090d1d1eb44c907e20309db194d242f639a020c8569b6ae89993bd57e823"
+
+  STEP: Get container status for containerID: e034090d1d1eb44c907e20309db194d242f639a020c8569b6ae89993bd57e823 @ 11/11/26 18:45:02.199
+  STEP: create a propatation mount point in host @ 11/11/26 18:45:02.201
+  STEP: check whether propagationMntPoint contains file or dir in container @ 11/11/26 18:45:02.201
+  STEP: execSync for containerID: e034090d1d1eb44c907e20309db194d242f639a020c8569b6ae89993bd57e823 @ 11/11/26 18:45:02.201
+  Nov 11 18:45:02.330: INFO: Execsync succeed
+  STEP: create a directory named containerMntPoint as a mount point in container @ 11/11/26 18:45:02.33
+  STEP: execSync for containerID: e034090d1d1eb44c907e20309db194d242f639a020c8569b6ae89993bd57e823 @ 11/11/26 18:45:02.33
+  Nov 11 18:45:02.490: INFO: Execsync succeed
+  STEP: mount /etc to the mount point in container @ 11/11/26 18:45:02.49
+  STEP: execSync for containerID: e034090d1d1eb44c907e20309db194d242f639a020c8569b6ae89993bd57e823 @ 11/11/26 18:45:02.49
+  Nov 11 18:45:02.683: INFO: Execsync succeed
+  STEP: check whether containerMntPoint contains file or dir in host @ 11/11/26 18:45:02.683
+  STEP: clean up the TempDir @ 11/11/26 18:45:02.684
+  STEP: stop PodSandbox @ 11/11/26 18:45:02.684
+  STEP: delete PodSandbox @ 11/11/26 18:45:03.446
+• [7.187 seconds]
+------------------------------
+[k8s.io] Container Mount Propagation runtime should support mount propagation mount with 'rshared' should support propagation from host to container and vice versa
+sigs.k8s.io/cri-tools/pkg/validate/container_linux.go:119
+  STEP: create Privileged podSandbox @ 11/11/26 18:45:03.483
+  STEP: create host path and flag file @ 11/11/26 18:45:07.792
+  STEP: create container with volume @ 11/11/26 18:45:07.792
+  STEP: create a container with volume and name @ 11/11/26 18:45:07.792
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:45:07.792
+  STEP: Create container. @ 11/11/26 18:45:07.793
+  Nov 11 18:45:07.851: INFO: Created container "27f65ae47a6bfb7a5e67fe816e76fefd583116e158fffff4624ba95f4951117a"
+
+  STEP: verifying container status @ 11/11/26 18:45:07.851
+  STEP: verifying container status mount propagation @ 11/11/26 18:45:07.853
+  STEP: test start container with volume @ 11/11/26 18:45:07.853
+  STEP: Start container for containerID: 27f65ae47a6bfb7a5e67fe816e76fefd583116e158fffff4624ba95f4951117a @ 11/11/26 18:45:07.853
+E1111 18:45:07.871368     138 remote_runtime.go:523] "StartContainer from runtime service failed" err="rpc error: code = Unimplemented desc = failed to create containerd task: failed to create shim task: service containerd.task.v2.Task" containerID="27f65ae47a6bfb7a5e67fe816e76fefd583116e158fffff4624ba95f4951117a"
+  Nov 11 18:45:07.871: INFO: Unexpected error occurred: rpc error: code = Unimplemented desc = failed to create containerd task: failed to create shim task: service containerd.task.v2.Task
+  STEP: clean up the TempDir @ 11/11/26 18:45:07.871
+  Nov 11 18:45:07.871: INFO: Unexpected error occurred: invalid argument
+  [FAILED] in [It] - sigs.k8s.io/cri-tools/pkg/validate/container.go:507 @ 11/11/26 18:45:07.871
+  STEP: stop PodSandbox @ 11/11/26 18:45:07.872
+  STEP: delete PodSandbox @ 11/11/26 18:45:08.464
+• [FAILED] [5.019 seconds]
+[k8s.io] Container Mount Propagation runtime should support mount propagation [It] mount with 'rshared' should support propagation from host to container and vice versa
+sigs.k8s.io/cri-tools/pkg/validate/container_linux.go:119
+
+  [FAILED] failed to start container
+  Unexpected error:
+      <*status.Error | 0x2bcebc722c78>: 
+      rpc error: code = Unimplemented desc = failed to create containerd task: failed to create shim task: service containerd.task.v2.Task
+      {
+          s: {
+              s: {
+                  state: {
+                      NoUnkeyedLiterals: {},
+                      DoNotCompare: [],
+                      DoNotCopy: [],
+                      atomicMessageInfo: nil,
+                  },
+                  sizeCache: 0,
+                  unknownFields: nil,
+                  Code: 12,
+                  Message: "failed to create containerd task: failed to create shim task: service containerd.task.v2.Task",
+                  Details: nil,
+              },
+          },
+      }
+  occurred
+  In [It] at: sigs.k8s.io/cri-tools/pkg/validate/container.go:507 @ 11/11/26 18:45:07.871
+------------------------------
+[k8s.io] Container Mount Propagation runtime should support mount propagation mount with 'rslave' should support propagation from host to container
+sigs.k8s.io/cri-tools/pkg/validate/container_linux.go:123
+  STEP: create Privileged podSandbox @ 11/11/26 18:45:08.502
+  STEP: create host path and flag file @ 11/11/26 18:45:13.62
+  STEP: create container with volume @ 11/11/26 18:45:13.62
+  STEP: create a container with volume and name @ 11/11/26 18:45:13.62
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:45:13.62
+  STEP: Create container. @ 11/11/26 18:45:13.621
+  Nov 11 18:45:13.673: INFO: Created container "6bd4b330da00bfb790c91418e79929b72e61f174860c8b0faa5d7110e43a6cd4"
+
+  STEP: verifying container status @ 11/11/26 18:45:13.673
+  STEP: verifying container status mount propagation @ 11/11/26 18:45:13.676
+  STEP: test start container with volume @ 11/11/26 18:45:13.676
+  STEP: Start container for containerID: 6bd4b330da00bfb790c91418e79929b72e61f174860c8b0faa5d7110e43a6cd4 @ 11/11/26 18:45:13.676
+  Nov 11 18:45:13.693: INFO: Unexpected error occurred: rpc error: code = Unimplemented desc = failed to create containerd task: failed to create shim task: service containerd.task.v2.Task
+E1111 18:45:13.693041     138 remote_runtime.go:523] "StartContainer from runtime service failed" err="rpc error: code = Unimplemented desc = failed to create containerd task: failed to create shim task: service containerd.task.v2.Task" containerID="6bd4b330da00bfb790c91418e79929b72e61f174860c8b0faa5d7110e43a6cd4"
+  STEP: clean up the TempDir @ 11/11/26 18:45:13.693
+  Nov 11 18:45:13.693: INFO: Unexpected error occurred: invalid argument
+  [FAILED] in [It] - sigs.k8s.io/cri-tools/pkg/validate/container.go:507 @ 11/11/26 18:45:13.693
+  STEP: stop PodSandbox @ 11/11/26 18:45:13.693
+  STEP: delete PodSandbox @ 11/11/26 18:45:14.215
+• [FAILED] [5.749 seconds]
+[k8s.io] Container Mount Propagation runtime should support mount propagation [It] mount with 'rslave' should support propagation from host to container
+sigs.k8s.io/cri-tools/pkg/validate/container_linux.go:123
+
+  [FAILED] failed to start container
+  Unexpected error:
+      <*status.Error | 0x2bcebc790b80>: 
+      rpc error: code = Unimplemented desc = failed to create containerd task: failed to create shim task: service containerd.task.v2.Task
+      {
+          s: {
+              s: {
+                  state: {
+                      NoUnkeyedLiterals: {},
+                      DoNotCompare: [],
+                      DoNotCopy: [],
+                      atomicMessageInfo: nil,
+                  },
+                  sizeCache: 0,
+                  unknownFields: nil,
+                  Code: 12,
+                  Message: "failed to create containerd task: failed to create shim task: service containerd.task.v2.Task",
+                  Details: nil,
+              },
+          },
+      }
+  occurred
+  In [It] at: sigs.k8s.io/cri-tools/pkg/validate/container.go:507 @ 11/11/26 18:45:13.693
+------------------------------
+[k8s.io] Streaming runtime should support streaming interfaces runtime should support portforward in host network
+sigs.k8s.io/cri-tools/pkg/validate/streaming_linux.go:47
+  STEP: create a PodSandbox with container port mapping in host network @ 11/11/26 18:45:14.251
+E1111 18:45:14.419867     138 remote_runtime.go:325] "RunPodSandbox from runtime service failed" err="rpc error: code = Unknown desc = failed to start sandbox \"a0ff60a0c7a92c7cc95c8703d6daf1bc4afe01840d13be4d05f65044594fb023\": failed to create containerd task: failed to start shim: start failed: aws.firecracker: rpc error: code = Unimplemented desc = Firecracker CRI host-network Pods are not supported: exit status 1"
+  Nov 11 18:45:14.419: INFO: Unexpected error occurred: rpc error: code = Unknown desc = failed to start sandbox "a0ff60a0c7a92c7cc95c8703d6daf1bc4afe01840d13be4d05f65044594fb023": failed to create containerd task: failed to start shim: start failed: aws.firecracker: rpc error: code = Unimplemented desc = Firecracker CRI host-network Pods are not supported: exit status 1
+  [FAILED] in [It] - sigs.k8s.io/cri-tools/pkg/framework/util.go:241 @ 11/11/26 18:45:14.42
+  STEP: stop PodSandbox @ 11/11/26 18:45:14.42
+E1111 18:45:14.420763     138 remote_runtime.go:355] "StopPodSandbox from runtime service failed" err="rpc error: code = Unknown desc = an error occurred when try to find sandbox \"\": prefix can't be empty" podSandboxID=""
+  Nov 11 18:45:14.420: INFO: Unexpected error occurred: rpc error: code = Unknown desc = an error occurred when try to find sandbox "": prefix can't be empty
+  [FAILED] in [AfterEach] - sigs.k8s.io/cri-tools/pkg/framework/util.go:195 @ 11/11/26 18:45:14.42
+• [FAILED] [0.171 seconds]
+[k8s.io] Streaming runtime should support streaming interfaces [It] runtime should support portforward in host network
+sigs.k8s.io/cri-tools/pkg/validate/streaming_linux.go:47
+
+  [FAILED] failed to create PodSandbox
+  Unexpected error:
+      <*status.Error | 0x2bcebc046c88>: 
+      rpc error: code = Unknown desc = failed to start sandbox "a0ff60a0c7a92c7cc95c8703d6daf1bc4afe01840d13be4d05f65044594fb023": failed to create containerd task: failed to start shim: start failed: aws.firecracker: rpc error: code = Unimplemented desc = Firecracker CRI host-network Pods are not supported: exit status 1
+      {
+          s: {
+              s: {
+                  state: {
+                      NoUnkeyedLiterals: {},
+                      DoNotCompare: [],
+                      DoNotCopy: [],
+                      atomicMessageInfo: nil,
+                  },
+                  sizeCache: 0,
+                  unknownFields: nil,
+                  Code: 2,
+                  Message: "failed to start sandbox \"a0ff60a0c7a92c7cc95c8703d6daf1bc4afe01840d13be4d05f65044594fb023\": failed to create containerd task: failed to start shim: start failed: aws.firecracker: rpc error: code = Unimplemented desc = Firecracker CRI host-network Pods are not supported: exit status 1",
+                  Details: nil,
+              },
+          },
+      }
+  occurred
+  In [It] at: sigs.k8s.io/cri-tools/pkg/framework/util.go:241 @ 11/11/26 18:45:14.42
+
+  There were additional failures detected.  To view them in detail run ginkgo -vv
+------------------------------
+[k8s.io] Container OOM runtime should output OOMKilled reason should terminate with exitCode 137 and reason OOMKilled
+sigs.k8s.io/cri-tools/pkg/validate/container_linux.go:156
+  STEP: create Privileged podSandbox @ 11/11/26 18:45:14.422
+  STEP: create container @ 11/11/26 18:45:18.901
+  STEP: create a container that will be killed by OOMKiller @ 11/11/26 18:45:18.901
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:45:18.901
+  STEP: Create container. @ 11/11/26 18:45:18.902
+  Nov 11 18:45:18.943: INFO: Created container "ca020d78154bb9e6805cfe03cc8a342fd449b545b739196056a38bc7fb9a1c85"
+
+  STEP: verifying container status @ 11/11/26 18:45:18.943
+  STEP: start container @ 11/11/26 18:45:18.944
+  STEP: Start container for containerID: ca020d78154bb9e6805cfe03cc8a342fd449b545b739196056a38bc7fb9a1c85 @ 11/11/26 18:45:18.944
+  Nov 11 18:45:19.069: INFO: Started container "ca020d78154bb9e6805cfe03cc8a342fd449b545b739196056a38bc7fb9a1c85"
+
+  STEP: container is stopped because of OOM @ 11/11/26 18:45:19.069
+  STEP: Get container status for containerID: ca020d78154bb9e6805cfe03cc8a342fd449b545b739196056a38bc7fb9a1c85 @ 11/11/26 18:45:19.069
+  STEP: Get container status for containerID: ca020d78154bb9e6805cfe03cc8a342fd449b545b739196056a38bc7fb9a1c85 @ 11/11/26 18:45:23.073
+  STEP: Get container status for containerID: ca020d78154bb9e6805cfe03cc8a342fd449b545b739196056a38bc7fb9a1c85 @ 11/11/26 18:45:23.074
+  STEP: Get container status for containerID: ca020d78154bb9e6805cfe03cc8a342fd449b545b739196056a38bc7fb9a1c85 @ 11/11/26 18:45:23.075
+  STEP: exit code is 137 @ 11/11/26 18:45:23.076
+  STEP: stop PodSandbox @ 11/11/26 18:45:23.076
+  STEP: delete PodSandbox @ 11/11/26 18:45:23.828
+• [9.440 seconds]
+------------------------------
+S
+------------------------------
+[k8s.io] AppArmor runtime should support deprecated apparmor_profile field should fail with an unloaded apparmor_profile
+sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:103
+  [FAILED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:86 @ 11/11/26 18:45:23.863
+• [FAILED] [0.003 seconds]
+[k8s.io] AppArmor [BeforeEach] runtime should support deprecated apparmor_profile field should fail with an unloaded apparmor_profile
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:78
+  [It] sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:103
+
+  [FAILED] Unexpected error:
+      <*fmt.wrapError | 0x2bcebcc51000>: 
+      find sudo binary: exec: "sudo": executable file not found in $PATH
+      {
+          msg: "find sudo binary: exec: \"sudo\": executable file not found in $PATH",
+          err: <*exec.Error | 0x2bcebcc50fe0>{
+              Name: "sudo",
+              Err: <*errors.errorString | 0x20a5fd0>{
+                  s: "executable file not found in $PATH",
+              },
+          },
+      }
+  occurred
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:86 @ 11/11/26 18:45:23.863
+------------------------------
+[k8s.io] AppArmor runtime should support deprecated apparmor_profile field should enforce a apparmor_profile blocking writes
+sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:111
+  [FAILED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:86 @ 11/11/26 18:45:23.865
+• [FAILED] [0.002 seconds]
+[k8s.io] AppArmor [BeforeEach] runtime should support deprecated apparmor_profile field should enforce a apparmor_profile blocking writes
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:78
+  [It] sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:111
+
+  [FAILED] Unexpected error:
+      <*fmt.wrapError | 0x2bcebc46fb60>: 
+      find sudo binary: exec: "sudo": executable file not found in $PATH
+      {
+          msg: "find sudo binary: exec: \"sudo\": executable file not found in $PATH",
+          err: <*exec.Error | 0x2bcebc46fb40>{
+              Name: "sudo",
+              Err: <*errors.errorString | 0x20a5fd0>{
+                  s: "executable file not found in $PATH",
+              },
+          },
+      }
+  occurred
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:86 @ 11/11/26 18:45:23.865
+------------------------------
+[k8s.io] AppArmor runtime should support deprecated apparmor_profile field should enforce a permissive deprecated profile
+sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:119
+  [FAILED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:86 @ 11/11/26 18:45:23.867
+• [FAILED] [0.002 seconds]
+[k8s.io] AppArmor [BeforeEach] runtime should support deprecated apparmor_profile field should enforce a permissive deprecated profile
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:78
+  [It] sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:119
+
+  [FAILED] Unexpected error:
+      <*fmt.wrapError | 0x2bcebd427720>: 
+      find sudo binary: exec: "sudo": executable file not found in $PATH
+      {
+          msg: "find sudo binary: exec: \"sudo\": executable file not found in $PATH",
+          err: <*exec.Error | 0x2bcebd427700>{
+              Name: "sudo",
+              Err: <*errors.errorString | 0x20a5fd0>{
+                  s: "executable file not found in $PATH",
+              },
+          },
+      }
+  occurred
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:86 @ 11/11/26 18:45:23.867
+------------------------------
+[k8s.io] AppArmor runtime should support apparmor field should fail with an unloaded apparmor_profile
+sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:142
+  [FAILED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:86 @ 11/11/26 18:45:23.869
+• [FAILED] [0.002 seconds]
+[k8s.io] AppArmor [BeforeEach] runtime should support apparmor field should fail with an unloaded apparmor_profile
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:78
+  [It] sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:142
+
+  [FAILED] Unexpected error:
+      <*fmt.wrapError | 0x2bcebcc51660>: 
+      find sudo binary: exec: "sudo": executable file not found in $PATH
+      {
+          msg: "find sudo binary: exec: \"sudo\": executable file not found in $PATH",
+          err: <*exec.Error | 0x2bcebcc51640>{
+              Name: "sudo",
+              Err: <*errors.errorString | 0x20a5fd0>{
+                  s: "executable file not found in $PATH",
+              },
+          },
+      }
+  occurred
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:86 @ 11/11/26 18:45:23.869
+------------------------------
+[k8s.io] AppArmor runtime should support apparmor field should enforce a apparmor_profile blocking writes
+sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:153
+  [FAILED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:86 @ 11/11/26 18:45:23.871
+• [FAILED] [0.002 seconds]
+[k8s.io] AppArmor [BeforeEach] runtime should support apparmor field should enforce a apparmor_profile blocking writes
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:78
+  [It] sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:153
+
+  [FAILED] Unexpected error:
+      <*fmt.wrapError | 0x2bcebcb42800>: 
+      find sudo binary: exec: "sudo": executable file not found in $PATH
+      {
+          msg: "find sudo binary: exec: \"sudo\": executable file not found in $PATH",
+          err: <*exec.Error | 0x2bcebcb427e0>{
+              Name: "sudo",
+              Err: <*errors.errorString | 0x20a5fd0>{
+                  s: "executable file not found in $PATH",
+              },
+          },
+      }
+  occurred
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:86 @ 11/11/26 18:45:23.871
+------------------------------
+[k8s.io] AppArmor runtime should support apparmor field should enforce a permissive deprecated profile
+sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:164
+  [FAILED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:86 @ 11/11/26 18:45:23.874
+• [FAILED] [0.002 seconds]
+[k8s.io] AppArmor [BeforeEach] runtime should support apparmor field should enforce a permissive deprecated profile
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:78
+  [It] sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:164
+
+  [FAILED] Unexpected error:
+      <*fmt.wrapError | 0x2bcebcb43660>: 
+      find sudo binary: exec: "sudo": executable file not found in $PATH
+      {
+          msg: "find sudo binary: exec: \"sudo\": executable file not found in $PATH",
+          err: <*exec.Error | 0x2bcebcb435c0>{
+              Name: "sudo",
+              Err: <*errors.errorString | 0x20a5fd0>{
+                  s: "executable file not found in $PATH",
+              },
+          },
+      }
+  occurred
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:86 @ 11/11/26 18:45:23.874
+------------------------------
+[k8s.io] AppArmor runtime should prefer new apparmor field should fail with an unloaded apparmor_profile
+sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:190
+  [FAILED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:86 @ 11/11/26 18:45:23.875
+• [FAILED] [0.002 seconds]
+[k8s.io] AppArmor [BeforeEach] runtime should prefer new apparmor field should fail with an unloaded apparmor_profile
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:78
+  [It] sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:190
+
+  [FAILED] Unexpected error:
+      <*fmt.wrapError | 0x2bcebcb05a80>: 
+      find sudo binary: exec: "sudo": executable file not found in $PATH
+      {
+          msg: "find sudo binary: exec: \"sudo\": executable file not found in $PATH",
+          err: <*exec.Error | 0x2bcebcb05a60>{
+              Name: "sudo",
+              Err: <*errors.errorString | 0x20a5fd0>{
+                  s: "executable file not found in $PATH",
+              },
+          },
+      }
+  occurred
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:86 @ 11/11/26 18:45:23.875
+------------------------------
+[k8s.io] AppArmor runtime should prefer new apparmor field should enforce a apparmor_profile blocking writes
+sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:202
+  [FAILED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:86 @ 11/11/26 18:45:23.877
+• [FAILED] [0.002 seconds]
+[k8s.io] AppArmor [BeforeEach] runtime should prefer new apparmor field should enforce a apparmor_profile blocking writes
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:78
+  [It] sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:202
+
+  [FAILED] Unexpected error:
+      <*fmt.wrapError | 0x2bcebd02c0e0>: 
+      find sudo binary: exec: "sudo": executable file not found in $PATH
+      {
+          msg: "find sudo binary: exec: \"sudo\": executable file not found in $PATH",
+          err: <*exec.Error | 0x2bcebd02c020>{
+              Name: "sudo",
+              Err: <*errors.errorString | 0x20a5fd0>{
+                  s: "executable file not found in $PATH",
+              },
+          },
+      }
+  occurred
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:86 @ 11/11/26 18:45:23.877
+------------------------------
+[k8s.io] AppArmor runtime should prefer new apparmor field should work with apparmor profile
+sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:214
+  [FAILED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:86 @ 11/11/26 18:45:23.879
+• [FAILED] [0.002 seconds]
+[k8s.io] AppArmor [BeforeEach] runtime should prefer new apparmor field should work with apparmor profile
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:78
+  [It] sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:214
+
+  [FAILED] Unexpected error:
+      <*fmt.wrapError | 0x2bcebc6f0ce0>: 
+      find sudo binary: exec: "sudo": executable file not found in $PATH
+      {
+          msg: "find sudo binary: exec: \"sudo\": executable file not found in $PATH",
+          err: <*exec.Error | 0x2bcebc6f0cc0>{
+              Name: "sudo",
+              Err: <*errors.errorString | 0x20a5fd0>{
+                  s: "executable file not found in $PATH",
+              },
+          },
+      }
+  occurred
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:86 @ 11/11/26 18:45:23.879
+------------------------------
+[k8s.io] Container runtime should support basic operations on container runtime should support creating container [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/container.go:82
+  STEP: test create a default container @ 11/11/26 18:45:27.789
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:45:27.789
+  STEP: Create container. @ 11/11/26 18:45:27.79
+  Nov 11 18:45:27.831: INFO: Created container "cc7cd6660fa666691643856970ac7cd0b76d8f87ceaaf2cc397293b06ff4da1c"
+
+  STEP: test list container @ 11/11/26 18:45:27.831
+  STEP: List containers for containerID: cc7cd6660fa666691643856970ac7cd0b76d8f87ceaaf2cc397293b06ff4da1c @ 11/11/26 18:45:27.831
+  STEP: stop PodSandbox @ 11/11/26 18:45:27.833
+  STEP: delete PodSandbox @ 11/11/26 18:45:28.307
+• [4.460 seconds]
+------------------------------
+[k8s.io] Container runtime should support basic operations on container runtime should support preserving container attributes [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/container.go:93
+  STEP: create container with attributes @ 11/11/26 18:45:32.562
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:45:32.563
+  STEP: Create container. @ 11/11/26 18:45:32.563
+  Nov 11 18:45:32.623: INFO: Created container "0dbe8d21c65ab9b748b5a47f365aab1b67bd89f7fa059b2ae0de8258276436a6"
+
+  STEP: test get container status @ 11/11/26 18:45:32.623
+  STEP: Get container status for containerID: 0dbe8d21c65ab9b748b5a47f365aab1b67bd89f7fa059b2ae0de8258276436a6 @ 11/11/26 18:45:32.623
+  STEP: test list container @ 11/11/26 18:45:32.624
+  STEP: List containers for containerID: 0dbe8d21c65ab9b748b5a47f365aab1b67bd89f7fa059b2ae0de8258276436a6 @ 11/11/26 18:45:32.624
+  STEP: stop PodSandbox @ 11/11/26 18:45:32.625
+  STEP: delete PodSandbox @ 11/11/26 18:45:33.105
+• [4.799 seconds]
+------------------------------
+[k8s.io] Container runtime should support basic operations on container runtime should support starting container [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/container.go:135
+  STEP: create container @ 11/11/26 18:45:37.957
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:45:37.957
+  STEP: Create container. @ 11/11/26 18:45:37.958
+  Nov 11 18:45:38.007: INFO: Created container "39d8034bd2bafd46f0aee3ed0b73cfd04b90305a014d658e7b417b149c8d5110"
+
+  STEP: test start container @ 11/11/26 18:45:38.007
+  STEP: Start container for containerID: 39d8034bd2bafd46f0aee3ed0b73cfd04b90305a014d658e7b417b149c8d5110 @ 11/11/26 18:45:38.007
+  Nov 11 18:45:38.132: INFO: Started container "39d8034bd2bafd46f0aee3ed0b73cfd04b90305a014d658e7b417b149c8d5110"
+
+  STEP: Get container status for containerID: 39d8034bd2bafd46f0aee3ed0b73cfd04b90305a014d658e7b417b149c8d5110 @ 11/11/26 18:45:38.132
+  STEP: stop PodSandbox @ 11/11/26 18:45:38.133
+  STEP: delete PodSandbox @ 11/11/26 18:45:38.697
+• [5.592 seconds]
+------------------------------
+[k8s.io] Container runtime should support basic operations on container runtime should support stopping container [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/container.go:144
+  STEP: create container @ 11/11/26 18:45:44.605
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:45:44.605
+  STEP: Create container. @ 11/11/26 18:45:44.605
+  Nov 11 18:45:44.655: INFO: Created container "654b7b8e6c2f1a917efb0f1a1fb947bab535c0739c7aaf6135e5d4d08dafb746"
+
+  STEP: start container @ 11/11/26 18:45:44.655
+  STEP: Start container for containerID: 654b7b8e6c2f1a917efb0f1a1fb947bab535c0739c7aaf6135e5d4d08dafb746 @ 11/11/26 18:45:44.655
+  Nov 11 18:45:44.779: INFO: Started container "654b7b8e6c2f1a917efb0f1a1fb947bab535c0739c7aaf6135e5d4d08dafb746"
+
+  STEP: test stop container @ 11/11/26 18:45:44.78
+  STEP: Stop container for containerID: 654b7b8e6c2f1a917efb0f1a1fb947bab535c0739c7aaf6135e5d4d08dafb746 @ 11/11/26 18:45:44.78
+  Nov 11 18:45:44.810: INFO: Stopped container "654b7b8e6c2f1a917efb0f1a1fb947bab535c0739c7aaf6135e5d4d08dafb746"
+
+  STEP: Get container status for containerID: 654b7b8e6c2f1a917efb0f1a1fb947bab535c0739c7aaf6135e5d4d08dafb746 @ 11/11/26 18:45:44.81
+  STEP: stop PodSandbox @ 11/11/26 18:45:44.811
+  STEP: delete PodSandbox @ 11/11/26 18:45:45.332
+• [6.636 seconds]
+------------------------------
+[k8s.io] Container runtime should support basic operations on container runtime should support removing created container [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/container.go:156
+  STEP: create container @ 11/11/26 18:45:50.808
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:45:50.808
+  STEP: Create container. @ 11/11/26 18:45:50.809
+  Nov 11 18:45:50.849: INFO: Created container "4721037f229b4616eb0a62c84ad7c885aff25425be0cd89f9884103afd8ce76a"
+
+  STEP: test remove container @ 11/11/26 18:45:50.849
+  STEP: Remove container for containerID: 4721037f229b4616eb0a62c84ad7c885aff25425be0cd89f9884103afd8ce76a @ 11/11/26 18:45:50.849
+  Nov 11 18:45:50.852: INFO: Removed container "4721037f229b4616eb0a62c84ad7c885aff25425be0cd89f9884103afd8ce76a"
+
+  STEP: List containers for containerID: 4721037f229b4616eb0a62c84ad7c885aff25425be0cd89f9884103afd8ce76a @ 11/11/26 18:45:50.852
+  STEP: stop PodSandbox @ 11/11/26 18:45:50.852
+  STEP: delete PodSandbox @ 11/11/26 18:45:53.395
+• [8.061 seconds]
+------------------------------
+[k8s.io] Container runtime should support basic operations on container runtime should support removing running container [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/container.go:167
+  STEP: create container @ 11/11/26 18:45:58.095
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:45:58.095
+  STEP: Create container. @ 11/11/26 18:45:58.095
+  Nov 11 18:45:58.255: INFO: Created container "6f4d8e5487b3cfb10e5ea9ad4f5247f3b6e943dc29f009f5b0843860c528f8cd"
+
+  STEP: start container @ 11/11/26 18:45:58.255
+  STEP: Start container for containerID: 6f4d8e5487b3cfb10e5ea9ad4f5247f3b6e943dc29f009f5b0843860c528f8cd @ 11/11/26 18:45:58.255
+  Nov 11 18:45:58.380: INFO: Started container "6f4d8e5487b3cfb10e5ea9ad4f5247f3b6e943dc29f009f5b0843860c528f8cd"
+
+  STEP: test remove container @ 11/11/26 18:45:58.38
+  STEP: Remove container for containerID: 6f4d8e5487b3cfb10e5ea9ad4f5247f3b6e943dc29f009f5b0843860c528f8cd @ 11/11/26 18:45:58.38
+  Nov 11 18:45:58.411: INFO: Removed container "6f4d8e5487b3cfb10e5ea9ad4f5247f3b6e943dc29f009f5b0843860c528f8cd"
+
+  STEP: List containers for containerID: 6f4d8e5487b3cfb10e5ea9ad4f5247f3b6e943dc29f009f5b0843860c528f8cd @ 11/11/26 18:45:58.412
+  STEP: stop PodSandbox @ 11/11/26 18:45:58.412
+  STEP: delete PodSandbox @ 11/11/26 18:45:58.992
+• [5.596 seconds]
+------------------------------
+[k8s.io] Container runtime should support basic operations on container runtime should support removing stopped container [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/container.go:181
+  STEP: create container @ 11/11/26 18:46:03.118
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:46:03.118
+  STEP: Create container. @ 11/11/26 18:46:03.119
+  Nov 11 18:46:03.164: INFO: Created container "c59bf2cce713f076196cc144d6c80a84af9cdd684322021988214252be8e2156"
+
+  STEP: start container @ 11/11/26 18:46:03.164
+  STEP: Start container for containerID: c59bf2cce713f076196cc144d6c80a84af9cdd684322021988214252be8e2156 @ 11/11/26 18:46:03.164
+  Nov 11 18:46:03.382: INFO: Started container "c59bf2cce713f076196cc144d6c80a84af9cdd684322021988214252be8e2156"
+
+  STEP: test stop container @ 11/11/26 18:46:03.382
+  STEP: Stop container for containerID: c59bf2cce713f076196cc144d6c80a84af9cdd684322021988214252be8e2156 @ 11/11/26 18:46:03.382
+  Nov 11 18:46:03.411: INFO: Stopped container "c59bf2cce713f076196cc144d6c80a84af9cdd684322021988214252be8e2156"
+
+  STEP: Get container status for containerID: c59bf2cce713f076196cc144d6c80a84af9cdd684322021988214252be8e2156 @ 11/11/26 18:46:03.411
+  STEP: test remove container @ 11/11/26 18:46:03.412
+  STEP: Remove container for containerID: c59bf2cce713f076196cc144d6c80a84af9cdd684322021988214252be8e2156 @ 11/11/26 18:46:03.412
+  Nov 11 18:46:03.414: INFO: Removed container "c59bf2cce713f076196cc144d6c80a84af9cdd684322021988214252be8e2156"
+
+  STEP: List containers for containerID: c59bf2cce713f076196cc144d6c80a84af9cdd684322021988214252be8e2156 @ 11/11/26 18:46:03.414
+  STEP: stop PodSandbox @ 11/11/26 18:46:03.415
+  STEP: delete PodSandbox @ 11/11/26 18:46:04.729
+• [6.061 seconds]
+------------------------------
+[k8s.io] Container runtime should support basic operations on container runtime should support execSync [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/container.go:198
+  STEP: create container @ 11/11/26 18:46:09.379
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:46:09.379
+  STEP: Create container. @ 11/11/26 18:46:09.38
+  Nov 11 18:46:09.423: INFO: Created container "672d274d03ae5689e39769c5b823b88ccf7c5c50a7f3fc90a5d3efe3738e5163"
+
+  STEP: start container @ 11/11/26 18:46:09.423
+  STEP: Start container for containerID: 672d274d03ae5689e39769c5b823b88ccf7c5c50a7f3fc90a5d3efe3738e5163 @ 11/11/26 18:46:09.423
+  Nov 11 18:46:09.547: INFO: Started container "672d274d03ae5689e39769c5b823b88ccf7c5c50a7f3fc90a5d3efe3738e5163"
+
+  STEP: test execSync @ 11/11/26 18:46:09.547
+  STEP: verify execSync output @ 11/11/26 18:46:09.547
+  STEP: execSync for containerID: 672d274d03ae5689e39769c5b823b88ccf7c5c50a7f3fc90a5d3efe3738e5163 @ 11/11/26 18:46:09.547
+  Nov 11 18:46:09.670: INFO: Execsync succeed
+  Nov 11 18:46:09.670: INFO: verify Execsync output succeed
+  STEP: stop PodSandbox @ 11/11/26 18:46:09.671
+  STEP: delete PodSandbox @ 11/11/26 18:46:10.221
+• [5.168 seconds]
+------------------------------
+[k8s.io] Container runtime should support basic operations on container runtime should support execSync with timeout [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/container.go:210
+  STEP: create container @ 11/11/26 18:46:15.974
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:46:15.974
+  STEP: Create container. @ 11/11/26 18:46:15.975
+  Nov 11 18:46:16.026: INFO: Created container "1a65265a311bbaf11ed1a9c3ce63d91a79dda70a93fb9dedd313a5569b944085"
+
+  STEP: start container @ 11/11/26 18:46:16.026
+  STEP: Start container for containerID: 1a65265a311bbaf11ed1a9c3ce63d91a79dda70a93fb9dedd313a5569b944085 @ 11/11/26 18:46:16.026
+  Nov 11 18:46:16.149: INFO: Started container "1a65265a311bbaf11ed1a9c3ce63d91a79dda70a93fb9dedd313a5569b944085"
+
+  STEP: test execSync with timeout @ 11/11/26 18:46:16.149
+E1111 18:46:17.273276     138 remote_runtime.go:724] "ExecSync cmd from runtime service failed" err="rpc error: code = DeadlineExceeded desc = failed to exec in container: timeout 1s exceeded: context deadline exceeded" containerID="1a65265a311bbaf11ed1a9c3ce63d91a79dda70a93fb9dedd313a5569b944085" cmd=["sleep","4321"]
+  STEP: timeout exec process should be gone @ 11/11/26 18:46:17.273
+  STEP: stop PodSandbox @ 11/11/26 18:46:17.397
+  STEP: delete PodSandbox @ 11/11/26 18:46:17.973
+• [7.751 seconds]
+------------------------------
+[k8s.io] Container runtime should support basic operations on container runtime should support listing container stats [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/container.go:232
+  STEP: create container @ 11/11/26 18:46:23.701
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:46:23.701
+  STEP: Create container. @ 11/11/26 18:46:23.702
+  Nov 11 18:46:23.752: INFO: Created container "f5f94a5f0b459f93edf6917caee0c40f96fa7210c5345568054faf365de425d3"
+
+  STEP: start container @ 11/11/26 18:46:23.752
+  STEP: Start container for containerID: f5f94a5f0b459f93edf6917caee0c40f96fa7210c5345568054faf365de425d3 @ 11/11/26 18:46:23.752
+  Nov 11 18:46:23.875: INFO: Started container "f5f94a5f0b459f93edf6917caee0c40f96fa7210c5345568054faf365de425d3"
+
+  STEP: test container stats @ 11/11/26 18:46:23.875
+  STEP: List container stats for containerID: f5f94a5f0b459f93edf6917caee0c40f96fa7210c5345568054faf365de425d3 @ 11/11/26 18:46:23.875
+  STEP: stop PodSandbox @ 11/11/26 18:46:23.877
+  STEP: delete PodSandbox @ 11/11/26 18:46:24.393
+• [6.420 seconds]
+------------------------------
+[k8s.io] Container runtime should support basic operations on container runtime should support listing stats for started containers [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/container.go:249
+  STEP: create container @ 11/11/26 18:46:29.682
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:46:29.682
+  STEP: Create container. @ 11/11/26 18:46:29.683
+  Nov 11 18:46:29.823: INFO: Created container "0087664c651de9593d184129d44c90173d1d82ab13af9b305d4c67f3c7c8ce56"
+
+  STEP: start container @ 11/11/26 18:46:29.823
+  STEP: Start container for containerID: 0087664c651de9593d184129d44c90173d1d82ab13af9b305d4c67f3c7c8ce56 @ 11/11/26 18:46:29.823
+  Nov 11 18:46:29.949: INFO: Started container "0087664c651de9593d184129d44c90173d1d82ab13af9b305d4c67f3c7c8ce56"
+
+  STEP: test container stats @ 11/11/26 18:46:29.949
+  STEP: List container stats for all containers: @ 11/11/26 18:46:29.949
+  STEP: stop PodSandbox @ 11/11/26 18:46:29.952
+  STEP: delete PodSandbox @ 11/11/26 18:46:30.502
+• [6.110 seconds]
+------------------------------
+[k8s.io] Container runtime should support basic operations on container runtime should support listing stats for started containers when filter is nil [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/container.go:266
+  STEP: create container @ 11/11/26 18:46:36.173
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:46:36.173
+  STEP: Create container. @ 11/11/26 18:46:36.174
+  Nov 11 18:46:36.219: INFO: Created container "653e364137ac9bda752215352f663d79f9b468dcfc21697fe480d9fe5e2b616b"
+
+  STEP: start container @ 11/11/26 18:46:36.219
+  STEP: Start container for containerID: 653e364137ac9bda752215352f663d79f9b468dcfc21697fe480d9fe5e2b616b @ 11/11/26 18:46:36.219
+  Nov 11 18:46:36.343: INFO: Started container "653e364137ac9bda752215352f663d79f9b468dcfc21697fe480d9fe5e2b616b"
+
+  STEP: test container stats @ 11/11/26 18:46:36.343
+  STEP: List container stats for all containers: @ 11/11/26 18:46:36.343
+  STEP: stop PodSandbox @ 11/11/26 18:46:36.346
+  STEP: delete PodSandbox @ 11/11/26 18:46:36.916
+• [6.413 seconds]
+------------------------------
+[k8s.io] Container runtime should support basic operations on container runtime should support listing stats for three created containers when filter is nil. [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/container.go:280
+  STEP: create first container  @ 11/11/26 18:46:41.778
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:46:41.778
+  STEP: Create container. @ 11/11/26 18:46:41.779
+  Nov 11 18:46:41.826: INFO: Created container "34384f98cf0e5293899215e6600fd9ee2341aa42c515843c203311cffbd38347"
+
+  STEP: create second container  @ 11/11/26 18:46:41.826
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:46:41.826
+  STEP: Create container. @ 11/11/26 18:46:41.827
+  Nov 11 18:46:41.878: INFO: Created container "4c6a2c4997fd5335195b8cb43d14e77557494680f02dcae22b563aafab80f8e5"
+
+  STEP: create third container  @ 11/11/26 18:46:41.878
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:46:41.878
+  STEP: Create container. @ 11/11/26 18:46:41.878
+  Nov 11 18:46:41.920: INFO: Created container "cd02a5a0f2b66ef531a650e904c678bbdb8c4c840a53a57e2724aa08ae3823f3"
+
+  STEP: start first container @ 11/11/26 18:46:41.92
+  STEP: Start container for containerID: 34384f98cf0e5293899215e6600fd9ee2341aa42c515843c203311cffbd38347 @ 11/11/26 18:46:41.92
+  Nov 11 18:46:42.044: INFO: Started container "34384f98cf0e5293899215e6600fd9ee2341aa42c515843c203311cffbd38347"
+
+  STEP: start second container @ 11/11/26 18:46:42.044
+  STEP: Start container for containerID: 4c6a2c4997fd5335195b8cb43d14e77557494680f02dcae22b563aafab80f8e5 @ 11/11/26 18:46:42.044
+  Nov 11 18:46:42.167: INFO: Started container "4c6a2c4997fd5335195b8cb43d14e77557494680f02dcae22b563aafab80f8e5"
+
+  STEP: start third container @ 11/11/26 18:46:42.168
+  STEP: Start container for containerID: cd02a5a0f2b66ef531a650e904c678bbdb8c4c840a53a57e2724aa08ae3823f3 @ 11/11/26 18:46:42.168
+  Nov 11 18:46:42.291: INFO: Started container "cd02a5a0f2b66ef531a650e904c678bbdb8c4c840a53a57e2724aa08ae3823f3"
+
+  STEP: test containers stats @ 11/11/26 18:46:42.291
+  STEP: List container stats for all containers: @ 11/11/26 18:46:42.291
+  STEP: stop PodSandbox @ 11/11/26 18:46:42.298
+  STEP: delete PodSandbox @ 11/11/26 18:46:42.933
+• [6.021 seconds]
+------------------------------
+[k8s.io] Container runtime should support basic operations on container runtime should support listing stats for containers filtered by labels [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/container.go:308
+  STEP: create container @ 11/11/26 18:46:48.125
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:46:48.125
+  STEP: Create container. @ 11/11/26 18:46:48.126
+  Nov 11 18:46:48.182: INFO: Created container "0d4da0fbfd362ae2b1f7229941e3b0fbd99cfbac04bbb23bde1a943bfcd3e586"
+
+  STEP: start container @ 11/11/26 18:46:48.182
+  STEP: Start container for containerID: 0d4da0fbfd362ae2b1f7229941e3b0fbd99cfbac04bbb23bde1a943bfcd3e586 @ 11/11/26 18:46:48.182
+  Nov 11 18:46:48.308: INFO: Started container "0d4da0fbfd362ae2b1f7229941e3b0fbd99cfbac04bbb23bde1a943bfcd3e586"
+
+  STEP: test container stats @ 11/11/26 18:46:48.308
+  STEP: List container stats for all containers: @ 11/11/26 18:46:48.308
+  STEP: List container stats for all containers: @ 11/11/26 18:46:48.311
+  STEP: stop PodSandbox @ 11/11/26 18:46:48.313
+  STEP: delete PodSandbox @ 11/11/26 18:46:48.88
+• [5.944 seconds]
+------------------------------
+[k8s.io] Container runtime should support adding volume and device runtime should support starting container with volume [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/container.go:341
+  STEP: create host path and flag file @ 11/11/26 18:46:54.909
+  STEP: create container with volume @ 11/11/26 18:46:54.91
+  STEP: create a container with volume and name @ 11/11/26 18:46:54.91
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:46:54.91
+  STEP: Create container. @ 11/11/26 18:46:54.91
+  Nov 11 18:46:54.968: INFO: Created container "b1bb281e11330843e1525915dc02c21eabbb2c2f3508bc80d441065cc39f2938"
+
+  STEP: test start container with volume @ 11/11/26 18:46:54.968
+  STEP: Start container for containerID: b1bb281e11330843e1525915dc02c21eabbb2c2f3508bc80d441065cc39f2938 @ 11/11/26 18:46:54.968
+  Nov 11 18:46:55.100: INFO: Started container "b1bb281e11330843e1525915dc02c21eabbb2c2f3508bc80d441065cc39f2938"
+
+  STEP: Get container status for containerID: b1bb281e11330843e1525915dc02c21eabbb2c2f3508bc80d441065cc39f2938 @ 11/11/26 18:46:55.1
+  STEP: check whether 'hostPath' contains file or dir in container @ 11/11/26 18:46:55.101
+  STEP: execSync for containerID: b1bb281e11330843e1525915dc02c21eabbb2c2f3508bc80d441065cc39f2938 @ 11/11/26 18:46:55.101
+  Nov 11 18:46:55.227: INFO: Execsync succeed
+  STEP: stop PodSandbox @ 11/11/26 18:46:55.227
+  STEP: delete PodSandbox @ 11/11/26 18:46:55.796
+• [6.915 seconds]
+------------------------------
+[k8s.io] Container runtime should support adding volume and device runtime should support starting container with volume when host path is a symlink [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/container.go:361
+  STEP: create host path and flag file @ 11/11/26 18:47:00.216
+  STEP: create symlink @ 11/11/26 18:47:00.217
+  STEP: create volume container with symlink host path @ 11/11/26 18:47:00.217
+  STEP: create a container with volume and name @ 11/11/26 18:47:00.217
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:47:00.217
+  STEP: Create container. @ 11/11/26 18:47:00.218
+  Nov 11 18:47:00.281: INFO: Created container "d7d9b6d30cc50f4224524711668e88f640d79f45ddf899f24fb0b08a3db3a166"
+
+  STEP: test start volume container with symlink host path @ 11/11/26 18:47:00.281
+  STEP: Start container for containerID: d7d9b6d30cc50f4224524711668e88f640d79f45ddf899f24fb0b08a3db3a166 @ 11/11/26 18:47:00.281
+  Nov 11 18:47:00.415: INFO: Started container "d7d9b6d30cc50f4224524711668e88f640d79f45ddf899f24fb0b08a3db3a166"
+
+  STEP: Get container status for containerID: d7d9b6d30cc50f4224524711668e88f640d79f45ddf899f24fb0b08a3db3a166 @ 11/11/26 18:47:00.415
+  STEP: check whether 'symlink' contains file or dir in container @ 11/11/26 18:47:00.416
+  STEP: execSync for containerID: d7d9b6d30cc50f4224524711668e88f640d79f45ddf899f24fb0b08a3db3a166 @ 11/11/26 18:47:00.416
+  Nov 11 18:47:00.540: INFO: Execsync succeed
+  STEP: stop PodSandbox @ 11/11/26 18:47:00.54
+  STEP: delete PodSandbox @ 11/11/26 18:47:01.128
+• [5.332 seconds]
+------------------------------
+[k8s.io] Container runtime should support log runtime should support starting container with log [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/container.go:403
+  STEP: create a PodSandbox with log directory @ 11/11/26 18:47:01.162
+  STEP: create container with log @ 11/11/26 18:47:05.352
+  STEP: create a container with log and name @ 11/11/26 18:47:05.352
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:47:05.352
+  STEP: Create container. @ 11/11/26 18:47:05.353
+  Nov 11 18:47:05.408: INFO: Created container "cbbd4bf61d93c5514e375c58b11c570ccae67ec13dbba4ff53732995dac55cad"
+
+  STEP: start container with log @ 11/11/26 18:47:05.408
+  STEP: Start container for containerID: cbbd4bf61d93c5514e375c58b11c570ccae67ec13dbba4ff53732995dac55cad @ 11/11/26 18:47:05.408
+  Nov 11 18:47:05.534: INFO: Started container "cbbd4bf61d93c5514e375c58b11c570ccae67ec13dbba4ff53732995dac55cad"
+
+  STEP: Get container status for containerID: cbbd4bf61d93c5514e375c58b11c570ccae67ec13dbba4ff53732995dac55cad @ 11/11/26 18:47:05.534
+  STEP: Get container status for containerID: cbbd4bf61d93c5514e375c58b11c570ccae67ec13dbba4ff53732995dac55cad @ 11/11/26 18:47:09.538
+  STEP: check the log context @ 11/11/26 18:47:09.539
+  STEP: verify log contents @ 11/11/26 18:47:09.539
+  Nov 11 18:47:09.539: INFO: Open log file /tmp/podLogTest1711512371/PodSandbox-with-log-directory-eefec8a0-b3f5-48c8-ac6f-6349ea97ba71/container-with-log-test-9141ab64-0717-4a5b-8172-7fc6b11639aa.log
+  Nov 11 18:47:09.539: INFO: Parse container log succeed
+  STEP: stop PodSandbox @ 11/11/26 18:47:09.539
+  STEP: delete PodSandbox @ 11/11/26 18:47:10.065
+  STEP: cleanup log directory @ 11/11/26 18:47:10.097
+• [8.937 seconds]
+------------------------------
+[k8s.io] Container runtime should support log runtime should support reopening container log [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/container.go:421
+  STEP: create a PodSandbox with log directory @ 11/11/26 18:47:10.099
+  STEP: create container with log @ 11/11/26 18:47:14.588
+  STEP: create a container with log and name @ 11/11/26 18:47:14.588
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:47:14.588
+  STEP: Create container. @ 11/11/26 18:47:14.588
+  Nov 11 18:47:15.639: INFO: Created container "8d5c3226e22f9a74d6315aad458439426f6efd9d9bd51799f4ddff785060d4a1"
+
+  STEP: start container with log @ 11/11/26 18:47:15.639
+  STEP: Start container for containerID: 8d5c3226e22f9a74d6315aad458439426f6efd9d9bd51799f4ddff785060d4a1 @ 11/11/26 18:47:15.64
+  Nov 11 18:47:15.830: INFO: Started container "8d5c3226e22f9a74d6315aad458439426f6efd9d9bd51799f4ddff785060d4a1"
+
+  Nov 11 18:47:15.830: INFO: Open log file /tmp/podLogTest1441567561/PodSandbox-with-log-directory-0e1de20b-251a-45c9-b8ff-5e3f0ca3b314/container-reopen-log-test-33fcdbb7-1de3-4140-a015-702851c2f107.log
+  Nov 11 18:47:15.830: INFO: Parse container log succeed
+  STEP: rename container log @ 11/11/26 18:47:15.83
+  STEP: reopen container log @ 11/11/26 18:47:15.831
+  Nov 11 18:47:15.832: INFO: Open log file /tmp/podLogTest1441567561/PodSandbox-with-log-directory-0e1de20b-251a-45c9-b8ff-5e3f0ca3b314/container-reopen-log-test-33fcdbb7-1de3-4140-a015-702851c2f107.log
+  Nov 11 18:47:15.832: INFO: Parse container log succeed
+  Nov 11 18:47:16.832: INFO: Open log file /tmp/podLogTest1441567561/PodSandbox-with-log-directory-0e1de20b-251a-45c9-b8ff-5e3f0ca3b314/container-reopen-log-test-33fcdbb7-1de3-4140-a015-702851c2f107.log
+  Nov 11 18:47:16.832: INFO: Parse container log succeed
+  Nov 11 18:47:16.832: INFO: Open log file /tmp/podLogTest1441567561/PodSandbox-with-log-directory-0e1de20b-251a-45c9-b8ff-5e3f0ca3b314/container-reopen-log-test-33fcdbb7-1de3-4140-a015-702851c2f107.log.new
+  Nov 11 18:47:16.832: INFO: Parse container log succeed
+  Nov 11 18:47:16.832: INFO: Open log file /tmp/podLogTest1441567561/PodSandbox-with-log-directory-0e1de20b-251a-45c9-b8ff-5e3f0ca3b314/container-reopen-log-test-33fcdbb7-1de3-4140-a015-702851c2f107.log.new
+  Nov 11 18:47:16.832: INFO: Parse container log succeed
+  Nov 11 18:47:17.832: INFO: Open log file /tmp/podLogTest1441567561/PodSandbox-with-log-directory-0e1de20b-251a-45c9-b8ff-5e3f0ca3b314/container-reopen-log-test-33fcdbb7-1de3-4140-a015-702851c2f107.log.new
+  Nov 11 18:47:17.832: INFO: Parse container log succeed
+  Nov 11 18:47:18.833: INFO: Open log file /tmp/podLogTest1441567561/PodSandbox-with-log-directory-0e1de20b-251a-45c9-b8ff-5e3f0ca3b314/container-reopen-log-test-33fcdbb7-1de3-4140-a015-702851c2f107.log.new
+  Nov 11 18:47:18.833: INFO: Parse container log succeed
+  Nov 11 18:47:19.834: INFO: Open log file /tmp/podLogTest1441567561/PodSandbox-with-log-directory-0e1de20b-251a-45c9-b8ff-5e3f0ca3b314/container-reopen-log-test-33fcdbb7-1de3-4140-a015-702851c2f107.log.new
+  Nov 11 18:47:19.834: INFO: Parse container log succeed
+  Nov 11 18:47:20.835: INFO: Open log file /tmp/podLogTest1441567561/PodSandbox-with-log-directory-0e1de20b-251a-45c9-b8ff-5e3f0ca3b314/container-reopen-log-test-33fcdbb7-1de3-4140-a015-702851c2f107.log.new
+  Nov 11 18:47:20.835: INFO: Parse container log succeed
+  STEP: stop PodSandbox @ 11/11/26 18:47:21.832
+  STEP: delete PodSandbox @ 11/11/26 18:47:23.132
+  STEP: cleanup log directory @ 11/11/26 18:47:23.164
+• [13.067 seconds]
+------------------------------
+[k8s.io] Image Consistency should not list or get image status immediately after removal [Conformance] [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/image_consistency.go:41
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:47:23.166
+  STEP: Pulling image: gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:47:23.167
+  STEP: Pull image : gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:47:23.167
+  STEP: Removing image: gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:47:24.472
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:47:24.472
+  STEP: Remove image by ID : sha256:552a946d71c1a27bd126431c3af69b3ded9eea21a2e98b6e93305927f37edb49 @ 11/11/26 18:47:24.472
+  STEP: Verifying image is not listed @ 11/11/26 18:47:24.484
+  STEP: Verifying image status is nil @ 11/11/26 18:47:24.484
+  STEP: Get image status for image: gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:47:24.485
+• [1.320 seconds]
+------------------------------
+[k8s.io] Image Consistency should list and get image status immediately after pulling [Conformance] [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/image_consistency.go:76
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:47:24.487
+  STEP: Pulling image: gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:47:24.487
+  STEP: Pull image : gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:47:24.487
+  STEP: Verifying image is listed @ 11/11/26 18:47:25.855
+  STEP: Verifying image status is not nil @ 11/11/26 18:47:25.855
+  STEP: Get image status for image: gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:47:25.856
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:47:25.856
+  STEP: Remove image by ID : sha256:552a946d71c1a27bd126431c3af69b3ded9eea21a2e98b6e93305927f37edb49 @ 11/11/26 18:47:25.856
+• [1.382 seconds]
+------------------------------
+[k8s.io] Image Consistency should not fail on simultaneous RemoveImage calls [Conformance] [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/image_consistency.go:128
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:47:25.869
+  STEP: Pulling an image to be removed @ 11/11/26 18:47:25.87
+  STEP: Pull image : gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:47:25.87
+  STEP: Get image status for image: gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:47:27.265
+  STEP: Concurrently removing the same image @ 11/11/26 18:47:27.265
+  STEP: Get image status for image: sha256:552a946d71c1a27bd126431c3af69b3ded9eea21a2e98b6e93305927f37edb49 @ 11/11/26 18:47:27.268
+  STEP: Get image status for image: sha256:552a946d71c1a27bd126431c3af69b3ded9eea21a2e98b6e93305927f37edb49 @ 11/11/26 18:47:27.268
+  STEP: Get image status for image: sha256:552a946d71c1a27bd126431c3af69b3ded9eea21a2e98b6e93305927f37edb49 @ 11/11/26 18:47:27.269
+  STEP: Get image status for image: sha256:552a946d71c1a27bd126431c3af69b3ded9eea21a2e98b6e93305927f37edb49 @ 11/11/26 18:47:27.269
+  STEP: Get image status for image: sha256:552a946d71c1a27bd126431c3af69b3ded9eea21a2e98b6e93305927f37edb49 @ 11/11/26 18:47:27.656
+  STEP: Verifying the image is completely removed (final check) @ 11/11/26 18:47:27.657
+  STEP: Get image status for image: sha256:552a946d71c1a27bd126431c3af69b3ded9eea21a2e98b6e93305927f37edb49 @ 11/11/26 18:47:27.657
+• [1.791 seconds]
+------------------------------
+[k8s.io] Streaming runtime should support streaming interfaces runtime should support exec with tty=false and stdin=false [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/streaming.go:66
+  STEP: create a default container @ 11/11/26 18:47:33.511
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:47:33.511
+  STEP: Create container. @ 11/11/26 18:47:33.512
+  Nov 11 18:47:33.564: INFO: Created container "69ca935b39b0fc843b173d78f1d5a99ac5d4582a198f53562296cae06eb4d015"
+
+  STEP: start container @ 11/11/26 18:47:33.564
+  STEP: Start container for containerID: 69ca935b39b0fc843b173d78f1d5a99ac5d4582a198f53562296cae06eb4d015 @ 11/11/26 18:47:33.564
+  Nov 11 18:47:33.689: INFO: Started container "69ca935b39b0fc843b173d78f1d5a99ac5d4582a198f53562296cae06eb4d015"
+
+  STEP: exec given command in container: 69ca935b39b0fc843b173d78f1d5a99ac5d4582a198f53562296cae06eb4d015 @ 11/11/26 18:47:33.689
+  Nov 11 18:47:33.690: INFO: Get exec URL: http://127.0.0.1:43809/exec/bAOI7jxY
+  STEP: check the output of exec @ 11/11/26 18:47:33.69
+  Nov 11 18:47:33.691: INFO: Parse URL "http://127.0.0.1:43809/exec/bAOI7jxY" succeed
+  Nov 11 18:47:33.822: INFO: Check exec URL "http://127.0.0.1:43809/exec/bAOI7jxY" succeed
+  STEP: stop PodSandbox @ 11/11/26 18:47:33.822
+  STEP: delete PodSandbox @ 11/11/26 18:47:34.382
+• [6.757 seconds]
+------------------------------
+[k8s.io] Streaming runtime should support streaming interfaces runtime should support exec with tty=true and stdin=true [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/streaming.go:88
+  STEP: create a default container @ 11/11/26 18:47:38.808
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:47:38.808
+  STEP: Create container. @ 11/11/26 18:47:38.809
+  Nov 11 18:47:38.997: INFO: Created container "fdfc520d9d849066ced18aa93d9695f1dce03bb2a070e453e3294565f017bc03"
+
+  STEP: start container @ 11/11/26 18:47:38.997
+  STEP: Start container for containerID: fdfc520d9d849066ced18aa93d9695f1dce03bb2a070e453e3294565f017bc03 @ 11/11/26 18:47:38.997
+  Nov 11 18:47:41.325: INFO: Started container "fdfc520d9d849066ced18aa93d9695f1dce03bb2a070e453e3294565f017bc03"
+
+  STEP: exec given command in container: fdfc520d9d849066ced18aa93d9695f1dce03bb2a070e453e3294565f017bc03 @ 11/11/26 18:47:41.325
+  Nov 11 18:47:41.326: INFO: Get exec URL: http://127.0.0.1:43809/exec/66j3fYgX
+  STEP: check the output of exec @ 11/11/26 18:47:41.326
+  Nov 11 18:47:41.326: INFO: Parse URL "http://127.0.0.1:43809/exec/66j3fYgX" succeed
+  Nov 11 18:47:46.451: INFO: Check exec URL "http://127.0.0.1:43809/exec/66j3fYgX" succeed
+  STEP: stop PodSandbox @ 11/11/26 18:47:46.451
+  STEP: delete PodSandbox @ 11/11/26 18:47:47.18
+• [12.837 seconds]
+------------------------------
+[k8s.io] Streaming runtime should support streaming interfaces runtime should support attach [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/streaming.go:111
+  STEP: create a default container @ 11/11/26 18:47:59.912
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:47:59.912
+  STEP: Create container. @ 11/11/26 18:47:59.912
+  Nov 11 18:47:59.963: INFO: Created container "cbbf65a5a0f03466cf8ea11f33aa4d6281af58248a4d1ea03a471f3aca0552c2"
+
+  STEP: start container @ 11/11/26 18:47:59.963
+  STEP: Start container for containerID: cbbf65a5a0f03466cf8ea11f33aa4d6281af58248a4d1ea03a471f3aca0552c2 @ 11/11/26 18:47:59.963
+  Nov 11 18:48:00.091: INFO: Started container "cbbf65a5a0f03466cf8ea11f33aa4d6281af58248a4d1ea03a471f3aca0552c2"
+
+  STEP: attach container: cbbf65a5a0f03466cf8ea11f33aa4d6281af58248a4d1ea03a471f3aca0552c2 @ 11/11/26 18:48:00.091
+  Nov 11 18:48:00.092: INFO: Get attach URL: http://127.0.0.1:43809/attach/1m9TkXWF
+  STEP: check the output of attach @ 11/11/26 18:48:00.092
+  Nov 11 18:48:00.092: INFO: Parse URL "http://127.0.0.1:43809/attach/1m9TkXWF" succeed
+  Nov 11 18:48:05.101: INFO: Check attach URL "http://127.0.0.1:43809/attach/1m9TkXWF" succeed
+  STEP: stop PodSandbox @ 11/11/26 18:48:05.101
+  STEP: delete PodSandbox @ 11/11/26 18:48:05.684
+• [18.471 seconds]
+------------------------------
+[k8s.io] Streaming runtime should support streaming interfaces runtime should support portforward [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/streaming.go:127
+  STEP: create a PodSandbox with container port mapping @ 11/11/26 18:48:05.726
+  STEP: create a web server container @ 11/11/26 18:48:12.047
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/nginx:1.14-2 @ 11/11/26 18:48:12.048
+  STEP: Create container. @ 11/11/26 18:48:12.048
+  Nov 11 18:48:12.091: INFO: Created container "c7bdbb14fb1e72d07cc398b5a3b00ee0656118b4668e5e842795ed3707684f3e"
+
+  STEP: start the web server container @ 11/11/26 18:48:12.091
+  STEP: Start container for containerID: c7bdbb14fb1e72d07cc398b5a3b00ee0656118b4668e5e842795ed3707684f3e @ 11/11/26 18:48:12.091
+  Nov 11 18:48:12.214: INFO: Started container "c7bdbb14fb1e72d07cc398b5a3b00ee0656118b4668e5e842795ed3707684f3e"
+
+  STEP: ensure the web server container is serving @ 11/11/26 18:48:12.214
+  STEP: get the IP:port needed to be checked @ 11/11/26 18:48:12.214
+  STEP: Get PodSandbox status for podID: 1ca2de2dd3c076066bcb5ed5d3974b1389f93f1488760173d84ead1dd57e1c60 @ 11/11/26 18:48:12.214
+  Nov 11 18:48:12.215: INFO: the IP:port is http://198.20.0.77:80
+  STEP: check the content of http://198.20.0.77:80 @ 11/11/26 18:48:12.215
+  Nov 11 18:48:13.218: INFO: check port mapping succeed
+  STEP: port forward PodSandbox: 1ca2de2dd3c076066bcb5ed5d3974b1389f93f1488760173d84ead1dd57e1c60 @ 11/11/26 18:48:13.218
+  Nov 11 18:48:13.222: INFO: Get port forward URL: http://127.0.0.1:33757/portforward/9DcXw6-0
+  STEP: check the output of portforward @ 11/11/26 18:48:13.222
+  Nov 11 18:48:13.223: INFO: Parse URL "http://127.0.0.1:33757/portforward/9DcXw6-0" succeed
+  STEP: check if we can get nginx main page via localhost:12001 @ 11/11/26 18:48:13.223
+  STEP: get the IP:port needed to be checked @ 11/11/26 18:48:13.223
+  Nov 11 18:48:13.223: INFO: the IP:port is http://127.0.0.1:12001
+  STEP: check the content of http://127.0.0.1:12001 @ 11/11/26 18:48:13.223
+  STEP: start port forward @ 11/11/26 18:48:13.223
+  Nov 11 18:48:14.334: INFO: check port mapping succeed
+  Nov 11 18:48:14.334: INFO: Check port forward URL "http://127.0.0.1:33757/portforward/9DcXw6-0" succeed
+  STEP: stop PodSandbox @ 11/11/26 18:48:14.334
+  STEP: delete PodSandbox @ 11/11/26 18:48:14.885
+• [9.194 seconds]
+------------------------------
+[k8s.io] Container Mount Readonly runtime should support readonly mounts should support non-recursive readonly mounts
+sigs.k8s.io/cri-tools/pkg/validate/container_linux.go:385
+  STEP: create Privileged podSandbox @ 11/11/26 18:48:14.92
+  STEP: create host path @ 11/11/26 18:48:26.719
+  STEP: create container with volume @ 11/11/26 18:48:26.72
+  STEP: create a container with volume and name @ 11/11/26 18:48:26.72
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:48:26.72
+  STEP: Create container. @ 11/11/26 18:48:26.721
+  Nov 11 18:48:26.771: INFO: Created container "24857a394c3ae11faacf067f4d2d1bc882949a5b3520159cfa8e00b7f7536828"
+
+  STEP: verifying container status @ 11/11/26 18:48:26.771
+  STEP: test start container with volume @ 11/11/26 18:48:26.772
+  STEP: Start container for containerID: 24857a394c3ae11faacf067f4d2d1bc882949a5b3520159cfa8e00b7f7536828 @ 11/11/26 18:48:26.772
+  Nov 11 18:48:26.909: INFO: Started container "24857a394c3ae11faacf067f4d2d1bc882949a5b3520159cfa8e00b7f7536828"
+
+  STEP: Get container status for containerID: 24857a394c3ae11faacf067f4d2d1bc882949a5b3520159cfa8e00b7f7536828 @ 11/11/26 18:48:26.909
+  STEP: check whether `touch /mnt/tmpfs/file` succeeds @ 11/11/26 18:48:26.91
+  STEP: execSync for containerID: 24857a394c3ae11faacf067f4d2d1bc882949a5b3520159cfa8e00b7f7536828 @ 11/11/26 18:48:26.91
+  Nov 11 18:48:27.036: INFO: Unexpected error occurred: command 'touch /mnt/tmpfs/file' exited with 1: touch: /mnt/tmpfs/file: Read-only file system
+
+  STEP: clean up the TempDir @ 11/11/26 18:48:27.036
+  [FAILED] in [It] - sigs.k8s.io/cri-tools/pkg/validate/container.go:574 @ 11/11/26 18:48:27.037
+  STEP: stop PodSandbox @ 11/11/26 18:48:27.037
+  STEP: delete PodSandbox @ 11/11/26 18:48:27.576
+• [FAILED] [12.694 seconds]
+[k8s.io] Container Mount Readonly runtime should support readonly mounts [It] should support non-recursive readonly mounts
+sigs.k8s.io/cri-tools/pkg/validate/container_linux.go:385
+
+  [FAILED] failed to execSync in container "24857a394c3ae11faacf067f4d2d1bc882949a5b3520159cfa8e00b7f7536828"
+  Unexpected error:
+      <exec.CodeExitError>: 
+      command 'touch /mnt/tmpfs/file' exited with 1: touch: /mnt/tmpfs/file: Read-only file system
+      
+      {
+          Err: <*errors.errorString | 0x2bcebc415260>{
+              s: "command 'touch /mnt/tmpfs/file' exited with 1: touch: /mnt/tmpfs/file: Read-only file system\n",
+          },
+          Code: 1,
+      }
+  occurred
+  In [It] at: sigs.k8s.io/cri-tools/pkg/validate/container.go:574 @ 11/11/26 18:48:27.037
+------------------------------
+[k8s.io] Container Mount Readonly runtime should support readonly mounts should support recursive readonly mounts
+sigs.k8s.io/cri-tools/pkg/validate/container_linux.go:388
+  STEP: create Privileged podSandbox @ 11/11/26 18:48:27.614
+  [SKIPPED] in [It] - sigs.k8s.io/cri-tools/pkg/validate/container_linux.go:358 @ 11/11/26 18:48:31.585
+  STEP: stop PodSandbox @ 11/11/26 18:48:31.585
+  STEP: delete PodSandbox @ 11/11/26 18:48:32.111
+S [SKIPPED] [4.530 seconds]
+[k8s.io] Container Mount Readonly runtime should support readonly mounts [It] should support recursive readonly mounts
+sigs.k8s.io/cri-tools/pkg/validate/container_linux.go:388
+
+  [SKIPPED] runtime does not implement recursive readonly mounts
+  In [It] at: sigs.k8s.io/cri-tools/pkg/validate/container_linux.go:358 @ 11/11/26 18:48:31.585
+------------------------------
+[k8s.io] Container Mount Readonly runtime should support readonly mounts should reject a recursive readonly mount with PROPAGATION_HOST_TO_CONTAINER
+sigs.k8s.io/cri-tools/pkg/validate/container_linux.go:417
+  STEP: create Privileged podSandbox @ 11/11/26 18:48:32.143
+  [SKIPPED] in [It] - sigs.k8s.io/cri-tools/pkg/validate/container_linux.go:394 @ 11/11/26 18:48:36.999
+  STEP: stop PodSandbox @ 11/11/26 18:48:36.999
+  STEP: delete PodSandbox @ 11/11/26 18:48:38.696
+S [SKIPPED] [6.585 seconds]
+[k8s.io] Container Mount Readonly runtime should support readonly mounts [It] should reject a recursive readonly mount with PROPAGATION_HOST_TO_CONTAINER
+sigs.k8s.io/cri-tools/pkg/validate/container_linux.go:417
+
+  [SKIPPED] runtime does not implement recursive readonly mounts
+  In [It] at: sigs.k8s.io/cri-tools/pkg/validate/container_linux.go:394 @ 11/11/26 18:48:36.999
+------------------------------
+[k8s.io] Container Mount Readonly runtime should support readonly mounts should reject a recursive readonly mount with PROPAGATION_BIDIRECTIONAL
+sigs.k8s.io/cri-tools/pkg/validate/container_linux.go:420
+  STEP: create Privileged podSandbox @ 11/11/26 18:48:38.728
+  [SKIPPED] in [It] - sigs.k8s.io/cri-tools/pkg/validate/container_linux.go:394 @ 11/11/26 18:48:42.876
+  STEP: stop PodSandbox @ 11/11/26 18:48:42.876
+  STEP: delete PodSandbox @ 11/11/26 18:48:43.435
+S [SKIPPED] [4.740 seconds]
+[k8s.io] Container Mount Readonly runtime should support readonly mounts [It] should reject a recursive readonly mount with PROPAGATION_BIDIRECTIONAL
+sigs.k8s.io/cri-tools/pkg/validate/container_linux.go:420
+
+  [SKIPPED] runtime does not implement recursive readonly mounts
+  In [It] at: sigs.k8s.io/cri-tools/pkg/validate/container_linux.go:394 @ 11/11/26 18:48:42.876
+------------------------------
+[k8s.io] Container Mount Readonly runtime should support readonly mounts should reject a recursive readonly mount with ReadOnly: false
+sigs.k8s.io/cri-tools/pkg/validate/container_linux.go:423
+  STEP: create Privileged podSandbox @ 11/11/26 18:48:43.469
+  [SKIPPED] in [It] - sigs.k8s.io/cri-tools/pkg/validate/container_linux.go:425 @ 11/11/26 18:48:50.547
+  STEP: stop PodSandbox @ 11/11/26 18:48:50.547
+  STEP: delete PodSandbox @ 11/11/26 18:48:51.067
+S [SKIPPED] [7.632 seconds]
+[k8s.io] Container Mount Readonly runtime should support readonly mounts [It] should reject a recursive readonly mount with ReadOnly: false
+sigs.k8s.io/cri-tools/pkg/validate/container_linux.go:423
+
+  [SKIPPED] runtime does not implement recursive readonly mounts
+  In [It] at: sigs.k8s.io/cri-tools/pkg/validate/container_linux.go:425 @ 11/11/26 18:48:50.547
+------------------------------
+[k8s.io] NRI pod sandbox lifecycle should receive RunPodSandbox, StopPodSandbox, and RemovePodSandbox in strict order with correct metadata [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:85
+  [SKIPPED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:47 @ 11/11/26 18:48:51.101
+S [SKIPPED] [0.002 seconds]
+[k8s.io] NRI [BeforeEach] pod sandbox lifecycle should receive RunPodSandbox, StopPodSandbox, and RemovePodSandbox in strict order with correct metadata [Serial]
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:45
+  [It] sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:85
+
+  [SKIPPED] NRI socket not configured (use -nri-socket flag)
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:47 @ 11/11/26 18:48:51.101
+------------------------------
+[k8s.io] NRI container lifecycle should receive CreateContainer, StartContainer, StopContainer, and RemoveContainer in strict order with correct metadata [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:206
+  [SKIPPED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:47 @ 11/11/26 18:48:51.104
+S [SKIPPED] [0.002 seconds]
+[k8s.io] NRI [BeforeEach] container lifecycle should receive CreateContainer, StartContainer, StopContainer, and RemoveContainer in strict order with correct metadata [Serial]
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:45
+  [It] sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:206
+
+  [SKIPPED] NRI socket not configured (use -nri-socket flag)
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:47 @ 11/11/26 18:48:51.104
+------------------------------
+[k8s.io] NRI container lifecycle (failed container) should receive CreateContainer, StartContainer, StopContainer, and RemoveContainer for a container that exits with a non-zero code [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:378
+  [SKIPPED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:47 @ 11/11/26 18:48:51.108
+S [SKIPPED] [0.005 seconds]
+[k8s.io] NRI [BeforeEach] container lifecycle (failed container) should receive CreateContainer, StartContainer, StopContainer, and RemoveContainer for a container that exits with a non-zero code [Serial]
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:45
+  [It] sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:378
+
+  [SKIPPED] NRI socket not configured (use -nri-socket flag)
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:47 @ 11/11/26 18:48:51.108
+------------------------------
+[k8s.io] NRI RunPodSandbox contract should not expose sandbox while RunPodSandbox hook is in progress [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:564
+  [SKIPPED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:47 @ 11/11/26 18:48:51.111
+S [SKIPPED] [0.002 seconds]
+[k8s.io] NRI [BeforeEach] RunPodSandbox contract should not expose sandbox while RunPodSandbox hook is in progress [Serial]
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:45
+  [It] sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:564
+
+  [SKIPPED] NRI socket not configured (use -nri-socket flag)
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:47 @ 11/11/26 18:48:51.111
+------------------------------
+[k8s.io] NRI RunPodSandbox contract should not start workload containers until RunPodSandbox hook completes [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:671
+  [SKIPPED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:47 @ 11/11/26 18:48:51.113
+S [SKIPPED] [0.002 seconds]
+[k8s.io] NRI [BeforeEach] RunPodSandbox contract should not start workload containers until RunPodSandbox hook completes [Serial]
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:45
+  [It] sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:671
+
+  [SKIPPED] NRI socket not configured (use -nri-socket flag)
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:47 @ 11/11/26 18:48:51.113
+------------------------------
+[k8s.io] NRI RunPodSandbox contract should fail RunPodSandbox and clean up when the NRI hook errors, then allow retry [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:787
+  [SKIPPED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:47 @ 11/11/26 18:48:51.115
+S [SKIPPED] [0.002 seconds]
+[k8s.io] NRI [BeforeEach] RunPodSandbox contract should fail RunPodSandbox and clean up when the NRI hook errors, then allow retry [Serial]
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:45
+  [It] sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:787
+
+  [SKIPPED] NRI socket not configured (use -nri-socket flag)
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:47 @ 11/11/26 18:48:51.115
+------------------------------
+[k8s.io] NRI StopPodSandbox contract should stop all workload containers and keep sandbox accessible while StopPodSandbox hook is in progress [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:899
+  [SKIPPED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:47 @ 11/11/26 18:48:51.132
+S [SKIPPED] [0.017 seconds]
+[k8s.io] NRI [BeforeEach] StopPodSandbox contract should stop all workload containers and keep sandbox accessible while StopPodSandbox hook is in progress [Serial]
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:45
+  [It] sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:899
+
+  [SKIPPED] NRI socket not configured (use -nri-socket flag)
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:47 @ 11/11/26 18:48:51.132
+------------------------------
+[k8s.io] NRI StopPodSandbox contract should handle StopPodSandbox idempotently and never reuse sandbox [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:1028
+  [SKIPPED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:47 @ 11/11/26 18:48:51.134
+S [SKIPPED] [0.002 seconds]
+[k8s.io] NRI [BeforeEach] StopPodSandbox contract should handle StopPodSandbox idempotently and never reuse sandbox [Serial]
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:45
+  [It] sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:1028
+
+  [SKIPPED] NRI socket not configured (use -nri-socket flag)
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:47 @ 11/11/26 18:48:51.134
+------------------------------
+[k8s.io] NRI CreateContainer contract should not expose container while CreateContainer hook is in progress [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:1205
+  [SKIPPED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:47 @ 11/11/26 18:48:51.158
+S [SKIPPED] [0.023 seconds]
+[k8s.io] NRI [BeforeEach] CreateContainer contract should not expose container while CreateContainer hook is in progress [Serial]
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:45
+  [It] sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:1205
+
+  [SKIPPED] NRI socket not configured (use -nri-socket flag)
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:47 @ 11/11/26 18:48:51.158
+------------------------------
+[k8s.io] NRI CreateContainer contract should fail CreateContainer when the NRI hook errors, leak nothing, and allow retry [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:1296
+  [SKIPPED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:47 @ 11/11/26 18:48:51.16
+S [SKIPPED] [0.002 seconds]
+[k8s.io] NRI [BeforeEach] CreateContainer contract should fail CreateContainer when the NRI hook errors, leak nothing, and allow retry [Serial]
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:45
+  [It] sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:1296
+
+  [SKIPPED] NRI socket not configured (use -nri-socket flag)
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:47 @ 11/11/26 18:48:51.16
+------------------------------
+[k8s.io] NRI plugin synchronization should synchronize a newly connected plugin with existing pods and containers [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:1601
+  [SKIPPED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:47 @ 11/11/26 18:48:51.161
+S [SKIPPED] [0.002 seconds]
+[k8s.io] NRI [BeforeEach] plugin synchronization should synchronize a newly connected plugin with existing pods and containers [Serial]
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:45
+  [It] sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:1601
+
+  [SKIPPED] NRI socket not configured (use -nri-socket flag)
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:47 @ 11/11/26 18:48:51.161
+------------------------------
+[k8s.io] NRI plugin synchronization should receive a callback for container created during the Synchronize call [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:1683
+  [SKIPPED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:47 @ 11/11/26 18:48:51.163
+S [SKIPPED] [0.002 seconds]
+[k8s.io] NRI [BeforeEach] plugin synchronization should receive a callback for container created during the Synchronize call [Serial]
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:45
+  [It] sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:1683
+
+  [SKIPPED] NRI socket not configured (use -nri-socket flag)
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:47 @ 11/11/26 18:48:51.163
+------------------------------
+[k8s.io] NRI plugin synchronization should receive information about all containers without the race condition during initialization [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:1792
+  [SKIPPED] in [BeforeEach] - sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:47 @ 11/11/26 18:48:51.165
+S [SKIPPED] [0.002 seconds]
+[k8s.io] NRI [BeforeEach] plugin synchronization should receive information about all containers without the race condition during initialization [Serial]
+  [BeforeEach] sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:45
+  [It] sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:1792
+
+  [SKIPPED] NRI socket not configured (use -nri-socket flag)
+  In [BeforeEach] at: sigs.k8s.io/cri-tools/pkg/validate/nri_linux.go:47 @ 11/11/26 18:48:51.165
+------------------------------
+S
+------------------------------
+[k8s.io] Multiple Containers [Conformance] when running multiple containers in a pod should support network
+sigs.k8s.io/cri-tools/pkg/validate/multi_container_linux.go:82
+  STEP: create a PodSandbox @ 11/11/26 18:48:51.167
+  STEP: create a httpd container @ 11/11/26 18:48:55.205
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/httpd:2.4.39-4 @ 11/11/26 18:48:55.205
+  STEP: Pull image : registry.k8s.io/e2e-test-images/httpd:2.4.39-4 @ 11/11/26 18:48:55.206
+  STEP: Create container. @ 11/11/26 18:49:00.363
+  Nov 11 18:49:00.427: INFO: Created container "3f87c8b0bc4d0eee0353293b0608383550b3646562c6dc42ea3d3027bec9c35c"
+
+  STEP: start the httpd container @ 11/11/26 18:49:00.427
+  STEP: Start container for containerID: 3f87c8b0bc4d0eee0353293b0608383550b3646562c6dc42ea3d3027bec9c35c @ 11/11/26 18:49:00.427
+  Nov 11 18:49:00.554: INFO: Started container "3f87c8b0bc4d0eee0353293b0608383550b3646562c6dc42ea3d3027bec9c35c"
+
+  STEP: Get container status for containerID: 3f87c8b0bc4d0eee0353293b0608383550b3646562c6dc42ea3d3027bec9c35c @ 11/11/26 18:49:00.554
+  STEP: create a busybox container @ 11/11/26 18:49:00.555
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:49:00.555
+  STEP: Create container. @ 11/11/26 18:49:00.556
+  Nov 11 18:49:00.604: INFO: Created container "3c9e65fb6470d413cc58365b6af3f722c22ab6595f3bf70313883fe113c6ea7e"
+
+  STEP: start the busybox container @ 11/11/26 18:49:00.604
+  STEP: Start container for containerID: 3c9e65fb6470d413cc58365b6af3f722c22ab6595f3bf70313883fe113c6ea7e @ 11/11/26 18:49:00.604
+  Nov 11 18:49:00.734: INFO: Started container "3c9e65fb6470d413cc58365b6af3f722c22ab6595f3bf70313883fe113c6ea7e"
+
+  STEP: Get container status for containerID: 3c9e65fb6470d413cc58365b6af3f722c22ab6595f3bf70313883fe113c6ea7e @ 11/11/26 18:49:00.734
+  STEP: get the IP:port needed to be checked @ 11/11/26 18:49:00.735
+  STEP: Get PodSandbox status for podID: 8c24f9e47db2d3337dbe96b538278e2ab925786e4c422b27b9b5985a786bdd3a @ 11/11/26 18:49:00.735
+  Nov 11 18:49:00.736: INFO: the IP:port is http://198.20.0.83:80
+  STEP: check the content of http://198.20.0.83:80 @ 11/11/26 18:49:00.736
+  Nov 11 18:49:00.737: INFO: check port mapping succeed
+  STEP: stop PodSandbox @ 11/11/26 18:49:00.737
+  STEP: delete PodSandbox @ 11/11/26 18:49:01.344
+  STEP: cleanup log directory @ 11/11/26 18:49:01.378
+• [10.213 seconds]
+------------------------------
+[k8s.io] Multiple Containers [Conformance] when running multiple containers in a pod should support container log
+sigs.k8s.io/cri-tools/pkg/validate/multi_container_linux.go:86
+  STEP: create a PodSandbox @ 11/11/26 18:49:01.38
+  STEP: create a httpd container @ 11/11/26 18:49:07.04
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/httpd:2.4.39-4 @ 11/11/26 18:49:07.04
+  STEP: Create container. @ 11/11/26 18:49:07.041
+  Nov 11 18:49:07.091: INFO: Created container "a3129d3f80edad0fdae2b834ed9c108d248513e5b497ed4dc829a3492b469473"
+
+  STEP: start the httpd container @ 11/11/26 18:49:07.091
+  STEP: Start container for containerID: a3129d3f80edad0fdae2b834ed9c108d248513e5b497ed4dc829a3492b469473 @ 11/11/26 18:49:07.091
+  Nov 11 18:49:07.216: INFO: Started container "a3129d3f80edad0fdae2b834ed9c108d248513e5b497ed4dc829a3492b469473"
+
+  STEP: Get container status for containerID: a3129d3f80edad0fdae2b834ed9c108d248513e5b497ed4dc829a3492b469473 @ 11/11/26 18:49:07.216
+  STEP: create a busybox container @ 11/11/26 18:49:07.216
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:49:07.217
+  STEP: Create container. @ 11/11/26 18:49:07.217
+  Nov 11 18:49:07.268: INFO: Created container "3046b05aea2e51ced35ce3e27bfd861bd76e30c06ba79f9f064f0a0a6ae4373f"
+
+  STEP: start the busybox container @ 11/11/26 18:49:07.268
+  STEP: Start container for containerID: 3046b05aea2e51ced35ce3e27bfd861bd76e30c06ba79f9f064f0a0a6ae4373f @ 11/11/26 18:49:07.268
+  Nov 11 18:49:07.397: INFO: Started container "3046b05aea2e51ced35ce3e27bfd861bd76e30c06ba79f9f064f0a0a6ae4373f"
+
+  STEP: Get container status for containerID: 3046b05aea2e51ced35ce3e27bfd861bd76e30c06ba79f9f064f0a0a6ae4373f @ 11/11/26 18:49:07.397
+  STEP: stop PodSandbox @ 11/11/26 18:49:07.4
+  STEP: delete PodSandbox @ 11/11/26 18:49:08
+  STEP: cleanup log directory @ 11/11/26 18:49:08.034
+• [6.656 seconds]
+------------------------------
+[k8s.io] Multiple Containers [Conformance] when running multiple containers in a pod should support container exec
+sigs.k8s.io/cri-tools/pkg/validate/multi_container_linux.go:108
+  STEP: create a PodSandbox @ 11/11/26 18:49:08.035
+  STEP: create a httpd container @ 11/11/26 18:49:12.13
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/httpd:2.4.39-4 @ 11/11/26 18:49:12.13
+  STEP: Create container. @ 11/11/26 18:49:12.131
+  Nov 11 18:49:12.193: INFO: Created container "ef817b42138da36fa138123cb1937c1c7e43cee749ef8e52e449c8f6d562ccc0"
+
+  STEP: start the httpd container @ 11/11/26 18:49:12.193
+  STEP: Start container for containerID: ef817b42138da36fa138123cb1937c1c7e43cee749ef8e52e449c8f6d562ccc0 @ 11/11/26 18:49:12.193
+  Nov 11 18:49:12.317: INFO: Started container "ef817b42138da36fa138123cb1937c1c7e43cee749ef8e52e449c8f6d562ccc0"
+
+  STEP: Get container status for containerID: ef817b42138da36fa138123cb1937c1c7e43cee749ef8e52e449c8f6d562ccc0 @ 11/11/26 18:49:12.317
+  STEP: create a busybox container @ 11/11/26 18:49:12.318
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/11/26 18:49:12.318
+  STEP: Create container. @ 11/11/26 18:49:12.318
+  Nov 11 18:49:12.361: INFO: Created container "fcd977410149bbd4c6aa22bb5eb45aed0c09229804f1b41bdd0af03502ef3249"
+
+  STEP: start the busybox container @ 11/11/26 18:49:12.361
+  STEP: Start container for containerID: fcd977410149bbd4c6aa22bb5eb45aed0c09229804f1b41bdd0af03502ef3249 @ 11/11/26 18:49:12.361
+  Nov 11 18:49:12.489: INFO: Started container "fcd977410149bbd4c6aa22bb5eb45aed0c09229804f1b41bdd0af03502ef3249"
+
+  STEP: Get container status for containerID: fcd977410149bbd4c6aa22bb5eb45aed0c09229804f1b41bdd0af03502ef3249 @ 11/11/26 18:49:12.489
+  STEP: execSync for containerID: ef817b42138da36fa138123cb1937c1c7e43cee749ef8e52e449c8f6d562ccc0 @ 11/11/26 18:49:12.49
+  Nov 11 18:49:12.616: INFO: Execsync succeed
+  STEP: execSync for containerID: fcd977410149bbd4c6aa22bb5eb45aed0c09229804f1b41bdd0af03502ef3249 @ 11/11/26 18:49:12.616
+  Nov 11 18:49:12.912: INFO: Execsync succeed
+  STEP: stop PodSandbox @ 11/11/26 18:49:12.912
+  STEP: delete PodSandbox @ 11/11/26 18:49:14.924
+  STEP: cleanup log directory @ 11/11/26 18:49:14.958
+• [6.924 seconds]
+------------------------------
+[k8s.io] Runtime info runtime should support returning runtime info runtime should return version info [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/runtime_info.go:43
+  Nov 11 18:49:14.960: INFO: Get version info succeed
+• [0.003 seconds]
+------------------------------
+[k8s.io] Runtime info runtime should support returning runtime info runtime should return runtime conditions [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/runtime_info.go:47
+  STEP: test runtime status @ 11/11/26 18:49:14.962
+• [0.002 seconds]
+------------------------------
+[k8s.io] Image Identifier Consistency should return the same image identifier across all APIs [Conformance] [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/image_id_consistency.go:51
+  STEP: Pulling image: gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:49:14.964
+  STEP: Pull image : gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:49:14.964
+  Nov 11 18:49:16.260: INFO: PullImageResponse.image_ref: "sha256:552a946d71c1a27bd126431c3af69b3ded9eea21a2e98b6e93305927f37edb49"
+  STEP: Checking ImageStatus @ 11/11/26 18:49:16.26
+  STEP: Get image status for image: gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:49:16.26
+  Nov 11 18:49:16.260: INFO: Image.id: "sha256:552a946d71c1a27bd126431c3af69b3ded9eea21a2e98b6e93305927f37edb49"
+  Nov 11 18:49:16.260: INFO: Image.repo_tags: [gcr.io/k8s-staging-cri-tools/test-image-tag:test]
+  Nov 11 18:49:16.260: INFO: Image.repo_digests: [gcr.io/k8s-staging-cri-tools/test-image-tag@sha256:7790d76e1fd8a5b3ae026fc29ec87b1d622828cd5539b1c0a79acecf4c4821be]
+  STEP: Creating a pod sandbox @ 11/11/26 18:49:16.26
+  STEP: Creating and starting a container @ 11/11/26 18:49:20.563
+  STEP: Collecting identifiers from all APIs @ 11/11/26 18:49:20.736
+  Nov 11 18:49:20.736: INFO: ContainerStatus.image_id: "sha256:552a946d71c1a27bd126431c3af69b3ded9eea21a2e98b6e93305927f37edb49"
+  Nov 11 18:49:20.737: INFO: ContainerStatus.image_ref (legacy): "gcr.io/k8s-staging-cri-tools/test-image-tag@sha256:7790d76e1fd8a5b3ae026fc29ec87b1d622828cd5539b1c0a79acecf4c4821be"
+  Nov 11 18:49:20.737: INFO: Container.image_id: "sha256:552a946d71c1a27bd126431c3af69b3ded9eea21a2e98b6e93305927f37edb49"
+  STEP: Verifying consistency @ 11/11/26 18:49:20.737
+  Nov 11 18:49:20.737: INFO: Verifying consistency: PullImageResponse.image_ref="sha256:552a946d71c1a27bd126431c3af69b3ded9eea21a2e98b6e93305927f37edb49", Image.id="sha256:552a946d71c1a27bd126431c3af69b3ded9eea21a2e98b6e93305927f37edb49", ContainerStatus.image_id="sha256:552a946d71c1a27bd126431c3af69b3ded9eea21a2e98b6e93305927f37edb49", Container.image_id="sha256:552a946d71c1a27bd126431c3af69b3ded9eea21a2e98b6e93305927f37edb49"
+  STEP: Remove image : gcr.io/k8s-staging-cri-tools/test-image-tag:test @ 11/11/26 18:49:21.349
+  STEP: Remove image by ID : sha256:552a946d71c1a27bd126431c3af69b3ded9eea21a2e98b6e93305927f37edb49 @ 11/11/26 18:49:21.349
+• [6.458 seconds]
+------------------------------
+[k8s.io] Image Identifier Consistency should return the same image identifier when pulled from different registries [Conformance] [Serial]
+sigs.k8s.io/cri-tools/pkg/validate/image_id_consistency.go:137
+  STEP: Pulling image from registry 1: registry.k8s.io/pause:3.9 @ 11/11/26 18:49:21.424
+  STEP: Pull image : registry.k8s.io/pause:3.9 @ 11/11/26 18:49:21.424
+  Nov 11 18:49:22.386: INFO: PullImageResponse.image_ref (registry 1): "sha256:e6f1816883972d4be47bd48879a08919b96afcd344132622e4d444987919323c"
+  STEP: Pulling image from registry 2: k8s.gcr.io/pause:3.9 @ 11/11/26 18:49:22.386
+  STEP: Pull image : k8s.gcr.io/pause:3.9 @ 11/11/26 18:49:22.386
+  Nov 11 18:49:22.648: INFO: PullImageResponse.image_ref (registry 2): "sha256:e6f1816883972d4be47bd48879a08919b96afcd344132622e4d444987919323c"
+  STEP: Verifying image IDs are consistent across registries @ 11/11/26 18:49:22.648
+  STEP: Verifying ImageStatus returns the same ID for both names @ 11/11/26 18:49:22.648
+  STEP: Get image status for image: registry.k8s.io/pause:3.9 @ 11/11/26 18:49:22.648
+  Nov 11 18:49:22.649: INFO: Image.id (registry 1): "sha256:e6f1816883972d4be47bd48879a08919b96afcd344132622e4d444987919323c"
+  Nov 11 18:49:22.649: INFO: Image.repo_tags (registry 1): [k8s.gcr.io/pause:3.9 registry.k8s.io/pause:3.9]
+  Nov 11 18:49:22.649: INFO: Image.repo_digests (registry 1): [k8s.gcr.io/pause@sha256:7031c1b283388d2c2e09b57badb803c05ebed362dc88d84b480cc47f72a21097 registry.k8s.io/pause@sha256:7031c1b283388d2c2e09b57badb803c05ebed362dc88d84b480cc47f72a21097]
+  STEP: Get image status for image: k8s.gcr.io/pause:3.9 @ 11/11/26 18:49:22.649
+  Nov 11 18:49:22.650: INFO: Image.id (registry 2): "sha256:e6f1816883972d4be47bd48879a08919b96afcd344132622e4d444987919323c"
+  Nov 11 18:49:22.650: INFO: Image.repo_tags (registry 2): [k8s.gcr.io/pause:3.9 registry.k8s.io/pause:3.9]
+  Nov 11 18:49:22.650: INFO: Image.repo_digests (registry 2): [k8s.gcr.io/pause@sha256:7031c1b283388d2c2e09b57badb803c05ebed362dc88d84b480cc47f72a21097 registry.k8s.io/pause@sha256:7031c1b283388d2c2e09b57badb803c05ebed362dc88d84b480cc47f72a21097]
+  STEP: Creating a pod sandbox @ 11/11/26 18:49:22.65
+  STEP: Creating a container using image from registry 2 @ 11/11/26 18:49:28.349
+  STEP: Checking container status @ 11/11/26 18:49:28.53
+  Nov 11 18:49:28.531: INFO: ContainerStatus.image_id: "sha256:e6f1816883972d4be47bd48879a08919b96afcd344132622e4d444987919323c"
+  Nov 11 18:49:28.531: INFO: ContainerStatus.image_ref (legacy): "k8s.gcr.io/pause@sha256:7031c1b283388d2c2e09b57badb803c05ebed362dc88d84b480cc47f72a21097"
+  STEP: Verifying consistency @ 11/11/26 18:49:28.531
+  STEP: Remove image : k8s.gcr.io/pause:3.9 @ 11/11/26 18:49:29.122
+  STEP: Remove image by ID : sha256:e6f1816883972d4be47bd48879a08919b96afcd344132622e4d444987919323c @ 11/11/26 18:49:29.123
+  STEP: Remove image : registry.k8s.io/pause:3.9 @ 11/11/26 18:49:29.186
+• [7.765 seconds]
+------------------------------
+[ReportAfterSuite] Autogenerated ReportAfterSuite for --json-report
+autogenerated by Ginkgo
+[ReportAfterSuite] PASSED [0.030 seconds]
+------------------------------
+
+Summarizing 16 Failures:
+  [FAIL] [k8s.io] Security Context NamespaceOption [It] runtime should support HostPID
+  sigs.k8s.io/cri-tools/pkg/framework/util.go:241
+  [FAIL] [k8s.io] Security Context NamespaceOption [It] runtime should support HostIpc is true
+  sigs.k8s.io/cri-tools/pkg/framework/util.go:241
+  [FAIL] [k8s.io] Security Context NamespaceOption [It] runtime should support HostNetwork is true
+  sigs.k8s.io/cri-tools/pkg/framework/util.go:241
+  [FAIL] [k8s.io] Container Mount Propagation runtime should support mount propagation [It] mount with 'rshared' should support propagation from host to container and vice versa
+  sigs.k8s.io/cri-tools/pkg/validate/container.go:507
+  [FAIL] [k8s.io] Container Mount Propagation runtime should support mount propagation [It] mount with 'rslave' should support propagation from host to container
+  sigs.k8s.io/cri-tools/pkg/validate/container.go:507
+  [FAIL] [k8s.io] Streaming runtime should support streaming interfaces [It] runtime should support portforward in host network
+  sigs.k8s.io/cri-tools/pkg/framework/util.go:241
+  [FAIL] [k8s.io] AppArmor [BeforeEach] runtime should support deprecated apparmor_profile field should fail with an unloaded apparmor_profile
+  sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:86
+  [FAIL] [k8s.io] AppArmor [BeforeEach] runtime should support deprecated apparmor_profile field should enforce a apparmor_profile blocking writes
+  sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:86
+  [FAIL] [k8s.io] AppArmor [BeforeEach] runtime should support deprecated apparmor_profile field should enforce a permissive deprecated profile
+  sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:86
+  [FAIL] [k8s.io] AppArmor [BeforeEach] runtime should support apparmor field should fail with an unloaded apparmor_profile
+  sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:86
+  [FAIL] [k8s.io] AppArmor [BeforeEach] runtime should support apparmor field should enforce a apparmor_profile blocking writes
+  sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:86
+  [FAIL] [k8s.io] AppArmor [BeforeEach] runtime should support apparmor field should enforce a permissive deprecated profile
+  sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:86
+  [FAIL] [k8s.io] AppArmor [BeforeEach] runtime should prefer new apparmor field should fail with an unloaded apparmor_profile
+  sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:86
+  [FAIL] [k8s.io] AppArmor [BeforeEach] runtime should prefer new apparmor field should enforce a apparmor_profile blocking writes
+  sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:86
+  [FAIL] [k8s.io] AppArmor [BeforeEach] runtime should prefer new apparmor field should work with apparmor profile
+  sigs.k8s.io/cri-tools/pkg/validate/apparmor_linux.go:86
+  [FAIL] [k8s.io] Container Mount Readonly runtime should support readonly mounts [It] should support non-recursive readonly mounts
+  sigs.k8s.io/cri-tools/pkg/validate/container.go:574
+
+Ran 113 of 142 Specs in 614.603 seconds
+FAIL! -- 97 Passed | 16 Failed | 0 Pending | 29 Skipped
+--- FAIL: TestCRISuite (614.64s)
+FAIL

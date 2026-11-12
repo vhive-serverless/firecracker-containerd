@@ -1,0 +1,3 @@
+ ce86b117d59ca93b1c04b791a251b445ace76703 _submodules/firecracker (v1.18.0-2-gce86b117d)
+ c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e _submodules/runc (v1.4.2)
+ 3070538befb5a6c09f93e99164762b3a76310357 _submodules/stargz-snapshotter (cmd/v0.18.2)

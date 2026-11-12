@@ -1,0 +1,20 @@
+Checkout and validation ran on nehalem@amd218.utah.cloudlab.us.
+
+Clean checkout:
+  /users/nehalem/fc-ctrd-mod/step4-capture-interrupt-clean-5186d40
+  commit: 5186d40578d58b23c432e6c5af15789654d548c1
+
+Lint:
+  cd /users/nehalem/fc-ctrd-mod/step4-capture-interrupt-clean-5186d40
+  PATH=/users/nehalem/fc-ctrd-mod/toolchains/go1.26.11/bin:$PATH make lint
+
+Isolated real-VM test:
+  cd /users/nehalem/fc-ctrd-mod/step4-capture-interrupt-clean-5186d40
+  PATH=/users/nehalem/fc-ctrd-mod/toolchains/go1.26.11/bin:$PATH \
+  STACK_DIR=/users/nehalem/fc-ctrd-mod \
+  DOCKER_IMAGE_TAG=72f4fc9173be \
+  FIRECRACKER_CONTAINERD_TEST_IMAGE=localhost/firecracker-containerd-test \
+  FICD_DM_POOL=fc-step4-capture-interrupt-clean-5186d40 \
+  FICD_VM_STORAGE=/users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-capture-interrupt-clean-5186d40 \
+  EXTRAGOARGS='-v -count=1 -timeout=1200s' \
+  make -C runtime integ-test-TestNativeCheckpointInterrupt_Isolated

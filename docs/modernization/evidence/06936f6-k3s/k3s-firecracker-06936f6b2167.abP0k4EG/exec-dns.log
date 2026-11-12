@@ -1,0 +1,7 @@
+EXEC_OK
+Server:		10.43.0.10
+Address:	10.43.0.10:53
+
+Name:	kubernetes.default.svc.cluster.local
+Address: 10.43.0.1
+

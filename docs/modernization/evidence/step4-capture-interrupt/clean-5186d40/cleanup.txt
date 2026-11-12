@@ -1,0 +1,2 @@
+pool_removed=true
+storage_removed=true

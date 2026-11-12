@@ -1,0 +1,32 @@
+commit=5186d40578d58b23c432e6c5af15789654d548c1
+commit_delta_from_parent=
+A	runtime/native_checkpoint_interrupt_integ_test.go
+test_source_sha256=51216214faf538e616b763fadb8f294e87cfc3a4759dea6c6ffcfacf8f2b359d
+go_version=go version go1.26.11 linux/amd64
+ttrpc=github.com/containerd/ttrpc v1.2.8
+worker_hostname=node-005.cluster.ntu-cloud-pg0.utah.cloudlab.us
+worker_mount=/dev/sda3 ext3
+test_image=sha256:0ed23833cf6043e6f2e0fa6ef3e590cfd9626c03e69d66303f9a693b079021b5
+test_image_tag=localhost/firecracker-containerd-test:72f4fc9173be
+test_runtime_source=72f4fc9173bef33cc1c981ad285758716f635e02
+submodule_status=
+ ce86b117d59ca93b1c04b791a251b445ace76703 _submodules/firecracker (v1.18.0-2-gce86b117d)
+ c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e _submodules/runc (v1.4.2)
+ 3070538befb5a6c09f93e99164762b3a76310357 _submodules/stargz-snapshotter (cmd/v0.18.2)
+test_result_tail=
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestNativeCheckpointInterrupt_Isolated$'"
+=== RUN   TestNativeCheckpointInterrupt_Isolated
+=== RUN   TestNativeCheckpointInterrupt_Isolated/jailed=false
+=== RUN   TestNativeCheckpointInterrupt_Isolated/jailed=true
+--- PASS: TestNativeCheckpointInterrupt_Isolated (31.52s)
+    --- PASS: TestNativeCheckpointInterrupt_Isolated/jailed=false (15.45s)
+    --- PASS: TestNativeCheckpointInterrupt_Isolated/jailed=true (16.08s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	31.540s
+make: Leaving directory '/users/nehalem/fc-ctrd-mod/step4-capture-interrupt-clean-5186d40/runtime'
+private_storage_contents_before_cleanup=
+drwxr-xr-x nehalem:ntu-cloud-PG0 /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-capture-interrupt-clean-5186d40 4096
+test_exit=test_exit=0
+lint_exit=lint_exit=0

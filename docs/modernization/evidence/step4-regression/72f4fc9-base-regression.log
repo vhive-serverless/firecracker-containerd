@@ -1,0 +1,1434 @@
+make: Entering directory '/users/nehalem/fc-ctrd-mod/step4-native-final/runtime'
+make -C .. test-deps-in-docker
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/step4-native-final'
+docker run --rm \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final:/src \
+	--volume gocache:/go \
+	--workdir /src \
+	public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 go mod download
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/step4-native-final'
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 9
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestAttachBlockDevice_Isolated$'"
+=== RUN   TestAttachBlockDevice_Isolated
+=== RUN   TestAttachBlockDevice_Isolated/Without_Jailer
+    jailer_integ_test.go:50: 
+        	Error Trace:	/src/runtime/jailer_integ_test.go:50
+        	            				/src/runtime/jailer_integ_test.go:295
+        	            				/src/runtime/jailer_integ_test.go:76
+        	Error:      	"[d .pmem-images/]" should have 0 item(s), but has 1
+        	Test:       	TestAttachBlockDevice_Isolated/Without_Jailer
+=== RUN   TestAttachBlockDevice_Isolated/With_Jailer
+    jailer_integ_test.go:50: 
+        	Error Trace:	/src/runtime/jailer_integ_test.go:50
+        	            				/src/runtime/jailer_integ_test.go:295
+        	            				/src/runtime/jailer_integ_test.go:79
+        	Error:      	"[d .pmem-images/]" should have 0 item(s), but has 1
+        	Test:       	TestAttachBlockDevice_Isolated/With_Jailer
+=== RUN   TestAttachBlockDevice_Isolated/With_Jailer_and_bind-mount
+    jailer_integ_test.go:50: 
+        	Error Trace:	/src/runtime/jailer_integ_test.go:50
+        	            				/src/runtime/jailer_integ_test.go:295
+        	            				/src/runtime/jailer_integ_test.go:85
+        	Error:      	"[d .pmem-images/]" should have 0 item(s), but has 1
+        	Test:       	TestAttachBlockDevice_Isolated/With_Jailer_and_bind-mount
+--- FAIL: TestAttachBlockDevice_Isolated (24.84s)
+    --- FAIL: TestAttachBlockDevice_Isolated/Without_Jailer (7.90s)
+    --- FAIL: TestAttachBlockDevice_Isolated/With_Jailer (8.35s)
+    --- FAIL: TestAttachBlockDevice_Isolated/With_Jailer_and_bind-mount (8.58s)
+FAIL
+exit status 1
+FAIL	github.com/firecracker-microvm/firecracker-containerd/runtime	24.857s
+make: *** [Makefile:58: integ-test-TestAttachBlockDevice_Isolated] Error 1
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 9
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestAttach_Isolated$'"
+=== RUN   TestAttach_Isolated
+=== RUN   TestAttach_Isolated/attach
+=== RUN   TestAttach_Isolated/null_io
+--- PASS: TestAttach_Isolated (10.12s)
+    --- PASS: TestAttach_Isolated/attach (5.38s)
+    --- PASS: TestAttach_Isolated/null_io (4.23s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	10.138s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        1
+Event number:      0
+Major, minor:      252, 7
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestAutomaticCNISupport_Isolated$'"
+=== RUN   TestAutomaticCNISupport_Isolated
+    cni_integ_test.go:209: stdout output from task "task-1": Hello, my task task-1
+    cni_integ_test.go:209: stdout output from task "task-4": Hello, my task task-4
+    cni_integ_test.go:209: stdout output from task "task-3": Hello, my task task-3
+    cni_integ_test.go:209: stdout output from task "task-0": Hello, my task task-0
+    cni_integ_test.go:209: stdout output from task "task-2": Hello, my task task-2
+--- PASS: TestAutomaticCNISupport_Isolated (10.76s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	10.777s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        1
+Event number:      0
+Major, minor:      252, 7
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestBinaryOutput_Isolated$'"
+=== RUN   TestBinaryOutput_Isolated
+    resources_integ_test.go:142: slow consumer received 4194304 bytes without corruption
+--- PASS: TestBinaryOutput_Isolated (6.84s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	6.863s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 7
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestBrokenPipe_Isolated$'"
+=== RUN   TestBrokenPipe_Isolated
+--- PASS: TestBrokenPipe_Isolated (26.48s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	26.666s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 7
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestCNIGracefulCleanup_Isolated$'"
+=== RUN   TestCNIGracefulCleanup_Isolated
+=== RUN   TestCNIGracefulCleanup_Isolated/iteration-0
+=== RUN   TestCNIGracefulCleanup_Isolated/iteration-1
+=== RUN   TestCNIGracefulCleanup_Isolated/iteration-2
+--- PASS: TestCNIGracefulCleanup_Isolated (24.80s)
+    --- PASS: TestCNIGracefulCleanup_Isolated/iteration-0 (8.34s)
+    --- PASS: TestCNIGracefulCleanup_Isolated/iteration-1 (6.95s)
+    --- PASS: TestCNIGracefulCleanup_Isolated/iteration-2 (8.06s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	24.822s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 7
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestCNISupport_Isolated$'"
+=== RUN   TestCNISupport_Isolated
+    cni_integ_test.go:140: stdout output from task "vm-4-container": Hello, my virtual machine vm-4
+    cni_integ_test.go:140: stdout output from task "vm-1-container": Hello, my virtual machine vm-1
+    cni_integ_test.go:140: stdout output from task "vm-3-container": Hello, my virtual machine vm-3
+    cni_integ_test.go:140: stdout output from task "vm-2-container": Hello, my virtual machine vm-2
+    cni_integ_test.go:140: stdout output from task "vm-0-container": Hello, my virtual machine vm-0
+--- PASS: TestCNISupport_Isolated (16.22s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	16.242s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 7
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestCrashRecovery_Isolated$'"
+=== RUN   TestCrashRecovery_Isolated
+=== RUN   TestCrashRecovery_Isolated/iteration-0
+=== RUN   TestCrashRecovery_Isolated/iteration-1
+=== RUN   TestCrashRecovery_Isolated/iteration-2
+--- PASS: TestCrashRecovery_Isolated (18.23s)
+    --- PASS: TestCrashRecovery_Isolated/iteration-0 (6.01s)
+    --- PASS: TestCrashRecovery_Isolated/iteration-1 (5.86s)
+    --- PASS: TestCrashRecovery_Isolated/iteration-2 (5.92s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	18.245s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        1
+Event number:      0
+Major, minor:      252, 7
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestCreateContainerWithSameName_Isolated$'"
+=== RUN   TestCreateContainerWithSameName_Isolated
+--- PASS: TestCreateContainerWithSameName_Isolated (22.19s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	22.207s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        1
+Event number:      0
+Major, minor:      252, 7
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestCreateVM_Isolated$'"
+=== RUN   TestCreateVM_Isolated
+=== RUN   TestCreateVM_Isolated/Happy_Case
+=== RUN   TestCreateVM_Isolated/Happy_Case/Jailer
+=== RUN   TestCreateVM_Isolated/No_Agent
+=== RUN   TestCreateVM_Isolated/No_Agent/Jailer
+=== RUN   TestCreateVM_Isolated/Slow_Root_FS
+    service_integ_test.go:2389: received error: rpc error: code = DeadlineExceeded desc = VM "TestCreateVM-Isolated-Slow-Root-FS" didn't start within 5s: failed to dial the VM over vsock: context deadline exceeded
+=== RUN   TestCreateVM_Isolated/Slow_Root_FS/Jailer
+    service_integ_test.go:2389: received error: rpc error: code = DeadlineExceeded desc = VM "TestCreateVM-Isolated-Slow-Root-FS-Jailer" didn't start within 5s: failed to dial the VM over vsock: context deadline exceeded
+=== RUN   TestCreateVM_Isolated/Slow_Root_FS_and_Longer_Timeout
+=== RUN   TestCreateVM_Isolated/Slow_Root_FS_and_Longer_Timeout/Jailer
+--- PASS: TestCreateVM_Isolated (136.59s)
+    --- PASS: TestCreateVM_Isolated/Happy_Case (6.18s)
+    --- PASS: TestCreateVM_Isolated/Happy_Case/Jailer (6.64s)
+    --- PASS: TestCreateVM_Isolated/No_Agent (20.20s)
+    --- PASS: TestCreateVM_Isolated/No_Agent/Jailer (20.04s)
+    --- PASS: TestCreateVM_Isolated/Slow_Root_FS (5.20s)
+    --- PASS: TestCreateVM_Isolated/Slow_Root_FS/Jailer (5.03s)
+    --- PASS: TestCreateVM_Isolated/Slow_Root_FS_and_Longer_Timeout (36.74s)
+    --- PASS: TestCreateVM_Isolated/Slow_Root_FS_and_Longer_Timeout/Jailer (36.55s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	136.603s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 7
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestDiskLimit_Isolated$'"
+=== RUN   TestDiskLimit_Isolated
+--- PASS: TestDiskLimit_Isolated (12.63s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	12.651s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        1
+Event number:      0
+Major, minor:      252, 7
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestDriveMountFails_Isolated$'"
+=== RUN   TestDriveMountFails_Isolated
+--- PASS: TestDriveMountFails_Isolated (4.21s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	4.226s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 7
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestDriveMount_Isolated$'"
+=== RUN   TestDriveMount_Isolated
+--- PASS: TestDriveMount_Isolated (8.23s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	8.253s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        1
+Event number:      0
+Major, minor:      252, 7
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestEvents_Isolated$'"
+=== RUN   TestEvents_Isolated
+--- PASS: TestEvents_Isolated (7.18s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	7.196s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        1
+Event number:      0
+Major, minor:      252, 7
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestExec_Isolated$'"
+=== RUN   TestExec_Isolated
+--- PASS: TestExec_Isolated (17.90s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	17.915s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        1
+Event number:      0
+Major, minor:      252, 7
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestFailedCreateReleasesDrive_Isolated$'"
+=== RUN   TestFailedCreateReleasesDrive_Isolated
+    task_failure_integ_test.go:76: expected create failure: failed to create shim task: failed to create task: rpc error: code = Unknown desc = OCI runtime create failed: runc create failed: Cwd must be an absolute path
+    task_failure_integ_test.go:76: expected create failure: failed to create shim task: failed to create task: rpc error: code = Unknown desc = OCI runtime create failed: runc create failed: Cwd must be an absolute path
+    task_failure_integ_test.go:76: expected create failure: failed to create shim task: failed to create task: rpc error: code = Unknown desc = OCI runtime create failed: runc create failed: Cwd must be an absolute path
+    task_failure_integ_test.go:55: explicit VM cleanup: <nil>
+--- PASS: TestFailedCreateReleasesDrive_Isolated (28.00s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	28.013s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 7
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestForceStopDefaultFirecracker_Isolated$'"
+=== RUN   TestForceStopDefaultFirecracker_Isolated
+--- PASS: TestForceStopDefaultFirecracker_Isolated (5.02s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	5.041s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 7
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestJailerCPUSet_Isolated$'"
+=== RUN   TestJailerCPUSet_Isolated
+    jailer_integ_test.go:50: 
+        	Error Trace:	/src/runtime/jailer_integ_test.go:50
+        	            				/src/runtime/jailer_integ_test.go:188
+        	            				/src/runtime/jailer_integ_test.go:202
+        	Error:      	"[d .pmem-images/ d default#9fe84f30-8df0-47c8-a34e-65e6b9ec3815/ d default#b35a9395-4ee7-4b8c-b8f0-a8068b37a61c/ d default#d8c815f8-4940-490f-b310-53c64111b1f1/ d default#test-drive-mount/]" should have 0 item(s), but has 5
+        	Test:       	TestJailerCPUSet_Isolated
+--- FAIL: TestJailerCPUSet_Isolated (10.34s)
+FAIL
+exit status 1
+FAIL	github.com/firecracker-microvm/firecracker-containerd/runtime	10.357s
+make: *** [Makefile:58: integ-test-TestJailerCPUSet_Isolated] Error 1
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        1
+Event number:      0
+Major, minor:      252, 7
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestJailer_Isolated$'"
+=== RUN   TestJailer_Isolated
+=== RUN   TestJailer_Isolated/Without_Jailer
+    jailer_integ_test.go:50: 
+        	Error Trace:	/src/runtime/jailer_integ_test.go:50
+        	            				/src/runtime/jailer_integ_test.go:188
+        	            				/src/runtime/jailer_integ_test.go:56
+        	Error:      	"[d .pmem-images/ d default#9fe84f30-8df0-47c8-a34e-65e6b9ec3815/ d default#b35a9395-4ee7-4b8c-b8f0-a8068b37a61c/ d default#d8c815f8-4940-490f-b310-53c64111b1f1/ d default#test-drive-mount/]" should have 0 item(s), but has 5
+        	Test:       	TestJailer_Isolated/Without_Jailer
+=== RUN   TestJailer_Isolated/With_Jailer
+    jailer_integ_test.go:50: 
+        	Error Trace:	/src/runtime/jailer_integ_test.go:50
+        	            				/src/runtime/jailer_integ_test.go:188
+        	            				/src/runtime/jailer_integ_test.go:59
+        	Error:      	"[d .pmem-images/ d default#9fe84f30-8df0-47c8-a34e-65e6b9ec3815/ d default#b35a9395-4ee7-4b8c-b8f0-a8068b37a61c/ d default#d8c815f8-4940-490f-b310-53c64111b1f1/ d default#test-drive-mount/]" should have 0 item(s), but has 5
+        	Test:       	TestJailer_Isolated/With_Jailer
+=== RUN   TestJailer_Isolated/With_Jailer_and_bind-mount
+    jailer_integ_test.go:50: 
+        	Error Trace:	/src/runtime/jailer_integ_test.go:50
+        	            				/src/runtime/jailer_integ_test.go:188
+        	            				/src/runtime/jailer_integ_test.go:65
+        	Error:      	"[d .pmem-images/ d default#9fe84f30-8df0-47c8-a34e-65e6b9ec3815/ d default#b35a9395-4ee7-4b8c-b8f0-a8068b37a61c/ d default#d8c815f8-4940-490f-b310-53c64111b1f1/ d default#test-drive-mount/]" should have 0 item(s), but has 5
+        	Test:       	TestJailer_Isolated/With_Jailer_and_bind-mount
+--- FAIL: TestJailer_Isolated (25.76s)
+    --- FAIL: TestJailer_Isolated/Without_Jailer (8.19s)
+    --- FAIL: TestJailer_Isolated/With_Jailer (8.91s)
+    --- FAIL: TestJailer_Isolated/With_Jailer_and_bind-mount (8.66s)
+FAIL
+exit status 1
+FAIL	github.com/firecracker-microvm/firecracker-containerd/runtime	25.779s
+make: *** [Makefile:58: integ-test-TestJailer_Isolated] Error 1
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 7
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestLongUnixSocketPath_Isolated$'"
+=== RUN   TestLongUnixSocketPath_Isolated
+=== RUN   TestLongUnixSocketPath_Isolated/Without_Jailer
+=== RUN   TestLongUnixSocketPath_Isolated/With_Jailer
+--- PASS: TestLongUnixSocketPath_Isolated (11.91s)
+    --- PASS: TestLongUnixSocketPath_Isolated/Without_Jailer (6.44s)
+    --- PASS: TestLongUnixSocketPath_Isolated/With_Jailer (5.47s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	11.925s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 7
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestMemoryBalloon_Isolated$'"
+=== RUN   TestMemoryBalloon_Isolated
+    service_integ_test.go:1486: TestMemoryBalloon_Isolated: will run 5 vm's
+--- PASS: TestMemoryBalloon_Isolated (9.54s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	9.555s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 6
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestMultipleVMs_Isolated$'"
+=== RUN   TestMultipleVMs_Isolated
+    service_integ_test.go:260: TestMultipleVMs_Isolated: will run up to 5 VMs
+    service_integ_test.go:507: 2026-11-11 18:49:58.503384722 +0000 UTC m=+10.550573839: created=5/5 stopped=0/5
+    service_integ_test.go:507: 2026-11-11 18:50:08.504447064 +0000 UTC m=+20.551636201: created=5/5 stopped=5/5
+--- PASS: TestMultipleVMs_Isolated (20.67s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	20.690s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 6
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestNewJailer_Isolated$'"
+=== RUN   TestNewJailer_Isolated
+--- PASS: TestNewJailer_Isolated (0.00s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	0.020s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 6
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestOOM_Isolated$'"
+=== RUN   TestOOM_Isolated
+--- PASS: TestOOM_Isolated (5.24s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	5.262s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        1
+Event number:      0
+Major, minor:      252, 6
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestPauseResume_Isolated$'"
+=== RUN   TestPauseResume_Isolated
+=== RUN   TestPauseResume_Isolated/PauseVM
+=== RUN   TestPauseResume_Isolated/PauseVM/Jailer
+=== RUN   TestPauseResume_Isolated/ResumeVM
+=== RUN   TestPauseResume_Isolated/ResumeVM/Jailer
+=== RUN   TestPauseResume_Isolated/Consecutive_PauseVM
+=== RUN   TestPauseResume_Isolated/Consecutive_PauseVM/Jailer
+=== RUN   TestPauseResume_Isolated/Consecutive_ResumeVM
+=== RUN   TestPauseResume_Isolated/Consecutive_ResumeVM/Jailer
+=== RUN   TestPauseResume_Isolated/PauseResume
+=== RUN   TestPauseResume_Isolated/PauseResume/Jailer
+=== RUN   TestPauseResume_Isolated/ResumePause
+=== RUN   TestPauseResume_Isolated/ResumePause/Jailer
+--- PASS: TestPauseResume_Isolated (104.71s)
+    --- PASS: TestPauseResume_Isolated/PauseVM (8.10s)
+    --- PASS: TestPauseResume_Isolated/PauseVM/Jailer (8.79s)
+    --- PASS: TestPauseResume_Isolated/ResumeVM (8.24s)
+    --- PASS: TestPauseResume_Isolated/ResumeVM/Jailer (8.71s)
+    --- PASS: TestPauseResume_Isolated/Consecutive_PauseVM (8.55s)
+    --- PASS: TestPauseResume_Isolated/Consecutive_PauseVM/Jailer (9.19s)
+    --- PASS: TestPauseResume_Isolated/Consecutive_ResumeVM (8.68s)
+    --- PASS: TestPauseResume_Isolated/Consecutive_ResumeVM/Jailer (9.26s)
+    --- PASS: TestPauseResume_Isolated/PauseResume (8.49s)
+    --- PASS: TestPauseResume_Isolated/PauseResume/Jailer (8.96s)
+    --- PASS: TestPauseResume_Isolated/ResumePause (8.56s)
+    --- PASS: TestPauseResume_Isolated/ResumePause/Jailer (9.17s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	104.726s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 6
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestRandomness_Isolated$'"
+=== RUN   TestRandomness_Isolated
+    service_integ_test.go:1644: stderr output from dd:
+         1024+0 records in
+        1024+0 records out
+    service_integ_test.go:1653: stdout output from rngtest:
+         
+    service_integ_test.go:1654: stderr output from rngtest:
+         rngtest 2.2
+        Copyright (c) 2004 by Henrique de Moraes Holschuh
+        This is free software; see the source for copying conditions.  There is NO
+        warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+        
+        rngtest: starting FIPS tests...
+        rngtest: bits received from input: 20460032
+        rngtest: FIPS 140-2 successes: 1021
+        rngtest: FIPS 140-2 failures: 2
+        rngtest: FIPS 140-2(2001-10-10) Monobit: 0
+        rngtest: FIPS 140-2(2001-10-10) Poker: 0
+        rngtest: FIPS 140-2(2001-10-10) Runs: 0
+        rngtest: FIPS 140-2(2001-10-10) Long run: 2
+        rngtest: FIPS 140-2(2001-10-10) Continuous run: 0
+        rngtest: input channel speed: (min=3.725; avg=11.683; max=18.626)Gibits/s
+        rngtest: FIPS tests speed: (min=125.483; avg=155.932; max=160.281)Mibits/s
+        rngtest: Program run time: 126870 microseconds
+--- PASS: TestRandomness_Isolated (5.76s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	5.775s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        1
+Event number:      0
+Major, minor:      252, 6
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestResourceAccounting_Isolated$'"
+=== RUN   TestResourceAccounting_Isolated
+    resources_integ_test.go:76: guest cgroup v2 accounting: pids:{current:1 limit:18446744073709551615} cpu:{usage_usec:538607 user_usec:427067 system_usec:111540 nr_periods:10 nr_throttled:9 throttled_usec:445302} memory:{anon:118784 file:1413120 kernel_stack:16384 slab:215864 file_mapped:876544 inactive_anon:114688 active_anon:4096 inactive_file:499712 active_file:913408 slab_reclaimable:80264 slab_unreclaimable:135600 pgfault:815 pgmajfault:16 pgactivate:216 usage:2043904 usage_limit:67108864 swap_limit:18446744073709551615 max_usage:2441216} rdma:{} io:{usage:{major:254 minor:16 rbytes:1282048 rios:252} usage:{major:254 rbytes:92160 rios:25}} hugetlb:{max:18446744073709551615 pagesize:"2MB"} hugetlb:{max:18446744073709551615 pagesize:"1GB"} memory_events:{}
+    resources_integ_test.go:65: resource test stdout=RESOURCE_LIMITS_OK
+         stderr=
+--- PASS: TestResourceAccounting_Isolated (6.57s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	6.588s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 6
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestShimExitsUponContainerDelete_Isolated$'"
+=== RUN   TestShimExitsUponContainerDelete_Isolated
+    service_integ_test.go:194: 
+        	Error Trace:	/src/runtime/service_integ_test.go:194
+        	Error:      	"[d .pmem-images/ d default#9fe84f30-8df0-47c8-a34e-65e6b9ec3815/ d default#b35a9395-4ee7-4b8c-b8f0-a8068b37a61c/ d default#c7236a75-2a43-4a93-978d-4d620ee9ce42/ d default#d8c815f8-4940-490f-b310-53c64111b1f1/ d default#test-drive-mount/]" should have 0 item(s), but has 6
+        	Test:       	TestShimExitsUponContainerDelete_Isolated
+        	Messages:   	expect /srv/firecracker_containerd_tests to be empty
+--- FAIL: TestShimExitsUponContainerDelete_Isolated (7.67s)
+FAIL
+exit status 1
+FAIL	github.com/firecracker-microvm/firecracker-containerd/runtime	7.693s
+make: *** [Makefile:58: integ-test-TestShimExitsUponContainerDelete_Isolated] Error 1
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        1
+Event number:      0
+Major, minor:      252, 6
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestStopVMFailFast_Isolated$'"
+=== RUN   TestStopVMFailFast_Isolated
+--- PASS: TestStopVMFailFast_Isolated (6.11s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	6.126s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        1
+Event number:      0
+Major, minor:      252, 6
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestStopVM_Isolated$'"
+=== RUN   TestStopVM_Isolated
+=== RUN   TestStopVM_Isolated/Successful
+=== RUN   TestStopVM_Isolated/Successful/Jailer
+=== RUN   TestStopVM_Isolated/Timeout
+=== RUN   TestStopVM_Isolated/Timeout/Jailer
+=== RUN   TestStopVM_Isolated/SIGKILLFirecracker
+    service_integ_test.go:1916: Skipping test - investigating runc 1.2 behavior
+=== RUN   TestStopVM_Isolated/SIGKILLFirecracker/Jailer
+    service_integ_test.go:1926: Skipping jailer test - investigating runc 1.2 behavior
+=== RUN   TestStopVM_Isolated/ErrorExit
+    service_integ_test.go:1916: Skipping test - investigating runc 1.2 behavior
+=== RUN   TestStopVM_Isolated/ErrorExit/Jailer
+    service_integ_test.go:1926: Skipping jailer test - investigating runc 1.2 behavior
+=== RUN   TestStopVM_Isolated/PauseStop
+    service_integ_test.go:1916: Skipping test - investigating runc 1.2 behavior
+=== RUN   TestStopVM_Isolated/PauseStop/Jailer
+    service_integ_test.go:1926: Skipping jailer test - investigating runc 1.2 behavior
+=== RUN   TestStopVM_Isolated/Suspend
+    service_integ_test.go:1916: Skipping test - investigating runc 1.2 behavior
+=== RUN   TestStopVM_Isolated/Suspend/Jailer
+    service_integ_test.go:1926: Skipping jailer test - investigating runc 1.2 behavior
+--- PASS: TestStopVM_Isolated (43.92s)
+    --- PASS: TestStopVM_Isolated/Successful (8.21s)
+    --- PASS: TestStopVM_Isolated/Successful/Jailer (8.80s)
+    --- PASS: TestStopVM_Isolated/Timeout (12.87s)
+    --- PASS: TestStopVM_Isolated/Timeout/Jailer (13.52s)
+    --- SKIP: TestStopVM_Isolated/SIGKILLFirecracker (0.00s)
+    --- SKIP: TestStopVM_Isolated/SIGKILLFirecracker/Jailer (0.00s)
+    --- SKIP: TestStopVM_Isolated/ErrorExit (0.00s)
+    --- SKIP: TestStopVM_Isolated/ErrorExit/Jailer (0.00s)
+    --- SKIP: TestStopVM_Isolated/PauseStop (0.00s)
+    --- SKIP: TestStopVM_Isolated/PauseStop/Jailer (0.00s)
+    --- SKIP: TestStopVM_Isolated/Suspend (0.00s)
+    --- SKIP: TestStopVM_Isolated/Suspend/Jailer (0.00s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	43.935s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        4
+Event number:      0
+Major, minor:      252, 6
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestStubBlockDevices_Isolated$'"
+=== RUN   TestStubBlockDevices_Isolated
+    service_integ_test.go:927: 
+        	Error Trace:	/src/runtime/service_integ_test.go:927
+        	Error:      	Not equal: 
+        	            	expected: "vdb  254:16   0 1073741824B  0 |    0   0   0   0   0   0   0   0\nvdc  254:32   0        512B  0 |  214 244 216 245 215 177 177 177\nvdd  254:48   0        512B  0 |  214 244 216 245 215 177 177 177\nvde  254:64   0        512B  0 |  214 244 216 245 215 177 177 177\nvdf  254:80   0        512B  0 |  214 244 216 245 215 177 177 177"
+        	            	actual  : "vdb  254:16   0 1073741824B  0 |    0   0   0   0   0   0   0   0\nvdc  254:32   0        512B  0 |  214 244 216 245 215 177 177 177\nvdd  254:48   0        512B  0 |  214 244 216 245 215 177 177 177\nvde  254:64   0        512B  0 |  214 244 216 245 215 177 177 177\nvdf  254:80   0        512B  0 |  214 244 216 245 215 177 177 177\nvdg  254:96   0  536870912B  0 |    0   0   0   0   0   0   0   0"
+        	            	
+        	            	Diff:
+        	            	--- Expected
+        	            	+++ Actual
+        	            	@@ -5 +5,2 @@
+        	            	 vdf  254:80   0        512B  0 |  214 244 216 245 215 177 177 177
+        	            	+vdg  254:96   0  536870912B  0 |    0   0   0   0   0   0   0   0
+        	Test:       	TestStubBlockDevices_Isolated
+--- FAIL: TestStubBlockDevices_Isolated (7.82s)
+FAIL
+exit status 1
+FAIL	github.com/firecracker-microvm/firecracker-containerd/runtime	7.835s
+make: *** [Makefile:58: integ-test-TestStubBlockDevices_Isolated] Error 1
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        1
+Event number:      0
+Major, minor:      252, 6
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestStubDriveReserveAndReleaseByContainers_Isolated$'"
+=== RUN   TestStubDriveReserveAndReleaseByContainers_Isolated
+--- PASS: TestStubDriveReserveAndReleaseByContainers_Isolated (9.01s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	9.030s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        1
+Event number:      0
+Major, minor:      252, 6
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestUpdateVMMetadata_Isolated$'"
+=== RUN   TestUpdateVMMetadata_Isolated
+    service_integ_test.go:1452: stdout output from task "mmds-test": ThreeThing
+        TwoThing
+        thing
+    service_integ_test.go:1471: stdout output from task "mmds-test-entry": 45
+--- PASS: TestUpdateVMMetadata_Isolated (8.95s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	8.967s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        2
+Event number:      0
+Major, minor:      252, 6
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestVolumeFrom_Isolated$'"
+=== RUN   TestVolumeFrom_Isolated
+=== RUN   TestVolumeFrom_Isolated/aws.firecracker
+=== RUN   TestVolumeFrom_Isolated/io.containerd.runc.v2
+--- PASS: TestVolumeFrom_Isolated (23.24s)
+    --- PASS: TestVolumeFrom_Isolated/aws.firecracker (21.27s)
+    --- PASS: TestVolumeFrom_Isolated/io.containerd.runc.v2 (1.97s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	23.259s
+/users/nehalem/fc-ctrd-mod/step4-native-final/runtime/../tools/thinpool.sh reset "fc-step4-base-72f4fc9"
+Name:              fc-step4-base-72f4fc9
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        4
+Event number:      0
+Major, minor:      252, 6
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-final/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-final:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-base-72f4fc9 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestVolumes_Isolated$'"
+=== RUN   TestVolumes_Isolated
+=== RUN   TestVolumes_Isolated/aws.firecracker
+=== RUN   TestVolumes_Isolated/io.containerd.runc.v2
+--- PASS: TestVolumes_Isolated (13.45s)
+    --- PASS: TestVolumes_Isolated/aws.firecracker (12.69s)
+    --- PASS: TestVolumes_Isolated/io.containerd.runc.v2 (0.76s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	13.465s
+make: Leaving directory '/users/nehalem/fc-ctrd-mod/step4-native-final/runtime'
+BASE_RUNTIME_EXIT=2
