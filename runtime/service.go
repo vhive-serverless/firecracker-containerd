@@ -518,6 +518,10 @@ func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRe
 		}
 		return nil, fmt.Errorf("failed to create VM: %w", err)
 	}
+	socketPath, err := s.firecrackerSocketPath()
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve Firecracker API socket path: %w", err)
+	}
 
 	// creating the VM succeeded, setup monitors and publish events to celebrate
 	err = s.publishVMStart()
@@ -532,7 +536,7 @@ func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRe
 	resp.VMID = s.vmID
 	resp.MetricsFifoPath = s.machineConfig.MetricsFifo
 	resp.LogFifoPath = s.machineConfig.LogFifo
-	resp.SocketPath = s.shimDir.FirecrackerSockPath()
+	resp.SocketPath = socketPath
 	if c, ok := s.jailer.(cgroupPather); ok {
 		resp.CgroupPath = c.CgroupPath()
 	}
@@ -753,15 +757,41 @@ func (s *service) GetVMInfo(_ context.Context, _ *proto.GetVMInfoRequest) (*prot
 	if c, ok := s.jailer.(cgroupPather); ok {
 		cgroupPath = c.CgroupPath()
 	}
+	socketPath, err := s.firecrackerSocketPath()
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve Firecracker API socket path: %w", err)
+	}
 
 	return &proto.GetVMInfoResponse{
 		VMID:            s.vmID,
-		SocketPath:      s.shimDir.FirecrackerSockPath(),
+		SocketPath:      socketPath,
 		LogFifoPath:     s.machineConfig.LogPath,
 		MetricsFifoPath: s.machineConfig.MetricsPath,
 		CgroupPath:      cgroupPath,
-		VSockPath:       s.shimDir.FirecrackerVSockPath(),
+		VSockPath:       s.jailer.JailPath().FirecrackerVSockPath(),
 	}, nil
+}
+
+// firecrackerSocketPath resolves the SDK's configured API socket to the host
+// path reported to controllers. The noop runner inherits the shim's working
+// directory, so its relative path is cwd-relative. The runc jailer instead
+// places its relative API path under the VM's shim directory (for example,
+// rootfs/api.socket). Absolute paths are already authoritative and are kept.
+func (s *service) firecrackerSocketPath() (string, error) {
+	if s.machineConfig == nil {
+		return "", errors.New("Firecracker machine configuration is unavailable")
+	}
+	socketPath := s.machineConfig.SocketPath
+	if filepath.IsAbs(socketPath) {
+		return socketPath, nil
+	}
+	if s.jailer == nil {
+		return "", errors.New("Firecracker jailer is unavailable")
+	}
+	if filepath.Clean(s.jailer.JailPath().RootPath()) != filepath.Clean(s.shimDir.RootPath()) {
+		return filepath.Join(s.shimDir.RootPath(), socketPath), nil
+	}
+	return filepath.Abs(socketPath)
 }
 
 // SetVMMetadata will update the VM being managed by this shim with the provided metadata. If the VM has not been created yet, this

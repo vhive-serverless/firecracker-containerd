@@ -451,17 +451,37 @@ func testMultipleVMs(ctx context.Context, t *testing.T, count int) {
 				return fmt.Errorf("%q must be %q", vmInfoResp.VMID, strconv.Itoa(vmID))
 			}
 
-			nspVMid := defaultNamespace + "#" + strconv.Itoa(vmID)
+			vmIDString := strconv.Itoa(vmID)
 			cfg, err := config.LoadConfig("")
 			if err != nil {
 				return err
 			}
-			if vmInfoResp.SocketPath != filepath.Join(cfg.ShimBaseDir, nspVMid, "firecracker.sock") ||
-				vmInfoResp.VSockPath != filepath.Join(cfg.ShimBaseDir, nspVMid, "firecracker.vsock") ||
-				vmInfoResp.LogFifoPath != filepath.Join(cfg.ShimBaseDir, nspVMid, "fc-logs.fifo") ||
-				vmInfoResp.MetricsFifoPath != filepath.Join(cfg.ShimBaseDir, nspVMid, "fc-metrics.fifo") ||
+			shimDir, err := vm.ShimDir(cfg.ShimBaseDir, defaultNamespace, vmIDString)
+			if err != nil {
+				return err
+			}
+			wantSocketPath := shimDir.FirecrackerSockPath()
+			wantVSockPath := shimDir.FirecrackerVSockPath()
+			if jailerConfig != nil {
+				wantSocketPath = filepath.Join(shimDir.RootPath(), rootfsFolder, "api.socket")
+				wantVSockPath = vm.Dir(filepath.Join(shimDir.RootPath(), rootfsFolder)).FirecrackerVSockPath()
+			}
+			if resp.SocketPath != wantSocketPath ||
+				vmInfoResp.SocketPath != wantSocketPath ||
+				vmInfoResp.VSockPath != wantVSockPath ||
+				vmInfoResp.LogFifoPath != shimDir.FirecrackerLogFifoPath() ||
+				vmInfoResp.MetricsFifoPath != shimDir.FirecrackerMetricsFifoPath() ||
 				resp.CgroupPath != vmInfoResp.CgroupPath {
-				return fmt.Errorf("unexpected result from GetVMInfo: %+v", vmInfoResp)
+				return fmt.Errorf("unexpected socket paths: CreateVM=%+v GetVMInfo=%+v", resp, vmInfoResp)
+			}
+			for _, socketPath := range []string{resp.SocketPath, vmInfoResp.SocketPath, vmInfoResp.VSockPath} {
+				info, err := os.Stat(socketPath)
+				if err != nil {
+					return fmt.Errorf("reported VM socket %q does not exist: %w", socketPath, err)
+				}
+				if info.Mode()&os.ModeSocket == 0 {
+					return fmt.Errorf("reported VM socket %q is not a unix socket (mode %v)", socketPath, info.Mode())
+				}
 			}
 
 			// just verify that updating the metadata doesn't return an error, a separate test case is needed
