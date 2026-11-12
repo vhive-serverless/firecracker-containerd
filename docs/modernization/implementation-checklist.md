@@ -2,22 +2,25 @@
 
 ## Current migrated Step 3 status
 
-Migrated Step 3 is a candidate with local compile/unit checks only. The historical
-checkboxes below retain their original scope; they do not certify this migrated
-upstream tree. CRI/native restore remains WIP and Kubernetes Pod restore remains
-deferred to 1.38.
+Exact migrated Step 3 source `332da2a7065baa0050037250bbf2ff316a1a8519`
+passed build/private installation, eight jailed/nonjailed native VM leaves, the
+real-volume VM case, four focused CRI specs (138 skipped), and
+`TestPodVMResources` (three subcases) plus `TestPodVolumes`. The
+[current receipt](evidence/upstream-step3-332da2a7065b/README.md) records exact
+artifacts, commands, logs and cleanup. This later documentation tip was not
+built or tested. Full CRI remains WIP; Kubernetes Pod restore is deferred to
+1.38. Final published-module/installed-vHive acceptance remains pending.
 
 The maintained base is `firecracker-v1.18-containerdv2`; its vHive successor is
 `firecracker-v1.18-containerdv2-vhive-integration`. Official Firecracker/jailer
 1.18.0 binaries and the published vHive SDK dd9db32 are selected in the current
-lock and module manifests. Fresh exact-candidate worker build/install and VM
-acceptance remain pending. Local compilation checks are recorded separately in
-[the local validation note](upstream-step1-local-validation.md).
+lock and module manifests. The historical checkboxes below retain their original
+scope and source revisions; they do not broaden the current focused acceptance.
 
 The checklist below preserves the original modernization ledger. Its checked
 items, former branch names, planned later steps and acceptance statements
 belong to that historical source, not the migrated candidates. See the
-[current branch guide](README.md) and [Step 1 procedure](step-1.md) for current
+[current branch guide](README.md) and [Step 3 procedure](step-3.md) for current
 inputs and validation gates. Step 3 remains WIP; Kubernetes Pod restore is
 deferred to the 1.38 interface work.
 

@@ -14,7 +14,7 @@ firecracker-v1.18-containerdv2
 | --- | --- | --- |
 | 1 | `firecracker-v1.18-containerdv2` | Modernized OCI runtime, acknowledged events and framed IO; migrated candidate VM acceptance pending. |
 | 2 | `firecracker-v1.18-containerdv2-vhive-integration` | Adds standalone vHive and coordinated legacy snapshot/restore; migrated candidate VM acceptance pending. |
-| 3 | `cri-native-snapshot-restore` | Adds CRI integration, ordinary RuntimeClass Pods and native checkpoint components; **WIP**, with historical CRI failures, fresh migrated candidate validation pending, and Kubernetes Pod restore deferred to the 1.38 interface work. |
+| 3 | `cri-native-snapshot-restore` | Exact `332da2a7065b` passed eight jailed/nonjailed native VM leaves, a real-volume VM case and focused CRI checks. [Receipt and scope](evidence/upstream-step3-332da2a7065b/README.md). Full CRI remains **WIP**; Kubernetes Pod restore is deferred to the 1.38 interface work. |
 | 4 | `damon-virtio-pmem` | Adds disk-backed guest storage, pmem/DAX, DAMON/reporting and memory evaluation; historical direct runtime acceptance is revision-specific and does not validate the migrated candidate. Fresh migrated validation and inherited Step 3 gates remain open. |
 
 Read the milestone document on its own branch: [Step 1](step-1.md),
@@ -32,9 +32,13 @@ The migrated stack uses official Firecracker and jailer v1.18.0 release
 archives, verified against checksums in `versions.json`, and the published
 `vhive-serverless/firecracker-go-sdk` branch `firecracker-v1.18.0`, commit
 `dd9db322432989b96cff7a38a64703d60b6cabf9`. Runtime builds fetch the official
-binaries rather than compiling a custom VMM. Fresh exact-commit runtime VM
-acceptance is pending; historical runtime receipts and standalone SDK acceptance
-do not close that gate. See [migration scope](upstream-migration.md).
+binaries rather than compiling a custom VMM. Exact Step 3 source `332da2a7065b`
+passed the native/volume/focused-CRI worker procedure documented in
+[Step 3](step-3.md). Its receipt identifies the tested source and artifacts;
+this later documentation tip was not tested. Earlier milestone acceptance is
+documented on its own branch. Full CRI and final published/installed-vHive
+acceptance remain separate open gates; later-stage acceptance requires its own
+source and receipts.
 
 Use this checkout's [versions.json](versions.json), module manifests and gitlinks.
 `selected_inputs` describes this branch's dependency selection; `existing`

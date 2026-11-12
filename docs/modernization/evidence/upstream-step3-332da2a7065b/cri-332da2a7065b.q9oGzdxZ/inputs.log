@@ -1,0 +1,11 @@
+script_revision=332da2a7065baa0050037250bbf2ff316a1a8519
+runtime_revision=332da2a7065baa0050037250bbf2ff316a1a8519
+image=sha256:17046a2aeb5c501161f0761094b96b3f5347602888759d56ac8cf9d6c40ab64d
+focus=Runtime info|starting container with volume
+source_dirty=false
+image_override=
+websocket_streaming=0
+runtime_integration_tests=1
+88d229493cb535125b0007b2d8c1965acf0e93808e579d5eccaf3699d7f1cd93  cri/cri-runtime.test
+5a092a439fd0ebce6bb51068e745cdb58e4c14a30a184d0ca905ad7bb251b102  tools/critest/test-cri.sh
+5ca39407f5a9efc9da20968a110a8aaf450b09cb270adfcebce76a5ea10b4c33  tools/critest/run-in-container.sh
