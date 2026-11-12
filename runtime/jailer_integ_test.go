@@ -40,14 +40,29 @@ const (
 	jailerGID = 300001
 )
 
-func assertEmptyShimDir(tb testing.TB, ns, vmID string) {
+func assertCleanShimDir(tb testing.TB, ns, vmID string) {
+	tb.Helper()
 	_, err := os.Stat(filepath.Join(integtest.ShimBaseDir(), ns+"#"+vmID))
 	assert.Error(tb, err)
 	assert.True(tb, os.IsNotExist(err))
 
 	shimContents, err := os.ReadDir(integtest.ShimBaseDir())
 	require.NoError(tb, err)
-	assert.Len(tb, shimContents, 0)
+	for _, entry := range shimContents {
+		// Immutable images are shared across VMs and intentionally outlive them.
+		// Every VM-owned directory must still disappear after shutdown.
+		require.Equal(tb, ".pmem-images", entry.Name(), "unexpected leftover in shim directory")
+		require.True(tb, entry.IsDir(), "immutable image cache must be a directory, not a symlink")
+		cache := filepath.Join(integtest.ShimBaseDir(), entry.Name())
+		images, err := os.ReadDir(cache)
+		require.NoError(tb, err)
+		for _, image := range images {
+			require.True(tb, strings.HasSuffix(image.Name(), ".img"))
+			digest := strings.TrimSuffix(image.Name(), ".img")
+			require.NoError(tb, verifyImmutableImage(context.Background(), filepath.Join(cache, image.Name()), digest),
+				"only digest-verified read-only disk images may remain")
+		}
+	}
 }
 
 func TestJailer_Isolated(t *testing.T) {
@@ -185,7 +200,7 @@ func testJailer(t *testing.T, jailerConfig *proto.JailerConfig) {
 	})
 	require.NoError(t, err)
 
-	assertEmptyShimDir(t, "default", vmID)
+	assertCleanShimDir(t, "default", vmID)
 }
 
 func TestJailerCPUSet_Isolated(t *testing.T) {
@@ -292,5 +307,5 @@ func testAttachBlockDevice(tb testing.TB, jailerConfig *proto.JailerConfig) {
 	})
 	require.NoError(tb, err)
 
-	assertEmptyShimDir(tb, "default", vmID)
+	assertCleanShimDir(tb, "default", vmID)
 }
