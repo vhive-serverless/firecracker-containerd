@@ -30,7 +30,7 @@ flowchart LR
 ```
 
 The [control plugin](../firecracker-control) is compiled into the custom
-containerd binary. Its [control API](../proto/firecracker.proto) manages VMs
+containerd binary. Its [control API](../proto/service/fccontrol/fccontrol.proto) manages VMs
 that can contain multiple containers. It forwards requests to the per-VM shim.
 The [runtime shim](../runtime) implements containerd's runtime-v2 integration
 using the **task/v3 ttrpc API** and current shim-manager bootstrap. Runtime-v2
@@ -63,18 +63,30 @@ See [migration scope and validation](modernization/upstream-migration.md).
 
 ## Storage and incremental features
 
-Step 1 preserves an immutable SquashFS guest base with a tmpfs guest overlay
-upper; default devmapper container writable roots are already separate ext4
-block devices backed by host storage. The guest-root overlay, container writable
-root, exported host volumes and temporary mounts are separate storage layers.
-The optional guest stargz path has its own storage and must be assessed separately.
+The Step 1 baseline used an immutable SquashFS guest base with a tmpfs guest
+overlay upper. Step 4 defaults that upper to a private host-disk ext4 image;
+default non-stargz container writable roots remain separate devmapper-backed
+ext4 devices. The guest-root overlay, container writable root, exported host
+volumes and temporary mounts are separate storage layers. The optional guest
+stargz path has its own storage. Its store and container overlay upper/work
+directories bind to the private guest-upper filesystem at
+`/rom/overlay/stargz`; they share that disk's capacity and snapshot lifetime.
+The historical custom-VMM `06b55e3` acceptance run passed four stargz storage profiles under
+both jailer modes and 12 stargz native restore cases. See the
+[Step 4 completeness report](modernization/step-4-completeness.md) and
+[verification receipt](modernization/evidence/step4-stargz/clean-06b55e3/verification.json)
+for results and limits. Stargz workload lower layers remain FUSE-backed; the
+storage tests do not establish cold lazy-fetch behavior. Optional pmem/DAX
+applies to the immutable guest base, not the FUSE lowers.
 
 Step 2 adds vHive-managed snapshot/restore for its documented standalone profile.
 Step 3 adds a CRI frontend, ordinary Kubernetes RuntimeClass support and native
 checkpoint/restore components. Step 4 adds a private disk-backed guest upper,
 optional immutable pmem/DAX backing, and DAMON with free-page reporting. These
-features do not imply full CRI conformance or Kubernetes Pod restore. Consult
-the milestone documents for supported profiles, measured results and open gates.
+features do not imply full CRI conformance or Kubernetes Pod restore. Kubernetes
+Pod checkpoint/restore is deferred to the 1.38 interface work; this is separate
+from CRI conformance and Step 4's native runtime restore. Consult the milestone
+documents for supported profiles, measured results and open gates.
 
 The original [design alternatives](design-approaches.md) and
 [shim design](shim-design.md) explain historical decisions. Their proposals and
