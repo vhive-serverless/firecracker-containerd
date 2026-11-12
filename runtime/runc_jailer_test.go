@@ -275,3 +275,28 @@ func TestPrepareBindMount(t *testing.T) {
 		})
 	}
 }
+
+func TestBindImmutableImageToJail(t *testing.T) {
+	internal.RequiresRoot(t)
+	ctx := context.Background()
+	dir := t.TempDir()
+	source := filepath.Join(t.TempDir(), "shared.img")
+	require.NoError(t, os.WriteFile(source, []byte("immutable"), 0444))
+	before, err := os.Stat(source)
+	require.NoError(t, err)
+	jailer, err := newRuncJailer(ctx, logrus.NewEntry(logrus.New()), "pmem", runcJailerConfig{OCIBundlePath: dir, UID: 123, GID: 456, RuncConfigPath: "./firecracker-runc-config.json.example"}, nil)
+	require.NoError(t, err)
+	previousMounts := len(jailer.configSpec.Mounts)
+	destination := filepath.Join(jailer.RootPath(), "shared.img")
+	require.NoError(t, jailer.bindImmutableImageToJail(source, destination))
+	require.Len(t, jailer.configSpec.Mounts, previousMounts+1)
+	require.Equal(t, source, jailer.configSpec.Mounts[previousMounts].Source)
+	require.Contains(t, jailer.configSpec.Mounts[previousMounts].Options, "ro")
+	after, err := os.Stat(source)
+	require.NoError(t, err)
+	require.Equal(t, before.Sys().(*syscall.Stat_t).Uid, after.Sys().(*syscall.Stat_t).Uid)
+	require.Equal(t, os.FileMode(0444), after.Mode().Perm())
+	require.Error(t, jailer.bindImmutableImageToJail(source, destination))
+	require.NoError(t, os.Chmod(source, 0600))
+	require.Error(t, jailer.bindImmutableImageToJail(source, filepath.Join(jailer.RootPath(), "writable.img")))
+}
