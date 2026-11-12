@@ -112,8 +112,8 @@ func stargzStorageTestPair(t *testing.T, mode stargzStorageMode, nameservers []s
 	}
 
 	instances := []*stargzStorageVM{
-		stargzStorageCreateVM(t, ctx, control, mode, rootImage, rootDigest, stargzStorageVMID(mode, false), false, nameservers),
-		stargzStorageCreateVM(t, ctx, control, mode, rootImage, rootDigest, stargzStorageVMID(mode, true), true, nameservers),
+		stargzStorageCreateVM(ctx, t, control, mode, rootImage, rootDigest, stargzStorageVMID(mode, false), false, nameservers),
+		stargzStorageCreateVM(ctx, t, control, mode, rootImage, rootDigest, stargzStorageVMID(mode, true), true, nameservers),
 	}
 
 	firstInfo := stargzStorageCheckHostDisk(t, instances[0])
@@ -152,7 +152,7 @@ func stargzStorageTestPair(t *testing.T, mode stargzStorageMode, nameservers []s
 			require.NoError(t, deleteErr)
 		})
 		otherID := instances[1-index].id
-		stargzStorageRunWorkload(t, vmCtx, client, image, instance, otherID, mode)
+		stargzStorageRunWorkload(vmCtx, t, client, image, instance, otherID, mode)
 		err = client.ImageService().Delete(vmCtx, image.Name())
 		require.NoError(t, err)
 		imageDeleted = true
@@ -185,7 +185,7 @@ func stargzStorageTestPair(t *testing.T, mode stargzStorageMode, nameservers []s
 
 }
 
-func stargzStorageCreateVM(t *testing.T, ctx context.Context, control *fccontrol.Client, mode stargzStorageMode, rootImage, rootDigest, id string, jailed bool, nameservers []string) *stargzStorageVM {
+func stargzStorageCreateVM(ctx context.Context, t *testing.T, control *fccontrol.Client, mode stargzStorageMode, rootImage, rootDigest, id string, jailed bool, nameservers []string) *stargzStorageVM {
 	t.Helper()
 	tap := stargzStorageTapName(mode, jailed)
 	stargzStorageCreateTap(t, tap, jailed)
@@ -274,12 +274,12 @@ func stargzStorageCheckHostDisk(t *testing.T, instance *stargzStorageVM) os.File
 	require.GreaterOrEqual(t, uint64(stat.Blocks*512), uint64(info.Size()), "host backing must reserve the configured guest disk capacity")
 	var backing unix.Statfs_t
 	require.NoError(t, unix.Statfs(instance.disk, &backing))
-	require.Contains(t, []int64{unix.EXT4_SUPER_MAGIC, unix.XFS_SUPER_MAGIC, unix.BTRFS_SUPER_MAGIC}, int64(backing.Type), "guest overlay backing must be on a disk filesystem")
+	require.Contains(t, []int64{unix.EXT4_SUPER_MAGIC, unix.XFS_SUPER_MAGIC, unix.BTRFS_SUPER_MAGIC}, backing.Type, "guest overlay backing must be on a disk filesystem")
 	t.Logf("guest overlay id=%s jailed=%t host_fs=%#x uid=%d inode=%d blocks=%d size=%d", instance.id, instance.jailed, backing.Type, stat.Uid, stat.Ino, stat.Blocks, info.Size())
 	return info
 }
 
-func stargzStorageRunWorkload(t *testing.T, ctx context.Context, client *containerd.Client, image containerd.Image, instance *stargzStorageVM, otherID string, mode stargzStorageMode) {
+func stargzStorageRunWorkload(ctx context.Context, t *testing.T, client *containerd.Client, image containerd.Image, instance *stargzStorageVM, otherID string, mode stargzStorageMode) {
 	t.Helper()
 	containerID := instance.id + "-stargz"
 	container, err := client.NewContainer(ctx, containerID,
@@ -492,7 +492,11 @@ func stargzStorageCreateBridge(t *testing.T) []string {
 		if err != nil && !strings.Contains(string(output), "Cannot find device") {
 			t.Errorf("delete storage test bridge: %v: %s", err, output)
 		}
-		if err := os.WriteFile("/proc/sys/net/ipv4/ip_forward", previousForward, 0600); err != nil {
+		value := []byte("0\n")
+		if strings.TrimSpace(string(previousForward)) == "1" {
+			value = []byte("1\n")
+		}
+		if err := os.WriteFile("/proc/sys/net/ipv4/ip_forward", value, 0600); err != nil {
 			t.Errorf("restore ip_forward setting: %v", err)
 		}
 	})

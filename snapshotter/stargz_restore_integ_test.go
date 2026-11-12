@@ -337,7 +337,7 @@ cat /stargz-persist
 	cloneUpperBefore := stargzRestoreHash(t, cloneUpper)
 	var cloneFS unix.Statfs_t
 	require.NoError(t, unix.Statfs(cloneUpper, &cloneFS))
-	require.Contains(t, []int64{unix.EXT4_SUPER_MAGIC, unix.XFS_SUPER_MAGIC, unix.BTRFS_SUPER_MAGIC}, int64(cloneFS.Type), "restored upper backing must be on a disk filesystem")
+	require.Contains(t, []int64{unix.EXT4_SUPER_MAGIC, unix.XFS_SUPER_MAGIC, unix.BTRFS_SUPER_MAGIC}, cloneFS.Type, "restored upper backing must be on a disk filesystem")
 
 	address, err := os.ReadFile(cloneDir.AddrFilePath())
 	require.NoError(t, err)
@@ -349,7 +349,7 @@ cat /stargz-persist
 	restored := taskAPI.NewTTRPCTaskClient(rpc)
 	state, err := restored.State(ctx, &taskAPI.StateRequest{ID: containerID})
 	require.NoError(t, err)
-	require.Equal(t, uint32(task.Pid()), state.Pid)
+	require.Equal(t, task.Pid(), state.Pid)
 
 	resumed := stargzRestoreExecTaskAPI(ctx, t, restored, containerID, probe)
 	require.Equal(t, strings.TrimSuffix(initial, "41")+"42", resumed, "guest memory must resume at its checkpoint state")
@@ -359,7 +359,7 @@ cat /stargz-persist
 		_, err := client.SnapshotService(snapshotterName).Stat(ctx, snapshotKey)
 		return err == nil
 	}, 90*time.Second, time.Second, "cached host demux snapshotter RPC must reconnect to the restored VM")
-	stargzRestoreCheckTCP(t, ctx, restored, containerID)
+	stargzRestoreCheckTCP(ctx, t, restored, containerID)
 	stargzRestoreExecTaskAPI(ctx, t, restored, containerID, `echo clone-write >/stargz-persist; sync; test "$(cat /stargz-persist)" = clone-write`)
 	require.Equal(t, artifactUpperHash, stargzRestoreHash(t, artifactUpper), "writes in restored stargz upper must not mutate the checkpoint")
 	require.NotEqual(t, cloneUpperBefore, stargzRestoreHash(t, cloneUpper), "restored guest upper must receive the clone's stargz writes")
@@ -386,7 +386,11 @@ func stargzRestoreCreateBridge(t *testing.T) []string {
 	previousForward, err := os.ReadFile("/proc/sys/net/ipv4/ip_forward")
 	require.NoError(t, err)
 	t.Cleanup(func() {
-		if err := os.WriteFile("/proc/sys/net/ipv4/ip_forward", previousForward, 0600); err != nil {
+		value := []byte("0\n")
+		if strings.TrimSpace(string(previousForward)) == "1" {
+			value = []byte("1\n")
+		}
+		if err := os.WriteFile("/proc/sys/net/ipv4/ip_forward", value, 0600); err != nil {
 			t.Errorf("restore ip_forward setting: %v", err)
 		}
 	})
@@ -540,7 +544,7 @@ func stargzRestoreExecTaskAPI(ctx context.Context, t *testing.T, backend taskAPI
 	return strings.TrimSpace(stdout.String())
 }
 
-func stargzRestoreCheckTCP(t *testing.T, ctx context.Context, backend taskAPI.TTRPCTaskService, id string) {
+func stargzRestoreCheckTCP(ctx context.Context, t *testing.T, backend taskAPI.TTRPCTaskService, id string) {
 	t.Helper()
 	listener, err := net.Listen("tcp4", net.JoinHostPort(stargzRestoreHostIP, "0"))
 	require.NoError(t, err)
