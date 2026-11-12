@@ -29,21 +29,12 @@ SUBMODULES=_submodules
 UID:=$(shell id -u)
 GID:=$(shell id -g)
 
-FIRECRACKER_CONTAINERD_BUILDER_IMAGE?=golang:1.25-bookworm
+FIRECRACKER_CONTAINERD_BUILDER_IMAGE?=public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0
 export FIRECRACKER_CONTAINERD_TEST_IMAGE?=localhost/firecracker-containerd-test
 export GO_CACHE_VOLUME_NAME?=gocache
 
-# This Makefile uses Firecracker's pre-build Linux kernels for x86_64 and aarch64.
+# The pinned guest kernel build is validated on the designated x86_64 worker.
 host_arch=$(shell uname -m)
-ifeq ($(host_arch),x86_64)
-	kernel_sha256sum="ea5e7d5cf494a8c4ba043259812fc018b44880d70bcbbfc4d57d2760631b1cd6"
-	kernel_config_pattern=x86
-else ifeq ($(host_arch),aarch64)
-	kernel_sha256sum="e2d7c3d6cc123de9e6052d1f434ca7b47635a1f630d63f7fcc1b7164958375e4"
-	kernel_config_pattern=arm64
-else
-$(error "$(host_arch) is not supported by Firecracker")
-endif
 FIRECRACKER_TARGET?=$(host_arch)-unknown-linux-musl
 
 FIRECRACKER_DIR=$(SUBMODULES)/firecracker
@@ -51,17 +42,14 @@ FIRECRACKER_BIN=bin/firecracker
 FIRECRACKER_BUILDER_NAME?=firecracker-builder
 CARGO_CACHE_VOLUME_NAME?=cargocache
 
-KERNEL_VERSIONS=4.14 5.10
-KERNEL_VERSION?=4.14
+KERNEL_VERSIONS=6.18
+KERNEL_VERSION?=6.18
 ifeq ($(filter $(KERNEL_VERSION),$(KERNEL_VERSIONS)),)
 $(error "Kernel version $(KERNEL_VERSION) is not supported. Supported versions are $(KERNEL_VERSIONS)")
 endif
 
 KERNEL_CONFIG=tools/kernel-configs/microvm-kernel-$(host_arch)-$(KERNEL_VERSION).config
-# Copied from https://github.com/firecracker-microvm/firecracker/blob/v1.1.0/tools/devtool#L2082
-# This allows us to specify a kernel without the patch version, but still get the correct build path to reference the kernel binary
-KERNEL_FULL_VERSION=$(shell cat "$(KERNEL_CONFIG)" | grep -Po "^\# Linux\/$(kernel_config_pattern) (([0-9]+.)[0-9]+)" | cut -d ' ' -f 3)
-KERNEL_BIN=$(FIRECRACKER_DIR)/build/kernel/linux-$(KERNEL_FULL_VERSION)/vmlinux-$(KERNEL_FULL_VERSION)-$(host_arch).bin
+KERNEL_BIN=bin/vmlinux-6.18.56-fcmod
 
 RUNC_DIR=$(SUBMODULES)/runc
 RUNC_BIN=$(RUNC_DIR)/runc
@@ -130,7 +118,7 @@ deps = \
 	$(BINPATH)/ltag
 
 lint: $(deps)
-	$(BINPATH)/ltag -t ./.headers -excludes "tools $(SUBMODULES)" -check -v
+	$(BINPATH)/ltag -t ./.headers -excludes "tools $(SUBMODULES) tmp bin" -check -v
 # Change HEAD~1 to HEAD~20 once this commit falls out of range:
 # https://github.com/firecracker-microvm/firecracker-containerd/commit/9711138b150ac9133ca01379ac19a2e7884c251d
 	$(BINPATH)/git-validation -run DCO,short-subject -range HEAD~1..HEAD
@@ -140,7 +128,7 @@ tidy:
 	./tools/tidy.sh
 
 $(BINPATH)/golangci-lint:
-	GOBIN=$(BINPATH) go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.2
+	GOBIN=$(BINPATH) go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.15.0
 	$(BINPATH)/golangci-lint --version
 
 $(BINPATH)/git-validation:
@@ -150,7 +138,7 @@ $(BINPATH)/ltag:
 	GOBIN=$(BINPATH) go install github.com/kunalkushwaha/ltag@v0.2.5
 
 install:
-	for d in $(SUBDIRS); do $(MAKE) -C $$d install; done
+	set -e; for d in $(SUBDIRS); do $(MAKE) -C $$d install; done
 
 files_ephemeral: $(RUNC_BIN) agent-in-docker
 	mkdir -p tools/image-builder/files_ephemeral/usr/local/bin
@@ -199,7 +187,17 @@ integ-test: $(INTEG_TEST_SUBDIRS)
 $(INTEG_TEST_SUBDIRS): test-images
 	$(MAKE) -C $(patsubst integ-test-%,%,$@) integ-test
 
-test-images: test-images-stamp
+test-images: test-images-stamp test-deps-in-docker
+
+# The isolated test containers have no network. Populate their shared module
+# cache explicitly, including dependencies imported only by test files.
+.PHONY: test-deps-in-docker
+test-deps-in-docker:
+	docker run --rm \
+		--volume $(CURDIR):/src \
+		--volume $(GO_CACHE_VOLUME_NAME):/go \
+		--workdir /src \
+		$(FIRECRACKER_CONTAINERD_BUILDER_IMAGE) go mod download
 
 test-images-stamp: | image image-stargz firecracker-containerd-test-image
 	touch $@
@@ -223,11 +221,8 @@ $(FIRECRACKER_CONTAINERD_RUNTIME_DIR) $(ETC_CONTAINERD):
 	mkdir --mode 0700 --parents $@
 
 DEFAULT_VMLINUX_NAME?=default-vmlinux.bin
-$(DEFAULT_VMLINUX_NAME):
-	curl --silent --show-error --retry 3 --max-time 30 --output $@ \
-		"https://s3.amazonaws.com/spec.ccfc.min/img/quickstart_guide/$(host_arch)/kernels/vmlinux.bin"
-	echo "$(kernel_sha256sum) $@" | sha256sum -c -
-	chmod 0400 $@
+$(DEFAULT_VMLINUX_NAME): $(KERNEL_BIN)
+	install -m 644 $< $@
 
 DEFAULT_VMLINUX_INSTALLPATH=$(FIRECRACKER_CONTAINERD_RUNTIME_DIR)/$(DEFAULT_VMLINUX_NAME)
 $(DEFAULT_VMLINUX_INSTALLPATH): $(DEFAULT_VMLINUX_NAME) $(FIRECRACKER_CONTAINERD_RUNTIME_DIR)
@@ -277,19 +272,19 @@ $(CNI_BIN_ROOT):
 
 BRIDGE_BIN?=$(BINPATH)/bridge
 $(BRIDGE_BIN):
-	GOBIN=$(dir $@) go install github.com/containernetworking/plugins/plugins/main/bridge@v1.1.0
+	GOBIN=$(dir $@) go install github.com/containernetworking/plugins/plugins/main/bridge@v1.9.1
 
 PTP_BIN?=$(BINPATH)/ptp
 $(PTP_BIN):
-	GOBIN=$(dir $@) go install github.com/containernetworking/plugins/plugins/main/ptp@v1.1.0
+	GOBIN=$(dir $@) go install github.com/containernetworking/plugins/plugins/main/ptp@v1.9.1
 
 HOSTLOCAL_BIN?=$(BINPATH)/host-local
 $(HOSTLOCAL_BIN):
-	GOBIN=$(dir $@) go install github.com/containernetworking/plugins/plugins/ipam/host-local@v1.1.0
+	GOBIN=$(dir $@) go install github.com/containernetworking/plugins/plugins/ipam/host-local@v1.9.1
 
 FIREWALL_BIN?=$(BINPATH)/firewall
 $(FIREWALL_BIN):
-	GOBIN=$(dir $@) go install github.com/containernetworking/plugins/plugins/meta/firewall@v1.1.0
+	GOBIN=$(dir $@) go install github.com/containernetworking/plugins/plugins/meta/firewall@v1.9.1
 
 TC_REDIRECT_TAP_BIN?=$(BINPATH)/tc-redirect-tap
 $(TC_REDIRECT_TAP_BIN):
@@ -301,7 +296,7 @@ $(TEST_BRIDGED_TAP_BIN): $(shell find internal/cmd/test-bridged-tap -name *.go) 
 
 LOOPBACK_BIN?=$(BINPATH)/loopback
 $(LOOPBACK_BIN):
-	GOBIN=$(dir $@) go install github.com/containernetworking/plugins/plugins/main/loopback@v1.1.0
+	GOBIN=$(dir $@) go install github.com/containernetworking/plugins/plugins/main/loopback@v1.9.1
 
 .PHONY: cni-bins
 cni-bins: $(BRIDGE_BIN) $(PTP_BIN) $(HOSTLOCAL_BIN) $(FIREWALL_BIN) $(TC_REDIRECT_TAP_BIN) $(LOOPBACK_BIN)
@@ -336,34 +331,32 @@ $(FCNET_BRIDGE_CONFIG): tools/demo/fc-br0.interface
 demo-network: install-cni-bins $(FCNET_CONFIG)
 
 ##########################
-# Firecracker submodule
+# Official Firecracker release
 ##########################
 .PHONY: firecracker
-firecracker: $(FIRECRACKER_BIN)
+firecracker:
+	tools/modernize/fetch-firecracker.sh
 
 .PHONY: install-firecracker
 install-firecracker: firecracker
-	install -D -o root -g root -m755 -t $(INSTALLROOT)/bin $(FIRECRACKER_BIN)
+	install -D -o root -g root -m755 -t $(INSTALLROOT)/bin $(FIRECRACKER_BIN) bin/jailer
 
 $(FIRECRACKER_DIR)/Cargo.toml:
 	git submodule update --init --recursive $(FIRECRACKER_DIR)
 
-$(FIRECRACKER_BIN): $(FIRECRACKER_DIR)/Cargo.toml
-	$(FIRECRACKER_DIR)/tools/devtool -y build --release && \
-		$(FIRECRACKER_DIR)/tools/devtool -y strip
-	cp $(FIRECRACKER_DIR)/build/cargo_target/$(FIRECRACKER_TARGET)/release/firecracker $@
+$(FIRECRACKER_BIN): tools/modernize/fetch-firecracker.sh
+	tools/modernize/fetch-firecracker.sh
 
 .PHONY: firecracker-clean
 firecracker-clean:
-	- $(FIRECRACKER_DIR)/tools/devtool -y distclean
-	- rm $(FIRECRACKER_BIN)
+	- rm -f $(FIRECRACKER_BIN) bin/jailer
 	- rm $(KERNEL_BIN)
 
 .PHONY: kernel
 kernel: $(KERNEL_BIN)
 
-$(KERNEL_BIN): $(KERNEL_CONFIG)
-	$(FIRECRACKER_DIR)/tools/devtool -y build_kernel --config $(KERNEL_CONFIG)
+$(KERNEL_BIN): $(KERNEL_CONFIG) tools/modernize/build-kernel.sh
+	bash tools/modernize/build-kernel.sh
 
 .PHONY: install-kernel
 install-kernel: $(KERNEL_BIN)
@@ -378,14 +371,16 @@ runc: $(RUNC_BIN)
 $(RUNC_DIR)/VERSION:
 	git submodule update --init --recursive $(RUNC_DIR)
 
-tools/runc-builder-stamp: tools/docker/Dockerfile.runc-builder
+.PHONY: tools/runc-builder-$(DOCKER_IMAGE_TAG)-stamp
+tools/runc-builder-$(DOCKER_IMAGE_TAG)-stamp: tools/docker/Dockerfile.runc-builder
 	docker build \
 		-t localhost/$(RUNC_BUILDER_NAME):$(DOCKER_IMAGE_TAG) \
 		-f tools/docker/Dockerfile.runc-builder \
 		tools/
 	touch $@
 
-$(RUNC_BIN): $(RUNC_DIR)/VERSION tools/runc-builder-stamp
+$(RUNC_BIN): $(RUNC_DIR)/VERSION tools/runc-builder-$(DOCKER_IMAGE_TAG)-stamp
+	runc_revision=$$(git -C $(RUNC_DIR) rev-parse --verify HEAD) && \
 	docker run --rm --user $(UID) \
 		--volume $(CURDIR)/$(RUNC_DIR):/gopath/src/github.com/opencontainers/runc \
 		--volume $(CURDIR)/deps:/target \
@@ -393,7 +388,7 @@ $(RUNC_BIN): $(RUNC_DIR)/VERSION tools/runc-builder-stamp
 		-e GOPATH=/gopath \
 		--workdir /gopath/src/github.com/opencontainers/runc \
 		localhost/$(RUNC_BUILDER_NAME):$(DOCKER_IMAGE_TAG) \
-		make static
+		make static COMMIT="$$runc_revision"
 
 .PHONY: install-runc
 install-runc: $(RUNC_BIN)
@@ -408,15 +403,16 @@ stargz-snapshotter: $(STARGZ_BIN)
 $(STARGZ_DIR)/go.mod:
 	git submodule update --init --recursive $(STARGZ_DIR)
 
-tools/stargz-builder-stamp: tools/docker/Dockerfile.stargz-builder
+.PHONY: tools/stargz-builder-$(DOCKER_IMAGE_TAG)-stamp
+tools/stargz-builder-$(DOCKER_IMAGE_TAG)-stamp: tools/docker/Dockerfile.stargz-builder
 	docker build \
 		-t localhost/$(STARGZ_BUILDER_NAME):$(DOCKER_IMAGE_TAG) \
 		-f tools/docker/Dockerfile.stargz-builder \
 		tools/
 	touch $@
 
-$(STARGZ_BIN): $(STARGZ_DIR)/go.mod tools/stargz-builder-stamp
-	docker run --rm -it \
+$(STARGZ_BIN): $(STARGZ_DIR)/go.mod tools/stargz-builder-$(DOCKER_IMAGE_TAG)-stamp
+	docker run --rm \
 	--user $(UID):$(GID) \
 	--volume $(GO_CACHE_VOLUME_NAME):/go \
 	--volume $(CURDIR):/src \

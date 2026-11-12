@@ -1,44 +1,70 @@
-run:
-  timeout: 5m
-
+version: "2"
 linters:
-  disable-all: true
+  default: none
+  settings:
+    goconst:
+      # Repeated literal fixtures and expected event names keep tests readable.
+      ignore-tests: true
   enable:
-    - govet
     - copyloopvar
-    - staticcheck
-    - gosimple
-    - ineffassign
-    - typecheck
-    - gosec
-    - unconvert
     - goconst
-    - goimports
+    - gocritic
+    - gosec
+    - govet
+    - ineffassign
     - misspell
     - prealloc
-    - gocritic
-    - gofmt
     - revive
-
-issues:
-  exclude-use-default: false
-  exclude:
-    - G104 # Errors unhandled
-    - G103 # Use of unsafe calls should be audited
-    - G114 # Use of net/http serve function without timeouts.
-    - G115 # Integer overflow conversion should be audited
-    - G204 # Subprocess launched with variable
-    - G301 # Expect directory permissions to be 0750 or less
-    - G304 # Potential file inclusion via variable
-    - G306 # WriteFile permissions 0600 or less to be audited
-    - G307 # Deferring unsafe method "Close" on type "*os.File" to be audited
-    - G404 # Use of weak random number generator
-  exclude-rules:
-    - linters:
-      - govet
-      text: "copylocks"
-    - linters:
-      - staticcheck
-      text: "Do not rely on the global seed"
-  exclude-dirs:
-    - snapshotter/internal/integtest/stargz # Code copied from upstream stargz
+    - staticcheck
+    - unconvert
+  exclusions:
+    generated: lax
+    rules:
+      - linters:
+          - govet
+        text: copylocks
+      - linters:
+          - staticcheck
+        text: Do not rely on the global seed
+      - path: (.+)\.go$
+        text: G104
+      - path: (.+)\.go$
+        text: G103
+      - path: (.+)\.go$
+        text: G114
+      - path: (.+)\.go$
+        text: G115
+      - path: (.+)\.go$
+        text: G204
+      - path: (.+)\.go$
+        text: G301
+      - path: (.+)\.go$
+        text: G304
+      - path: (.+)\.go$
+        text: G306
+      - path: (.+)\.go$
+        text: G307
+      - path: (.+)\.go$
+        text: G404
+    paths:
+      - _submodules
+      - ^tmp/
+      - ^bin/
+      - snapshotter/internal/integtest/stargz
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - _submodules
+      - ^tmp/
+      - ^bin/
+      - snapshotter/internal/integtest/stargz
+      - third_party$
+      - builtin$
+      - examples$
