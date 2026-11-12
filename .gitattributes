@@ -10,3 +10,4 @@ docs/modernization/evidence/** -whitespace
 tools/memory-eval/evidence/** -whitespace
 tools/memory-eval/results/** -whitespace
 tools/memory-probe/evidence/** -whitespace
+tools/image-builder/evidence/** -whitespace

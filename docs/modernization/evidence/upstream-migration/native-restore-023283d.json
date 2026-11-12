@@ -1,0 +1,21 @@
+{
+  "runtime_revision": "023283d9dd698f505ec7c0be9f977eef443e52fe",
+  "sdk_revision": "76af8abe770941a987e6071677b8228df75cdd86",
+  "firecracker": "official v1.18.0",
+  "worker": "amd218.utah.cloudlab.us",
+  "test": "TestNativeRestore_Isolated",
+  "result": "failed",
+  "cases": [
+    {
+      "jailed": false,
+      "result": "failed"
+    },
+    {
+      "jailed": true,
+      "result": "failed"
+    }
+  ],
+  "failure": "CheckpointVM returned context deadline exceeded during source recovery after snapshot creation; restore not reached",
+  "worker_log": "upstream-migration/evidence/native-restore-023283d-containerd.log",
+  "scope": "Diagnostic development revision, not release acceptance"
+}
