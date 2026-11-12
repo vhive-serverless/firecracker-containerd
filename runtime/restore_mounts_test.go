@@ -164,6 +164,48 @@ func TestNativeRestoreMountPlan(t *testing.T) {
 	}
 }
 
+func TestNativeRestorePmemMountPlan(t *testing.T) {
+	for _, jailed := range []bool{false, true} {
+		name := "unjailed"
+		if jailed {
+			name = "jailed"
+		}
+		t.Run(name, func(t *testing.T) {
+			shared := t.TempDir()
+			clone := filepath.Join(shared, "clone")
+			pmem := filepath.Join(shared, "pmem")
+			require.NoError(t, os.WriteFile(clone, []byte("independent"), 0600))
+			require.NoError(t, os.WriteFile(pmem, []byte("verified-pmem"), 0400))
+			captured, capturedPmem := "/deleted-source/disks/workload", "/deleted-source/pmem/root"
+			if jailed {
+				captured, capturedPmem = "workload", "root-pmem"
+			}
+			restore := &nativeRestore{
+				manifest: &nativeCheckpoint{
+					VMConfig: &models.FullVMConfiguration{
+						Drives: []*models.Drive{{DriveID: fc.String("workload"), PathOnHost: captured}},
+						Pmem:   []*models.Pmem{{ID: fc.String(pmemRootID), PathOnHost: fc.String(capturedPmem), ReadOnly: true}},
+					},
+					Drives: []nativeDrive{{ID: "workload", File: snapshotFile{Path: "drives/0"}}},
+					Pmem:   []nativePmem{{ID: pmemRootID, File: snapshotFile{Path: "pmem/0"}}},
+				},
+				files: map[string]string{"drives/0": clone, "pmem/0": pmem, "memory": filepath.Join(shared, "memory"), "state": filepath.Join(shared, "state")},
+			}
+			svc := &service{nativeRestore: restore, machineConfig: &fc.Config{PmemDevices: []models.Pmem{{ID: fc.String(pmemRootID), PathOnHost: fc.String(pmem), ReadOnly: true}}}, jailer: &noopJailer{shimDir: vm.Dir(shared), logger: logrus.NewEntry(logrus.New())}}
+			if jailed {
+				svc.jailer = &runcJailer{Config: runcJailerConfig{OCIBundlePath: shared}}
+			}
+			require.NoError(t, svc.prepareSnapshotMounts(&proto.CreateVMRequest{}))
+			path, ok := restoreBackingPath(svc.jailer, captured)
+			require.True(t, ok)
+			require.Equal(t, clone, path)
+			path, ok = restoreBackingPath(svc.jailer, capturedPmem)
+			require.True(t, ok)
+			require.Equal(t, pmem, path)
+		})
+	}
+}
+
 func TestRestoreBackingRejectsFileAliasesAndSpecialFiles(t *testing.T) {
 	directory := t.TempDir()
 	regular := filepath.Join(directory, "regular")
