@@ -4,7 +4,7 @@
 set -euo pipefail
 repo_dir=$(cd "$(dirname "$0")/../.." && pwd)
 stack_dir=${STACK_DIR:-"$HOME/fc-ctrd-mod"}
-export PATH="$stack_dir/toolchains/go1.26.11/bin:$stack_dir/toolchains/cargo/bin:$PATH"
+export PATH="$stack_dir/toolchains/go1.26.11/bin:$PATH"
 export STATIC_AGENT=on STATIC_DOCKER_CREDENTIAL_MMDS=on
 cd "$repo_dir"
 test -z "$(git status --porcelain)"
