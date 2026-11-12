@@ -18,6 +18,7 @@ import (
 	"sync"
 
 	"github.com/containerd/containerd/api/events"
+	taskAPI "github.com/containerd/containerd/api/runtime/task/v3"
 	coreevents "github.com/containerd/containerd/v2/core/events"
 	"github.com/containerd/containerd/v2/pkg/shim"
 )
@@ -74,4 +75,41 @@ func (p *exitPublisher) Publish(ctx context.Context, topic string, event coreeve
 		p.mu.Unlock()
 	}
 	return nil
+}
+
+// waitAll runs after task admission is closed and all process exits are known.
+// Keep the runc publisher alive until each started init exit reaches the journal.
+func (p *exitPublisher) waitAll(ctx context.Context) error {
+	p.mu.Lock()
+	exits := make([]<-chan struct{}, 0, len(p.exits))
+	for _, done := range p.exits {
+		exits = append(exits, done)
+	}
+	p.mu.Unlock()
+	for _, done := range exits {
+		select {
+		case <-done:
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+	}
+	return ctx.Err()
+}
+
+// Start publication bookkeeping belongs inside the admitted Start operation so
+// final shutdown cannot miss a late barrier or wait on a rejected Start.
+type startPublisher struct {
+	taskAPI.TTRPCTaskService
+	publisher *exitPublisher
+}
+
+func (p *startPublisher) Start(ctx context.Context, req *taskAPI.StartRequest) (*taskAPI.StartResponse, error) {
+	if req.ExecID == "" {
+		p.publisher.begin(req.ID)
+	}
+	response, err := p.TTRPCTaskService.Start(ctx, req)
+	if err != nil && req.ExecID == "" {
+		p.publisher.forget(req.ID)
+	}
+	return response, err
 }
