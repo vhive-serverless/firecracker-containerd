@@ -42,6 +42,7 @@ type Dialer struct {
 type RemoteSnapshotter struct {
 	snapshots.Snapshotter
 	metricsProxy *metrics.Proxy
+	connection   *grpc.ClientConn
 }
 
 // Close closes the remote snapshotter's snapshotter and shuts down its metrics proxy server.
@@ -49,6 +50,11 @@ func (rs *RemoteSnapshotter) Close() error {
 	var compiledErr error
 	if err := rs.Snapshotter.Close(); err != nil {
 		compiledErr = multierror.Append(compiledErr, err)
+	}
+	if rs.connection != nil {
+		if err := rs.connection.Close(); err != nil {
+			compiledErr = multierror.Append(compiledErr, err)
+		}
 	}
 	if rs.metricsProxy != nil {
 		if err := rs.metricsProxy.Shutdown(context.Background()); err != nil {
@@ -67,7 +73,9 @@ func NewRemoteSnapshotter(ctx context.Context, address string,
 		grpc.WithContextDialer(dialer),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	}
-	gRPCConn, err := grpc.NewClient(address, opts...)
+	// The address is a namespace resolved by our custom vsock dialer, not a
+	// DNS hostname. NewClient otherwise applies its default DNS resolver first.
+	gRPCConn, err := grpc.NewClient("passthrough:///"+address, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +85,11 @@ func NewRemoteSnapshotter(ctx context.Context, address string,
 		go metricsProxy.Serve(ctx)
 	}
 
-	return &RemoteSnapshotter{proxy.NewSnapshotter(snapshotsapi.NewSnapshotsClient(gRPCConn), address), metricsProxy}, nil
+	return &RemoteSnapshotter{
+		Snapshotter:  proxy.NewSnapshotter(snapshotsapi.NewSnapshotsClient(gRPCConn), address),
+		metricsProxy: metricsProxy,
+		connection:   gRPCConn,
+	}, nil
 }
 
 // Cleanup implements the Cleaner interface for snapshotters.

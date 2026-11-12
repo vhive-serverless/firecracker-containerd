@@ -14,13 +14,51 @@
 package metrics
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
+
+	"github.com/stretchr/testify/require"
 )
+
+func TestProxyCompletionAfterMonitorStop(t *testing.T) {
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+	defer listener.Close()
+	port := listener.Addr().(*net.TCPAddr).Port
+	monitor, err := NewMonitor(port, port)
+	require.NoError(t, err)
+	proxy, err := NewProxy("127.0.0.1", monitor, nil, nil)
+	require.NoError(t, err)
+	monitor.Stop()
+	// The occupied port makes completion deterministic, including when the
+	// monitor stops before this server's goroutine has begun running.
+	require.Error(t, proxy.Serve(context.Background()))
+	monitor.Stop()
+	_, err = monitor.findOpenPort()
+	require.Error(t, err)
+}
+
+func TestProxyShutdownBeforeServe(t *testing.T) {
+	monitor, err := NewMonitor(30000, 30000)
+	require.NoError(t, err)
+	defer monitor.Stop()
+	proxy, err := NewProxy("127.0.0.1", monitor, nil, nil)
+	require.NoError(t, err)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	require.NoError(t, proxy.Shutdown(ctx))
+	require.NoError(t, proxy.Serve(ctx))
+	port, err := monitor.findOpenPort()
+	require.NoError(t, err)
+	require.Equal(t, proxy.Port, port, "a server closed before startup must release its reservation")
+}
 
 func okPortRange(startPort, endPort int) error {
 	m, err := NewMonitor(startPort, endPort)
