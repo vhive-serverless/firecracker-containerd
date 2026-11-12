@@ -27,17 +27,23 @@ import (
 
 type restoredTaskBackend struct {
 	mockTaskService
+	stateIDOverride string
 }
 
-func (*restoredTaskBackend) State(ctx context.Context, req *taskAPI.StateRequest) (*taskAPI.StateResponse, error) {
+func (b *restoredTaskBackend) State(ctx context.Context, req *taskAPI.StateRequest) (*taskAPI.StateResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
 	pid := uint32(41)
+	id := req.ID
 	if req.ExecID != "" {
 		pid = 42
+		id = req.ExecID
 	}
-	return &taskAPI.StateResponse{ID: req.ID, Pid: pid, Status: task.Status_PAUSED}, nil
+	if b.stateIDOverride != "" {
+		id = b.stateIDOverride
+	}
+	return &taskAPI.StateResponse{ID: id, Pid: pid, Status: task.Status_PAUSED}, nil
 }
 
 func TestAdoptProcessPreservesGuestTaskAndExec(t *testing.T) {
@@ -76,4 +82,19 @@ func TestAdoptProcessRejectsWrongIdentityAndMissingParent(t *testing.T) {
 	require.Empty(t, backend.PopCreateRequests("captured"))
 	require.Empty(t, backend.PopExecRequests("captured"))
 	require.Empty(t, backend.PopDeleteRequests("captured"), "failed adoption must not delete a guest process")
+}
+
+func TestAdoptProcessRejectsSubstitutedProcessIdentity(t *testing.T) {
+	for _, saved := range []RestoredProcess{{TaskID: "captured", PID: 41}, {TaskID: "captured", ExecID: "exec", PID: 42}} {
+		t.Run("exec="+saved.ExecID, func(t *testing.T) {
+			backend := &restoredTaskBackend{stateIDOverride: "exec"}
+			if saved.ExecID != "" {
+				backend.stateIDOverride = saved.TaskID
+			}
+			manager := NewTaskManager(context.Background(), logrus.NewEntry(logrus.New()))
+			_, err := manager.AdoptProcess(context.Background(), saved, backend, NewNullIOProxy())
+			require.Equal(t, codes.FailedPrecondition, status.Code(err))
+			require.True(t, manager.ShutdownIfEmpty())
+		})
+	}
 }

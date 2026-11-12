@@ -50,7 +50,11 @@ func (m *taskManager) AdoptProcess(ctx context.Context, saved RestoredProcess, b
 	if err != nil {
 		return nil, err
 	}
-	if state == nil || state.ID != saved.TaskID || state.Pid != saved.PID || state.Status == task.Status_UNKNOWN {
+	stateID := saved.TaskID
+	if saved.ExecID != "" {
+		stateID = saved.ExecID
+	}
+	if state == nil || state.ID != stateID || state.Pid != saved.PID || state.Status == task.Status_UNKNOWN {
 		return nil, status.Error(codes.FailedPrecondition, "restored guest process does not match captured task identity and PID")
 	}
 	proc, err := m.newProc(saved.TaskID, saved.ExecID)
