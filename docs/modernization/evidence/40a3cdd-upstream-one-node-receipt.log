@@ -1,0 +1,30 @@
+ONE_NODE_LOGS=/users/nehalem/fc-ctrd-mod/evidence/upstream-one-node.lGasubs0
+source_revision=40a3cdd37d5e19e8212db69d665319e05eed42e6
+source_dirty=false
+aee6151561422756b764a4ae28e7f44cda5af5a9eead3cc9985112b1de8d8e0d  /users/nehalem/fc-ctrd-mod/toolchains/kind-v0.33.0/kind-linux-amd64
+38e16f4ef1a3bf1406efa58f177b170b941e9aa6dedd0b8f1e27c2a52f1bdf38  /users/nehalem/fc-ctrd-mod/toolchains/kubernetes-v1.37.2/kubernetes-server-linux-amd64.tar.gz
+8f275c35e9e9a1ca1659722e254383428d650de86e5de0d77f3c4a5db925aba2  tools/kubernetes/one-node-baseline.sh
+node_image=sha256:474367be785d37cee54bb13cb1382e112e01aa9e215969e91095a0dd5a1565d8
+Kubernetes v1.37.2
+containerd github.com/containerd/containerd/v2 v2.3.4 db8809540e1a7a9da5d518876894933ff55692ab
+node/fcmod-upstream-137-control-plane condition met
+{"podcheckpoint_resource_advertised": false, "pod_spec_restoreFrom_advertised": false, "feature_gate_configuration": "released defaults; PodLevelCheckpointRestore was rejected in the separate binary audit"}
+namespace/fcmod-one-node-smoke-3103086 created
+pod/smoke created
+pod/smoke condition met
+UPSTREAM_POD_STARTED
+Server:		10.96.0.10
+Address:	10.96.0.10:53
+
+
+Name:	kubernetes.default.svc.cluster.local
+Address: 10.96.0.1
+
+namespace "fcmod-one-node-smoke-3103086" deleted
+UPSTREAM_ONE_NODE_BASELINE_OK
+
+Committed checkout: 40a3cdd37d5e19e8212db69d665319e05eed42e6
+Commands: tools/kubernetes/one-node-baseline.sh create; tools/kubernetes/one-node-baseline.sh probe
+Both command exit statuses: 0
+bca3a002bcff5c8700b81c41c9e05387c44625523f6facd4eeb8c8dd4fb7218e  evidence/40a3cdd-upstream-one-node-create.log
+925f5fcee1cb5fb7d2d57fb381e76a60185c7db79dd2b04310b7362526c93103  evidence/40a3cdd-upstream-one-node-probe.log
