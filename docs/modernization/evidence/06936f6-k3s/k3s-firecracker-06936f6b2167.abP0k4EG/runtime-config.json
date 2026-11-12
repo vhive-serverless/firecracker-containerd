@@ -1,0 +1,11 @@
+{
+  "shim_base_dir": "/srv/firecracker_containerd_tests",
+  "guest_root_mode": "disk",
+  "guest_root_size_mib": 512,
+  "guest_reclamation": {
+    "Enabled": false
+  },
+  "root_drive": "/fc-root-dax.img",
+  "root_drive_use_pmem": true,
+  "root_drive_sha256": "a341ce971194ce07663e157c31c3a28946cc4962b547270fe6a9ba8db3f3e0f3"
+}

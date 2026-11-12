@@ -1,0 +1,101 @@
+{
+  "containers": [
+    {
+      "id": "58c41f48b24634f86b958ad109138d4b2690bbddf4d6d987ddc46244d3e3600c",
+      "podSandboxId": "9eecb68da759fe2b360a29b6e31ffc02af6bda1d2c127dd1e0d4c9a52af9eeea",
+      "metadata": {
+        "name": "sidecar",
+        "attempt": 0
+      },
+      "image": {
+        "image": "sha256:84eebb9ca17342f9a6e5e5a1435eb2c139c3c20d63178ee2cd04390dd85ba4e7",
+        "annotations": {},
+        "userSpecifiedImage": "registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf",
+        "runtimeHandler": "",
+        "imageRef": ""
+      },
+      "imageRef": "sha256:84eebb9ca17342f9a6e5e5a1435eb2c139c3c20d63178ee2cd04390dd85ba4e7",
+      "state": "CONTAINER_RUNNING",
+      "createdAt": "1794421835633055144",
+      "labels": {
+        "io.kubernetes.container.name": "sidecar",
+        "io.kubernetes.pod.name": "firecracker",
+        "io.kubernetes.pod.namespace": "fcmod-smoke",
+        "io.kubernetes.pod.uid": "f22879a0-7297-4d98-b1db-4c76a9cb3f97"
+      },
+      "annotations": {
+        "io.kubernetes.container.hash": "f1b6e0cc",
+        "io.kubernetes.container.restartCount": "0",
+        "io.kubernetes.container.terminationMessagePath": "/dev/termination-log",
+        "io.kubernetes.container.terminationMessagePolicy": "File",
+        "io.kubernetes.pod.terminationGracePeriod": "5"
+      },
+      "imageId": "sha256:84eebb9ca17342f9a6e5e5a1435eb2c139c3c20d63178ee2cd04390dd85ba4e7"
+    },
+    {
+      "id": "7fce69593060f742789ca20bd3af691fa0e796965e402a4a1927b3566c6881bf",
+      "podSandboxId": "9eecb68da759fe2b360a29b6e31ffc02af6bda1d2c127dd1e0d4c9a52af9eeea",
+      "metadata": {
+        "name": "main",
+        "attempt": 0
+      },
+      "image": {
+        "image": "sha256:84eebb9ca17342f9a6e5e5a1435eb2c139c3c20d63178ee2cd04390dd85ba4e7",
+        "annotations": {},
+        "userSpecifiedImage": "registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf",
+        "runtimeHandler": "",
+        "imageRef": ""
+      },
+      "imageRef": "sha256:84eebb9ca17342f9a6e5e5a1435eb2c139c3c20d63178ee2cd04390dd85ba4e7",
+      "state": "CONTAINER_RUNNING",
+      "createdAt": "1794421835408623193",
+      "labels": {
+        "io.kubernetes.container.name": "main",
+        "io.kubernetes.pod.name": "firecracker",
+        "io.kubernetes.pod.namespace": "fcmod-smoke",
+        "io.kubernetes.pod.uid": "f22879a0-7297-4d98-b1db-4c76a9cb3f97"
+      },
+      "annotations": {
+        "io.kubernetes.container.hash": "2b7702ec",
+        "io.kubernetes.container.restartCount": "0",
+        "io.kubernetes.container.terminationMessagePath": "/dev/termination-log",
+        "io.kubernetes.container.terminationMessagePolicy": "File",
+        "io.kubernetes.pod.terminationGracePeriod": "5"
+      },
+      "imageId": "sha256:84eebb9ca17342f9a6e5e5a1435eb2c139c3c20d63178ee2cd04390dd85ba4e7"
+    },
+    {
+      "id": "6e523e317e196ff479edc3d4d3e932b3f6bdad0d1edd85f4daf69d8813afdc08",
+      "podSandboxId": "524e054190e6a807705918e9c7ded2db870eebbfc51c280933d03510cee41606",
+      "metadata": {
+        "name": "coredns",
+        "attempt": 0
+      },
+      "image": {
+        "image": "sha256:97efff2babf85310d6f87bd969ac64d7006bbbadb147c90579d68d57634750f4",
+        "annotations": {},
+        "userSpecifiedImage": "docker.io/rancher/mirrored-coredns-coredns@sha256:7efd3c635b03efd68c4e8398fc45f0d993d0e9ab016f72c1cefb0fd6d01aa286",
+        "runtimeHandler": "",
+        "imageRef": ""
+      },
+      "imageRef": "sha256:97efff2babf85310d6f87bd969ac64d7006bbbadb147c90579d68d57634750f4",
+      "state": "CONTAINER_RUNNING",
+      "createdAt": "1794421826650873415",
+      "labels": {
+        "io.kubernetes.container.name": "coredns",
+        "io.kubernetes.pod.name": "coredns-875f564df-2ncpp",
+        "io.kubernetes.pod.namespace": "kube-system",
+        "io.kubernetes.pod.uid": "892a4fb0-909e-4559-95f0-103e70ac7c0c"
+      },
+      "annotations": {
+        "io.kubernetes.container.hash": "3793a8ea",
+        "io.kubernetes.container.ports": "[{\"name\":\"dns\",\"containerPort\":53,\"protocol\":\"UDP\"},{\"name\":\"dns-tcp\",\"containerPort\":53,\"protocol\":\"TCP\"},{\"name\":\"metrics\",\"containerPort\":9153,\"protocol\":\"TCP\"}]",
+        "io.kubernetes.container.restartCount": "0",
+        "io.kubernetes.container.terminationMessagePath": "/dev/termination-log",
+        "io.kubernetes.container.terminationMessagePolicy": "File",
+        "io.kubernetes.pod.terminationGracePeriod": "30"
+      },
+      "imageId": "sha256:97efff2babf85310d6f87bd969ac64d7006bbbadb147c90579d68d57634750f4"
+    }
+  ]
+}

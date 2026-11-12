@@ -1,0 +1,345 @@
+From https://github.com/vhive-serverless/firecracker-containerd
+ * branch              damon-virtio-pmem -> FETCH_HEAD
+   5fb79f12..f5b3ba6b  damon-virtio-pmem -> origin/damon-virtio-pmem
+Updating 5fb79f12..f5b3ba6b
+Fast-forward
+ snapshotter/Makefile | 2 ++
+ 1 file changed, 2 insertions(+)
+f5b3ba6b84553b4bbcec9d08f5ed79aabf3bc217
+make: Entering directory '/users/nehalem/fc-ctrd-mod/step4-regression-fix/snapshotter'
+make -C .. test-deps-in-docker
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/step4-regression-fix'
+docker run --rm \
+	--volume /users/nehalem/fc-ctrd-mod/step4-regression-fix:/src \
+	--volume gocache:/go \
+	--workdir /src \
+	public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 go mod download
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/step4-regression-fix'
+test -n "TestSnapshotterMetrics_Isolated TestSnapshotterMetricsMultipleVMs_Isolated TestLaunchContainerWithRemoteSnapshotter_Isolated TestLaunchMultipleContainersWithRemoteSnapshotter_Isolated TestGuestVolumeFrom_Isolated"
+make integ-test-TestSnapshotterMetrics_Isolated integ-test-TestSnapshotterMetricsMultipleVMs_Isolated integ-test-TestLaunchContainerWithRemoteSnapshotter_Isolated integ-test-TestLaunchMultipleContainersWithRemoteSnapshotter_Isolated integ-test-TestGuestVolumeFrom_Isolated
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/step4-regression-fix/snapshotter'
+mkdir logs
+make -C .. test-deps-in-docker
+make[2]: Entering directory '/users/nehalem/fc-ctrd-mod/step4-regression-fix'
+docker run --rm \
+	--volume /users/nehalem/fc-ctrd-mod/step4-regression-fix:/src \
+	--volume gocache:/go \
+	--workdir /src \
+	public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 go mod download
+make[2]: Leaving directory '/users/nehalem/fc-ctrd-mod/step4-regression-fix'
+/users/nehalem/fc-ctrd-mod/step4-regression-fix/snapshotter/../tools/thinpool.sh reset "fc-step4-snapshotter-f5b3ba6"
+Name:              fc-step4-snapshotter-f5b3ba6
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 9
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=bridge \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-regression-fix/snapshotter/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-regression-fix/snapshotter/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-snapshotter-f5b3ba6:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env GO111MODULE=on \
+	--env NUMBER_OF_VMS= \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-snapshotter-f5b3ba6 \
+	--workdir="/src/snapshotter" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=300s -run '^TestSnapshotterMetrics_Isolated$'"
+=== RUN   TestSnapshotterMetrics_Isolated
+--- PASS: TestSnapshotterMetrics_Isolated (9.20s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter	9.221s
+/users/nehalem/fc-ctrd-mod/step4-regression-fix/snapshotter/../tools/thinpool.sh reset "fc-step4-snapshotter-f5b3ba6"
+Name:              fc-step4-snapshotter-f5b3ba6
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 8
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=bridge \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-regression-fix/snapshotter/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-regression-fix/snapshotter/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-snapshotter-f5b3ba6:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env GO111MODULE=on \
+	--env NUMBER_OF_VMS= \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-snapshotter-f5b3ba6 \
+	--workdir="/src/snapshotter" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=300s -run '^TestSnapshotterMetricsMultipleVMs_Isolated$'"
+=== RUN   TestSnapshotterMetricsMultipleVMs_Isolated
+--- PASS: TestSnapshotterMetricsMultipleVMs_Isolated (11.81s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter	11.824s
+/users/nehalem/fc-ctrd-mod/step4-regression-fix/snapshotter/../tools/thinpool.sh reset "fc-step4-snapshotter-f5b3ba6"
+Name:              fc-step4-snapshotter-f5b3ba6
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 8
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=bridge \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-regression-fix/snapshotter/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-regression-fix/snapshotter/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-snapshotter-f5b3ba6:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env GO111MODULE=on \
+	--env NUMBER_OF_VMS= \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-snapshotter-f5b3ba6 \
+	--workdir="/src/snapshotter" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=300s -run '^TestLaunchContainerWithRemoteSnapshotter_Isolated$'"
+=== RUN   TestLaunchContainerWithRemoteSnapshotter_Isolated
+    service_integ_test.go:164: namespace=0 remote snapshotter mounts:
+        overlay / overlay rw,relatime,lowerdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/1/fs,upperdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/fs,workdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/work 0 0
+        proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /dev tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        devpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=666 0 0
+        shm /dev/shm tmpfs rw,nosuid,nodev,noexec,relatime,size=65536k 0 0
+        mqueue /dev/mqueue mqueue rw,nosuid,nodev,noexec,relatime 0 0
+        sysfs /sys sysfs ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /run tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        proc /etc/resolv.conf proc ro,relatime 0 0
+        overlayfs:/overlay/root /etc/hosts overlay ro,noatime,lowerdir=/,upperdir=/overlay/root,workdir=/overlay/work,uuid=on 0 0
+        proc /proc/bus proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/fs proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/irq proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sys proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sysrq-trigger proc ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /proc/acpi tmpfs ro,relatime 0 0
+        tmpfs /proc/interrupts tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/kcore tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/keys tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/timer_list tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /sys/firmware tmpfs ro,relatime 0 0
+        tmpfs /proc/scsi tmpfs ro,relatime 0 0
+--- PASS: TestLaunchContainerWithRemoteSnapshotter_Isolated (11.90s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter	11.918s
+/users/nehalem/fc-ctrd-mod/step4-regression-fix/snapshotter/../tools/thinpool.sh reset "fc-step4-snapshotter-f5b3ba6"
+Name:              fc-step4-snapshotter-f5b3ba6
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 8
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=bridge \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-regression-fix/snapshotter/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-regression-fix/snapshotter/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-snapshotter-f5b3ba6:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env GO111MODULE=on \
+	--env NUMBER_OF_VMS= \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-snapshotter-f5b3ba6 \
+	--workdir="/src/snapshotter" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=300s -run '^TestLaunchMultipleContainersWithRemoteSnapshotter_Isolated$'"
+=== RUN   TestLaunchMultipleContainersWithRemoteSnapshotter_Isolated
+    service_integ_test.go:164: namespace=1 remote snapshotter mounts:
+        overlay / overlay rw,relatime,lowerdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/1/fs,upperdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/fs,workdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/work 0 0
+        proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /dev tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        devpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=666 0 0
+        shm /dev/shm tmpfs rw,nosuid,nodev,noexec,relatime,size=65536k 0 0
+        mqueue /dev/mqueue mqueue rw,nosuid,nodev,noexec,relatime 0 0
+        sysfs /sys sysfs ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /run tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        proc /etc/resolv.conf proc ro,relatime 0 0
+        overlayfs:/overlay/root /etc/hosts overlay ro,noatime,lowerdir=/,upperdir=/overlay/root,workdir=/overlay/work,uuid=on 0 0
+        proc /proc/bus proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/fs proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/irq proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sys proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sysrq-trigger proc ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /proc/acpi tmpfs ro,relatime 0 0
+        tmpfs /proc/interrupts tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/kcore tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/keys tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/timer_list tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /sys/firmware tmpfs ro,relatime 0 0
+        tmpfs /proc/scsi tmpfs ro,relatime 0 0
+    service_integ_test.go:164: namespace=4 remote snapshotter mounts:
+        overlay / overlay rw,relatime,lowerdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/1/fs,upperdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/fs,workdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/work 0 0
+        proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /dev tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        devpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=666 0 0
+        shm /dev/shm tmpfs rw,nosuid,nodev,noexec,relatime,size=65536k 0 0
+        mqueue /dev/mqueue mqueue rw,nosuid,nodev,noexec,relatime 0 0
+        sysfs /sys sysfs ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /run tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        proc /etc/resolv.conf proc ro,relatime 0 0
+        overlayfs:/overlay/root /etc/hosts overlay ro,noatime,lowerdir=/,upperdir=/overlay/root,workdir=/overlay/work,uuid=on 0 0
+        proc /proc/bus proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/fs proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/irq proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sys proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sysrq-trigger proc ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /proc/acpi tmpfs ro,relatime 0 0
+        tmpfs /proc/interrupts tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/kcore tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/keys tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/timer_list tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /sys/firmware tmpfs ro,relatime 0 0
+        tmpfs /proc/scsi tmpfs ro,relatime 0 0
+    service_integ_test.go:164: namespace=2 remote snapshotter mounts:
+        overlay / overlay rw,relatime,lowerdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/1/fs,upperdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/fs,workdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/work 0 0
+        proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /dev tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        devpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=666 0 0
+        shm /dev/shm tmpfs rw,nosuid,nodev,noexec,relatime,size=65536k 0 0
+        mqueue /dev/mqueue mqueue rw,nosuid,nodev,noexec,relatime 0 0
+        sysfs /sys sysfs ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /run tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        proc /etc/resolv.conf proc ro,relatime 0 0
+        overlayfs:/overlay/root /etc/hosts overlay ro,noatime,lowerdir=/,upperdir=/overlay/root,workdir=/overlay/work,uuid=on 0 0
+        proc /proc/bus proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/fs proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/irq proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sys proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sysrq-trigger proc ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /proc/acpi tmpfs ro,relatime 0 0
+        tmpfs /proc/interrupts tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/kcore tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/keys tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/timer_list tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /sys/firmware tmpfs ro,relatime 0 0
+        tmpfs /proc/scsi tmpfs ro,relatime 0 0
+    service_integ_test.go:164: namespace=0 remote snapshotter mounts:
+        overlay / overlay rw,relatime,lowerdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/1/fs,upperdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/fs,workdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/work 0 0
+        proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /dev tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        devpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=666 0 0
+        shm /dev/shm tmpfs rw,nosuid,nodev,noexec,relatime,size=65536k 0 0
+        mqueue /dev/mqueue mqueue rw,nosuid,nodev,noexec,relatime 0 0
+        sysfs /sys sysfs ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /run tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        proc /etc/resolv.conf proc ro,relatime 0 0
+        overlayfs:/overlay/root /etc/hosts overlay ro,noatime,lowerdir=/,upperdir=/overlay/root,workdir=/overlay/work,uuid=on 0 0
+        proc /proc/bus proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/fs proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/irq proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sys proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sysrq-trigger proc ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /proc/acpi tmpfs ro,relatime 0 0
+        tmpfs /proc/interrupts tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/kcore tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/keys tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/timer_list tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /sys/firmware tmpfs ro,relatime 0 0
+        tmpfs /proc/scsi tmpfs ro,relatime 0 0
+    service_integ_test.go:164: namespace=3 remote snapshotter mounts:
+        overlay / overlay rw,relatime,lowerdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/1/fs,upperdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/fs,workdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/work 0 0
+        proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /dev tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        devpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=666 0 0
+        shm /dev/shm tmpfs rw,nosuid,nodev,noexec,relatime,size=65536k 0 0
+        mqueue /dev/mqueue mqueue rw,nosuid,nodev,noexec,relatime 0 0
+        sysfs /sys sysfs ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /run tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        proc /etc/resolv.conf proc ro,relatime 0 0
+        overlayfs:/overlay/root /etc/hosts overlay ro,noatime,lowerdir=/,upperdir=/overlay/root,workdir=/overlay/work,uuid=on 0 0
+        proc /proc/bus proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/fs proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/irq proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sys proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sysrq-trigger proc ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /proc/acpi tmpfs ro,relatime 0 0
+        tmpfs /proc/interrupts tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/kcore tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/keys tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/timer_list tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /sys/firmware tmpfs ro,relatime 0 0
+        tmpfs /proc/scsi tmpfs ro,relatime 0 0
+--- PASS: TestLaunchMultipleContainersWithRemoteSnapshotter_Isolated (15.63s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter	15.652s
+/users/nehalem/fc-ctrd-mod/step4-regression-fix/snapshotter/../tools/thinpool.sh reset "fc-step4-snapshotter-f5b3ba6"
+Name:              fc-step4-snapshotter-f5b3ba6
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 8
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=bridge \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-regression-fix/snapshotter/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-regression-fix/snapshotter/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-snapshotter-f5b3ba6:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env GO111MODULE=on \
+	--env NUMBER_OF_VMS= \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-snapshotter-f5b3ba6 \
+	--workdir="/src/snapshotter" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=300s -run '^TestGuestVolumeFrom_Isolated$'"
+=== RUN   TestGuestVolumeFrom_Isolated
+--- PASS: TestGuestVolumeFrom_Isolated (25.02s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter	25.048s
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/step4-regression-fix/snapshotter'
+make: Leaving directory '/users/nehalem/fc-ctrd-mod/step4-regression-fix/snapshotter'
+COMMITTED_STEP4_SNAPSHOTTER_REGRESSION_OK

@@ -1,0 +1,160 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "v1",
+            "kind": "Node",
+            "metadata": {
+                "annotations": {
+                    "alpha.kubernetes.io/provided-node-ip": "172.17.0.2",
+                    "k3s.io/hostname": "8127a375eaeb",
+                    "k3s.io/internal-ip": "172.17.0.2",
+                    "k3s.io/node-args": "[\"server\",\"--container-runtime-endpoint\",\"unix:///run/firecracker-containerd/cri.sock\",\"--flannel-backend\",\"none\",\"--disable-network-policy\",\"--disable\",\"traefik,servicelb,local-storage,metrics-server,gateway-api-crd\",\"--node-name\",\"fcmod-firecracker\",\"--cluster-cidr\",\"198.20.0.0/16\",\"--kube-proxy-arg\",\"masquerade-all=true\",\"--kubelet-arg\",\"cgroup-driver=cgroupfs\",\"--kubelet-arg\",\"fail-swap-on=false\"]",
+                    "k3s.io/node-config-hash": "ZMLQXBOIMTPWSD72J7HI5YVRKU3MKY5W3L3PQZNYJYL3AP66JLWA====",
+                    "k3s.io/node-env": "{}",
+                    "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+                },
+                "creationTimestamp": "2026-11-11T18:30:14Z",
+                "labels": {
+                    "beta.kubernetes.io/arch": "amd64",
+                    "beta.kubernetes.io/os": "linux",
+                    "kubernetes.io/arch": "amd64",
+                    "kubernetes.io/hostname": "fcmod-firecracker",
+                    "kubernetes.io/os": "linux"
+                },
+                "name": "fcmod-firecracker",
+                "resourceVersion": "260",
+                "uid": "8bb862a1-256c-403f-9a84-9995d55373f7"
+            },
+            "spec": {
+                "taints": [
+                    {
+                        "effect": "NoSchedule",
+                        "key": "node.cloudprovider.kubernetes.io/uninitialized",
+                        "value": "true"
+                    },
+                    {
+                        "effect": "NoSchedule",
+                        "key": "node.kubernetes.io/not-ready"
+                    }
+                ]
+            },
+            "status": {
+                "addresses": [
+                    {
+                        "address": "172.17.0.2",
+                        "type": "InternalIP"
+                    },
+                    {
+                        "address": "fcmod-firecracker",
+                        "type": "Hostname"
+                    }
+                ],
+                "allocatable": {
+                    "cpu": "32",
+                    "ephemeral-storage": "448106684884",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "memory": "131490256Ki",
+                    "pods": "110"
+                },
+                "capacity": {
+                    "cpu": "32",
+                    "ephemeral-storage": "471691247616",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "memory": "131490256Ki",
+                    "pods": "110"
+                },
+                "conditions": [
+                    {
+                        "lastHeartbeatTime": "2026-11-11T18:30:14Z",
+                        "lastTransitionTime": "2026-11-11T18:30:14Z",
+                        "message": "kubelet has sufficient memory available",
+                        "reason": "KubeletHasSufficientMemory",
+                        "status": "False",
+                        "type": "MemoryPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-11-11T18:30:14Z",
+                        "lastTransitionTime": "2026-11-11T18:30:14Z",
+                        "message": "kubelet has no disk pressure",
+                        "reason": "KubeletHasNoDiskPressure",
+                        "status": "False",
+                        "type": "DiskPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-11-11T18:30:14Z",
+                        "lastTransitionTime": "2026-11-11T18:30:14Z",
+                        "message": "kubelet has sufficient PID available",
+                        "reason": "KubeletHasSufficientPID",
+                        "status": "False",
+                        "type": "PIDPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-11-11T18:30:14Z",
+                        "lastTransitionTime": "2026-11-11T18:30:14Z",
+                        "message": "kubelet is posting ready status",
+                        "reason": "KubeletReady",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "daemonEndpoints": {
+                    "kubeletEndpoint": {
+                        "Port": 10250
+                    }
+                },
+                "declaredFeatures": [
+                    "ExtendWebSocketsToKubelet",
+                    "InPlacePodLevelResourcesVerticalScaling",
+                    "InPlacePodVerticalScalingInitContainers",
+                    "RestartAllContainersOnContainerExits"
+                ],
+                "features": {
+                    "supplementalGroupsPolicy": true
+                },
+                "nodeInfo": {
+                    "architecture": "amd64",
+                    "bootID": "6428a00e-e606-492a-8fee-a94717abaf7e",
+                    "containerRuntimeVersion": "containerd://2.3.7+unknown",
+                    "kernelVersion": "6.8.0-147-generic",
+                    "kubeProxyVersion": "",
+                    "kubeletVersion": "v1.37.2+k3s1",
+                    "machineID": "",
+                    "operatingSystem": "linux",
+                    "osImage": "Debian GNU/Linux 12 (bookworm)",
+                    "runningInUserNamespace": false,
+                    "systemUUID": "4c4c4544-004a-3910-8033-b6c04f373733"
+                },
+                "runtimeHandlers": [
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": ""
+                    },
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": false,
+                            "userNamespaces": false
+                        },
+                        "name": "firecracker"
+                    },
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": "runc"
+                    }
+                ]
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}

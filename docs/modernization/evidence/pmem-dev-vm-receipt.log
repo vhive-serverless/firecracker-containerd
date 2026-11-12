@@ -1,0 +1,47 @@
+Development pmem VM checks PASS; dirty base 6291b38, not acceptance of 438c2cb.
+Wed Nov 11 15:32:28 UTC 2026
+6291b38d3a5a7ea5778f6c5aadec9521e62aba5a
+ M config/config.go
+ M proto/types.pb.go
+ M proto/types.proto
+ M runtime/native_checkpoint.go
+ M runtime/native_checkpoint_integ_test.go
+ M runtime/native_restore.go
+ M runtime/runc_jailer.go
+ M runtime/runc_jailer_test.go
+ M runtime/service.go
+?? runtime/pmem_root.go
+?? runtime/pmem_root_integ_test.go
+?? runtime/pmem_root_test.go
+?? tools/modernize/test-pmem.sh
+90609169236268f3d93cf51b6616fa1945de58d4a0abe3be0329e754decd5b58  /users/nehalem/fc-ctrd-mod/evidence/pmem-dev-tested-source.patch
+5c709cc56376aa4e423499534bd2d0ea4a3a7cfa1c6756ec7852123e94200a09  /users/nehalem/fc-ctrd-mod/evidence/pmem-dev-tested-untracked.tar
+5d10e2e6f165b7fa3c3c9576407f5e0ab18812b74ac457e80f65010de2b38374  runtime/containerd-shim-aws-firecracker
+42d37b475c225776fac432224640712582b70553157dee876d06438e10ae87dd  agent/agent
+ce15b3d35a4811fbf164371b72f57757cce5e846ad5959b547a471fd564a6e89  bin/firecracker
+f7c763775c948bd8b779e432e5f4d418463a96a3e222b959df2d648c5b798dac  default-vmlinux.bin
+795e0c4f28179f3a2bcedf5face03665fd5731e207afd7524c338baa78606216  tools/image-builder/rootfs-dax.img
+08ac35524118fb259b229415889b64e2c5c100a4dc15c93ad87d03f706fcf827  tools/memory-probe/fc-memory-probe
+76733d508105a9c84c7bd0e09d2e1fab69239aab8ca95b47479b120c07f7f5ac  /users/nehalem/fc-ctrd-mod/evidence/pmem-dev-unit.log
+d151cbb30e9fda6b74e32db98a59e1bd0ed41713ae566ceaea606bba894678ae  /users/nehalem/fc-ctrd-mod/evidence/pmem-dev-lint-final.log
+bded15dbe7f6c118b8b062596be4cf2028b4ccb6926cbfe470cd3b0684a8a07d  /users/nehalem/fc-ctrd-mod/evidence/pmem-dev-build.log
+caf4c217db727a2b6269b6fd76bbb6d247efd0137e75c01d82ef2a5506dace66  /users/nehalem/fc-ctrd-mod/evidence/pmem-dev-image-dax.log
+fb3369e02d103fc456e10ebb1685c74c2388b211031fbb63bed22a217aac0b90  /users/nehalem/fc-ctrd-mod/evidence/pmem-dev-test-images.log
+799d162572348913c92e66c0bc0009819e7f9fdc46ca36bb343329e1ec60f040  /users/nehalem/fc-ctrd-mod/evidence/pmem-dev-BindImmutableImageToJail.log
+5878447ea5e5b08bbe4a45853079df85cfe76acbefcd24ff1fd939ac9eb9eaa9  /users/nehalem/fc-ctrd-mod/evidence/pmem-dev-PmemRoot_Isolated.log
+125f3c99b04ece04c6d23fab4c7d79c8e0ffd9381352408aec22438b8c44fcd0  /users/nehalem/fc-ctrd-mod/evidence/pmem-dev-PmemNativeCheckpoint_Isolated.log
+test_image=sha256:2e5b1164ff9193f1331d0fca00b21d1a0f9a4e62915c7cb3065e33d73e105500
+/users/nehalem/fc-ctrd-mod/evidence/pmem-dev-PmemRoot_Isolated.log:=== RUN   TestPmemRoot_Isolated
+/users/nehalem/fc-ctrd-mod/evidence/pmem-dev-PmemRoot_Isolated.log:=== RUN   TestPmemRoot_Isolated/pmem=false/jailed=false
+/users/nehalem/fc-ctrd-mod/evidence/pmem-dev-PmemRoot_Isolated.log:=== RUN   TestPmemRoot_Isolated/pmem=false/jailed=true
+/users/nehalem/fc-ctrd-mod/evidence/pmem-dev-PmemRoot_Isolated.log:=== RUN   TestPmemRoot_Isolated/pmem=true/jailed=false
+/users/nehalem/fc-ctrd-mod/evidence/pmem-dev-PmemRoot_Isolated.log:=== RUN   TestPmemRoot_Isolated/pmem=true/jailed=true
+/users/nehalem/fc-ctrd-mod/evidence/pmem-dev-PmemRoot_Isolated.log:--- PASS: TestPmemRoot_Isolated (52.25s)
+/users/nehalem/fc-ctrd-mod/evidence/pmem-dev-PmemRoot_Isolated.log:ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	52.266s
+/users/nehalem/fc-ctrd-mod/evidence/pmem-dev-PmemNativeCheckpoint_Isolated.log:=== RUN   TestPmemNativeCheckpoint_Isolated
+/users/nehalem/fc-ctrd-mod/evidence/pmem-dev-PmemNativeCheckpoint_Isolated.log:=== RUN   TestPmemNativeCheckpoint_Isolated/jailed=false
+/users/nehalem/fc-ctrd-mod/evidence/pmem-dev-PmemNativeCheckpoint_Isolated.log:=== RUN   TestPmemNativeCheckpoint_Isolated/jailed=true
+/users/nehalem/fc-ctrd-mod/evidence/pmem-dev-PmemNativeCheckpoint_Isolated.log:--- PASS: TestPmemNativeCheckpoint_Isolated (112.04s)
+/users/nehalem/fc-ctrd-mod/evidence/pmem-dev-PmemNativeCheckpoint_Isolated.log:ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	112.060s
+Actual lower-file STATX_ATTR_DAX=true in 4 pmem VMs and false in 4 matched block controls; both jailers. Mmap/reread/anonymous canary and private writable state passed; both combined pmem/DAMON native capture cases passed.
+No native restore or controlled evaluation acceptance. Final fsync/block-control capture changes in 438c2cb were not part of these dirty development tests.

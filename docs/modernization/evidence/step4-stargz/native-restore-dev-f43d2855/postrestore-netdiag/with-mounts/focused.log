@@ -1,0 +1,56 @@
+=== RUN   TestStargzNativeRestore_Isolated
+    stargz_restore_integ_test.go:94: isolated stargz network bridge=fc-sgz0 subnet=198.18.42.0/24 uplink=eth0 nameservers=[128.110.156.4]
+=== RUN   TestStargzNativeRestore_Isolated/ext4-block
+=== RUN   TestStargzNativeRestore_Isolated/ext4-block/jailed=true
+    stargz_restore_integ_test.go:107: guest routing and DNS configuration:
+        guest route:
+        Iface	Destination	Gateway 	Flags	RefCnt	Use	Metric	Mask		MTU	Window	IRTT                                                       
+        eth0	00000000	012A12C6	0003	0	0	0	00000000	0	0	0                                                                               
+        eth0	002A12C6	00000000	0001	0	0	0	00FFFFFF	0	0	0                                                                               
+        guest resolv.conf:
+        #MANUAL
+        nameserver 128.110.156.4
+        guest ghcr.io DNS:
+        140.82.112.34   STREAM ghcr.io
+        guest TCP sockets:
+          sl  local_address rem_address   st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode                                                     
+           0: 0100007F:202A 00000000:0000 0A 00000000:00000000 00:00000000 00000000     0        0 1828 2 0000000009ef133c 100 0 0 10 0                      
+           1: 022A12C6:B9B4 2270528C:01BB 01 00000000:00000000 02:00000A46 00000000     0        0 1853 4 00000000433117a2 28 4 21 10 -1                     
+           2: 022A12C6:821E 9A6FC7B9:01BB 01 00000060:00000000 01:00000002 00000000     0        0 1873 4 00000000d68f8b70 21 4 19 24 -1                     
+          sl  local_address                         remote_address                        st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode
+    stargz_restore_integ_test.go:107: capturing restore network on sgrR011 to /var/log/firecracker-containerd-test/sgzR-1-1-sgrR011.pcap
+    stargz_restore_integ_test.go:107: capturing restore network on eth0 to /var/log/firecracker-containerd-test/sgzR-1-1-eth0.pcap
+    stargz_restore_integ_test.go:107: post-restore SnapshotService.Mounts refresh completed in 520.90499ms: [{Type:vm:overlay Source:overlay Target: Options:[workdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/work upperdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/2/fs lowerdir=/var/lib/containerd-stargz-grpc/snapshotter/snapshots/1/fs]}]
+    stargz_restore_integ_test.go:107: post-restore guest route, MTU, sockets, DNS, and fresh HTTPS TCP connects:
+        restored guest route:
+        Iface	Destination	Gateway 	Flags	RefCnt	Use	Metric	Mask		MTU	Window	IRTT                                                       
+        eth0	00000000	012A12C6	0003	0	0	0	00000000	0	0	0                                                                               
+        eth0	002A12C6	00000000	0001	0	0	0	00FFFFFF	0	0	0                                                                               
+        restored guest resolver:
+        #MANUAL
+        nameserver 128.110.156.4
+        restored guest interface MTU:
+        1500
+        restored guest TCP sockets:
+          sl  local_address rem_address   st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode                                                     
+           0: 0100007F:202A 00000000:0000 0A 00000000:00000000 00:00000000 00000000     0        0 1828 2 0000000009ef133c 100 0 0 10 0                      
+           1: 022A12C6:B9B4 2270528C:01BB 01 00000000:00000000 02:00000982 00000000     0        0 1853 2 00000000433117a2 28 4 10 10 -1                     
+           2: 022A12C6:821E 9A6FC7B9:01BB 01 00000000:00000000 02:000009A9 00000000     0        0 1873 2 00000000d68f8b70 21 4 25 12 -1                     
+          sl  local_address                         remote_address                        st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode
+        DNS ghcr.io: DNS_FAILED
+        TCP ghcr.io:443 FAILED
+        DNS pkg-containers.githubusercontent.com: DNS_FAILED
+        TCP pkg-containers.githubusercontent.com:443 FAILED
+    stargz_restore_integ_test.go:107: 
+        	Error Trace:	/src/snapshotter/stargz_restore_integ_test.go:565
+        	            				/src/snapshotter/stargz_restore_integ_test.go:593
+        	            				/src/snapshotter/stargz_restore_integ_test.go:382
+        	            				/src/snapshotter/stargz_restore_integ_test.go:107
+        	Error:      	Should be zero, but was 124
+        	Test:       	TestStargzNativeRestore_Isolated/ext4-block/jailed=true
+--- FAIL: TestStargzNativeRestore_Isolated (76.60s)
+    --- FAIL: TestStargzNativeRestore_Isolated/ext4-block (76.52s)
+        --- FAIL: TestStargzNativeRestore_Isolated/ext4-block/jailed=true (76.52s)
+FAIL
+exit status 1
+FAIL	github.com/firecracker-microvm/firecracker-containerd/snapshotter	76.616s

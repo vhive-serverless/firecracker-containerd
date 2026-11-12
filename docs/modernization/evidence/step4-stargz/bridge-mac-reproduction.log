@@ -1,0 +1,5 @@
+6.8.0-147-generic
+automatic source bridge=02:00:00:00:00:01
+automatic restored bridge=02:00:00:00:00:02
+fixed source bridge=02:fc:42:ff:ff:01
+fixed restored bridge=02:fc:42:ff:ff:01

@@ -1,0 +1,41 @@
+make: Entering directory '/users/nehalem/fc-ctrd-mod/step4-capture-interrupt-clean-5186d40/runtime'
+mkdir logs
+make -C .. test-deps-in-docker
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/step4-capture-interrupt-clean-5186d40'
+docker run --rm \
+	--volume /users/nehalem/fc-ctrd-mod/step4-capture-interrupt-clean-5186d40:/src \
+	--volume gocache:/go \
+	--workdir /src \
+	public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 go mod download
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/step4-capture-interrupt-clean-5186d40'
+/users/nehalem/fc-ctrd-mod/step4-capture-interrupt-clean-5186d40/runtime/../tools/thinpool.sh reset "fc-step4-capture-interrupt-clean-5186d40"
+Device does not exist.
+Command failed.
+/users/nehalem/fc-ctrd-mod/step4-capture-interrupt-clean-5186d40/runtime/../tools/modernize/run-isolated-vm-test.sh "/users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-capture-interrupt-clean-5186d40" --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-capture-interrupt-clean-5186d40/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-capture-interrupt-clean-5186d40/runtime/..:/src \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-capture-interrupt-clean-5186d40 \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestNativeCheckpointInterrupt_Isolated$'"
+=== RUN   TestNativeCheckpointInterrupt_Isolated
+=== RUN   TestNativeCheckpointInterrupt_Isolated/jailed=false
+=== RUN   TestNativeCheckpointInterrupt_Isolated/jailed=true
+--- PASS: TestNativeCheckpointInterrupt_Isolated (31.52s)
+    --- PASS: TestNativeCheckpointInterrupt_Isolated/jailed=false (15.45s)
+    --- PASS: TestNativeCheckpointInterrupt_Isolated/jailed=true (16.08s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	31.540s
+make: Leaving directory '/users/nehalem/fc-ctrd-mod/step4-capture-interrupt-clean-5186d40/runtime'

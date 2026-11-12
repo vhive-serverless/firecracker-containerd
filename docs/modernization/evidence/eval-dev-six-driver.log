@@ -1,0 +1,12 @@
+RUN block=0 arm=pmem
+PASS block=0 arm=pmem
+RUN block=0 arm=ext4-reclaim
+PASS block=0 arm=ext4-reclaim
+RUN block=0 arm=reclaim
+PASS block=0 arm=reclaim
+RUN block=0 arm=disk
+PASS block=0 arm=disk
+RUN block=0 arm=ext4-block
+PASS block=0 arm=ext4-block
+RUN block=0 arm=combined
+PASS block=0 arm=combined

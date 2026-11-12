@@ -1,0 +1,1 @@
+1090 firecracker --api-sock firecracker.sock --id 07552f004890906ba6f63a53eaf265fcc2a3737662ac2b9dfcb37a04b15ba29e --no-seccomp

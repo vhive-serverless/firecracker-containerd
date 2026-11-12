@@ -1,0 +1,4 @@
+=== RUN   TestRunIgnoresSIGPIPEAndStopsOnSIGTERM
+--- PASS: TestRunIgnoresSIGPIPEAndStopsOnSIGTERM (0.26s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/app	0.274s

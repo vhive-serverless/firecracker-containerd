@@ -1,0 +1,37 @@
+Step 4 disk-backed storage and native capture component: PASS. Overall Step 4 and Step 3 remain WIP.
+8f8d00fc2fb122d40c2e034f62e67978ba194c1e
+ ce86b117d59ca93b1c04b791a251b445ace76703 _submodules/firecracker (v1.18.0-2-gce86b117d)
+ c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e _submodules/runc (v1.4.2)
+ 3070538befb5a6c09f93e99164762b3a76310357 _submodules/stargz-snapshotter (cmd/v0.18.2)
+ce15b3d35a4811fbf164371b72f57757cce5e846ad5959b547a471fd564a6e89  bin/firecracker
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  _submodules/runc/runc
+3dd9ea4a0c2bc1eda0aafcc751447a9ef8511281065335e0aebc569ef14dab1b  _submodules/stargz-snapshotter/out/containerd-stargz-grpc
+64a01221f8c69b959cb7e8c3f1ff974b8525402d9687dcc6c73d3c1800be9dc9  volume/volume-init
+6c8670cdc277f622fbf26459fdb456a7dc6ba1bc404ad61aa4af13e4ac53eb99  agent/agent
+032057c6d4179bded507193a693aaee02a53ddb482402b58303f691613aefcf6  runtime/containerd-shim-aws-firecracker
+95c7e016196397fd215f74f85f93e7fd629461ac5a0a4e26f0105ff07c4f8464  firecracker-control/cmd/containerd/firecracker-containerd
+544a2f0f1901c34fe1669468680258422bc6a37a624f35f1c0e8d176bf0abb17  firecracker-control/cmd/containerd/firecracker-ctr
+e4fbf6b7d32325c9f09cc95dcbea9e34608bd5b304e75ee8753973ea165551c4  cri/firecracker-cri
+1854ab4b6275b4dbd5974017da46a5eece7735c6c93c362ae0a8c971ab322a42  runtime/containerd-shim-aws-firecracker
+800d159ea61ddef2fd8a6400752ce3ccf299e446ef966d78fcb414b5bfb6a890  agent/agent
+ce15b3d35a4811fbf164371b72f57757cce5e846ad5959b547a471fd564a6e89  bin/firecracker
+f7c763775c948bd8b779e432e5f4d418463a96a3e222b959df2d648c5b798dac  default-vmlinux.bin
+ca4662ce5a2e10024f2ba5e39350f9487eceea6aa8b4d3f414ac472eee0959ed  tools/image-builder/rootfs.img
+TARGET SOURCE    FSTYPE OPTIONS
+/      /dev/sda3 ext3   rw,relatime
+589b17038b62c08c015c00c6f59cd07c4bf45ee422b7fe8194448da12a4abcf1  /users/nehalem/fc-ctrd-mod/evidence/8f8d00f-storage-build.log
+516a0ee0329584cfd9229e2700f4ae7bc07f958663ddf877d530209697092da9  /users/nehalem/fc-ctrd-mod/evidence/8f8d00f-storage-install.log
+235f1814ae5e6ae1c679a9c7480d84bb1b96c5459afd21f2439bb862345a1783  /users/nehalem/fc-ctrd-mod/evidence/8f8d00f-storage-acceptance.log
+ff4837cdf4cdc8437a4643dd3b5ffc68a47c607d0e04dfa530defdfe9f8f2071  /users/nehalem/fc-ctrd-mod/evidence/4208b01-storage-acceptance.log
+--- PASS: TestGuestOverlayAllocation (0.61s)
+--- PASS: TestGuestOverlayRejectsRAMAndCleansFailure (0.30s)
+--- SKIP: TestGuestOverlayHostENOSPC (0.00s)
+--- PASS: TestGuestOverlayHostENOSPC (0.15s)
+--- PASS: TestGuestDiskStorage_Isolated (11.13s)
+--- PASS: TestStorageBaseline_Isolated (7.69s)
+--- PASS: TestNativeCheckpoint_Isolated (79.72s)
+--- PASS: TestJailerTelemetryCrossFilesystem_Isolated (5.46s)
+--- PASS: TestCreateVM_Isolated (136.39s)
+COMMITTED_GUEST_STORAGE_AND_CAPTURE_OK
+sha256:b5c0536ec4587c6bc13a9123a3f4bb046b6107c8c7c5eba45ab5629dd781012d
+Clean source before build and after tests; dedicated pool/loop cleanup completed

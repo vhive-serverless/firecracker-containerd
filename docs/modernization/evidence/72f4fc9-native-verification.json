@@ -1,0 +1,84 @@
+{
+  "source": "72f4fc9173bef33cc1c981ad285758716f635e02",
+  "worker": "nehalem@amd218.utah.cloudlab.us",
+  "native_base_cases": 2,
+  "native_storage_cases": 12,
+  "post_restore_reporting_cases": 6,
+  "cold_reporting_cases": 2,
+  "actual_dax_cases": 12,
+  "actual_dax_true": 4,
+  "durations_s": {
+    "TestNativeRestore_Isolated": 55.83,
+    "TestNativeRestoreStorage_Isolated": 489.51,
+    "TestFreePageReporting_Isolated": 19.83
+  },
+  "post_restore_reporting_activity": [
+    {
+      "restored_reporting_task": "nr-reclaim-false-0",
+      "vmm_pid": "2108",
+      "baseline_rss_kib": "125860",
+      "filled_rss_kib": "193376",
+      "post_free_rss_kib": "130432",
+      "rss_drop_kib": "62944",
+      "rss_read_errors": "0",
+      "last_rss_read_error": "\"\"",
+      "retained_checksum_verified": "true"
+    },
+    {
+      "restored_reporting_task": "nr-reclaim-true-0",
+      "vmm_pid": "2475",
+      "baseline_rss_kib": "125308",
+      "filled_rss_kib": "193000",
+      "post_free_rss_kib": "128624",
+      "rss_drop_kib": "64376",
+      "rss_read_errors": "0",
+      "last_rss_read_error": "\"\"",
+      "retained_checksum_verified": "true"
+    },
+    {
+      "restored_reporting_task": "nr-combined-false-0",
+      "vmm_pid": "2720",
+      "baseline_rss_kib": "120440",
+      "filled_rss_kib": "187824",
+      "post_free_rss_kib": "123752",
+      "rss_drop_kib": "64072",
+      "rss_read_errors": "0",
+      "last_rss_read_error": "\"\"",
+      "retained_checksum_verified": "true"
+    },
+    {
+      "restored_reporting_task": "nr-combined-true-0",
+      "vmm_pid": "3091",
+      "baseline_rss_kib": "121144",
+      "filled_rss_kib": "188756",
+      "post_free_rss_kib": "123428",
+      "rss_drop_kib": "65328",
+      "rss_read_errors": "0",
+      "last_rss_read_error": "\"\"",
+      "retained_checksum_verified": "true"
+    },
+    {
+      "restored_reporting_task": "nr-ext4-reclaim-false-0",
+      "vmm_pid": "3342",
+      "baseline_rss_kib": "125920",
+      "filled_rss_kib": "193340",
+      "post_free_rss_kib": "130876",
+      "rss_drop_kib": "62464",
+      "rss_read_errors": "0",
+      "last_rss_read_error": "\"\"",
+      "retained_checksum_verified": "true"
+    },
+    {
+      "restored_reporting_task": "nr-ext4-reclaim-true-0",
+      "vmm_pid": "3716",
+      "baseline_rss_kib": "124320",
+      "filled_rss_kib": "191804",
+      "post_free_rss_kib": "129480",
+      "rss_drop_kib": "62324",
+      "rss_read_errors": "0",
+      "last_rss_read_error": "\"\"",
+      "retained_checksum_verified": "true"
+    }
+  ],
+  "qualification": "Direct runtime task API on same host/namespace/cache prefix; no accepted CRI or Kubernetes Pod restore. RSS activity is not net physical savings."
+}

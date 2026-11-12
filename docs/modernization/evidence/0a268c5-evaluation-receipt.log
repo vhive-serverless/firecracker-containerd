@@ -1,0 +1,29 @@
+COMMITTED_MEMORY_MATRIX_AND_ANALYSIS_OK
+worker=nehalem@amd218.utah.cloudlab.us
+source_clean=true
+Wed Nov 11 17:23:33 UTC 2026
+0a268c5589c37832e1c3dc89a7b60ed2701e0b9e
+ ce86b117d59ca93b1c04b791a251b445ace76703 _submodules/firecracker (v1.18.0-2-gce86b117d)
+ c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e _submodules/runc (v1.4.2)
+ 3070538befb5a6c09f93e99164762b3a76310357 _submodules/stargz-snapshotter (cmd/v0.18.2)
+commands=STACK_DIR=/users/nehalem/fc-ctrd-mod tools/modernize/build-stack.sh; tools/modernize/install-stack.sh; make lint; sampler+analyzer unittest; EVAL_OUTPUT=.../memory-matrix-0a268c5589c3 tools/modernize/evaluate-memory.sh; python3 tools/memory-eval/summarize_matrix.py --input .../memory-matrix-0a268c5589c3 --output .../memory-summary-0a268c5589c3
+{"label": "COMMITTED OBSERVATIONS", "trials": 21, "arms": 7, "paired_blocks": 12, "output": "/users/nehalem/fc-ctrd-mod/evidence/memory-summary-0a268c5589c3"}
+acceptance_scope=21trials 7arms 3blocks;2VMs512MiB each;primary dedicated cgroup;20s commonidle;independent guest correctness
+limitations=small singleworker experiment;verified warm host backing;reporting counters may precede consumption of final FlushMetrics;no final-throughflush completeness claim;Step3 Kubernetes/CRI restore remains WIP
+98a1ae7181aef2de59777afe864c7f13121390d3539b425cf805929a5e08ae69  /users/nehalem/fc-ctrd-mod/evidence/0a268c5-evaluation-build.log
+f95aa64754277205ef589ffe0c9b26505a4265270fd379e60d2ade3566c0b714  /users/nehalem/fc-ctrd-mod/evidence/0a268c5-evaluation-install.log
+29ce39d4c57751256bdfa31bf2da9865a0faa8a7147d918107359b6a5afda178  /users/nehalem/fc-ctrd-mod/evidence/0a268c5-evaluation-lint.log
+bdce955fa1be7a1239dbb5f6dc205a7dbd5f5a00eaf0af3a799ba0243a7fddc7  /users/nehalem/fc-ctrd-mod/evidence/0a268c5-sampler-unit.log
+4d4ce54316bbfcbe12ad8966c2da29b42038f88edd54ebaf558d3c43928259e3  /users/nehalem/fc-ctrd-mod/evidence/0a268c5-analysis-unit.log
+ac9446b14b0a6b68ac5bbda2a526da166d89f68656bce7f104768c97b138101a  /users/nehalem/fc-ctrd-mod/evidence/0a268c5-evaluation-matrix.log
+a69826ab61e0046e0954c734aeda48b360e6c3c48478bc20d4d5ce4cecbad086  /users/nehalem/fc-ctrd-mod/evidence/0a268c5-evaluation-analysis.log
+8e5aba1f78d587a0abc90078b339f2c74928fee9ce20e3fcc40560cbda4d1b27  /users/nehalem/fc-ctrd-mod/evidence/0a268c5-ci-unit-repro.log
+f7c763775c948bd8b779e432e5f4d418463a96a3e222b959df2d648c5b798dac  bin/vmlinux-6.18.56-fcmod
+14d7f85447cf18090154b4d85f853e21ecb93f998621025697e6bcf0fdc94914  bin/vmlinux-6.18.56-fcmod.config
+5c2d351e9b1c7aacbe0e22a56f1438c2cd70d0f3cbdf812fba189e36fb7ed67b  /users/nehalem/fc-ctrd-mod/evidence/memory-summary-0a268c5589c3/arms.csv
+075b672cd85b1ceaf6c0b342ffdef598a335af953040287c8b51d159ca770042  /users/nehalem/fc-ctrd-mod/evidence/memory-summary-0a268c5589c3/arms.json
+a7ec2b1151ed475ac3a6be371cdaa7903bd13d491a73ac2d72ee5c0de8897e73  /users/nehalem/fc-ctrd-mod/evidence/memory-summary-0a268c5589c3/paired.csv
+21af1633227a11357a32dae40d009e99e3289a42cfc0e0f10144d31ed0a56e12  /users/nehalem/fc-ctrd-mod/evidence/memory-summary-0a268c5589c3/paired.json
+63a50e406f0665aceba00a8eae55b2e737f9e865a27f4683410b0762ad5a36f5  /users/nehalem/fc-ctrd-mod/evidence/memory-summary-0a268c5589c3/summary.json
+649e4731392c3d80f69733fe97404d4c65eaddbd12e9dd1ce3d9f1ae5cb8087d  /users/nehalem/fc-ctrd-mod/evidence/memory-summary-0a268c5589c3/trials.csv
+2b279c5e5eff1e5b6f145451671730de6cb897c38835f9cd2ea7ac261e970b0c  /users/nehalem/fc-ctrd-mod/evidence/memory-summary-0a268c5589c3/trials.json

@@ -1,0 +1,27 @@
+{
+  "items": [
+    {
+      "id": "882113f4b1a6f5ee35906d1835db91c3479def510367b42b99f1c9389f8c8607",
+      "metadata": {
+        "name": "coredns-875f564df-hv9gq",
+        "uid": "060ad1b7-ac9e-43d1-97de-cb99ccc4de96",
+        "namespace": "kube-system",
+        "attempt": 0
+      },
+      "state": "SANDBOX_READY",
+      "createdAt": "1794421898187989604",
+      "labels": {
+        "io.kubernetes.pod.name": "coredns-875f564df-hv9gq",
+        "io.kubernetes.pod.namespace": "kube-system",
+        "io.kubernetes.pod.uid": "060ad1b7-ac9e-43d1-97de-cb99ccc4de96",
+        "k8s-app": "kube-dns",
+        "pod-template-hash": "875f564df"
+      },
+      "annotations": {
+        "kubernetes.io/config.seen": "2026-11-11T18:31:36.809582185Z",
+        "kubernetes.io/config.source": "api"
+      },
+      "runtimeHandler": ""
+    }
+  ]
+}
