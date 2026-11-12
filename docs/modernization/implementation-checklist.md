@@ -1,5 +1,13 @@
 # Modernization acceptance ledger
 
+> PROVISIONAL STEP 3: Corrected source `751c03c6f9a98b8726bc4d9066efce78db96952d` is being assembled; its acceptance receipt and final documentation integration are pending. Earlier receipts retain their exact source scope.
+
+## Current migrated Step 3 status
+
+Step 3 remains provisional while the corrected-source receipt is prepared.
+Full CRI remains WIP and Kubernetes Pod restore remains deferred to 1.38.
+The inherited Step 2 coverage and unfixed CNI flake below retain their scope.
+
 ## Current corrected Step 2 check coverage
 
 Exact `2e03843816cf95d184ad4ad429adf6ea2ccc1412` has complete required check
