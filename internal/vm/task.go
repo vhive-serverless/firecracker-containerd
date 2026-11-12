@@ -46,6 +46,9 @@ type TaskManager interface {
 	// error will be returned.
 	CreateTask(context.Context, *taskAPI.CreateTaskRequest, taskAPI.TTRPCTaskService, IOProxy) (*taskAPI.CreateTaskResponse, error)
 
+	// AdoptProcess registers an already running guest process and owns its proxy.
+	AdoptProcess(context.Context, RestoredProcess, taskAPI.TTRPCTaskService, IOProxy) (*taskAPI.StateResponse, error)
+
 	// DeleteProcess removes a task or exec being managed from the TaskManager.
 	// It deletes the process from the provided TaskService using the provided
 	// request. It also blocks until all IO for the task has been flushed or a
