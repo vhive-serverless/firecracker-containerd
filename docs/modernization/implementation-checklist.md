@@ -8,9 +8,10 @@ The maintained base is `firecracker-v1.18-containerdv2`; its vHive successor is
 lock and module manifests. The four-command lint/build/install/test-stack worker
 pipeline passed at exact clean source `1074bdc8f2b6`; see the
 [receipt and limitations](evidence/upstream-step1-1074bdc8f2b6/README.md).
-The documentation tip was not rebuilt, SDK `TestLogAndMetrics` is explicitly
-skipped, and separate lifecycle/crash-runner and later-stage acceptance remain
-pending. Earlier local compilation checks are recorded separately in
+The documentation tip was not rebuilt, and SDK `TestLogAndMetrics` is explicitly
+skipped. Separate installed-prefix lifecycle/controller-restart/shim-crash checks
+passed at the same source, with service and thinpool cleanup verified. Later-stage
+acceptance remains pending. Earlier local compilation checks are recorded separately in
 [the local validation note](upstream-step1-local-validation.md).
 
 The checklist below preserves the original modernization ledger. Its checked

@@ -3,8 +3,8 @@
 The recorded four-command pipeline passed on `amd218.utah.cloudlab.us` for
 clean committed runtime source `1074bdc8f2b602c9f986d3975d5c94b40bd1cac7`,
 tree `d786b6116dd3b855c2b2bc57ac727ecb354ce534`. This is the tested source;
-the later commit adding this receipt is documentation/evidence only and was not
-rebuilt. The original [summary](summary.json), logs and generated provenance
+the later commits adding these receipts are documentation/evidence only and were
+not rebuilt. The original [summary](summary.json), logs and generated provenance
 files are copied byte for byte from the worker evidence collection.
 
 ## Recorded procedure and result
@@ -40,6 +40,36 @@ output are separate from those counts. The runtime matrix includes both jailer
 modes in `TestCreateVM_Isolated`, ordinary pause/resume, exec, event, IO,
 networking and cleanup checks. The raw log retains all emitted warnings and
 diagnostics, including an SDK CNI cleanup warning in a passing test.
+
+## Installed-stack lifecycle and crash recovery
+
+Separate follow-ups passed on the same clean source `1074bdc8f2b6` using
+installed prefix `/users/nehalem/fc-ctrd-mod/install/1074bdc8f2b6` and run name
+`fcmod-step1-1074bdc8f2b6-lifecycle`. The
+[lifecycle log](stage1-lifecycle-1074bdc8f2b6.log) records the exact runtime/client
+revision and ends with `MODERNIZED_CONTAINER_OK`. The
+[controller/shim recovery log](stage1-controller-recovery-1074bdc8f2b6.log)
+records process identities, `CONTROLLER_RESTART_RECONNECT_OK` and
+`SHIM_CRASH_RECOVERY_OK`: controller restart preserved workload files and
+reconnected, then shim crash reaped the VMM and removed task/VM directories.
+
+The [lifecycle summary](lifecycle-summary.json) records the dedicated service
+stopped, its thinpool absent after cleanup, and the source checkout clean. The
+[cleanup log](stage1-lifecycle-cleanup-1074bdc8f2b6.log) is empty;
+the summary records the successful cleanup checks. Its launcher note preserves
+that the initial SSH stdin-fed launcher returned after lifecycle without running
+recovery/cleanup. The missing recovery receipt was detected and the remaining
+steps ran through an uploaded script, exiting zero with
+`STAGE1_INSTALLED_LIFECYCLE_AND_CRASH_RECOVERY_OK`. Lifecycle was not rerun and
+no test retry is hidden.
+
+These follow-ups used the installed rootfs
+`/users/nehalem/fc-ctrd-mod/install/1074bdc8f2b6/share/runtime/default-rootfs.img`.
+At the tested source, `run-worker.sh` selects that path when `INSTALL_DIR` is
+set. This exercises the installed-prefix image, distinct from the subsequently
+rebuilt final `test-stack.sh` image described below. The separate follow-ups
+are not part of the original four-command pipeline or a rebuild of this later
+documentation/evidence tip.
 
 ## Binary and input provenance
 
@@ -79,9 +109,9 @@ This is acceptance of the recorded Step 1 pipeline at the exact tested source.
 It establishes no legacy vHive coordinated snapshot/restore, runtime native
 restore, CRI conformance, Kubernetes Pod restore, Step 4 storage, PMEM,
 reclamation or memory-savings result. SDK snapshot tests are SDK coverage only.
-Separate `run-worker.sh` and `test-crash-recovery.py` runs are not included in
-this evidence collection; their reproduction commands remain documented without
-a claim that they ran in this pipeline. Later-stage validation remains pending;
+Separate `run-worker.sh` and `test-crash-recovery.py` follow-ups are included
+under their own lifecycle logs and summary above; they did not run as part of
+the four-command pipeline. Later-stage validation remains pending;
 CRI remains WIP and Kubernetes Pod checkpoint/restore is deferred to the 1.38
 interface work.
 
@@ -90,5 +120,9 @@ interface work.
 `summary.json` records the byte length and SHA-256 of each of the nine original
 log/provenance files. All were independently rehashed and matched before this
 receipt was prepared. The summary's own SHA-256 is recorded separately in
-`SHA256SUMS`, together with those nine original files. This README and
-`SHA256SUMS` are new explanatory metadata; the collected evidence is unchanged.
+`SHA256SUMS`, together with those nine original files. The separate
+`lifecycle-summary.json` records byte lengths and SHA-256 hashes for its three
+raw logs; its own hash and those three log hashes are appended to `SHA256SUMS`.
+The original pipeline summary/log/provenance bytes are unchanged. This README
+and `SHA256SUMS` are explanatory metadata; all collected evidence is preserved
+byte for byte.

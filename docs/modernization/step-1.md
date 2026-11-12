@@ -10,9 +10,11 @@ passed on clean source `1074bdc8f2b602c9f986d3975d5c94b40bd1cac7`, tree
 commit was not rebuilt. The [worker receipt](evidence/upstream-step1-1074bdc8f2b6/README.md)
 preserves raw logs, binary/input provenance, 127 verbose top-level passes and
 the single explicit SDK `TestLogAndMetrics` skip. It distinguishes the installed
-rootfs from the subsequently rebuilt final test image. Separate lifecycle and
-crash-runner runs are not recorded for this source. [Earlier local compilation
-and unit checks](upstream-step1-local-validation.md) remain separate evidence.
+rootfs from the subsequently rebuilt final test image. Separate installed-prefix
+lifecycle and controller-restart/shim-crash follow-ups passed at the same source
+using the installed rootfs; dedicated service and thinpool cleanup were verified.
+[Earlier local compilation and unit checks](upstream-step1-local-validation.md)
+remain separate evidence.
 
 The archived original Step 1 acceptance at `06bd205` and its personal SDK pin
 remain in the historical records below. Those receipts do not validate the
@@ -98,10 +100,12 @@ Both crash tests check that containerd removes the task bundle as well as the VM
 Select the exact committed migrated Step 1 revision before running this
 procedure. Do not substitute a historical receipt revision for the new candidate.
 The worker receipt above records the four successful lint/build/install/test-stack
-commands at `1074bdc8f2b6`. The broader procedure below also includes separate
-`run-worker.sh` and `test-crash-recovery.py` runs; those two runs are not recorded
-for this source and remain additional checks. Do not attribute them to the
-four-command pipeline or to this documentation tip.
+commands at `1074bdc8f2b6`. The separate `run-worker.sh` and
+`test-crash-recovery.py` follow-ups below are now recorded for that same source
+using installed prefix `/users/nehalem/fc-ctrd-mod/install/1074bdc8f2b6`, including
+its installed rootfs. These follow-ups passed with service/thinpool cleanup;
+they are distinct from the four-command pipeline and do not test this later
+documentation tip.
 
 Full stack builds and VM acceptance run on `nehalem@amd218.utah.cloudlab.us`.
 The default workspace is `/users/nehalem/fc-ctrd-mod`. The scripts support

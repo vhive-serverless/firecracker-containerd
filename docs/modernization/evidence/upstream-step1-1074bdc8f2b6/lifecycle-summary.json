@@ -1,0 +1,28 @@
+{
+  "runtime_revision": "1074bdc8f2b602c9f986d3975d5c94b40bd1cac7",
+  "installed_prefix": "/users/nehalem/fc-ctrd-mod/install/1074bdc8f2b6",
+  "result": "PASS",
+  "run_name": "fcmod-step1-1074bdc8f2b6-lifecycle",
+  "checks": [
+    "installed-stack lifecycle smoke",
+    "controller restart preserves workload filesystem and reconnects",
+    "shim crash reaps VMM and removes task and VM directories",
+    "dedicated service stopped and thinpool absent after cleanup",
+    "runtime checkout clean"
+  ],
+  "launcher_note": "Initial SSH stdin-fed launcher returned after lifecycle without executing remaining commands; missing recovery receipt was detected. Remaining recovery and cleanup executed via uploaded script file, terminal exit0 with STAGE1_INSTALLED_LIFECYCLE_AND_CRASH_RECOVERY_OK. No lifecycle rerun or hidden test retries.",
+  "files": {
+    "stage1-lifecycle-1074bdc8f2b6.log": {
+      "bytes": 210506,
+      "sha256": "1f5ed0db54b0b8db37394a5ca8daddbeeec90709790f3a0a39e4de2efb8e4b04"
+    },
+    "stage1-controller-recovery-1074bdc8f2b6.log": {
+      "bytes": 306,
+      "sha256": "50869e9f9034998538afe44f26dfa3e153f027735bf0f23f43c31a3045d18f77"
+    },
+    "stage1-lifecycle-cleanup-1074bdc8f2b6.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}

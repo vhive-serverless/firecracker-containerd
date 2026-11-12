@@ -31,7 +31,9 @@ successful lint/build/install/test-stack pipeline on clean migrated source
 `1074bdc8f2b602c9f986d3975d5c94b40bd1cac7`, tree
 `d786b6116dd3b855c2b2bc57ac727ecb354ce534`, including isolated runtime and
 snapshotter VM checks and the published SDK suite. SDK `TestLogAndMetrics`
-remains explicitly skipped. This documentation tip was not rebuilt; separate
-lifecycle/crash-runner and later-stage acceptance are not established. The
-receipt preserves raw binary provenance and distinguishes installed and final
-test rootfs images. Earlier local compilation/unit evidence remains separate.
+remains explicitly skipped. This documentation tip was not rebuilt. Separate
+installed-prefix lifecycle/controller-restart/shim-crash follow-ups passed at
+the same source, using its installed rootfs, with service and thinpool cleanup
+verified. Later-stage acceptance is not established. The receipt preserves raw
+binary provenance and distinguishes installed and final test rootfs images.
+Earlier local compilation/unit evidence remains separate.

@@ -2,8 +2,11 @@
 
 This page preserves the earlier local-check scope. The later exact-source
 [worker pipeline receipt](evidence/upstream-step1-1074bdc8f2b6/README.md)
-records lint/build/install/test-stack acceptance at `1074bdc8f2b6`; it does not
-retroactively broaden these local checks or establish later-stage acceptance.
+records lint/build/install/test-stack acceptance and separate installed-prefix
+lifecycle/controller-restart/shim-crash follow-ups at `1074bdc8f2b6`. The latter
+used the installed rootfs and verified service/thinpool cleanup. These worker
+results do not retroactively broaden the local checks below or establish
+later-stage acceptance.
 
 The implementation in `6f4e0c5c94322b5f3bf2cf521cdc448480c281f7` passed local
 checks with Go 1.26.11:
