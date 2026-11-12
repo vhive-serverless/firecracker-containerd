@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/users/nehalem/fc-ctrd-mod/evidence/memory-results-0a268c5589c3/make_results.py", line 320, in <module>
+    if __name__=='__main__': main()
+                             ^^^^^^
+  File "/users/nehalem/fc-ctrd-mod/evidence/memory-results-0a268c5589c3/make_results.py", line 133, in main
+    assert recorded_trial['status']=='pass' and recorded_trial['exit_code']==recorded_trial['container_exit_code']==0 and not recorded_trial['cleanup_errors']
+                                                                                                                              ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+KeyError: 'cleanup_errors'
