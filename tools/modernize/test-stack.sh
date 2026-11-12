@@ -3,9 +3,7 @@
 set -euo pipefail
 repo_dir=$(cd "$(dirname "$0")/../.." && pwd)
 stack_dir=${STACK_DIR:-"$HOME/fc-ctrd-mod"}
-export PATH="$stack_dir/toolchains/go1.26.11/bin:$stack_dir/toolchains/cargo/bin:$PATH"
-export RUSTUP_HOME="$stack_dir/toolchains/rustup"
-export CARGO_HOME="$stack_dir/toolchains/cargo"
+export PATH="$stack_dir/toolchains/go1.26.11/bin:$PATH"
 export STATIC_AGENT=on STATIC_DOCKER_CREDENTIAL_MMDS=on
 cd "$repo_dir"
 test -z "$(git status --porcelain)"
@@ -41,7 +39,7 @@ mkdir -p bin/receipts/acceptance
 git rev-parse HEAD > bin/receipts/acceptance/runtime-revision
 go list -m -json all > bin/receipts/acceptance/go-modules.json
 go version -m agent/agent > bin/receipts/acceptance/agent-build-info
-sha256sum bin/firecracker _submodules/runc/runc agent/agent \
+sha256sum bin/firecracker bin/jailer _submodules/runc/runc agent/agent \
     _submodules/stargz-snapshotter/out/containerd-stargz-grpc volume/volume-init \
     runtime/containerd-shim-aws-firecracker \
     firecracker-control/cmd/containerd/firecracker-containerd \

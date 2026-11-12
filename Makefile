@@ -331,26 +331,25 @@ $(FCNET_BRIDGE_CONFIG): tools/demo/fc-br0.interface
 demo-network: install-cni-bins $(FCNET_CONFIG)
 
 ##########################
-# Firecracker submodule
+# Official Firecracker release
 ##########################
 .PHONY: firecracker
-firecracker: $(FIRECRACKER_BIN)
+firecracker:
+	tools/modernize/fetch-firecracker.sh
 
 .PHONY: install-firecracker
 install-firecracker: firecracker
-	install -D -o root -g root -m755 -t $(INSTALLROOT)/bin $(FIRECRACKER_BIN)
+	install -D -o root -g root -m755 -t $(INSTALLROOT)/bin $(FIRECRACKER_BIN) bin/jailer
 
 $(FIRECRACKER_DIR)/Cargo.toml:
 	git submodule update --init --recursive $(FIRECRACKER_DIR)
 
-$(FIRECRACKER_BIN): $(FIRECRACKER_DIR)/Cargo.toml
-	cd $(FIRECRACKER_DIR) && cargo build --locked --release --target $(FIRECRACKER_TARGET) -p firecracker -p jailer
-	cp $(FIRECRACKER_DIR)/build/cargo_target/$(FIRECRACKER_TARGET)/release/firecracker $@
+$(FIRECRACKER_BIN): tools/modernize/fetch-firecracker.sh
+	tools/modernize/fetch-firecracker.sh
 
 .PHONY: firecracker-clean
 firecracker-clean:
-	- $(FIRECRACKER_DIR)/tools/devtool -y distclean
-	- rm $(FIRECRACKER_BIN)
+	- rm -f $(FIRECRACKER_BIN) bin/jailer
 	- rm $(KERNEL_BIN)
 
 .PHONY: kernel
@@ -381,6 +380,7 @@ tools/runc-builder-$(DOCKER_IMAGE_TAG)-stamp: tools/docker/Dockerfile.runc-build
 	touch $@
 
 $(RUNC_BIN): $(RUNC_DIR)/VERSION tools/runc-builder-$(DOCKER_IMAGE_TAG)-stamp
+	runc_revision=$$(git -C $(RUNC_DIR) rev-parse --verify HEAD) && \
 	docker run --rm --user $(UID) \
 		--volume $(CURDIR)/$(RUNC_DIR):/gopath/src/github.com/opencontainers/runc \
 		--volume $(CURDIR)/deps:/target \
@@ -388,7 +388,7 @@ $(RUNC_BIN): $(RUNC_DIR)/VERSION tools/runc-builder-$(DOCKER_IMAGE_TAG)-stamp
 		-e GOPATH=/gopath \
 		--workdir /gopath/src/github.com/opencontainers/runc \
 		localhost/$(RUNC_BUILDER_NAME):$(DOCKER_IMAGE_TAG) \
-		make static
+		make static COMMIT="$$runc_revision"
 
 .PHONY: install-runc
 install-runc: $(RUNC_BIN)

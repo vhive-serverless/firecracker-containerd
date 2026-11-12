@@ -13,18 +13,7 @@ sudo -n env DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-re
     libseccomp-dev e2fsprogs squashfs-tools debootstrap dmsetup \
     thin-provisioning-tools iproute2 iptables socat musl-tools \
     protobuf-compiler bc docker.io docker-buildx \
-    clang libclang-dev flex bison libelf-dev libssl-dev dwarves
-
-# Match Firecracker's musl builder: Linux UAPI headers are required by bindgen
-# and the userfaultfd C helper. Preserve any existing header layout.
-for header in linux asm-generic; do
-    if [ ! -e "/usr/include/x86_64-linux-musl/$header" ]; then
-        sudo -n ln -s "../$header" "/usr/include/x86_64-linux-musl/$header"
-    fi
-done
-if [ ! -e /usr/include/x86_64-linux-musl/asm ]; then
-    sudo -n ln -s ../x86_64-linux-gnu/asm /usr/include/x86_64-linux-musl/asm
-fi
+    flex bison libelf-dev libssl-dev dwarves
 
 go_dir="$stack_dir/toolchains/go$go_version"
 if [ ! -x "$go_dir/bin/go" ]; then
@@ -40,21 +29,6 @@ fi
 test "$("$go_dir/bin/go" version)" = "go version go$go_version linux/amd64"
 "$go_dir/bin/go" version
 
-rustup_dir="$stack_dir/toolchains/rustup"
-cargo_dir="$stack_dir/toolchains/cargo"
-rustup_init="$stack_dir/downloads/rustup-init-1.28.2"
-if [ ! -x "$cargo_dir/bin/rustup" ]; then
-    curl --fail --location --retry 3 --output "$rustup_init" \
-        https://static.rust-lang.org/rustup/archive/1.28.2/x86_64-unknown-linux-gnu/rustup-init
-    echo "20a06e644b0d9bd2fbdbfd52d42540bdde820ea7df86e92e533c073da0cdd43c  $rustup_init" | sha256sum --check -
-    chmod +x "$rustup_init"
-    RUSTUP_HOME="$rustup_dir" CARGO_HOME="$cargo_dir" "$rustup_init" \
-        -y --no-modify-path --profile minimal --default-toolchain 1.97.0
-fi
-RUSTUP_HOME="$rustup_dir" CARGO_HOME="$cargo_dir" "$cargo_dir/bin/rustup" \
-    target add --toolchain 1.97.0 x86_64-unknown-linux-musl
-RUSTUP_HOME="$rustup_dir" CARGO_HOME="$cargo_dir" "$cargo_dir/bin/rustup" \
-    component add --toolchain 1.97.0 rustfmt
 if ! id -nG "$USER" | tr " " "\n" | grep -q '^docker$'; then
     sudo -n usermod -aG docker "$USER"
     echo "Docker group added; run subsequent commands in a new SSH session."
