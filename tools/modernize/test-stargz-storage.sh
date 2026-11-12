@@ -31,7 +31,7 @@ tools/modernize/test-stargz-storage-init.sh "$FIRECRACKER_CONTAINERD_TEST_IMAGE:
 tools/thinpool.sh create "$pool"
 for name in StargzGuestDiskStorage StargzNativeRestore; do
     FICD_DM_POOL="$pool" make -C snapshotter "integ-test-Test${name}_Isolated" \
-        EXTRAGOARGS='-v -count=1 -timeout=1200s'
+        EXTRAGOARGS='-v -count=1 -failfast -timeout=1200s'
 done
 cleanup
 test -z "$(git status --porcelain)"

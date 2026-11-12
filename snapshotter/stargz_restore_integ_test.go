@@ -37,7 +37,6 @@ import (
 	"github.com/containerd/containerd/v2/pkg/oci"
 	"github.com/containerd/containerd/v2/pkg/ttrpcutil"
 	"github.com/containerd/typeurl/v2"
-	crimeta "github.com/firecracker-microvm/firecracker-containerd/internal/cri"
 	"github.com/firecracker-microvm/firecracker-containerd/internal/integtest"
 	"github.com/firecracker-microvm/firecracker-containerd/internal/vm"
 	"github.com/firecracker-microvm/firecracker-containerd/proto"
@@ -214,7 +213,6 @@ func stargzRestoreCase(t *testing.T, profileIndex, jailerIndex int, profile star
 			firecrackeroci.WithVMID(id),
 			firecrackeroci.WithVMNetwork,
 			oci.WithDefaultPathEnv,
-			oci.WithAnnotations(map[string]string{crimeta.ContainerTypeAnnotation: "container", crimeta.SandboxIDAnnotation: id}),
 			oci.WithMounts([]specs.Mount{
 				{Destination: "/rom", Type: "bind", Source: "/rom", Options: []string{"bind", "ro"}},
 				{Destination: "/guest-stargz-upper", Type: "bind", Source: stargzRestoreGuestOverlay, Options: []string{"rbind", "ro"}},
@@ -241,6 +239,16 @@ func stargzRestoreCase(t *testing.T, profileIndex, jailerIndex int, profile star
 	const probe = "rm -f /response; touch /request; while ! test -f /response; do sleep .01; done; cat /response"
 	initial := stargzRestoreExec(ctx, t, task, probe)
 	require.True(t, strings.HasSuffix(initial, ":41"), initial)
+	guestNetwork := stargzRestoreExec(ctx, t, task, `
+set -eu
+echo 'guest route:'
+cat /proc/net/route
+echo 'guest resolv.conf:'
+cat /etc/resolv.conf
+echo 'guest ghcr.io DNS:'
+getent ahostsv4 ghcr.io | head -n 1
+`)
+	t.Logf("guest routing and DNS configuration:\n%s", guestNetwork)
 	upperBefore := stargzRestoreExec(ctx, t, task, `
 set -eu
 test "$(stat -f -c %t /stargz-store)" = ef53
