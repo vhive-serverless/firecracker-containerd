@@ -1,0 +1,14 @@
+{
+  "sdk_revision": "dd9db322432989b96cff7a38a64703d60b6cabf9",
+  "runtime_checkout": "57b93fc288e2c606d8d1b291fc11103c81311511",
+  "test_environment_image": "localhost/firecracker-containerd-test:023283d9dd69",
+  "firecracker": "official v1.18.0; VMM and jailer bind-mounted from selected release",
+  "worker": "amd218.utah.cloudlab.us",
+  "top_level_test_counts": {
+    "PASS": 86,
+    "FAIL": 0,
+    "SKIP": 1
+  },
+  "marker": "PINNED_SDK_PRIVILEGED_SUITE_OK",
+  "scope": "SDK privileged acceptance only; does not validate runtime VM recovery"
+}
