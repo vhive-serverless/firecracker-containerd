@@ -715,6 +715,8 @@ func (ts *TaskService) Connect(requestCtx context.Context, req *taskAPI.ConnectR
 
 // Shutdown cleanups runc resources and gracefully shutdowns ttrpc server
 func (ts *TaskService) Shutdown(requestCtx context.Context, req *taskAPI.ShutdownRequest) (*types.Empty, error) {
+	shutdownTrace("TaskService.Shutdown entered id=%s now=%t", req.ID, req.Now)
+	startShutdownDiagnostic()
 	logger := log.G(requestCtx).WithFields(logrus.Fields{
 		logOperation: "Shutdown",
 		logTaskID:    req.ID,
@@ -725,8 +727,13 @@ func (ts *TaskService) Shutdown(requestCtx context.Context, req *taskAPI.Shutdow
 
 	// shimCancel will result in the runc shim to be canceled in addition to unblocking agent's
 	// main func, which will allow it to exit gracefully.
-	defer ts.shimCancel()
+	defer func() {
+		shutdownTrace("TaskService.Shutdown cancel begin")
+		ts.shimCancel()
+		shutdownTrace("TaskService.Shutdown cancel returned")
+	}()
 
 	logger.Debug("going to gracefully shutdown agent")
+	shutdownTrace("TaskService.Shutdown returning response")
 	return &types.Empty{}, nil
 }
