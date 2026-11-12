@@ -1,5 +1,20 @@
 # Step 3 — WIP
 
+Task-test synchronization maintenance at
+`6ef58125739aa87ce59e2007b2bc93ea943fbf65` passed 200 targeted worker
+repetitions across root/nonroot, single/default concurrency and plain/race modes.
+The [maintenance receipt](evidence/6ef5812-task-wait-sync-receipt.log) records
+the commands and hashes. Prior functional results retain their original source
+revisions and pins. **Step 3 remains WIP and incomplete**; no restore acceptance
+was rerun or established by this test-only change.
+
+Install-loop maintenance at `a5a2cb84a503338884692c1387fa2b1b3d5a3c72` passed the
+worker fixture: a failing first component stops installation before the second,
+and a successful component still installs. The [maintenance receipt](evidence/a5a2cb8-install-guard-receipt.log)
+records source and log hashes. This one-line build-system check did not rerun
+runtime acceptance; the prior functional results below retain their original
+source revisions and dependency pins. **Step 3 remains WIP and incomplete.**
+
 Step 3 is explicitly **WIP and incomplete**. On 2026-11-11 the user authorized
 starting Step 4 without completing this milestone. Steps 1 and 2 retain their accepted branches. This branch
 currently adds a containerd CRI adapter, RuntimeClass deployment tests and native
@@ -14,6 +29,30 @@ Step 1 commit `6585eba` through Step 2 commit `d959a78`. Their receipts are link
 from [Step 1](step-1.md) and [Step 2](step-2.md). The results below identify their
 tested source revisions; earlier results do not establish acceptance of the
 merged Step 3 runtime.
+
+## FIFO maintenance while Step 3 remains WIP
+
+The shared runc-jailer telemetry correction is backported from Step 4 source
+`c7d73c703d18d33e07b39c2785dbcb1f77af039f`. The runtime previously tried to
+hard-link log and metrics FIFOs after runc startup. A FIFO on a different
+filesystem failed with `EXDEV`. The correction prepares the hard links, or
+initial runc bind mounts when necessary, before the jail starts and preserves
+the caller's original FIFO readers.
+
+This is bounded runtime maintenance. The native restore prototype, full CRI
+compliance, whole-Pod restore and Kubernetes checkpoint/restore remain **WIP and
+incomplete**. This maintenance does not change the pinned SDK
+`832b1a5132e06f5e2167b64b97b5cd8946604005` or Firecracker
+`ce86b117d59ca93b1c04b791a251b445ace76703`.
+
+Clean committed source `3c0d1ce5ce8fc47e80607a8a9a11330746c2972b` passed
+full worker build and installation, SHA-tagged test-image creation, lint and the
+three targeted privileged race tests. The real-VM cross-filesystem telemetry
+regression and all eight `TestCreateVM_Isolated` cases passed without skips,
+with private thin-pool cleanup and a clean source checkout. The
+[maintenance receipt](evidence/3c0d1ce-step3-fifo-maintenance-receipt.log) records
+exact inputs, binaries, raw-log hashes and two preserved cwd harness errors.
+These results validate this correction only; **Step 3 remains WIP**.
 
 ## Restorable host volumes
 
@@ -374,7 +413,8 @@ firecracker-cri \
 
 The frontend refuses to replace an existing socket, creates its socket mode 0600,
 and defaults to loopback streaming. This command describes the component's
-configuration; Kubernetes RuntimeClass acceptance remains pending. The worker
+configuration; ordinary RuntimeClass acceptance is recorded above. It does not
+establish full CRI conformance or Kubernetes Pod checkpoint/restore. The worker
 test driver starts both components in its private test container automatically.
 
 The `cri/` Go module pins CRI API and streaming v0.37.2, while containerd 2.3.7
@@ -546,3 +586,16 @@ VMM with a vsock reset and attempts to adopt captured tasks and fresh I/O.
 Source compilation and lint passed on the worker; end-to-end restore acceptance
 has not been established. The standalone restore test is retained for later
 work. No CRI or Kubernetes Pod restore completion is claimed.
+
+## Cache eviction test maintenance
+
+Commit `cef16a9` fixes the timing-dependent eviction error test
+observed in [CI run 43079780458](https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43079780458).
+The test now waits for the reaper error log, checks its text, and verifies the
+entry was removed. Production code is unchanged. The clean committed worker
+checkout passed 200 targeted repetitions with one scheduler thread, 50 targeted
+race repetitions and the full cache package under the race detector.
+The [shared receipt](evidence/step4-cache-test/verification.json) records all four
+validated milestone backports, exact commands and raw hashes. The old failure
+was not reproduced in 30 baseline repetitions; these checks are test maintenance,
+not new full-stack acceptance. Step 3 CRI and Kubernetes restore remain WIP.

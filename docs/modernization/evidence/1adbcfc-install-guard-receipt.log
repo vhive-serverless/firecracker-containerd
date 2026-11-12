@@ -1,0 +1,84 @@
+Install failure propagation maintenance: PASS (step1).
+Checked source: 1adbcfc4f48dd7bee8d40bf24138f39350441a55
+Common backport: 283d71b0b5733ba40444171e1c1f7063a1671ec4
+Prior functional validation source: 06bd2058ba7938ad31eec9e17ac4d2e4c33a958f
+Worker: nehalem@amd218.utah.cloudlab.us
+Source delta: one Makefile line only, adding set -e before the recursive install loop.
+
+The previous loop could hide a failed component when a later install succeeded.
+The checked committed Makefile was exercised with private synthetic subdirectories
+under its checkout's ignored tmp/ directory. The first component touched its own
+marker then failed; make install returned 2 and the second component marker was
+absent. Installing only the second component returned 0 and created its marker.
+Both logs, fixture recipes, source/Makefile hashes and clean state are retained below.
+The fixtures were removed. No installation wrote outside the private fixture.
+
+This is a build-system fixture check only. No Go/Rust build, runtime acceptance,
+vHive deployment or VM test was rerun. The prior functional validation and its
+binary/log hashes remain attached to their original source revision and receipts.
+All dependency pins, versions.json and prior receipts are unchanged. No Step 4,
+/dev/sdb, or goal changes were made.
+
+Worker driver:
+/users/nehalem/fc-ctrd-mod/evidence/install-guard-backport.sh
+SHA-256: dabb4207e08057685f4eeb7105751851525e6f8e17fef7eef133ff61adbc5971
+Driver steps: verify clean source; fetch/checkout the exact commit; create private
+first/second fixtures; run the committed Makefile's install with SUBDIRS overrides;
+assert nonzero failure plus absent second marker; run second-only and assert success
+plus present marker; hash logs; remove fixtures; verify clean source again.
+
+First component Makefile:
+.PHONY: install
+install:
+	touch "$(FIRST_MARKER)"
+	false
+
+Second component Makefile:
+.PHONY: install
+install:
+	touch "$(MARKER)"
+
+Expected failing-first invocation (actual log):
+make: Entering directory '/users/nehalem/fc-ctrd-mod/step1-io-committed'
+set -e; for d in /users/nehalem/fc-ctrd-mod/step1-io-committed/tmp/install-guard.xICgoZIx/first /users/nehalem/fc-ctrd-mod/step1-io-committed/tmp/install-guard.xICgoZIx/second; do make -C $d install; done
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/step1-io-committed/tmp/install-guard.xICgoZIx/first'
+touch "/users/nehalem/fc-ctrd-mod/step1-io-committed/tmp/install-guard.xICgoZIx/first-ran"
+false
+make[1]: *** [Makefile:4: install] Error 1
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/step1-io-committed/tmp/install-guard.xICgoZIx/first'
+make: *** [Makefile:141: install] Error 2
+make: Leaving directory '/users/nehalem/fc-ctrd-mod/step1-io-committed'
+
+Successful-only invocation (actual log):
+make: Entering directory '/users/nehalem/fc-ctrd-mod/step1-io-committed'
+set -e; for d in /users/nehalem/fc-ctrd-mod/step1-io-committed/tmp/install-guard.xICgoZIx/second; do make -C $d install; done
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/step1-io-committed/tmp/install-guard.xICgoZIx/second'
+touch "/users/nehalem/fc-ctrd-mod/step1-io-committed/tmp/install-guard.xICgoZIx/second-ran"
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/step1-io-committed/tmp/install-guard.xICgoZIx/second'
+make: Leaving directory '/users/nehalem/fc-ctrd-mod/step1-io-committed'
+
+Actual checked source, outcomes and SHA-256:
+Wed Nov 11 14:52:04 UTC 2026
+step=step1
+branch=modernize-runtime
+checked_source=1adbcfc4f48dd7bee8d40bf24138f39350441a55
+prior_functional_acceptance=06bd2058ba7938ad31eec9e17ac4d2e4c33a958f
+worker_checkout=/users/nehalem/fc-ctrd-mod/step1-io-committed
+failing_first_exit=2
+first_marker_present=true
+second_marker_after_failure=false
+success_only_exit=0
+second_marker_after_success=true
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+Makefile
+acceptance_pins_unchanged=true
+a9904a8708e245875b4ec1ba84b17db3a7030c27d6f7af74000cc16d5e995e46  /users/nehalem/fc-ctrd-mod/step1-io-committed/Makefile
+d7341e35c8628df2376c4a5b0dfebf958b2e5089f490a631917411c345958104  /users/nehalem/fc-ctrd-mod/step1-io-committed/docs/modernization/versions.json
+6be0c5361ee4eb351332a3456b22db1d3cba2283a39ba11536563ba7c3ed2254  /users/nehalem/fc-ctrd-mod/evidence/install-guard-step1/first.Makefile
+e191475c63fedf81584faeb7b4432fa053606d0473eb3b9a590986102659c9ad  /users/nehalem/fc-ctrd-mod/evidence/install-guard-step1/second.Makefile
+228ffe4bdb119854c15fe8d52102da7905451db39eb8b3b0790ad1291874e2ec  /users/nehalem/fc-ctrd-mod/evidence/install-guard-step1/failure.log
+792e9c03d3f538ce3931cd2f87c3663951a5df13ba530a45dbf024e052987a22  /users/nehalem/fc-ctrd-mod/evidence/install-guard-step1/success.log
+fixture_removed=true
+source_clean=true
+INSTALL_GUARD_FIXTURE_PASS

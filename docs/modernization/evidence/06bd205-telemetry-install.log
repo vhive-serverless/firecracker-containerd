@@ -1,0 +1,95 @@
+firecracker: eaf83bb718a559d324613d566eaf776b31a62340
+runc: c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e
+stargz-snapshotter: 3070538befb5a6c09f93e99164762b3a76310357
+github.com/containerd/containerd/v2: v2.3.7
+github.com/opencontainers/runc: v1.4.2
+SDK: github.com/JooyoungPark73/firecracker-go-sdk@v0.0.0-20261110215740-0d7a093c9b0c
+VMM/SDK schema sha256: 3693a55005be2b9c81bf14e9908bd894e361adedff4abcf8c1ac24a8c40adb0c
+go version go1.26.11 linux/amd64
+for d in agent runtime examples firecracker-control/cmd/containerd snapshotter docker-credential-mmds volume; do make -C $d install; done
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/step1-io-committed/agent'
+make[1]: Nothing to be done for 'install'.
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/step1-io-committed/agent'
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/step1-io-committed/runtime'
+install -D -o root -g root -m755 -t /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/bin containerd-shim-aws-firecracker
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/step1-io-committed/runtime'
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/step1-io-committed/examples'
+make[1]: Nothing to be done for 'install'.
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/step1-io-committed/examples'
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/step1-io-committed/firecracker-control/cmd/containerd'
+install -D -o root -g root -m755 -t /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/bin firecracker-containerd
+install -D -o root -g root -m755 -t /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/bin firecracker-ctr
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/step1-io-committed/firecracker-control/cmd/containerd'
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/step1-io-committed/snapshotter'
+install -D -o root -g root -m755 -t /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/bin demux-snapshotter http-address-resolver
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/step1-io-committed/snapshotter'
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/step1-io-committed/docker-credential-mmds'
+make[1]: Nothing to be done for 'install'.
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/step1-io-committed/docker-credential-mmds'
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/step1-io-committed/volume'
+make[1]: Nothing to be done for 'install'.
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/step1-io-committed/volume'
+install -D -o root -g root -m755 -t /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/bin bin/firecracker
+docker build \
+	-t localhost/runc-builder:06bd2058ba79 \
+	-f tools/docker/Dockerfile.runc-builder \
+	tools/
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.runc-builder
+#1 transferring dockerfile: 856B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/2] FROM public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0
+#4 resolve public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 done
+#4 DONE 0.0s
+
+#5 [2/2] RUN apt-get update &&     DEBIAN_FRONTEND=noninteractive apt-get -y install libseccomp-dev pkg-config e2fsprogs
+#5 CACHED
+
+#6 exporting to image
+#6 exporting layers done
+#6 exporting manifest sha256:b972e2a1456dfd15247e53032e6032051bb9806dd75da0d10356385beda5f933 done
+#6 exporting config sha256:1346aaa3e9e8a2a793eedcb73f05d1b2b2c9faccae043986afa85b22e8084bc9 done
+#6 exporting attestation manifest sha256:f74b9ff45764997002e8e5fb2c1bb85e9547dc45340484f791898ac794c70af1 done
+#6 exporting manifest list sha256:61ff6dbdcd6fdb9010eafa9bd1d89525ac34d2f5287a2d3c420064e29f8a5005 done
+#6 naming to localhost/runc-builder:06bd2058ba79 done
+#6 unpacking to localhost/runc-builder:06bd2058ba79 done
+#6 DONE 0.0s
+touch tools/runc-builder-06bd2058ba79-stamp
+docker run --rm --user 0 \
+	--volume /users/nehalem/fc-ctrd-mod/step1-io-committed/_submodules/runc:/gopath/src/github.com/opencontainers/runc \
+	--volume /users/nehalem/fc-ctrd-mod/step1-io-committed/deps:/target \
+	-e HOME=/tmp \
+	-e GOPATH=/gopath \
+	--workdir /gopath/src/github.com/opencontainers/runc \
+	localhost/runc-builder:06bd2058ba79 \
+	make static
+fatal: not a git repository: /gopath/src/github.com/opencontainers/runc/../../../vhive-committed/.git/worktrees/step1-io-committed/modules/runc
+go build -trimpath -buildmode=pie  -tags "seccomp urfave_cli_no_docs netgo osusergo" -ldflags "-X main.gitCommit=  -linkmode external -extldflags -static-pie " -o runc .
+install -D -o root -g root -m755 -t /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/bin _submodules/runc/runc
+install -D -o root -g root -m400 bin/vmlinux-6.18.56-fcmod /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/share/runtime/default-vmlinux.bin
+install -D -o root -g root -m400 tools/image-builder/rootfs.img /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/share/runtime/default-rootfs.img
+mkdir --mode 0700 --parents /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/etc
+install -D -o root -g root -m400 runtime/firecracker-runc-config.json.example /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/etc/firecracker-runc-config.json
+mkdir --mode 0755 --parents /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/lib/cni
+install -D -o root -g root -m755 -t /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/lib/cni /users/nehalem/fc-ctrd-mod/step1-io-committed/bin/bridge
+install -D -o root -g root -m755 -t /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/lib/cni /users/nehalem/fc-ctrd-mod/step1-io-committed/bin/ptp
+install -D -o root -g root -m755 -t /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/lib/cni /users/nehalem/fc-ctrd-mod/step1-io-committed/bin/host-local
+install -D -o root -g root -m755 -t /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/lib/cni /users/nehalem/fc-ctrd-mod/step1-io-committed/bin/firewall
+install -D -o root -g root -m755 -t /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/lib/cni /users/nehalem/fc-ctrd-mod/step1-io-committed/bin/tc-redirect-tap
+install -D -o root -g root -m755 -t /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/lib/cni /users/nehalem/fc-ctrd-mod/step1-io-committed/bin/loopback
+f90d5689b66ec18b303f59efda5dd9615e563ca181a398449186439ee2cebc88  /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/bin/firecracker-containerd
+854e679cc9c46f18c76b56ea612daa693399daae932a37e4957a46380105ac0e  /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/bin/containerd-shim-aws-firecracker
+9d6c1876564e6cafefaade17cbc3e415cf243c520613f3e388e32154ab562e89  /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/bin/firecracker
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/bin/runc
+ab4650aeef3188318704e55a6149c99a4ca66663630d824f3853826bcdd0954a  /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/share/runtime/default-vmlinux.bin
+2df18f504ceefeac24f43abc0755f6ac8745b8a8472d3aa7ad48f89000ed3e20  /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/share/runtime/default-rootfs.img
+INSTALL_DIR=/users/nehalem/fc-ctrd-mod/install/06bd2058ba79
