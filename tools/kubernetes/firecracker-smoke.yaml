@@ -1,0 +1,59 @@
+apiVersion: node.k8s.io/v1
+kind: RuntimeClass
+metadata:
+  name: firecracker
+handler: firecracker
+overhead:
+  podFixed:
+    cpu: 100m
+    memory: 128Mi
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: fcmod-smoke
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: firecracker
+  namespace: fcmod-smoke
+  labels:
+    app: firecracker-smoke
+spec:
+  runtimeClassName: firecracker
+  terminationGracePeriodSeconds: 5
+  containers:
+    - name: main
+      image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf
+      command: [/bin/sh, -ec]
+      args:
+        - echo FIRECRACKER_SHARED_VOLUME > /shared/hello; echo FIRECRACKER_KUBERNETES_STARTED; sleep 600
+      resources:
+        requests: {cpu: 100m, memory: 32Mi}
+        limits: {cpu: 500m, memory: 64Mi}
+      volumeMounts:
+        - {name: shared, mountPath: /shared}
+    - name: sidecar
+      image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf
+      command: [/bin/sh, -ec]
+      args: ['exec httpd -f -p 8080 -h /shared']
+      resources:
+        requests: {cpu: 100m, memory: 16Mi}
+        limits: {cpu: 500m, memory: 32Mi}
+      volumeMounts:
+        - {name: shared, mountPath: /shared}
+  volumes:
+    - name: shared
+      emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: firecracker
+  namespace: fcmod-smoke
+spec:
+  selector:
+    app: firecracker-smoke
+  ports:
+    - {port: 8080, targetPort: 8080}
