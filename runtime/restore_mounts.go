@@ -192,13 +192,16 @@ func (s *service) prepareSnapshotMounts(request *proto.CreateVMRequest) error {
 	return nil
 }
 
+// validateRestoreMounts validates private targets and normalizes only backing
+// sources, replacing block-device aliases with their canonical device nodes.
 func validateRestoreMounts(mounts []restoreMount, shared string) error {
 	shared, err := filepath.Abs(shared)
 	if err != nil {
 		return err
 	}
 	targets := make(map[string]bool)
-	for _, mount := range mounts {
+	for index := range mounts {
+		mount := &mounts[index]
 		target, err := capturedDevicePath(mount.Target, false)
 		if err != nil {
 			return err
@@ -212,26 +215,74 @@ func validateRestoreMounts(mounts []restoreMount, shared string) error {
 			}
 		}
 		targets[target] = true
-		if !filepath.IsAbs(mount.Source) || filepath.Clean(mount.Source) != mount.Source {
-			return fmt.Errorf("restore backing must be an absolute clean path")
-		}
-		file, err := os.OpenFile(mount.Source, os.O_RDONLY|unix.O_NOFOLLOW|unix.O_NONBLOCK, 0)
+		file, source, err := openRestoreBacking(mount.Source)
 		if err != nil {
 			return err
 		}
-		info, statErr := file.Stat()
-		closeErr := file.Close()
-		if statErr != nil {
-			return statErr
+		if err := file.Close(); err != nil {
+			return err
 		}
-		if closeErr != nil {
-			return closeErr
-		}
-		if !info.Mode().IsRegular() && (info.Mode()&os.ModeDevice == 0 || info.Mode()&os.ModeCharDevice != 0) {
-			return fmt.Errorf("restore backing must be a regular file or block device")
-		}
+		mount.Source = source
 	}
 	return nil
+}
+
+// resolveRestoreBacking permits aliases such as /dev/mapper/name -> ../dm-N,
+// but never follows a final symlink to an ordinary file or a special non-block
+// device. Canonicalizing the backing must not change the captured guest path.
+func resolveRestoreBacking(source string) (string, bool, error) {
+	if !filepath.IsAbs(source) || filepath.Clean(source) != source {
+		return "", false, fmt.Errorf("restore backing must be an absolute clean path")
+	}
+	info, err := os.Lstat(source)
+	if err != nil {
+		return "", false, err
+	}
+	alias := info.Mode()&os.ModeSymlink != 0
+	if alias {
+		source, err = filepath.EvalSymlinks(source)
+		if err != nil {
+			return "", false, err
+		}
+		info, err = os.Lstat(source)
+		if err != nil {
+			return "", false, err
+		}
+	}
+	block := info.Mode()&os.ModeDevice != 0 && info.Mode()&os.ModeCharDevice == 0
+	if alias && !block {
+		return "", false, fmt.Errorf("restore backing symlink must resolve to a block device")
+	}
+	if !info.Mode().IsRegular() && !block {
+		return "", false, fmt.Errorf("restore backing must be a regular file or block device")
+	}
+	return source, alias, nil
+}
+
+// openRestoreBacking keeps the final-component guard after resolution and
+// verifies the actual opened inode, including a raced alias-to-file replacement.
+// Callers that pin a detached mount must use this descriptor rather than reopen
+// an unvalidated source path.
+func openRestoreBacking(source string) (*os.File, string, error) {
+	source, alias, err := resolveRestoreBacking(source)
+	if err != nil {
+		return nil, "", err
+	}
+	file, err := os.OpenFile(source, os.O_RDONLY|unix.O_NOFOLLOW|unix.O_NONBLOCK, 0)
+	if err != nil {
+		return nil, "", err
+	}
+	info, err := file.Stat()
+	if err != nil {
+		_ = file.Close()
+		return nil, "", err
+	}
+	block := info.Mode()&os.ModeDevice != 0 && info.Mode()&os.ModeCharDevice == 0
+	if (alias && !block) || (!info.Mode().IsRegular() && !block) {
+		_ = file.Close()
+		return nil, "", fmt.Errorf("restore backing must be a regular file or block device; aliases require a block device")
+	}
+	return file, source, nil
 }
 
 func pathWithin(path, parent string) bool {
