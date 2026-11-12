@@ -75,6 +75,10 @@ checkpoint/restore components. Step 4 adds a private disk-backed guest upper,
 optional immutable pmem/DAX backing, and DAMON with free-page reporting. These
 features do not imply full CRI conformance or Kubernetes Pod restore. Consult
 the milestone documents for supported profiles, measured results and open gates.
+Exact Step 3 source `332da2a7065b` has
+[native/volume VM and focused CRI acceptance](modernization/step-3.md), including
+both native jail modes. Those results do not establish full CRI conformance;
+Kubernetes Pod checkpoint/restore remains deferred to the 1.38 interface work.
 
 The original [design alternatives](design-approaches.md) and
 [shim design](shim-design.md) explain historical decisions. Their proposals and

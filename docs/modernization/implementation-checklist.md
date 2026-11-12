@@ -1,13 +1,17 @@
 # Modernization acceptance ledger
 
-> PROVISIONAL HISTORY DRAFT: Corrected cumulative history is being prepared. New acceptance and final documentation/results integration are pending. Earlier receipts retain their exact named source scope.
+> PROVISIONAL HISTORY DRAFT: Step 3 code and inputs match `751c03c6f9a98b8726bc4d9066efce78db96952d`. New acceptance and final documentation/results integration are pending. Earlier receipts retain their exact named source scope.
 
 ## Current migrated Step 3 status
 
-Migrated Step 3 is a candidate with local compile/unit checks only. The historical
-checkboxes below retain their original scope; they do not certify this migrated
-upstream tree. CRI/native restore remains WIP and Kubernetes Pod restore remains
-deferred to 1.38.
+Exact migrated Step 3 source `332da2a7065baa0050037250bbf2ff316a1a8519`
+passed build/private installation, eight jailed/nonjailed native VM leaves, the
+real-volume VM case, four focused CRI specs (138 skipped), and
+`TestPodVMResources` (three subcases) plus `TestPodVolumes`. The
+[current receipt](evidence/upstream-step3-332da2a7065b/README.md) records exact
+artifacts, commands, logs and cleanup. This later documentation tip was not
+built or tested. Full CRI remains WIP; Kubernetes Pod restore is deferred to
+1.38. Final published-module/installed-vHive acceptance remains pending.
 
 ## Inherited migrated Step 2 status
 
@@ -34,7 +38,7 @@ compilation checks. These results concern that exact Step 1 source.
 The checklist below preserves the original modernization ledger. Its checked
 items, former branch names, planned later steps and acceptance statements
 belong to that historical source, not the migrated candidates. See the
-[current branch guide](README.md) and [Step 2 procedure](step-2.md) for current
+[current branch guide](README.md) and [Step 3 procedure](step-3.md) for current
 inputs and validation gates. Step 3 remains WIP; Kubernetes Pod restore is
 deferred to the 1.38 interface work.
 

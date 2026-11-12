@@ -1,11 +1,28 @@
 # Step 3 — WIP
 
-## Migrated upstream candidate
+> PROVISIONAL HISTORY DRAFT: Step 3 code and inputs match `751c03c6f9a98b8726bc4d9066efce78db96952d`. New acceptance and final documentation/results integration are pending. Earlier receipts retain their exact named source scope.
+
+## Current exact-source acceptance
+
+The maintained branch is `cri-native-snapshot-restore`. Clean source
+`332da2a7065baa0050037250bbf2ff316a1a8519`, tree
+`ca3b1392749b9337479a79c6a7c9c39883ccc507`, passed the native/volume/focused-CRI
+worker pipeline with exit 0 and `STAGE3_NATIVE_VOLUME_AND_FOCUSED_CRI_OK`.
+The [acceptance receipt](evidence/upstream-step3-332da2a7065b/README.md) preserves
+the original summary and all 23 named raw files unchanged. These results belong
+to that exact source, not this later documentation tip or a future assembled
+commit automatically.
 
 This stage inherits the official Firecracker release and published SDK pins in
-[versions.json](versions.json) from Step 2. Its CRI frontend remains WIP. The
+[versions.json](versions.json) from Step 2: unmodified Firecracker/jailer v1.18.0,
+published vHive SDK `dd9db322432989b96cff7a38a64703d60b6cabf9`, containerd 2.3.7
+and runc 1.4.2. Build/native logs record the exact selected SDK pseudo-version;
+the installation and native receipts retain actual VMM/binary/image hashes.
+Its CRI frontend remains WIP. The
 Kubernetes whole-Pod checkpoint/restore endpoint remains deferred to Kubernetes
 1.38; native runtime restore does not establish CRI or Kubernetes ownership.
+Final published-runtime-module and installed-vHive consumer acceptance remain
+pending; no vHive consumer run or full CRI suite is claimed by this receipt.
 
 The migrated native artifact uses version 2 and a mandatory sealed transport
 cut version 1. Native and legacy capture share `snapshotMu`, task admission,
@@ -22,8 +39,44 @@ restore tests for both jail modes. It uses the ordinary immutable root profile
 and checks private workload storage and volumes. The separate
 [volume runner](../../tools/modernize/test-native-volumes.sh),
 [CRI runner](../../tools/critest/test-cri.sh) and Kubernetes audit scripts retain
-their own scopes. Source compilation and unprivileged tests do not establish
-fresh VM acceptance; exact committed worker runs remain pending.
+their own scopes. All four native groups passed in both jail modes: checkpoint,
+fork transport, checkpoint cancellation recovery and restore. The volume VM case
+restored counter 41 and advanced to 42 with shared views, logical inode and open
+orphan continuity. Focused `critest` passed four specs with 138 skipped;
+`TestPodVMResources` passed three subcases and `TestPodVolumes` passed. Full CRI
+compliance and Kubernetes Pod restore remain outside that focused scope.
+
+## Current reproduction and artifact boundaries
+
+Use a clean exact-source checkout on the designated KVM worker, prepared with
+the pinned Go toolchain, Docker and passwordless sudo described in the Step 1
+worker procedure. Preserve new logs separately from the archived originals.
+
+```sh
+test "$(git rev-parse HEAD)" = 332da2a7065baa0050037250bbf2ff316a1a8519
+test -z "$(git status --porcelain)"
+export STACK_DIR=/users/nehalem/fc-ctrd-mod
+export PATH="$STACK_DIR/toolchains/go1.26.11/bin:$PATH"
+export STATIC_AGENT=on STATIC_DOCKER_CREDENTIAL_MMDS=on
+tools/modernize/build-stack.sh
+tools/modernize/install-stack.sh
+tools/modernize/test-native-restore.sh
+FC_NATIVE_VMM="$PWD/bin/firecracker" FC_NATIVE_KERNEL="$PWD/default-vmlinux.bin" \
+    tools/modernize/test-native-volumes.sh
+CRI_INTEGRATION_TESTS=1 CRI_FOCUS='Runtime info|starting container with volume' \
+    tools/critest/test-cri.sh
+```
+
+The native runner includes lint, focused race/unit checks and rebuilt test
+images before the eight VM leaves. The CRI filter deliberately runs only four
+of 142 specs, plus the two runtime integration tests. Its receipts record
+`websocket_streaming=0` and `runtime_integration_tests=1`; no Kubernetes endpoint
+or complete CRI acceptance follows. The final native test rootfs was rebuilt
+after installation and differs from the installed rootfs; see the receipt for
+both hashes. The worker checkout stayed clean and owned containers/pool were
+removed while shared and unrelated resources were preserved.
+
+## Historical custom-stack implementation and validation
 
 The rest of this document preserves historical implementation and validation
 from the original custom VMM milestone. Every original receipt remains tied to
