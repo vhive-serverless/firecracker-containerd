@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "Migrated Step 3 candidate; CRI/native restore WIP, Kubernetes Pod checkpoint endpoint deferred to 1.38. Historical receipts validate their original custom VMM revisions; fresh exact-candidate VM/CRI acceptance pending.",
+  "status": "Migrated Step4 candidate. Fresh exact-candidate build/install and VM/profile acceptance pending; historical original and fc2a8c2 receipts validate only their recorded revisions. CRI/native restore WIP; Kubernetes whole-Pod endpoint deferred to1.38.",
   "step_1_validation": {
     "runtime_branch": "modernize-runtime",
     "completion_commit": "06bd2058ba7938ad31eec9e17ac4d2e4c33a958f",
@@ -250,11 +250,17 @@
     }
   ],
   "cache_eviction_test_maintenance": {
-    "tested_revision": "1a56f6ade94cca1b36aa7d7170d0ee60b765473c",
+    "tested_revision": "a67e5e6c1e270b199d5b8493ef04d7f2a0fa5401",
     "evidence": "evidence/step4-cache-test/verification.json",
     "evidence_sha256": "666d90dbfd00ac03f609876f25164cc8ec3a2cc6f4e712f544c3ea4d13e47ca6",
     "validation": "200 targeted repetitions with GOMAXPROCS=1, 50 targeted race repetitions, whole cache package race; all passed on designated worker with Go 1.26.11",
-    "scope": "Test-only synchronization fix; production code unchanged; no new VM acceptance or Step 3 completion claim."
+    "scope": "Test-only synchronization fix; production code unchanged; no new VM acceptance or Step 3 completion claim.",
+    "ci_successes": {
+      "modernize-runtime": "https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43086330863",
+      "vhive-compatible": "https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43086330660",
+      "cri-native-snapshot-restore": "https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43086330921",
+      "damon-virtio-pmem": "https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43086330942"
+    }
   },
   "upstream_sdk_validation": {
     "commit": "dd9db322432989b96cff7a38a64703d60b6cabf9",
@@ -300,5 +306,359 @@
     "previous_completion_commit": "122d7084043a1e0b237fea9eb57de8d2eb48c486",
     "previous_acceptance_receipt": "evidence/122d7084043a-acceptance-receipt.log",
     "result": "119 top-level acceptance cases passed; one existing SDK metrics skip; two vHive end-to-end runs passed"
+  },
+  "step_4_baseline": {
+    "branch": "damon-virtio-pmem",
+    "step_3_parent_commit": "26ceead7d0b4d1c6ea32a012c24b76efb4fb0439",
+    "step_3_status": "WIP; no whole-Pod or Kubernetes restore acceptance",
+    "firecracker_commit": "ce86b117d59ca93b1c04b791a251b445ace76703",
+    "sdk_commit": "832b1a5132e06f5e2167b64b97b5cd8946604005"
+  },
+  "step_4_guest_storage": {
+    "status": "Default disk-backed storage/capture and native restore accepted at their recorded revisions; retained guest stargz storage and native restore plus full regression accepted at 06b55e3. Step 3 CRI remains WIP; Kubernetes Pod restore is deferred.",
+    "default_mode": "disk",
+    "default_capacity_mib": 512,
+    "capacity_range_mib": [
+      64,
+      65536
+    ],
+    "original_baseline_mode": "ram",
+    "request_field": "CreateVMRequest.GuestRoot",
+    "host_backing": "direct ext3/ext4, XFS or Btrfs filesystem required",
+    "ownership": "private file inside each VM jail; removed on VM cleanup",
+    "boot_device_selection": "filesystem UUID; direct device probing before proc/udev startup",
+    "native_restore": "Direct runtime storage restore accepted at 72f4fc9; see step_4_native_runtime_restore. CRI remains WIP; Kubernetes Pod restore is deferred to 1.38 interface work.",
+    "validation": {
+      "tested_runtime_commit": "8f8d00fc2fb122d40c2e034f62e67978ba194c1e",
+      "worker_checkout": "/users/nehalem/fc-ctrd-mod/step4-storage-dev",
+      "receipt": "evidence/8f8d00f-storage-acceptance-receipt.log",
+      "receipt_sha256": "d8eed9b39406ff4511a4a3b78a42655f2c68926f5cdcdca9c78af46c92d1a40c",
+      "scope": "full build/install/test-storage; host/guest disk and ENOSPC; ownership/cleanup; original RAM control; native capture independent writable disks; cross-FS FIFOs; eight VM creation cases; no native restore claim"
+    },
+    "test_state_directory": "FICD_VM_STORAGE; defaults to ../.ficd-test-vms/<checkout-name>, outside source/build contexts"
+  },
+  "step_4_memory": {
+    "status": "Accepted in documented storage/memory scope: standard-image mechanisms and frozen 21-trial evaluation, plus clean full regression and retained stargz storage/native restore at 06b55e3. No stargz-specific memory savings claim; inherited Step 3 CRI remains WIP and Kubernetes Pod restore is deferred to 1.38 interface work.",
+    "free_page_reporting": "FirecrackerBalloonDevice.FreePageReporting; independent of target amount",
+    "damon": "Bounded non-anonymous reclamation and reporting passed clean committed worker acceptance at 9706231",
+    "pmem_dax": "Clean committed pmem/DAX, both jailers, shared immutable backing, private writes, combined DAMON capture and matching block capture passed at 438c2cb",
+    "evaluation": "21 passed trials: five requested configurations plus two matching ext4 controls, three randomized blocks and 42 correct VM workloads",
+    "evaluation_validation": {
+      "tested_runtime_commit": "0a268c5589c37832e1c3dc89a7b60ed2701e0b9e",
+      "worker_checkout": "/users/nehalem/fc-ctrd-mod/step4-evaluation-dev",
+      "receipt": "evidence/0a268c5-evaluation-receipt.log",
+      "receipt_sha256": "1911a54d6149549a568bdb27e27734acf5d73db54291490af7131b6b933c16be",
+      "report": "../../tools/memory-eval/results/0a268c5589c3/REPORT.md",
+      "raw_archive_sha256": "3c65da18d4706b324244e03691b7542620dbf74537ee8349d138f492b6fa8dc2",
+      "primary_metric": "dedicated cgroup memory.current; sampled peak, full-trial integral and fixed common-idle mean; mapped VMM PSS is separate",
+      "pmem_vs_ext4_block_idle_mib": -100.55,
+      "combined_vs_ext4_reclaim_idle_mib": -97.81,
+      "reclaim_vs_disk_idle_mib": -14.18,
+      "combined_vs_disk_idle_mib": 320.69,
+      "interpretation": "Small single-worker experiment with verified/warmed backing; format/startup costs outweigh pmem savings versus SquashFS baselines; reclamation adds CPU/readback cost",
+      "reporting_freshness": "Original reporting frames may lag the final flush; never used as physical memory savings or complete final traffic/failure totals",
+      "future_metrics_fence_commit": "ee78dc08f080bcb9b35a14324bd791a833e18f1d"
+    },
+    "free_page_reporting_validation": {
+      "tested_runtime_commit": "020f85b7c137be6989d96fbf4d63c1a3b3e9b71e",
+      "worker_checkout": "/users/nehalem/fc-ctrd-mod/step4-memory-dev",
+      "install_prefix": "/users/nehalem/fc-ctrd-mod/install/020f85b7c137",
+      "receipt": "evidence/020f85b-reporting-acceptance-receipt.log",
+      "receipt_sha256": "1689987625ae03a2902e0ad66d1cabf80e85b83087c6207e273a775e91b76f8f",
+      "tests": [
+        "TestFreePageReporting_Isolated",
+        "TestMemoryBalloon_Isolated"
+      ],
+      "result": "PASS; target and actual balloon 0; report handling and RSS release; retained-data checksum after reallocation; ordinary balloon behavior",
+      "enabled_filled_rss_kib": 237780,
+      "enabled_idle_rss_kib": 174536,
+      "disabled_filled_rss_kib": 236700,
+      "disabled_idle_rss_kib": 237260,
+      "interpretation": "single mechanism acceptance run, not five-arm evaluation"
+    },
+    "damon_development": {
+      "guest_memory_mib": 512,
+      "min_age_seconds": 5,
+      "quota_mib_per_second": 16,
+      "quota_time_ms_per_second": 5,
+      "report_order": 9,
+      "anonymous_folios_excluded": true,
+      "balloon_target_and_actual_mib": 0,
+      "filled_rss_kib": 288976,
+      "idle_rss_kib": 247264,
+      "reloaded_rss_kib": 289472,
+      "reclaimed_delta_bytes": 49467392,
+      "reporting_failures": 0,
+      "file_checksum_and_ram_token_preserved": true,
+      "scope": "one real-VM mechanism test, not evaluation"
+    },
+    "readonly_dax_image": {
+      "image_build_tested_source": "e76967bf13111a4818b4e57868fe2d1cc38de9ba",
+      "image_sha256": "fddd6a51d06feeaf41f65d879b52f81062e5b92f027f7f5e0e197d78d2882b3c",
+      "capacity_bytes": 536870912,
+      "sparse_host_allocated_bytes": 214065152,
+      "nominal_page_metadata_bytes": 8388608,
+      "filesystem": "ext4, 4096-byte blocks, clean, no journal, immutable mode0444",
+      "evidence": "../../tools/image-builder/evidence/e76967b-dax-image-receipt.log",
+      "guest_dax_activation_verified": false,
+      "scope": "historical image-builder-only validation; actual guest-validated image is identified in pmem_validation"
+    },
+    "damon_validation": {
+      "tested_runtime_commit": "97062314463adb53ee6534afc5d8eafd82bbf509",
+      "worker_checkout": "/users/nehalem/fc-ctrd-mod/step4-memory-dev",
+      "install_prefix": "/users/nehalem/fc-ctrd-mod/install/97062314463a",
+      "receipt": "evidence/9706231-damon-acceptance-receipt.log",
+      "receipt_sha256": "2d948136c4549e330c349833e50d6915f6755c5d65204be2857a0b921637c02e",
+      "result": "PASS; full build/private install/lint/race/forced proto, reporting/DAMON/ordinary balloon isolated VMs; clean source",
+      "filled_rss_kib": 287388,
+      "idle_rss_kib": 251532,
+      "reloaded_rss_kib": 286208,
+      "reclaimed_delta_bytes": 41943040,
+      "report_descriptors": 76,
+      "reporting_failures": 0,
+      "file_checksum_and_ram_token_preserved": true,
+      "scope": "mechanism acceptance, not five-arm evaluation or native restore"
+    },
+    "pmem_development": {
+      "source_base": "6291b38d3a5a7ea5778f6c5aadec9521e62aba5a",
+      "source_dirty": true,
+      "worker_checkout": "/users/nehalem/fc-ctrd-mod/step4-pmem-dev",
+      "receipt": "evidence/pmem-dev-vm-receipt.log",
+      "receipt_sha256": "1bd63fd2a7f7dc6f525e7802ee78578ceee7d06da33a34e4c81b1c184a412a1f",
+      "image_sha256": "795e0c4f28179f3a2bcedf5face03665fd5731e207afd7524c338baa78606216",
+      "pmem_vm_count": 4,
+      "block_control_vm_count": 4,
+      "actual_lower_file_dax_verified": true,
+      "both_jailer_modes": true,
+      "root_checks_seconds": 52.25,
+      "combined_capture_seconds": 112.04,
+      "scope": "historical dirty development run; final corrected implementation subsequently passed clean acceptance in pmem_validation"
+    },
+    "pmem_validation": {
+      "tested_runtime_commit": "438c2cb6ea0c7de719bed8eef08b3ba0db1d31b8",
+      "worker_checkout": "/users/nehalem/fc-ctrd-mod/step4-pmem-dev",
+      "install_prefix": "/users/nehalem/fc-ctrd-mod/install/438c2cb6ea0c",
+      "receipt": "evidence/438c2cb-pmem-acceptance-receipt.log",
+      "receipt_sha256": "5cb678cafff5905d9d73112e4e4bee3092c4331112537ed2603513f302ee7050",
+      "dax_image_sha256": "64101f4e112cb6e0eb1c2ab70093d4dc86e8498094d402d851c62a1a5116f57b",
+      "probe_sha256": "08ac35524118fb259b229415889b64e2c5c100a4dc15c93ad87d03f706fcf827",
+      "actual_lower_file_dax_verified": true,
+      "both_jailer_modes": true,
+      "root_checks_seconds": 52.03,
+      "combined_capture_seconds": 112.23,
+      "block_capture_seconds": 97.31,
+      "result": "PASS; full build/private install/lint/race/forced proto; eight root VMs; same immutable inode, private writes, canary/refault, probe hash, both repeated capture profiles; clean source and private pool removed",
+      "scope": "component acceptance; no native restore or controlled memory savings claim"
+    }
+  },
+  "step_4_native_runtime_restore": {
+    "status": "PASS for direct runtime API; not CRI or Kubernetes Pod restore acceptance",
+    "tested_runtime_commit": "72f4fc9173bef33cc1c981ad285758716f635e02",
+    "worker_checkout": "/users/nehalem/fc-ctrd-mod/step4-native-final",
+    "install_prefix": "/users/nehalem/fc-ctrd-mod/install/72f4fc9173be",
+    "receipt": "evidence/72f4fc9-native-receipt.log",
+    "receipt_sha256": "0a3c23bc1aa16d87dccf5572974ab39a7a0a879e54312daaf41b6910c3a5ae6a",
+    "verification": "evidence/72f4fc9-native-verification.json",
+    "raw_log": "evidence/72f4fc9-native-acceptance.log",
+    "source_clean": true,
+    "private_pool_removed": true,
+    "native_base_cases": 2,
+    "native_storage_cases": 12,
+    "post_restore_reporting_cases": 6,
+    "cold_reporting_cases": 2,
+    "ordinary_restore_seconds": 55.83,
+    "storage_restore_seconds": 489.51,
+    "cold_reporting_seconds": 19.83,
+    "reporting_rss_drop_kib_min": 62324,
+    "reporting_rss_drop_kib_max": 65328,
+    "reporting_interpretation": "Physical VMM RSS release after freeing a resident file, retained checksum and fresh allocations; target/actual balloon zero; not a net physical-memory saving estimate",
+    "scope": "Same host/namespace and pmem cache prefix; source VMM gone; private disk copies, real disk backing/full guest-upper reservation, unchanged artifacts, memory token/counter, matched logs and task lifecycle",
+    "limitations": "No accepted containerd/Kubernetes sandbox ownership reconstruction, networked restore or cross-host relocation; Step3 CRI remains WIP and Kubernetes Pod restore is deferred",
+    "ci_success": "https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43072956487"
+  },
+  "step_4_kubernetes_pod_validation": {
+    "script_source": "06936f6b2167386321755acca65100f84c40ddf2",
+    "runtime_source": "72f4fc9173bef33cc1c981ad285758716f635e02",
+    "runtime_image": "sha256:0ed23833cf6043e6f2e0fa6ef3e590cfd9626c03e69d66303f9a693b079021b5",
+    "worker": "nehalem@amd218.utah.cloudlab.us",
+    "k3s": "v1.37.2+k3s1",
+    "scope": "Ordinary Kubernetes Pods only; no CRI conformance or Kubernetes checkpoint/restore acceptance.",
+    "verification": "evidence/06936f6-k3s/verification.json",
+    "verification_sha256": "ec6a560f5038d003726970731ba6af3e45716287a251bf24f70693557b11563f",
+    "profiles_passed": [
+      "disk",
+      "pmem",
+      "reclaim",
+      "combined"
+    ],
+    "raw_artifacts_verified": 92,
+    "source_clean": true,
+    "private_storage_pools_and_containers_removed": true
+  },
+  "step_4_cri_regression": {
+    "harness_source": "393f5f61240a2ac925dfef99e1894b6eb748cff1",
+    "runtime_source": "72f4fc9173bef33cc1c981ad285758716f635e02",
+    "runtime_image": "sha256:0ed23833cf6043e6f2e0fa6ef3e590cfd9626c03e69d66303f9a693b079021b5",
+    "counts": {
+      "skipped": 29,
+      "passed": 97,
+      "failed": 16
+    },
+    "same_failure_names_as_20727f4": true,
+    "scope": "Regression with disk-backed writable upper; suite failed, CRI conformance remains WIP.",
+    "verification": "evidence/393f5f6-cri/verification.json"
+  },
+  "step_4_broader_regression": {
+    "runtime_source": "72f4fc9173bef33cc1c981ad285758716f635e02",
+    "final_test_source": "7c69cccae0a1f2d0f25d1a0a0ff649307834a73a",
+    "verification": "evidence/step4-regression/verification.json",
+    "verification_sha256": "c8739bc46c0bdedeb2bfb03d81721fd8e76b76f09bfd54603a0ee2e85214b49f",
+    "initial_runtime_passed": 30,
+    "initial_runtime_failed": 5,
+    "all_five_failed_cases_passed_after_targeted_corrections": true,
+    "snapshotter_cases_passed": 5,
+    "interruption_cleanup_seconds": 5,
+    "scope": "Initial baseline plus targeted committed corrections; not an uninterrupted full-suite run. Production Go and dependency pins unchanged; CRI remains WIP and Kubernetes Pod restore is deferred."
+  },
+  "step_4_native_capture_interruption": {
+    "test_source": "5186d40578d58b23c432e6c5af15789654d548c1",
+    "runtime_source": "72f4fc9173bef33cc1c981ad285758716f635e02",
+    "verification": "evidence/step4-capture-interrupt/clean-5186d40/verification.json",
+    "verification_sha256": "68c6d5c9e3cbc4615807ee2bfba657c0a594e66a4f7f3ca11ff42ea9e7fb3760",
+    "source_clean": true,
+    "jailer_modes_passed": 2,
+    "seconds": 31.54,
+    "scope": "Transport interruption after quiescing; thaw, artifact cleanup, exec and subsequent capture. Runtime API only; Step 3 remains WIP."
+  },
+  "step_4_completion_audit": {
+    "audited_revision": "06b55e3b78cc6bedfe3f0671fcdc49df73046eb2",
+    "report": "step-4-completeness.md",
+    "result": "Complete in authorized storage/memory scope",
+    "inherited_gates": "Observed CRI conformance failures remain open; Kubernetes Pod checkpoint/restore is deferred by the user to 1.38 interface availability, separately from current Step4 storage requirements.",
+    "scope": "Clean build/install/full acceptance and cleanup passed. Frozen memory evaluation retains its original source and missing-metric limitations.",
+    "initial_audited_revision": "8340f724c8e0b5bdd81a1fed984183b95c7ab67b",
+    "retained_stargz_path": "Disk-backed guest store/overlay; four storage profiles across both jailers and twelve native restore cases passed on clean 06b55e3. Static owned TAP topology, FUSE workload lowers, DAX guest base; no cold-fetch or stargz-memory-savings claim."
+  },
+  "step_4_final_validation": {
+    "tested_runtime_commit": "06b55e3b78cc6bedfe3f0671fcdc49df73046eb2",
+    "runtime_branch": "damon-virtio-pmem",
+    "worker_checkout": "/users/nehalem/fc-ctrd-mod/step4-stargz-closeout",
+    "install_prefix": "/users/nehalem/fc-ctrd-mod/install/06b55e3b78cc",
+    "verification": "evidence/step4-stargz/clean-06b55e3/verification.json",
+    "verification_sha256": "74ee0e6cbccc9ff81e89c4a05176f9dab164e087fdfba96fec161784a1829dac",
+    "runtime_isolated_passes": 47,
+    "snapshotter_isolated_passes": 7,
+    "sdk_top_level_passes": 79,
+    "explicit_verbose_skips": [
+      "TestMemoryEvaluation_Isolated",
+      "TestLogAndMetrics",
+      "TestNativeSnapshotVsockPolicy"
+    ],
+    "stargz_native_restore_cases": 12,
+    "stargz_storage_profiles": 4,
+    "stargz_jailer_modes": 2,
+    "source_clean": true,
+    "private_pools_storage_and_containers_cleaned": true,
+    "unrelated_control_plane_preserved": true,
+    "ci_success": "https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43172572356",
+    "scope": "Uninterrupted full acceptance script including package/CRI race/generation checks; not CRI conformance, Kubernetes Pod restore, or a new memory evaluation."
+  },
+  "kubernetes_capability_audit": {
+    "receipt": "evidence/f649858-kubernetes-api-audit.log",
+    "audit_commit": "f6498581d2ab8083774f138ec0f5e3789bf8e5d2",
+    "feature_gate": "PodLevelCheckpointRestore",
+    "k3s": {
+      "version": "v1.37.2+k3s1",
+      "commit": "f6973cb850e9b245585363d15bde80904ac862fd",
+      "binary_sha256": "265b3ee6a3198ef14033c63ef46cbb32370d83795199fb6d1b01f21575eddbda",
+      "result": "API server rejects required feature gate"
+    },
+    "newer_release": {
+      "version": "v1.38.0-beta.0",
+      "commit": "1ca7499c9a5669c1f025dbe14f1da7dd9a0eb58a",
+      "apiserver_sha256": "24c8161f0e983a3134002c7f32866dc8fe36f706a4e645a94bb2c0c81984afa0",
+      "result": "API server rejects required feature gate"
+    },
+    "open_upstream_candidates": {
+      "checkpoint_pr_140186": "27d02988e4fb3008c4d29e9db6ad844f58cb8d1b",
+      "restore_pr_143579": "5533040d9fce30bc30ed3c07e8b187ed788c2f8a",
+      "status": "unmerged, not released; no substitution made"
+    },
+    "upstream_same_release": {
+      "version": "v1.37.2",
+      "commit": "c50e5395f1ae2d4a2c05f28fdcc38c0916cc1a32",
+      "apiserver_sha256": "b87e5a91107cf994bfa38c6c1b28eb39f01fc040734ec9942c22738bc8b8f34b",
+      "result": "upstream API server rejects required feature gate; not specific to k3s"
+    },
+    "previous_audit_commit": "579da231cefb7771a57f3bb06e4b07fe1b17f579",
+    "previous_receipt": "evidence/579da231cefb-kubernetes-api-audit.log",
+    "kep_target": {
+      "alpha": "v1.38",
+      "milestone_update_commit": "7672f60a388a323ee8ec8a2e02232b7eeefc7e57",
+      "milestone_update_date": "2026-09-17",
+      "newest_published_1_38_rechecked": "v1.38.0-beta.0",
+      "final_release_scheduled": "2026-12-16",
+      "checked_at": "2026-11-11"
+    }
+  },
+  "milestone_order_override": {
+    "date": "2026-11-11",
+    "instruction": "Keep Step 3 incomplete and explicitly WIP, and proceed to Step 4.",
+    "step_3_complete": false
+  },
+  "shared_jailer_telemetry_validation": {
+    "common_fix": "c7d73c703d18d33e07b39c2785dbcb1f77af039f",
+    "step_1_tested": "06bd2058ba7938ad31eec9e17ac4d2e4c33a958f",
+    "step_1_result": "120 pass, one existing SDK skip; full base acceptance",
+    "step_2_tested": "4e0033b81a17d9a32c2861263c2792ebcfe37ebd",
+    "step_2_result": "120 pass, one existing SDK skip; two vHive runs",
+    "step_3_tested": "3c0d1ce5ce8fc47e80607a8a9a11330746c2972b",
+    "step_3_result": "bounded FIFO/CreateVM maintenance passed; Step3 remains WIP"
+  },
+  "task_wait_test_maintenance": {
+    "main_commit": "0cabdfa94b899edb56f3ea58f6a06622a4dd13f0",
+    "ci_success": "https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43068267918",
+    "main_evidence": "evidence/0cabdfa-task-wait-sync-validation.json",
+    "main_evidence_sha256": "5bd351c97f07e9fc86856e5c7c8c230a8b8a01cb31b5a6e768d3eccb7833f2b5",
+    "validation": "800 patched targeted repetitions plus root/user package race checks; 40 clean-commit race repetitions; 300 baseline repetitions did not reproduce sporadic CI failure",
+    "step_1_tested": "8797ff8523fa03547a205e3ea81863198e09241b",
+    "step_1_documentation_head": "ee0a710c11fdf9f111a506cf7dd79a4e60967026",
+    "step_1_receipt": "evidence/8797ff8-task-wait-sync-receipt.log",
+    "step_2_tested": "b2df9bc08aa38bc6a2072dc59f50cbae35a7a20b",
+    "step_2_documentation_head": "1397d2bbea779bc637df3a682acf1d66c3388a60",
+    "step_2_receipt": "evidence/b2df9bc-task-wait-sync-receipt.log",
+    "step_3_tested": "6ef58125739aa87ce59e2007b2bc93ea943fbf65",
+    "step_3_documentation_head": "a5781cf2afabed0564d1862d9ddaeb6935b10f8e",
+    "step_3_receipt": "evidence/6ef5812-task-wait-sync-receipt.log",
+    "backport_validation": "Each clean committed branch passed 200 targeted repetitions across root/user, plain/race and one/default scheduler; no runtime changes or full VM revalidation; Step3 stays WIP"
+  },
+  "kubernetes_one_node_validation": {
+    "tested_commit": "40a3cdd37d5e19e8212db69d665319e05eed42e6",
+    "receipt": "evidence/40a3cdd-upstream-one-node-receipt.log",
+    "result": "stock-runtime baseline passed; full Step 3 acceptance pending"
+  },
+  "shared_socket_sigpipe_maintenance": {
+    "scope": "Production socket-path and demux SIGPIPE fixes; focused worker tests and lint passed. Historical full acceptance revisions remain unchanged.",
+    "step_1_tested": "e09cf274139bfff7b276d7be775f898b4c6b6d1c",
+    "step_2_tested": "7c8d2ce1fd562323b447f08a64b0d0f5e557247c",
+    "step_3_tested": "aacebc90f4fe7d87819bb91ad736816a2ee0300f",
+    "receipt": "evidence/step4-stargz/README.md",
+    "pushed_documentation_tips": {
+      "modernize-runtime": "6856c5ce61667c1feb5a058459460440219ca3d1",
+      "vhive-compatible": "33179b3c2d046bb1340a117e1378ef5acb52f53c",
+      "cri-native-snapshot-restore": "2835aa8f442854d597744de6faaf407a94384406"
+    },
+    "ci_successes": {
+      "modernize-runtime": "https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43169093885",
+      "vhive-compatible": "https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43169093694",
+      "cri-native-snapshot-restore": "https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43169094114"
+    }
+  },
+  "kubernetes_pod_restore_deferral": {
+    "confirmed_by_user": "2026-11-12",
+    "target": "Kubernetes 1.38 interface work",
+    "status": "Deferred pending usable upstream interfaces; not accepted",
+    "last_interface_probe": "2026-11-11; k3s1.37.2, upstream1.37.2, upstream1.38.0-beta.0 lacked required workflow",
+    "scope": "External API deferral is separate from CRI conformance failures and current Step4 storage work."
   }
 }

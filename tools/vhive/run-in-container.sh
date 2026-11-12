@@ -2,6 +2,8 @@
 # Provisional candidate checks against the container's exact runtime stack.
 set -euo pipefail
 export FICD_LOG_DIR=${FICD_LOG_DIR:-/var/log/firecracker-containerd-test}
+grep -q '"guest_root_mode": "ram"' /etc/containerd/firecracker-runtime.json
+cp /etc/containerd/firecracker-runtime.json "$FICD_LOG_DIR/vhive-runtime-profile.json"
 socket=/run/firecracker-containerd/containerd.sock
 for attempt in $(seq 1 30); do
     if ctr --address "$socket" version >/dev/null 2>&1; then break; fi
