@@ -1,0 +1,121 @@
+Corrected vHive milestone: committed worker acceptance PASSED.
+Worker: nehalem@amd218.utah.cloudlab.us
+Checkout: /users/nehalem/fc-ctrd-mod/vhive-failed-create-committed
+Revision: d959a78de45faf1d8d13fea282b7fb980b629789
+Commands: tools/modernize/build-stack.sh; tools/modernize/install-stack.sh; tools/modernize/test-stack.sh; tools/vhive/test-vhive.sh (two independent runs)
+Install prefix: /users/nehalem/fc-ctrd-mod/install/d959a78de45f
+Source after acceptance: clean
+Base acceptance: 35 runtime + 5 snapshotter isolated tests passed; 79 SDK tests passed; existing TestLogAndMetrics skip.
+Includes validated Step 1 cleanup correction 6585eba92db4f8c55f6567cf8d2c8d695adcba05.
+Firecracker: df2d5b98ffe7e62bd367371e962fc00b0ee26e63
+SDK: 51a10ee490d4627076b887c7defa0c05399e8d21
+vHive: 1f373249770f51bd930939471607b14a04f9b708
+Base image: localhost/firecracker-containerd-test:d959a78de45f sha256:db1132de22b9585a32672f6bb083226741acaf0c3a0d324c922cad9d5407074f
+containerd github.com/containerd/containerd/v2 2.3.7+unknown d959a78de45faf1d8d13fea282b7fb980b629789
+
+vHive run 1: /users/nehalem/fc-ctrd-mod/evidence/vhive-d959a78de45f.yhMXZ3s2
+runtime=d959a78de45faf1d8d13fea282b7fb980b629789
+vhive=1f373249770f51bd930939471607b14a04f9b708
+function=ghcr.io/ease-lab/helloworld@sha256:12dc6715ed1a8306f246ceaf7742c09e38a52a79d17421e4a50d7e0e09fdbc25
+base_image=sha256:db1132de22b9585a32672f6bb083226741acaf0c3a0d324c922cad9d5407074f
+Source VMM: {"disk": "/dev/mapper/fc-vhive-d959a78de45f-3961760-snap-9", "netns": "/var/run/netns/uvmns1", "start_ticks": "4482286", "vm_id": "901-0", "vmm_pid": 296}
+Restored VMM: {"disk": "/dev/mapper/fc-vhive-d959a78de45f-3961760-snap-10", "netns": "/var/run/netns/uvmns1", "start_ticks": "4483662", "vm_id": "901-1", "vmm_pid": 411}
+Deployment, repeated invocation, nonempty VMM/memory/disk artifacts, source stop, new VMM restore, warm invocation and complete cleanup passed.
+76176e22e9cd9ffa431f55e98c38d27e113c7e1deb66dc321e2d3a8f85f5fba1  /users/nehalem/fc-ctrd-mod/vhive-failed-create-committed/tmp/vhive-build.PCJa4fZM/image/vhive
+313f3ecb701cd5abf55754ec673fa2d2fdcd3b0b431a5741c10a4370c6b1a6d7  /users/nehalem/fc-ctrd-mod/vhive-failed-create-committed/tmp/vhive-build.PCJa4fZM/image/vhive-probe
+b124b97d4e5011773f0d6eea2018360e541ed27b37182467dc2556166ffebfe1  tools/vhive/modern-stack.patch
+VHIVE_DEPLOY_INVOKE_SNAPSHOT_RESTORE_OK
+VHIVE_WORKER_ACCEPTANCE_OK
+
+vHive run 2: /users/nehalem/fc-ctrd-mod/evidence/vhive-d959a78de45f.3YeenuDf
+runtime=d959a78de45faf1d8d13fea282b7fb980b629789
+vhive=1f373249770f51bd930939471607b14a04f9b708
+function=ghcr.io/ease-lab/helloworld@sha256:12dc6715ed1a8306f246ceaf7742c09e38a52a79d17421e4a50d7e0e09fdbc25
+base_image=sha256:db1132de22b9585a32672f6bb083226741acaf0c3a0d324c922cad9d5407074f
+Source VMM: {"disk": "/dev/mapper/fc-vhive-d959a78de45f-3963395-snap-9", "netns": "/var/run/netns/uvmns0", "start_ticks": "4486350", "vm_id": "901-0", "vmm_pid": 304}
+Restored VMM: {"disk": "/dev/mapper/fc-vhive-d959a78de45f-3963395-snap-10", "netns": "/var/run/netns/uvmns0", "start_ticks": "4487755", "vm_id": "901-1", "vmm_pid": 435}
+Deployment, repeated invocation, nonempty VMM/memory/disk artifacts, source stop, new VMM restore, warm invocation and complete cleanup passed.
+76176e22e9cd9ffa431f55e98c38d27e113c7e1deb66dc321e2d3a8f85f5fba1  /users/nehalem/fc-ctrd-mod/vhive-failed-create-committed/tmp/vhive-build.59b9Vu2i/image/vhive
+313f3ecb701cd5abf55754ec673fa2d2fdcd3b0b431a5741c10a4370c6b1a6d7  /users/nehalem/fc-ctrd-mod/vhive-failed-create-committed/tmp/vhive-build.59b9Vu2i/image/vhive-probe
+b124b97d4e5011773f0d6eea2018360e541ed27b37182467dc2556166ffebfe1  tools/vhive/modern-stack.patch
+VHIVE_DEPLOY_INVOKE_SNAPSHOT_RESTORE_OK
+VHIVE_WORKER_ACCEPTANCE_OK
+
+All owned pools and SDK cgroup b removed; source clean.
+Scope remains standalone vHive, one function per unjailed VM, File memory backend and devmapper. Kubernetes/native whole-Pod restore remains Step 3 work.
+
+Isolated passes:
+TestCNISupport_Isolated
+TestAutomaticCNISupport_Isolated
+TestJailer_Isolated
+TestAttachBlockDevice_Isolated
+TestJailerCPUSet_Isolated
+TestNewJailer_Isolated
+TestDiskLimit_Isolated
+TestForceStopDefaultFirecracker_Isolated
+TestCrashRecovery_Isolated
+TestCNIGracefulCleanup_Isolated
+TestResourceAccounting_Isolated
+TestBinaryOutput_Isolated
+TestShimExitsUponContainerDelete_Isolated
+TestMultipleVMs_Isolated
+TestLongUnixSocketPath_Isolated
+TestStubBlockDevices_Isolated
+TestCreateContainerWithSameName_Isolated
+TestStubDriveReserveAndReleaseByContainers_Isolated
+TestDriveMount_Isolated
+TestDriveMountFails_Isolated
+TestUpdateVMMetadata_Isolated
+TestMemoryBalloon_Isolated
+TestRandomness_Isolated
+TestStopVM_Isolated
+TestStopVMFailFast_Isolated
+TestExec_Isolated
+TestEvents_Isolated
+TestOOM_Isolated
+TestCreateVM_Isolated
+TestPauseResume_Isolated
+TestAttach_Isolated
+TestBrokenPipe_Isolated
+TestFailedCreateReleasesDrive_Isolated
+TestVolumes_Isolated
+TestVolumeFrom_Isolated
+TestSnapshotterMetrics_Isolated
+TestSnapshotterMetricsMultipleVMs_Isolated
+TestLaunchContainerWithRemoteSnapshotter_Isolated
+TestLaunchMultipleContainersWithRemoteSnapshotter_Isolated
+TestGuestVolumeFrom_Isolated
+
+Acceptance binary hashes:
+635027271c6cbdf768b5f6f96e4c33150a4183edc7d0ba7f1305f614d0d8ab08  bin/firecracker
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  _submodules/runc/runc
+2768c06846036bce9653cdffe30ae3f33ef291d1f0eddb4e852081ee53c709ef  agent/agent
+3dd9ea4a0c2bc1eda0aafcc751447a9ef8511281065335e0aebc569ef14dab1b  _submodules/stargz-snapshotter/out/containerd-stargz-grpc
+a44547e8e80579496af82a6940812963135036810dced262803ae3baea6400cf  volume/volume-init
+7e97a2e4b0a8193b15f8d65a70420653d4430656d3e626b1d9251d04cc4f77a8  runtime/containerd-shim-aws-firecracker
+a9c0fb85a207c2818a90d356a5e9350726148ace8620b77b4ee93bd0f6409135  firecracker-control/cmd/containerd/firecracker-containerd
+f2b2394a2701c15bebb203313cf0290f3c9941ecd73bec18efd38a4dbf3a1c08  firecracker-control/cmd/containerd/firecracker-ctr
+addd0715a0f8cdfd6cebb3624a04f1cd3b6f6f7b7d73dcedfcd981a39a9f748c  default-vmlinux.bin
+cc2db69294d2c3a099fd0863739bf44a69670e86d8e058bf3cb82d11c7063253  tools/image-builder/rootfs.img
+ee9f402bc0100a59b22c923f16fc78564cbf212d2ba65043566a786d0c57f971  tools/image-builder/rootfs-stargz.img
+
+Actual base-image binaries:
+a9c0fb85a207c2818a90d356a5e9350726148ace8620b77b4ee93bd0f6409135  /usr/local/bin/firecracker-containerd
+7e97a2e4b0a8193b15f8d65a70420653d4430656d3e626b1d9251d04cc4f77a8  /usr/local/bin/containerd-shim-aws-firecracker
+635027271c6cbdf768b5f6f96e4c33150a4183edc7d0ba7f1305f614d0d8ab08  /usr/local/bin/firecracker
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  /usr/local/bin/runc
+cc2db69294d2c3a099fd0863739bf44a69670e86d8e058bf3cb82d11c7063253  /var/lib/firecracker-containerd/runtime/default-rootfs.img
+addd0715a0f8cdfd6cebb3624a04f1cd3b6f6f7b7d73dcedfcd981a39a9f748c  /var/lib/firecracker-containerd/runtime/default-vmlinux.bin
+
+Raw evidence SHA-256:
+a24f107e4833d3cb13c2563f75f8bfd2cb5d14deb19ed98da668ebab1913d6ea  /users/nehalem/fc-ctrd-mod/evidence/d959a78-build-stack.log
+deb9a867ed4bfdebf0e86a71f0086991071221b2ca7db8d9bbd8138af7966b7e  /users/nehalem/fc-ctrd-mod/evidence/d959a78-install-stack.log
+ea390f04c789196683b66aa1c235d5ffde52b7845dfbed576152f2a5820b7aff  /users/nehalem/fc-ctrd-mod/evidence/d959a78-base-acceptance.log
+ef964ae176742f1bd4ea9e8066e851d8bef309cd266c26e056824b75779f3efb  /users/nehalem/fc-ctrd-mod/evidence/d959a78-vhive-1.log
+e712841584abbf05cb34a016f1659636832d221a8c863756eba5f4b994696af7  /users/nehalem/fc-ctrd-mod/evidence/d959a78-vhive-2.log
+759aee07752a3da5a1593fc449fed25e5b2e3e35ad7213b649aa97252ef02527  /users/nehalem/fc-ctrd-mod/evidence/vhive-d959a78de45f.yhMXZ3s2/acceptance.log
+ddfd49cafcd0088c29652da0754bd103ebeba007b434cd77ed25cc0a01451df0  /users/nehalem/fc-ctrd-mod/evidence/vhive-d959a78de45f.yhMXZ3s2/inputs
+9553d79f5883cb8aec87259dc688855ef12278fbc0b840bfa930c6239663134c  /users/nehalem/fc-ctrd-mod/evidence/vhive-d959a78de45f.yhMXZ3s2/binaries.sha256
+9df0761d937483c980c98da627955625a900c706c44fc084bc10b2feea247b8b  /users/nehalem/fc-ctrd-mod/evidence/vhive-d959a78de45f.3YeenuDf/acceptance.log
+ddfd49cafcd0088c29652da0754bd103ebeba007b434cd77ed25cc0a01451df0  /users/nehalem/fc-ctrd-mod/evidence/vhive-d959a78de45f.3YeenuDf/inputs
+e3561032cb11d45090c8f393dc86eaf3891f5329fdd4c05c382b0199c5cd8980  /users/nehalem/fc-ctrd-mod/evidence/vhive-d959a78de45f.3YeenuDf/binaries.sha256
