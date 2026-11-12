@@ -1,0 +1,134 @@
+=== RUN   TestAgentOnlyIO
+--- PASS: TestAgentOnlyIO (0.00s)
+=== RUN   TestNonAgentIO
+--- PASS: TestNonAgentIO (0.00s)
+=== RUN   TestShimDir
+=== RUN   TestShimDir/empty_ns
+=== RUN   TestShimDir/ns_with_/
+=== RUN   TestShimDir/ns_with_?
+=== RUN   TestShimDir/ns_with_*
+=== RUN   TestShimDir/ns_with_,
+=== RUN   TestShimDir/empty_id
+=== RUN   TestShimDir/id_with_/
+=== RUN   TestShimDir/id_with_?
+=== RUN   TestShimDir/id_with_*
+=== RUN   TestShimDir/id_with_,
+=== RUN   TestShimDir/valid
+=== RUN   TestShimDir/valid_with_dashes
+=== RUN   TestShimDir/valid_with_dots
+=== RUN   TestShimDir/ns_with_aaa
+=== RUN   TestShimDir/ns_with_aaa-bbb
+--- PASS: TestShimDir (0.00s)
+    --- PASS: TestShimDir/empty_ns (0.00s)
+    --- PASS: TestShimDir/ns_with_/ (0.00s)
+    --- PASS: TestShimDir/ns_with_? (0.00s)
+    --- PASS: TestShimDir/ns_with_* (0.00s)
+    --- PASS: TestShimDir/ns_with_, (0.00s)
+    --- PASS: TestShimDir/empty_id (0.00s)
+    --- PASS: TestShimDir/id_with_/ (0.00s)
+    --- PASS: TestShimDir/id_with_? (0.00s)
+    --- PASS: TestShimDir/id_with_* (0.00s)
+    --- PASS: TestShimDir/id_with_, (0.00s)
+    --- PASS: TestShimDir/valid (0.00s)
+    --- PASS: TestShimDir/valid_with_dashes (0.00s)
+    --- PASS: TestShimDir/valid_with_dots (0.00s)
+    --- PASS: TestShimDir/ns_with_aaa (0.00s)
+    --- PASS: TestShimDir/ns_with_aaa-bbb (0.00s)
+=== RUN   TestBundleLink
+--- PASS: TestBundleLink (0.00s)
+=== RUN   TestBundleLinkInvalidID
+--- PASS: TestBundleLinkInvalidID (0.00s)
+=== RUN   TestProxy
+--- PASS: TestProxy (0.00s)
+=== RUN   TestIsLocalMount
+--- PASS: TestIsLocalMount (0.00s)
+=== RUN   TestAddLocalMountIdentifier
+--- PASS: TestAddLocalMountIdentifier (0.00s)
+=== RUN   TestStripLocalMountIdentifier
+--- PASS: TestStripLocalMountIdentifier (0.00s)
+=== RUN   TestPortForwardPreservesHalfCloseAndBinaryResponse
+--- PASS: TestPortForwardPreservesHalfCloseAndBinaryResponse (0.10s)
+=== RUN   TestPortForwardCancellationClosesBothDirections
+--- PASS: TestPortForwardCancellationClosesBothDirections (0.00s)
+=== RUN   TestPortForwardRejectsInvalidPortAndProtocol
+--- PASS: TestPortForwardRejectsInvalidPortAndProtocol (0.00s)
+=== RUN   TestRecoveryRefusesReusedPID
+--- PASS: TestRecoveryRefusesReusedPID (0.00s)
+=== RUN   TestRecoverVMActiveShimAndCrash
+--- PASS: TestRecoverVMActiveShimAndCrash (0.08s)
+=== RUN   TestRecoveryRejectsWrongVM
+--- PASS: TestRecoveryRejectsWrongVM (0.00s)
+=== RUN   TestDeleteRuncBundleOwnership
+=== RUN   TestDeleteRuncBundleOwnership/owned
+=== RUN   TestDeleteRuncBundleOwnership/foreign
+=== RUN   TestDeleteRuncBundleOwnership/missing
+--- PASS: TestDeleteRuncBundleOwnership (0.01s)
+    --- PASS: TestDeleteRuncBundleOwnership/owned (0.00s)
+    --- PASS: TestDeleteRuncBundleOwnership/foreign (0.00s)
+    --- PASS: TestDeleteRuncBundleOwnership/missing (0.00s)
+=== RUN   TestAdoptProcessPreservesGuestTaskAndExec
+--- PASS: TestAdoptProcessPreservesGuestTaskAndExec (0.00s)
+=== RUN   TestAdoptProcessRejectsWrongIdentityAndMissingParent
+--- PASS: TestAdoptProcessRejectsWrongIdentityAndMissingParent (0.00s)
+=== RUN   TestTaskManager_CreateExecDeleteTask
+time="2026-11-11T04:22:22-07:00" level=info msg=exited ExecID=exec TaskID=captured exit_status=0 exited_at="seconds:1794396142 nanos:140654488"
+time="2026-11-11T04:22:22-07:00" level=info msg=exited ExecID= TaskID=captured exit_status=0 exited_at="seconds:1794396142 nanos:140726233"
+    task_test.go:326: time="2026-11-11T04:22:22-07:00" level=debug msg="begin copying io" ExecID= TaskID=fakeTask stream=stderr test=TestTaskManager_CreateExecDeleteTask
+        
+    task_test.go:326: time="2026-11-11T04:22:22-07:00" level=debug msg="begin copying io" ExecID= TaskID=fakeTask stream=stdout test=TestTaskManager_CreateExecDeleteTask
+        
+    task_test.go:326: time="2026-11-11T04:22:22-07:00" level=info msg="successfully created task" ExecID= TaskID=fakeTask pid_in_vm=123 test=TestTaskManager_CreateExecDeleteTask
+        
+    task_test.go:326: time="2026-11-11T04:22:22-07:00" level=debug msg="begin copying io" ExecID= TaskID=fakeTask stream=stdin test=TestTaskManager_CreateExecDeleteTask
+        
+    task_test.go:326: time="2026-11-11T04:22:22-07:00" level=debug msg="begin copying io" ExecID=fakeExec TaskID=fakeTask stream=stderr test=TestTaskManager_CreateExecDeleteTask
+        
+    task_test.go:326: time="2026-11-11T04:22:22-07:00" level=debug msg="begin copying io" ExecID=fakeExec TaskID=fakeTask stream=stdin test=TestTaskManager_CreateExecDeleteTask
+        
+    task_test.go:326: time="2026-11-11T04:22:22-07:00" level=debug msg="begin copying io" ExecID=fakeExec TaskID=fakeTask stream=stdout test=TestTaskManager_CreateExecDeleteTask
+        
+    task_test.go:326: time="2026-11-11T04:22:22-07:00" level=info msg=exited ExecID=fakeExec TaskID=fakeTask exit_status=0 exited_at="seconds:1794396142 nanos:344018843" test=TestTaskManager_CreateExecDeleteTask
+        
+    task_test.go:326: time="2026-11-11T04:22:22-07:00" level=debug msg="copied 9" ExecID=fakeExec TaskID=fakeTask stream=stdin test=TestTaskManager_CreateExecDeleteTask
+        
+    task_test.go:326: time="2026-11-11T04:22:22-07:00" level=debug msg="end copying io" ExecID=fakeExec TaskID=fakeTask stream=stdin test=TestTaskManager_CreateExecDeleteTask
+        
+    task_test.go:326: time="2026-11-11T04:22:22-07:00" level=debug msg="copied 10" ExecID=fakeExec TaskID=fakeTask stream=stdout test=TestTaskManager_CreateExecDeleteTask
+        
+    task_test.go:326: time="2026-11-11T04:22:22-07:00" level=debug msg="end copying io" ExecID=fakeExec TaskID=fakeTask stream=stdout test=TestTaskManager_CreateExecDeleteTask
+        
+    task_test.go:326: time="2026-11-11T04:22:22-07:00" level=debug msg="copied 10" ExecID=fakeExec TaskID=fakeTask stream=stderr test=TestTaskManager_CreateExecDeleteTask
+        
+    task_test.go:326: time="2026-11-11T04:22:22-07:00" level=debug msg="end copying io" ExecID=fakeExec TaskID=fakeTask stream=stderr test=TestTaskManager_CreateExecDeleteTask
+        
+    task_test.go:326: time="2026-11-11T04:22:22-07:00" level=debug msg="closed proxy" ExecID=fakeExec TaskID=fakeTask test=TestTaskManager_CreateExecDeleteTask
+        
+    task_test.go:326: time="2026-11-11T04:22:22-07:00" level=info msg=exited ExecID= TaskID=fakeTask exit_status=0 exited_at="seconds:1794396142 nanos:345081613" test=TestTaskManager_CreateExecDeleteTask
+        
+    task_test.go:326: time="2026-11-11T04:22:22-07:00" level=debug msg="copied 14" ExecID= TaskID=fakeTask stream=stdout test=TestTaskManager_CreateExecDeleteTask
+        
+    task_test.go:326: time="2026-11-11T04:22:22-07:00" level=debug msg="copied 14" ExecID= TaskID=fakeTask stream=stderr test=TestTaskManager_CreateExecDeleteTask
+        
+    task_test.go:326: time="2026-11-11T04:22:22-07:00" level=debug msg="copied 5" ExecID= TaskID=fakeTask stream=stdin test=TestTaskManager_CreateExecDeleteTask
+        
+    task_test.go:326: time="2026-11-11T04:22:22-07:00" level=debug msg="end copying io" ExecID= TaskID=fakeTask stream=stderr test=TestTaskManager_CreateExecDeleteTask
+        
+    task_test.go:326: time="2026-11-11T04:22:22-07:00" level=debug msg="end copying io" ExecID= TaskID=fakeTask stream=stdin test=TestTaskManager_CreateExecDeleteTask
+        
+    task_test.go:326: time="2026-11-11T04:22:22-07:00" level=debug msg="end copying io" ExecID= TaskID=fakeTask stream=stdout test=TestTaskManager_CreateExecDeleteTask
+        
+    task_test.go:326: time="2026-11-11T04:22:22-07:00" level=debug msg="closed proxy" ExecID= TaskID=fakeTask test=TestTaskManager_CreateExecDeleteTask
+        
+--- PASS: TestTaskManager_CreateExecDeleteTask (0.21s)
+=== RUN   TestTaskManager_IOCreateFails
+    task_test.go:487: time="2026-11-11T04:22:22-07:00" level=debug msg="begin copying io" ExecID= TaskID=fakeTask stream=stdout test=TestTaskManager_IOCreateFails
+        
+    task_test.go:487: time="2026-11-11T04:22:22-07:00" level=error ExecID= TaskID=fakeTask error="error initializing io: nothing works" stream=stdin test=TestTaskManager_IOCreateFails
+        
+    task_test.go:487: time="2026-11-11T04:22:22-07:00" level=error ExecID= TaskID=fakeTask error="error initializing io: nothing works" stream=stdin test=TestTaskManager_IOCreateFails
+        
+    task_test.go:487: time="2026-11-11T04:22:22-07:00" level=debug msg="begin copying io" ExecID= TaskID=fakeTask stream=stderr test=TestTaskManager_IOCreateFails
+        
+--- PASS: TestTaskManager_IOCreateFails (0.10s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/internal/vm	1.571s

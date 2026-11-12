@@ -1,0 +1,30 @@
+2026-11-11T11:22:37Z
+40b4ca7c92cb872454c96e2325f3a44242795d3e
+Adopt captured guest processes into a fresh host task manager
+Signed-off-by: JooYoung Park <jooyoung.park73@gmail.com>
+
+Result: PASS; task adoption unit/race and lint checks only; runtime coordinator integration pending
+Worker: nehalem@amd218.utah.cloudlab.us
+Checkout: /users/nehalem/fc-ctrd-mod/native-adopt-committed
+go version go1.26.11 linux/amd64
+Commands: go test -mod=readonly -race -count=1 -timeout=180s -v ./internal/vm; make lint
+
+Evidence: 40b4ca7-adopt-unit.log
+88bbc6e47855bd7dbb88a4822f8b47484a24e44f5cd230d9eb2612899ba818eb  /users/nehalem/fc-ctrd-mod/evidence/40b4ca7-adopt-unit.log
+    task_test.go:487: time="2026-11-11T04:22:22-07:00" level=error ExecID= TaskID=fakeTask error="error initializing io: nothing works" stream=stdin test=TestTaskManager_IOCreateFails
+        
+    task_test.go:487: time="2026-11-11T04:22:22-07:00" level=debug msg="begin copying io" ExecID= TaskID=fakeTask stream=stderr test=TestTaskManager_IOCreateFails
+        
+--- PASS: TestTaskManager_IOCreateFails (0.10s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/internal/vm	1.571s
+
+Evidence: 40b4ca7-adopt-lint.log
+c5579ade9a87595cf21de46de845dbbc4a82c6d3ba4569dae6cf6a670a12d866  /users/nehalem/fc-ctrd-mod/evidence/40b4ca7-adopt-lint.log
+No template file for bash scripts, shall skip all bash scripts
+/users/nehalem/fc-ctrd-mod/native-adopt-committed/bin/git-validation -run DCO,short-subject -range HEAD~1..HEAD
+ * 40b4ca7c "Adopt captured guest processes into a fresh host task manager" ... PASS
+/users/nehalem/fc-ctrd-mod/native-adopt-committed/bin/golangci-lint run
+0 issues.
+cd cri && /users/nehalem/fc-ctrd-mod/native-adopt-committed/bin/golangci-lint run --config ../.golangci.yml
+0 issues.

@@ -1,0 +1,31 @@
+runtime_revision=f6498581d2ab8083774f138ec0f5e3789bf8e5d2
+base_image=sha256:9a605deddf567c421e04d46acb16382725adb949dfb94c8e3fba125ada1b1593
+k3s version v1.37.2+k3s1 (f6973cb8)
+go version go1.26.10
+Kubernetes v1.37.2
+Kubernetes v1.38.0-beta.0
+265b3ee6a3198ef14033c63ef46cbb32370d83795199fb6d1b01f21575eddbda  /users/nehalem/fc-ctrd-mod/toolchains/k3s-v1.37.2/k3s
+b87e5a91107cf994bfa38c6c1b28eb39f01fc040734ec9942c22738bc8b8f34b  /users/nehalem/fc-ctrd-mod/toolchains/kubernetes-v1.37.2/kube-apiserver
+24c8161f0e983a3134002c7f32866dc8fe36f706a4e645a94bb2c0c81984afa0  /users/nehalem/fc-ctrd-mod/toolchains/kubernetes-v1.38.0-beta.0/kube-apiserver
+e3dde13b08045929083dd8351813140704a7a540c54c228974e302ceee85a297  tools/kubernetes/audit-interfaces.sh
+
+k3s gate result:
+time="2026-11-11T02:55:46Z" level=warning msg="Failed to set feature-gates PodLevelCheckpointRestore=true: unrecognized feature gate: PodLevelCheckpointRestore"
+Error: unrecognized feature gate: PodLevelCheckpointRestore
+time="2026-11-11T02:55:46Z" level=error msg="Shutdown request received: \"apiserver exited: unrecognized feature gate: PodLevelCheckpointRestore\""
+
+upstream-stable gate result:
+E1111 02:55:47.780396       7 run.go:72] "command failed" err="unrecognized feature gate: PodLevelCheckpointRestore"
+exit_code=1
+
+upstream-beta gate result:
+E1111 02:55:48.034274       7 run.go:72] "command failed" err="unrecognized feature gate: PodLevelCheckpointRestore"
+exit_code=1
+25f98f1d3eaef2bc71205c12eb14ef13b505df10e1557cfb1e49626057b3c7d3  /users/nehalem/fc-ctrd-mod/evidence/kubernetes-api-audit.os7nsh4Q/k3s.log
+f956883bdc66aa650af9dec13555067c664cd7a34ed55e49b144e898f8417da9  /users/nehalem/fc-ctrd-mod/evidence/kubernetes-api-audit.os7nsh4Q/upstream-stable.log
+d005d3b9c1fe814b1f98032a3f887c15ca7059c552e99a54180246165fa5aedc  /users/nehalem/fc-ctrd-mod/evidence/kubernetes-api-audit.os7nsh4Q/upstream-beta.log
+
+Audit command: tools/kubernetes/audit-interfaces.sh
+Tested audit commit: f6498581d2ab8083774f138ec0f5e3789bf8e5d2
+Audit exit status: 2 (required feature unavailable)
+5014a8056672e3870dcdd8d99bc0f3218e6673be1fe9dc040f7efddcf6dc3534  evidence/f649858-kubernetes-api-audit.log
