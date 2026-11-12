@@ -136,8 +136,17 @@ k3s kubectl --namespace fcmod-smoke exec firecracker -c main -- /bin/sh -ec \
 grep -Eq '^Address([ 0-9]*)?:[[:space:]]*10\.43\.0\.1([[:space:]]|$)' "$logs/exec-dns.log"
 k3s kubectl --namespace fcmod-smoke exec firecracker -c main -- cat /proc/mounts > "$logs/guest-mounts.log"
 grep -q fuse.fcvolume "$logs/guest-mounts.log"
+k3s kubectl --namespace fcmod-smoke exec firecracker -c main -- /bin/sh -ec \
+    'echo FIRECRACKER_DISK_WRITE >/writable-state; mv /writable-state /renamed-state; sync; test "$(cat /renamed-state)" = FIRECRACKER_DISK_WRITE; rm /renamed-state; sync; test ! -e /renamed-state'
+k3s kubectl --namespace fcmod-smoke exec firecracker -c main -- \
+    cat /sys/module/damon_reclaim/parameters/enabled > "$logs/guest-reclamation.log"
+mapfile -t uppers < <(find /srv/firecracker_containerd_tests -name guest-overlay.ext4 -type f)
+test "${#uppers[@]}" = 1
+stat -c '%s %b %i' "${uppers[0]}" > "$logs/guest-upper-stat.log"
+stat -f -c '%t' "${uppers[0]}" > "$logs/guest-upper-host-magic.log"
 test "$(pgrep -cx firecracker)" = 1
 pgrep -ax firecracker > "$logs/vmm-process.log"
+cat "/proc/$(pgrep -x firecracker)/maps" > "$logs/vmm-maps.log"
 k3s crictl --runtime-endpoint="unix://$cri_socket" pods -o json > "$logs/sandboxes.json"
 k3s crictl --runtime-endpoint="unix://$cri_socket" ps -o json > "$logs/containers.json"
 k3s crictl --runtime-endpoint="unix://$cri_socket" stats -o json > "$logs/stats.json"
@@ -156,6 +165,8 @@ for attempt in $(seq 1 60); do
     sleep 1
 done
 if pgrep -x firecracker; then echo 'Firecracker VM leaked after Pod deletion' >&2; exit 1; fi
+find /srv/firecracker_containerd_tests -name guest-overlay.ext4 -type f > "$logs/guest-upper-after.log"
+test ! -s "$logs/guest-upper-after.log"
 k3s crictl --runtime-endpoint="unix://$cri_socket" pods -o json > "$logs/sandboxes-after.json"
 k3s crictl --runtime-endpoint="unix://$cri_socket" ps -o json > "$logs/containers-after.json"
 echo K3S_FIRECRACKER_RUNTIMECLASS_OK
