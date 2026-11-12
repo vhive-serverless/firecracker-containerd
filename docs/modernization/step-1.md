@@ -228,8 +228,8 @@ that regression. Its installation is
 unchanged. The current receipt records both the negative control and the full
 acceptance evidence.
 
-The runtime branch is pushed to `vhive-serverless/firecracker-containerd`, and
-the SDK branch and pinned revision are pushed to `JooyoungPark73/firecracker-go-sdk`.
+The runtime repository is hosted at `vhive-serverless/firecracker-containerd`,
+and the SDK repository is hosted at `JooyoungPark73/firecracker-go-sdk`.
 The Firecracker gitlink uses the existing upstream release tag and needs no VMM
 fork change. The enclosing workspace has three independent repositories and no
 root submodule references to update.
@@ -257,3 +257,14 @@ The [shared receipt](evidence/step4-cache-test/verification.json) records all fo
 validated milestone backports, exact commands and raw hashes. The old failure
 was not reproduced in 30 baseline repetitions; these checks are test maintenance,
 not new full-stack acceptance. Step 3 CRI and Kubernetes restore remain WIP.
+
+## Socket path and SIGPIPE maintenance
+
+After the last full Step 1 acceptance at `06bd205`, the runtime received two
+focused production corrections. `93d594c` resolves jailed VM socket paths from
+the shim directory and preserves absolute API socket paths. The socket/config
+unit tests passed on clean source `89556d1`. `e09cf27` removes SIGPIPE from the
+demux service's termination signals; its subprocess regression passed ten runs
+and `make lint` passed on that exact tip. The [maintenance receipt](evidence/step1-socket-sigpipe-maintenance.md)
+records the revisions and commands. Full VM/lifecycle acceptance was not rerun
+after these corrections; `06bd205` remains the last full Step 1 acceptance.
