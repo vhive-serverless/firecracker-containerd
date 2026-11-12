@@ -370,7 +370,7 @@ func (s *service) nativeVMFiles(ctx context.Context, stage string, manifest *nat
 	if err != nil {
 		return err
 	}
-	apiDirectory := directory
+	apiDirectory := restoreAPIPath(s.jailer, directory)
 	if _, jailed := s.jailer.(*runcJailer); jailed {
 		rel, err := filepath.Rel(s.jailer.JailPath().RootPath(), directory)
 		if err != nil {
