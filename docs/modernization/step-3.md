@@ -413,7 +413,8 @@ firecracker-cri \
 
 The frontend refuses to replace an existing socket, creates its socket mode 0600,
 and defaults to loopback streaming. This command describes the component's
-configuration; Kubernetes RuntimeClass acceptance remains pending. The worker
+configuration; ordinary RuntimeClass acceptance is recorded above. It does not
+establish full CRI conformance or Kubernetes Pod checkpoint/restore. The worker
 test driver starts both components in its private test container automatically.
 
 The `cri/` Go module pins CRI API and streaming v0.37.2, while containerd 2.3.7
