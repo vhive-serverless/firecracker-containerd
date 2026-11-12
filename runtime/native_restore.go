@@ -37,6 +37,7 @@ import (
 	ioproxy "github.com/firecracker-microvm/firecracker-containerd/proto/service/ioproxy/ttrpc"
 	fc "github.com/firecracker-microvm/firecracker-go-sdk"
 	"github.com/firecracker-microvm/firecracker-go-sdk/client/models"
+	"golang.org/x/sys/unix"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -136,7 +137,7 @@ func (s *service) prepareNativeRestore(ctx context.Context, incoming *proto.Crea
 }
 
 func validateNativeRestore(manifest *nativeCheckpoint) error {
-	if manifest.Version != 2 || manifest.Transport == nil || manifest.Transport.Version != 1 || manifest.VMConfig == nil || manifest.RuntimeConfig == nil || len(manifest.CreateRequest) == 0 || len(manifest.Drives) != len(manifest.VMConfig.Drives) || len(manifest.Drives) > 256 {
+	if manifest.Version != 2 || manifest.Transport == nil || manifest.Transport.Version != 1 || manifest.VMConfig == nil || manifest.RuntimeConfig == nil || len(manifest.CreateRequest) == 0 || len(manifest.Drives) != len(manifest.VMConfig.Drives) || len(manifest.Drives) > 256 || len(manifest.Pmem) != len(manifest.VMConfig.Pmem) || len(manifest.Pmem) > 1 {
 		return syscall.EINVAL
 	}
 	if !slices.Equal(manifest.ResumeTasks, manifest.Transport.ResumeTasks) {
@@ -166,6 +167,19 @@ func validateNativeRestore(manifest *nativeCheckpoint) error {
 			rootCount++
 		}
 		files = append(files, drive.File)
+	}
+	if len(manifest.Pmem) != 0 {
+		request := &proto.CreateVMRequest{}
+		if err := json.Unmarshal(manifest.CreateRequest, request); err != nil {
+			return syscall.EINVAL
+		}
+		root := request.GetRootDrive()
+		device, saved := manifest.VMConfig.Pmem[0], manifest.Pmem[0]
+		if device == nil || device.ID == nil || *device.ID != pmemRootID || saved.ID != pmemRootID || !device.ReadOnly || !device.RootDevice || device.PathOnHost == nil || device.RateLimiter != nil || !root.GetUsePmem() || root.GetIsWritable() || root.GetImageSha256() != saved.File.SHA256 || saved.File.Path != "pmem/00000000" || saved.File.Size < 2<<20 || saved.File.Size%(2<<20) != 0 {
+			return syscall.EINVAL
+		}
+		rootCount++
+		files = append(files, saved.File)
 	}
 	if rootCount != 1 || manifest.Memory.Path != "memory" || manifest.State.Path != "state" {
 		return syscall.EINVAL
@@ -241,8 +255,31 @@ func (s *service) cloneNativeRestore(ctx context.Context, request *proto.CreateV
 			restore.files = make(map[string]string)
 		}
 	}()
+	workspace, err := os.Open(restore.workspace)
+	if err != nil {
+		return err
+	}
+	defer workspace.Close()
+	upper := ""
+	for _, drive := range restore.manifest.Drives {
+		if !drive.ReadOnly {
+			// Even a RAM-upper control has persistent workload disks. Reject
+			// unsuitable clone storage before copying memory, state or disks.
+			if err := requireDiskBacking(workspace); err != nil {
+				return err
+			}
+			if drive.ID == guestOverlayDrive {
+				upper = drive.File.Path
+			}
+		}
+	}
 	if err := os.Mkdir(filepath.Join(restore.workspace, "drives"), 0700); err != nil {
 		return err
+	}
+	if len(restore.manifest.Pmem) > 0 {
+		if err := os.Mkdir(filepath.Join(restore.workspace, "pmem"), 0700); err != nil {
+			return err
+		}
 	}
 	for _, path := range []string{restore.workspace, filepath.Join(restore.workspace, "drives")} {
 		if err := s.nativeFileOwner(path); err != nil {
@@ -257,6 +294,9 @@ func (s *service) cloneNativeRestore(ctx context.Context, request *proto.CreateV
 	files := []snapshotFile{restore.manifest.Memory, restore.manifest.State}
 	for _, drive := range restore.manifest.Drives {
 		files = append(files, drive.File)
+	}
+	for _, device := range restore.manifest.Pmem {
+		files = append(files, device.File)
 	}
 	for _, saved := range files {
 		input, err := root.Open(saved.Path)
@@ -277,6 +317,25 @@ func (s *service) cloneNativeRestore(ctx context.Context, request *proto.CreateV
 			return fmt.Errorf("native artifact checksum mismatch for %s: %w", saved.Path, syscall.EIO)
 		}
 		path := filepath.Join(restore.workspace, saved.Path)
+		if saved.Path == upper {
+			// copySnapshotFile preserves sparse workload disks. Only the guest
+			// upper must retain the full capacity promised by fresh creation.
+			file, err := os.OpenFile(path, os.O_RDWR|unix.O_NOFOLLOW, 0)
+			if err != nil {
+				return err
+			}
+			err = requireDiskBacking(file)
+			if err == nil {
+				err = reserveGuestDisk(ctx, file, saved.Size)
+			}
+			if err == nil {
+				err = file.Sync()
+			}
+			err = errors.Join(err, file.Close())
+			if err != nil {
+				return fmt.Errorf("reserve restored guest upper: %w", err)
+			}
+		}
 		if err := s.nativeFileOwner(path); err != nil {
 			return err
 		}
@@ -287,6 +346,10 @@ func (s *service) cloneNativeRestore(ctx context.Context, request *proto.CreateV
 		if live.IsRootDevice != nil && *live.IsRootDevice {
 			request.RootDrive = &proto.FirecrackerRootDrive{HostPath: restore.files[drive.File.Path], IsWritable: !drive.ReadOnly}
 		}
+	}
+	if len(restore.manifest.Pmem) > 0 {
+		file := restore.manifest.Pmem[0].File
+		request.RootDrive = &proto.FirecrackerRootDrive{HostPath: restore.files[file.Path], UsePmem: true, ImageSha256: file.SHA256}
 	}
 	if len(request.DriveMounts) != len(restore.manifest.MountSlots) {
 		return syscall.EINVAL
