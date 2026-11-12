@@ -284,6 +284,16 @@ func (s *local) PauseVM(ctx context.Context, req *proto.PauseVMRequest) (*types.
 	return resp, nil
 }
 
+// CreateSnapshot writes the state and memory of a paused VM.
+func (s *local) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotRequest) (*types.Empty, error) {
+	client, err := s.shimFirecrackerClient(ctx, req.VMID)
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+	return client.CreateSnapshot(ctx, req)
+}
+
 // ResumeVM resumes a VM
 func (s *local) ResumeVM(ctx context.Context, req *proto.ResumeVMRequest) (*types.Empty, error) {
 	client, err := s.shimFirecrackerClient(ctx, req.VMID)
