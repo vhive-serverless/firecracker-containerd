@@ -1,0 +1,78 @@
+{
+  "runtime_revision": "cf0d9708bb3412507ddcc5110fccb1b4545f6b75",
+  "pipeline_exit_code": 1,
+  "build_install_images": "PASS",
+  "vhive_candidate_result": "FAIL",
+  "passes": [
+    "TestPauseSnapResume (16.27s)"
+  ],
+  "failures": [
+    "TestSnapshotConcurrentClones (64.49s)",
+    "TestSnapshotSourceMemoryAndDiskIsolation (45.43s)"
+  ],
+  "finding": "Bounded final agent RPC drain did not resolve actual clone shutdown failure. Do not treat local regression reproduction as confirmed worker root cause.",
+  "files": {
+    "stage2-build-cf0d9708bb34.log": {
+      "bytes": 104594,
+      "sha256": "016e758fd6a69adc6fafd1fc996cc44c995dd982daca3bda852c28de5b11edbf"
+    },
+    "stage2-install-cf0d9708bb34.log": {
+      "bytes": 9098,
+      "sha256": "ff7d6af406f3cc1ccf3b9c2a28f193ce5b366565393ca5f434ad2c28d172b7c4"
+    },
+    "stage2-test-images-cf0d9708bb34.log": {
+      "bytes": 109625,
+      "sha256": "f0ed33c100d179141a67fb844cb5ba1cec18f22f37dec6cf118e4757b96546ac"
+    },
+    "stage2-vhive-cf0d9708bb34.log": {
+      "bytes": 9962,
+      "sha256": "ebd57bede383467274452fbe48e438b7dbffec71663313a1de927fd068343b7d"
+    },
+    "vhive-cf0d9708bb34.2NcWNBtV/acceptance.log": {
+      "bytes": 6057,
+      "sha256": "07796baeaa226687f1511459859ba7ee578fe3639ad114c1ceef55f2a2800134"
+    },
+    "vhive-cf0d9708bb34.2NcWNBtV/binaries.sha256": {
+      "bytes": 506,
+      "sha256": "7aaf15ebee2b041a06c64762e5fb6b13426ed08fad5995cf238d06ddcaa52219"
+    },
+    "vhive-cf0d9708bb34.2NcWNBtV/containerd.out": {
+      "bytes": 392120,
+      "sha256": "bba83d4324654cc5fef2303919e1f70c41cbfb9d427ad4d6759a1ffc5c32e5c7"
+    },
+    "vhive-cf0d9708bb34.2NcWNBtV/demux-snapshotter.out": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "vhive-cf0d9708bb34.2NcWNBtV/http-address-resolver.out": {
+      "bytes": 81,
+      "sha256": "37c51fe8b41c00b87ddff8baa9a2f6f8ef3627bb48a1552b75b42eb839607392"
+    },
+    "vhive-cf0d9708bb34.2NcWNBtV/inputs": {
+      "bytes": 484,
+      "sha256": "68b004b7c608805336a8ad5004be00c9832d837cc41ac71178813170da16acd5"
+    },
+    "vhive-cf0d9708bb34.2NcWNBtV/modules.json": {
+      "bytes": 99237,
+      "sha256": "f1604a03ded75303913ba57811cf853f51b0bbbf287a2ca02f945b238ecf44fb"
+    },
+    "vhive-cf0d9708bb34.2NcWNBtV/test-buildinfo.txt": {
+      "bytes": 289,
+      "sha256": "27e526fb97d891510e983512c1eebf3e442b8701d14ebd9529ab0c1efed1ea2f"
+    },
+    "vhive-cf0d9708bb34.2NcWNBtV/vhive-runtime-version": {
+      "bytes": 244,
+      "sha256": "4d1f3c184b61fbdbddf1d473a908c02dd1f080afb2e3567343e52b0ece3b4350"
+    },
+    "vhive-cf0d9708bb34.2NcWNBtV/vhive-tests.log": {
+      "bytes": 5813,
+      "sha256": "a347f2b4682bf80a1db14768ffcfac735123b9980628950fb790b102a0a235e9"
+    }
+  },
+  "post_run_cleanup": {
+    "runtime_checkout": "clean",
+    "dedicated_vhive_pool": "absent from thin-pool listing",
+    "dedicated_container": "absent",
+    "unrelated_kubernetes_container": "fcmod-upstream-137-control-plane remains running"
+  }
+}
