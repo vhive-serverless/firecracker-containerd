@@ -1,0 +1,268 @@
+make: Entering directory '/users/nehalem/fc-ctrd-mod/step4-native-restore-dev/runtime'
+make -C .. test-deps-in-docker
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/step4-native-restore-dev'
+docker run --rm \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-restore-dev:/src \
+	--volume gocache:/go \
+	--workdir /src \
+	public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 go mod download
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/step4-native-restore-dev'
+/users/nehalem/fc-ctrd-mod/step4-native-restore-dev/runtime/../tools/thinpool.sh reset "fc-native-s4-storage"
+Name:              fc-native-s4-storage
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 6
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-restore-dev/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-native-restore-dev/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-native-restore-dev:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-native-s4-storage \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:c4ae5f3ffb0e-native-dev \
+	"go test -v -count=1 -timeout=1200s -run '^TestNativeRestoreStorage_Isolated$'"
+=== RUN   TestNativeRestoreStorage_Isolated
+=== RUN   TestNativeRestoreStorage_Isolated/disk
+=== RUN   TestNativeRestoreStorage_Isolated/disk/jailed=false
+    native_restore_integ_test.go:206: Restored guest root: guest_upper_magic=ef53
+        overlayfs:/overlay/root / overlay rw,noatime,lowerdir=/,upperdir=/overlay/root,workdir=/overlay/work,uuid=on 0 0
+        proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /dev tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        devpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=666 0 0
+        shm /dev/shm tmpfs rw,nosuid,nodev,noexec,relatime,size=65536k 0 0
+        mqueue /dev/mqueue mqueue rw,nosuid,nodev,noexec,relatime 0 0
+        sysfs /sys sysfs ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /run tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        /dev/root /rom squashfs ro,relatime,errors=continue 0 0
+        /dev/vdd /upper ext4 ro,noatime 0 0
+        proc /proc/bus proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/fs proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/irq proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sys proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sysrq-trigger proc ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /proc/acpi tmpfs ro,relatime 0 0
+        tmpfs /proc/interrupts tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/kcore tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/keys tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/timer_list tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /sys/firmware tmpfs ro,relatime 0 0
+        tmpfs /proc/scsi tmpfs ro,relatime 0 0
+        {"path":"/rom/usr/local/bin/agent","statx_mask":6143,"attributes":0,"attributes_mask":2109440,"statx_dax_supported":true,"statx_dax":false,"size_bytes":18682018,"mode":33261,"uid":0,"gid":0,"inode":2728,"links":1,"blocks_512_bytes":36489,"block_size_bytes":1024,"device_major":254,"device_minor":0,"mount_id":211,"mtime_unix_sec":1794417645,"mtime_nsec":0}
+        restored-upper-and-lower=passed
+    native_restore_integ_test.go:270: source_vmm=311 restored_vmm=435 tasks=2 source_stopped=true
+=== RUN   TestNativeRestoreStorage_Isolated/disk/jailed=true
+    native_restore_integ_test.go:206: Restored guest root: guest_upper_magic=ef53
+        overlayfs:/overlay/root / overlay rw,noatime,lowerdir=/,upperdir=/overlay/root,workdir=/overlay/work,uuid=on 0 0
+        proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /dev tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        devpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=666 0 0
+        shm /dev/shm tmpfs rw,nosuid,nodev,noexec,relatime,size=65536k 0 0
+        mqueue /dev/mqueue mqueue rw,nosuid,nodev,noexec,relatime 0 0
+        sysfs /sys sysfs ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /run tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        /dev/root /rom squashfs ro,relatime,errors=continue 0 0
+        /dev/vdd /upper ext4 ro,noatime 0 0
+        proc /proc/bus proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/fs proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/irq proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sys proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sysrq-trigger proc ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /proc/acpi tmpfs ro,relatime 0 0
+        tmpfs /proc/interrupts tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/kcore tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/keys tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/timer_list tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /sys/firmware tmpfs ro,relatime 0 0
+        tmpfs /proc/scsi tmpfs ro,relatime 0 0
+        {"path":"/rom/usr/local/bin/agent","statx_mask":6143,"attributes":0,"attributes_mask":2109440,"statx_dax_supported":true,"statx_dax":false,"size_bytes":18682018,"mode":33261,"uid":0,"gid":0,"inode":2728,"links":1,"blocks_512_bytes":36489,"block_size_bytes":1024,"device_major":254,"device_minor":0,"mount_id":211,"mtime_unix_sec":1794417645,"mtime_nsec":0}
+        restored-upper-and-lower=passed
+    native_restore_integ_test.go:270: source_vmm=529 restored_vmm=809 tasks=2 source_stopped=true
+=== RUN   TestNativeRestoreStorage_Isolated/ext4-block
+=== RUN   TestNativeRestoreStorage_Isolated/ext4-block/jailed=false
+    native_restore_integ_test.go:206: Restored guest root: guest_upper_magic=ef53
+        overlayfs:/overlay/root / overlay rw,noatime,lowerdir=/,upperdir=/overlay/root,workdir=/overlay/work,uuid=on 0 0
+        proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /dev tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        devpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=666 0 0
+        shm /dev/shm tmpfs rw,nosuid,nodev,noexec,relatime,size=65536k 0 0
+        mqueue /dev/mqueue mqueue rw,nosuid,nodev,noexec,relatime 0 0
+        sysfs /sys sysfs ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /run tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        /dev/root /rom ext4 ro,relatime 0 0
+        /dev/vdd /upper ext4 ro,noatime 0 0
+        proc /proc/bus proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/fs proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/irq proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sys proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sysrq-trigger proc ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /proc/acpi tmpfs ro,relatime 0 0
+        tmpfs /proc/interrupts tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/kcore tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/keys tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/timer_list tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /sys/firmware tmpfs ro,relatime 0 0
+        tmpfs /proc/scsi tmpfs ro,relatime 0 0
+        {"path":"/rom/usr/local/bin/agent","statx_mask":6143,"attributes":0,"attributes_mask":3160180,"statx_dax_supported":true,"statx_dax":false,"size_bytes":18682018,"mode":33261,"uid":0,"gid":0,"inode":2739,"links":1,"blocks_512_bytes":36488,"block_size_bytes":4096,"device_major":254,"device_minor":0,"mount_id":211,"mtime_unix_sec":1794268800,"mtime_nsec":0}
+        restored-upper-and-lower=passed
+    native_restore_integ_test.go:270: source_vmm=934 restored_vmm=1034 tasks=2 source_stopped=true
+=== RUN   TestNativeRestoreStorage_Isolated/ext4-block/jailed=true
+    native_restore_integ_test.go:206: Restored guest root: guest_upper_magic=ef53
+        overlayfs:/overlay/root / overlay rw,noatime,lowerdir=/,upperdir=/overlay/root,workdir=/overlay/work,uuid=on 0 0
+        proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /dev tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        devpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=666 0 0
+        shm /dev/shm tmpfs rw,nosuid,nodev,noexec,relatime,size=65536k 0 0
+        mqueue /dev/mqueue mqueue rw,nosuid,nodev,noexec,relatime 0 0
+        sysfs /sys sysfs ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /run tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        /dev/root /rom ext4 ro,relatime 0 0
+        /dev/vdd /upper ext4 ro,noatime 0 0
+        proc /proc/bus proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/fs proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/irq proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sys proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sysrq-trigger proc ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /proc/acpi tmpfs ro,relatime 0 0
+        tmpfs /proc/interrupts tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/kcore tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/keys tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/timer_list tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /sys/firmware tmpfs ro,relatime 0 0
+        tmpfs /proc/scsi tmpfs ro,relatime 0 0
+        {"path":"/rom/usr/local/bin/agent","statx_mask":6143,"attributes":0,"attributes_mask":3160180,"statx_dax_supported":true,"statx_dax":false,"size_bytes":18682018,"mode":33261,"uid":0,"gid":0,"inode":2739,"links":1,"blocks_512_bytes":36488,"block_size_bytes":4096,"device_major":254,"device_minor":0,"mount_id":211,"mtime_unix_sec":1794268800,"mtime_nsec":0}
+        restored-upper-and-lower=passed
+    native_restore_integ_test.go:270: source_vmm=1120 restored_vmm=1377 tasks=2 source_stopped=true
+=== RUN   TestNativeRestoreStorage_Isolated/pmem
+=== RUN   TestNativeRestoreStorage_Isolated/pmem/jailed=false
+    native_restore_integ_test.go:206: Restored guest root: guest_upper_magic=ef53
+        overlayfs:/overlay/root / overlay rw,noatime,lowerdir=/,upperdir=/overlay/root,workdir=/overlay/work,uuid=on 0 0
+        proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /dev tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        devpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=666 0 0
+        shm /dev/shm tmpfs rw,nosuid,nodev,noexec,relatime,size=65536k 0 0
+        mqueue /dev/mqueue mqueue rw,nosuid,nodev,noexec,relatime 0 0
+        sysfs /sys sysfs ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /run tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        /dev/root /rom ext4 ro,relatime,norecovery,dax=always 0 0
+        /dev/vdc /upper ext4 ro,noatime 0 0
+        proc /proc/bus proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/fs proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/irq proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sys proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sysrq-trigger proc ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /proc/acpi tmpfs ro,relatime 0 0
+        tmpfs /proc/interrupts tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/kcore tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/keys tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/timer_list tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /sys/firmware tmpfs ro,relatime 0 0
+        tmpfs /proc/scsi tmpfs ro,relatime 0 0
+        {"path":"/rom/usr/local/bin/agent","statx_mask":6143,"attributes":2097152,"attributes_mask":3160180,"statx_dax_supported":true,"statx_dax":true,"size_bytes":18682018,"mode":33261,"uid":0,"gid":0,"inode":2739,"links":1,"blocks_512_bytes":36488,"block_size_bytes":4096,"device_major":259,"device_minor":0,"mount_id":211,"mtime_unix_sec":1794268800,"mtime_nsec":0}
+        restored-upper-and-lower=passed
+    native_restore_integ_test.go:270: source_vmm=1501 restored_vmm=1600 tasks=2 source_stopped=true
+=== RUN   TestNativeRestoreStorage_Isolated/pmem/jailed=true
+    native_restore_integ_test.go:206: Restored guest root: guest_upper_magic=ef53
+        overlayfs:/overlay/root / overlay rw,noatime,lowerdir=/,upperdir=/overlay/root,workdir=/overlay/work,uuid=on 0 0
+        proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /dev tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        devpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=666 0 0
+        shm /dev/shm tmpfs rw,nosuid,nodev,noexec,relatime,size=65536k 0 0
+        mqueue /dev/mqueue mqueue rw,nosuid,nodev,noexec,relatime 0 0
+        sysfs /sys sysfs ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /run tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        /dev/root /rom ext4 ro,relatime,norecovery,dax=always 0 0
+        /dev/vdc /upper ext4 ro,noatime 0 0
+        proc /proc/bus proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/fs proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/irq proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sys proc ro,nosuid,nodev,noexec,relatime 0 0
+        proc /proc/sysrq-trigger proc ro,nosuid,nodev,noexec,relatime 0 0
+        tmpfs /proc/acpi tmpfs ro,relatime 0 0
+        tmpfs /proc/interrupts tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/kcore tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/keys tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /proc/timer_list tmpfs rw,nosuid,size=65536k,mode=755 0 0
+        tmpfs /sys/firmware tmpfs ro,relatime 0 0
+        tmpfs /proc/scsi tmpfs ro,relatime 0 0
+        {"path":"/rom/usr/local/bin/agent","statx_mask":6143,"attributes":2097152,"attributes_mask":3160180,"statx_dax_supported":true,"statx_dax":true,"size_bytes":18682018,"mode":33261,"uid":0,"gid":0,"inode":2739,"links":1,"blocks_512_bytes":36488,"block_size_bytes":4096,"device_major":259,"device_minor":0,"mount_id":211,"mtime_unix_sec":1794268800,"mtime_nsec":0}
+        restored-upper-and-lower=passed
+    native_restore_integ_test.go:270: source_vmm=1688 restored_vmm=1937 tasks=2 source_stopped=true
+=== RUN   TestNativeRestoreStorage_Isolated/reclaim
+=== RUN   TestNativeRestoreStorage_Isolated/reclaim/jailed=false
+    native_restore_integ_test.go:196: 
+        	Error Trace:	/src/runtime/native_restore_integ_test.go:196
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Unknown desc = failed to create VM: failed to start the VM: failed to load a snapshot for VM: [PUT /snapshot/load][400] loadSnapshotBadRequest {"fault_message":"Load snapshot error: Loading a microVM snapshot not allowed after configuring boot-specific resources."}
+        	Test:       	TestNativeRestoreStorage_Isolated/reclaim/jailed=false
+=== RUN   TestNativeRestoreStorage_Isolated/reclaim/jailed=true
+    native_restore_integ_test.go:196: 
+        	Error Trace:	/src/runtime/native_restore_integ_test.go:196
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Unknown desc = failed to create VM: failed to start the VM: failed to load a snapshot for VM: [PUT /snapshot/load][400] loadSnapshotBadRequest {"fault_message":"Load snapshot error: Loading a microVM snapshot not allowed after configuring boot-specific resources."}
+        	Test:       	TestNativeRestoreStorage_Isolated/reclaim/jailed=true
+=== RUN   TestNativeRestoreStorage_Isolated/combined
+=== RUN   TestNativeRestoreStorage_Isolated/combined/jailed=false
+    native_restore_integ_test.go:196: 
+        	Error Trace:	/src/runtime/native_restore_integ_test.go:196
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Unknown desc = failed to create VM: failed to start the VM: failed to load a snapshot for VM: [PUT /snapshot/load][400] loadSnapshotBadRequest {"fault_message":"Load snapshot error: Loading a microVM snapshot not allowed after configuring boot-specific resources."}
+        	Test:       	TestNativeRestoreStorage_Isolated/combined/jailed=false
+=== RUN   TestNativeRestoreStorage_Isolated/combined/jailed=true
+    native_restore_integ_test.go:196: 
+        	Error Trace:	/src/runtime/native_restore_integ_test.go:196
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Unknown desc = failed to create VM: failed to start the VM: failed to load a snapshot for VM: [PUT /snapshot/load][400] loadSnapshotBadRequest {"fault_message":"Load snapshot error: Loading a microVM snapshot not allowed after configuring boot-specific resources."}
+        	Test:       	TestNativeRestoreStorage_Isolated/combined/jailed=true
+=== RUN   TestNativeRestoreStorage_Isolated/ext4-reclaim
+=== RUN   TestNativeRestoreStorage_Isolated/ext4-reclaim/jailed=false
+    native_restore_integ_test.go:196: 
+        	Error Trace:	/src/runtime/native_restore_integ_test.go:196
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Unknown desc = failed to create VM: failed to start the VM: failed to load a snapshot for VM: [PUT /snapshot/load][400] loadSnapshotBadRequest {"fault_message":"Load snapshot error: Loading a microVM snapshot not allowed after configuring boot-specific resources."}
+        	Test:       	TestNativeRestoreStorage_Isolated/ext4-reclaim/jailed=false
+=== RUN   TestNativeRestoreStorage_Isolated/ext4-reclaim/jailed=true
+    native_restore_integ_test.go:196: 
+        	Error Trace:	/src/runtime/native_restore_integ_test.go:196
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Unknown desc = failed to create VM: failed to start the VM: failed to load a snapshot for VM: [PUT /snapshot/load][400] loadSnapshotBadRequest {"fault_message":"Load snapshot error: Loading a microVM snapshot not allowed after configuring boot-specific resources."}
+        	Test:       	TestNativeRestoreStorage_Isolated/ext4-reclaim/jailed=true
+--- FAIL: TestNativeRestoreStorage_Isolated (372.00s)
+    --- PASS: TestNativeRestoreStorage_Isolated/disk (70.73s)
+        --- PASS: TestNativeRestoreStorage_Isolated/disk/jailed=false (32.70s)
+        --- PASS: TestNativeRestoreStorage_Isolated/disk/jailed=true (38.03s)
+    --- PASS: TestNativeRestoreStorage_Isolated/ext4-block (73.36s)
+        --- PASS: TestNativeRestoreStorage_Isolated/ext4-block/jailed=false (36.86s)
+        --- PASS: TestNativeRestoreStorage_Isolated/ext4-block/jailed=true (36.49s)
+    --- PASS: TestNativeRestoreStorage_Isolated/pmem (76.38s)
+        --- PASS: TestNativeRestoreStorage_Isolated/pmem/jailed=false (40.67s)
+        --- PASS: TestNativeRestoreStorage_Isolated/pmem/jailed=true (35.71s)
+    --- FAIL: TestNativeRestoreStorage_Isolated/reclaim (46.71s)
+        --- FAIL: TestNativeRestoreStorage_Isolated/reclaim/jailed=false (22.96s)
+        --- FAIL: TestNativeRestoreStorage_Isolated/reclaim/jailed=true (23.74s)
+    --- FAIL: TestNativeRestoreStorage_Isolated/combined (52.08s)
+        --- FAIL: TestNativeRestoreStorage_Isolated/combined/jailed=false (25.87s)
+        --- FAIL: TestNativeRestoreStorage_Isolated/combined/jailed=true (26.21s)
+    --- FAIL: TestNativeRestoreStorage_Isolated/ext4-reclaim (52.75s)
+        --- FAIL: TestNativeRestoreStorage_Isolated/ext4-reclaim/jailed=false (25.38s)
+        --- FAIL: TestNativeRestoreStorage_Isolated/ext4-reclaim/jailed=true (27.37s)
+FAIL
+exit status 1
+FAIL	github.com/firecracker-microvm/firecracker-containerd/runtime	372.024s
+make: *** [Makefile:58: integ-test-TestNativeRestoreStorage_Isolated] Error 1
+make: Leaving directory '/users/nehalem/fc-ctrd-mod/step4-native-restore-dev/runtime'

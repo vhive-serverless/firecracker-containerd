@@ -1,0 +1,31 @@
+/users/nehalem/fc-ctrd-mod/toolchains/k3s-v1.37.2/k3s: OK
+K3S_FIRECRACKER_LOGS=/users/nehalem/fc-ctrd-mod/evidence/k3s-firecracker-06936f6b2167.rSkMn9OM
+firecracker-cri 72f4fc9173bef33cc1c981ad285758716f635e02
+node/fcmod-firecracker condition met
+deployment.apps/coredns image updated
+Waiting for deployment spec update to be observed...
+Waiting for deployment spec update to be observed...
+Waiting for deployment "coredns" rollout to finish: 0 out of 1 new replicas have been updated...
+Waiting for deployment "coredns" rollout to finish: 0 of 1 updated replicas are available...
+deployment "coredns" successfully rolled out
+runtimeclass.node.k8s.io/firecracker created
+namespace/fcmod-smoke created
+pod/firecracker created
+service/firecracker created
+pod/firecracker condition met
+FIRECRACKER_KUBERNETES_STARTED
+EXEC_OK
+Server:		10.43.0.10
+Address:	10.43.0.10:53
+
+Name:	kubernetes.default.svc.cluster.local
+Address: 10.43.0.1
+
+pod/client created
+pod/client condition met
+FIRECRACKER_SHARED_VOLUME
+namespace "fcmod-smoke" deleted
+runtimeclass.node.k8s.io "firecracker" deleted
+K3S_FIRECRACKER_RUNTIMECLASS_OK
+RuntimeClass Pod UID, one-VM mapping, both live container stats and cleanup verified.
+K3S_FIRECRACKER_WORKER_TEST_OK

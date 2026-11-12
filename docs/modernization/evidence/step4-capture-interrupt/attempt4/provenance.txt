@@ -1,0 +1,20 @@
+base_commit=907fc268ea85f60dfcdae2b1471b5ffb28811003
+source_worktree=dirty-untracked-test-only
+test_source_sha256=1d56cb8a027c8b84ed55e729f3971269903c6cb42fb9ab51bb729c69a9230959
+test_image=sha256:0ed23833cf6043e6f2e0fa6ef3e590cfd9626c03e69d66303f9a693b079021b5
+test_image_tag=localhost/firecracker-containerd-test:72f4fc9173be
+test_runtime_source=72f4fc9173bef33cc1c981ad285758716f635e02
+go=go version go1.26.11 linux/amd64
+ttrpc_module=github.com/containerd/ttrpc v1.2.8
+vm_storage=/dev/sda3 ext3
+test_command=make -C runtime integ-test-TestNativeCheckpointInterrupt_Isolated
+test_args=-v -count=1 -timeout=1200s
+pool=fc-step4-capture-interrupt-dev
+private_storage=/users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-capture-interrupt-dev
+submodules:
+ ce86b117d59ca93b1c04b791a251b445ace76703 _submodules/firecracker (v1.18.0-2-gce86b117d)
+ c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e _submodules/runc (v1.4.2)
+ 3070538befb5a6c09f93e99164762b3a76310357 _submodules/stargz-snapshotter (cmd/v0.18.2)
+worktree_status:
+## HEAD (no branch)
+?? runtime/native_checkpoint_interrupt_integ_test.go

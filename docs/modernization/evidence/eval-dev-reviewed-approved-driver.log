@@ -1,0 +1,4 @@
+RUN block=0 arm=original
+PASS block=0 arm=original
+RUN block=0 arm=combined
+PASS block=0 arm=combined

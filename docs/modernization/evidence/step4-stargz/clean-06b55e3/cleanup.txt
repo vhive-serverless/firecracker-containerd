@@ -1,0 +1,5 @@
+fc-test-06b55e3b78cc-runtime absent
+fc-test-06b55e3b78cc-stargz absent
+VM storage directory empty
+No candidate test containers running
+/fcmod-upstream-137-control-plane running

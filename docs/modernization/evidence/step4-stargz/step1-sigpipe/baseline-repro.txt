@@ -1,0 +1,15 @@
+Baseline reproduction (unchanged source 89556d1876f308eb892986c1fa1203256773f713)
+Command: GOTOOLCHAIN=local /users/nehalem/fc-ctrd-mod/toolchains/go1.26.11/bin/go test -mod=readonly -run "^TestRunIgnoresSIGPIPEAndStopsOnSIGTERM$" -count=1 -v ./snapshotter/app
+Exit: 1
+Output excerpt:
+=== RUN   TestRunIgnoresSIGPIPEAndStopsOnSIGTERM
+    service_signal_test.go:48: signal helper failed: exit status 1
+        time="2026-11-11T22:36:11-07:00" level=info msg="stopping server"
+        time="2026-11-11T22:36:11-07:00" level=info msg=done
+        --- FAIL: TestRunIgnoresSIGPIPEAndStopsOnSIGTERM (0.01s)
+            service_signal_test.go:41: demux stopped after SIGPIPE: <nil>
+        FAIL
+--- FAIL: TestRunIgnoresSIGPIPEAndStopsOnSIGTERM (0.02s)
+FAIL
+FAIL    github.com/firecracker-microvm/firecracker-containerd/snapshotter/app    0.034s
+FAIL

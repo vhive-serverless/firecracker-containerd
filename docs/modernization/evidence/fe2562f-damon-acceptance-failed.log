@@ -1,0 +1,26 @@
+firecracker: ce86b117d59ca93b1c04b791a251b445ace76703
+runc: c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e
+stargz-snapshotter: 3070538befb5a6c09f93e99164762b3a76310357
+github.com/containerd/containerd/v2: v2.3.7
+github.com/opencontainers/runc: v1.4.2
+SDK: github.com/JooyoungPark73/firecracker-go-sdk@v0.0.0-20261111093432-832b1a5132e0
+VMM/SDK schema sha256: bf73b43daf2124cc4077e2bade1469e893e635efdc230a85b51372c6581613f4
+Guest volume filesystem: github.com/hanwen/go-fuse/v2@v2.10.1 (1d16325e0693e4aeb40b3c899938e028cc8e538e)
+step4-memory-dev: k8s.io/cri-api@v0.36.3
+cri: k8s.io/cri-api@v0.37.2
+cri: k8s.io/cri-streaming@v0.37.2
+cri: github.com/containerd/containerd/v2@v2.3.7
+CRI frontend: co-versioned parent source and exact pinned SDK verified
+go version go1.26.11 linux/amd64
+/users/nehalem/fc-ctrd-mod/step4-memory-dev/bin/ltag -t ./.headers -excludes "tools _submodules tmp bin" -check -v
+No template file for Dockerfile, shall skip all Dockerfile
+No template file for bash scripts, shall skip all bash scripts
+/users/nehalem/fc-ctrd-mod/step4-memory-dev/bin/git-validation -run DCO,short-subject -range HEAD~1..HEAD
+ * fe2562f0 "Add bounded DAMON reclamation with free page reporting" ... PASS
+/users/nehalem/fc-ctrd-mod/step4-memory-dev/bin/golangci-lint run
+runtime/guest_reclamation_integ_test.go:17:1: File is not properly formatted (gofmt)
+    "context"
+^
+1 issues:
+* gofmt: 1
+make: *** [Makefile:123: lint] Error 1

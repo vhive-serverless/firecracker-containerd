@@ -1,0 +1,15 @@
+script_revision=06936f6b2167386321755acca65100f84c40ddf2
+runtime_revision=72f4fc9173bef33cc1c981ad285758716f635e02
+source_dirty=false
+memory_profile=reclaim
+vm_storage=/users/nehalem/fc-ctrd-mod/.ficd-test-vms/k3s-rSkMn9OM.iLxvhVg1
+image=sha256:0ed23833cf6043e6f2e0fa6ef3e590cfd9626c03e69d66303f9a693b079021b5
+k3s version v1.37.2+k3s1 (f6973cb8)
+go version go1.26.10
+265b3ee6a3198ef14033c63ef46cbb32370d83795199fb6d1b01f21575eddbda  /users/nehalem/fc-ctrd-mod/toolchains/k3s-v1.37.2/k3s
+151b98690eac26c3dec5f15c47a5e9385b05e19139a4e7c35249997907fff390  tools/kubernetes/test-firecracker-node.sh
+0dff8dc91766afba74d9f1f031a43194a8cb39004ae949086e09561c16501f8e  tools/kubernetes/run-firecracker-node.sh
+0ab556df8fd34c4820c05b076ae7a8357e4c9bac8f17e50236a3786a63b625d5  tools/kubernetes/firecracker-smoke.yaml
+57fca24aacf3e7f8e436ab180b68e5b470e556c00d16a818f636c7c28f099e58  /users/nehalem/fc-ctrd-mod/evidence/k3s-firecracker-06936f6b2167.rSkMn9OM/runtime-config.json
+TARGET SOURCE    FSTYPE
+/      /dev/sda3 ext3

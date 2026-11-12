@@ -1,0 +1,1 @@
+Storage component passed: four profiles, both jailers. Overall test-stargz-storage.sh failed later during source task creation in the native restore test. This receipt does not claim restore acceptance.

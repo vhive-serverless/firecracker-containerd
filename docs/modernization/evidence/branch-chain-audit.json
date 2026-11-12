@@ -1,0 +1,148 @@
+{
+  "scope": "Documentation and non-rewriting forward-merge audit. No new runtime acceptance.",
+  "branches": [
+    {
+      "branch": "modernize-runtime",
+      "before": "627c9902ea95a601c4b2886d4b53a525e316c840",
+      "audited_after": "b6caf19679cac3596bc908f0220f54a75eedc801",
+      "non_documentation_changes": [],
+      "selected_inputs_unchanged": true,
+      "changed_paths": [
+        "README.md",
+        "docs/agent.md",
+        "docs/architecture.md",
+        "docs/getting-started.md",
+        "docs/modernization/README.md",
+        "docs/modernization/implementation-checklist.md",
+        "docs/modernization/step-1.md",
+        "docs/quickstart.md",
+        "docs/root-filesystem.md",
+        "tools/image-builder/README.md"
+      ]
+    },
+    {
+      "branch": "vhive-compatible",
+      "before": "c749796581957df889f33f5b59b6ffc5322f2312",
+      "audited_after": "f2d1083855a27ca30213aaea93294f0da3f165d2",
+      "non_documentation_changes": [],
+      "selected_inputs_unchanged": true,
+      "changed_paths": [
+        "README.md",
+        "docs/agent.md",
+        "docs/architecture.md",
+        "docs/getting-started.md",
+        "docs/modernization/README.md",
+        "docs/modernization/evidence/06bd205-telemetry-acceptance-receipt.log",
+        "docs/modernization/evidence/06bd205-telemetry-acceptance.log",
+        "docs/modernization/evidence/06bd205-telemetry-build.log",
+        "docs/modernization/evidence/06bd205-telemetry-install.log",
+        "docs/modernization/evidence/06bd205-telemetry-jailer-race.log",
+        "docs/modernization/evidence/1adbcfc-install-guard-receipt.log",
+        "docs/modernization/evidence/3adc9f6-metrics-acceptance-receipt.log",
+        "docs/modernization/evidence/8797ff8-task-wait-sync-receipt.log",
+        "docs/modernization/implementation-checklist.md",
+        "docs/modernization/step-1.md",
+        "docs/modernization/step-2.md",
+        "docs/modernization/versions.json",
+        "docs/quickstart.md",
+        "docs/root-filesystem.md",
+        "tools/image-builder/README.md"
+      ]
+    },
+    {
+      "branch": "cri-native-snapshot-restore",
+      "before": "41e9e287a027bf7ef9afcd1cf8f5a20c03f02214",
+      "audited_after": "4a7c8af7815942401de3e2cda8d2525344f54487",
+      "non_documentation_changes": [],
+      "selected_inputs_unchanged": true,
+      "changed_paths": [
+        "README.md",
+        "docs/agent.md",
+        "docs/architecture.md",
+        "docs/getting-started.md",
+        "docs/modernization/README.md",
+        "docs/modernization/evidence/06bd205-telemetry-acceptance-receipt.log",
+        "docs/modernization/evidence/06bd205-telemetry-acceptance.log",
+        "docs/modernization/evidence/06bd205-telemetry-build.log",
+        "docs/modernization/evidence/06bd205-telemetry-install.log",
+        "docs/modernization/evidence/06bd205-telemetry-jailer-race.log",
+        "docs/modernization/evidence/1adbcfc-install-guard-receipt.log",
+        "docs/modernization/evidence/2780f2e-metrics-acceptance-receipt.log",
+        "docs/modernization/evidence/3adc9f6-metrics-acceptance-receipt.log",
+        "docs/modernization/evidence/46b2fa2-install-guard-receipt.log",
+        "docs/modernization/evidence/4e0033b-fifo-acceptance-receipt.log",
+        "docs/modernization/evidence/8797ff8-task-wait-sync-receipt.log",
+        "docs/modernization/evidence/b2df9bc-task-wait-sync-receipt.log",
+        "docs/modernization/implementation-checklist.md",
+        "docs/modernization/step-1.md",
+        "docs/modernization/step-2.md",
+        "docs/modernization/step-3.md",
+        "docs/modernization/versions.json",
+        "docs/quickstart.md",
+        "docs/root-filesystem.md",
+        "tools/image-builder/README.md"
+      ]
+    },
+    {
+      "branch": "damon-virtio-pmem",
+      "before": "8340f724c8e0b5bdd81a1fed984183b95c7ab67b",
+      "audited_after": "31a907914090b056817fb9a589e889ecd76f9272",
+      "non_documentation_changes": [],
+      "selected_inputs_unchanged": true,
+      "changed_paths": [
+        "README.md",
+        "docs/agent.md",
+        "docs/architecture.md",
+        "docs/getting-started.md",
+        "docs/modernization/README.md",
+        "docs/modernization/evidence/06bd205-telemetry-acceptance-receipt.log",
+        "docs/modernization/evidence/06bd205-telemetry-acceptance.log",
+        "docs/modernization/evidence/06bd205-telemetry-build.log",
+        "docs/modernization/evidence/06bd205-telemetry-install.log",
+        "docs/modernization/evidence/06bd205-telemetry-jailer-race.log",
+        "docs/modernization/evidence/1adbcfc-install-guard-receipt.log",
+        "docs/modernization/evidence/2780f2e-metrics-acceptance-receipt.log",
+        "docs/modernization/evidence/3adc9f6-metrics-acceptance-receipt.log",
+        "docs/modernization/evidence/3c0d1ce-step3-fifo-maintenance-receipt.log",
+        "docs/modernization/evidence/46b2fa2-install-guard-receipt.log",
+        "docs/modernization/evidence/4e0033b-fifo-acceptance-receipt.log",
+        "docs/modernization/evidence/a5a2cb8-install-guard-receipt.log",
+        "docs/modernization/implementation-checklist.md",
+        "docs/modernization/step-1.md",
+        "docs/modernization/step-2.md",
+        "docs/modernization/step-3.md",
+        "docs/modernization/step-4-completeness.md",
+        "docs/modernization/step-4.md",
+        "docs/modernization/versions.json",
+        "docs/quickstart.md",
+        "docs/root-filesystem.md",
+        "tools/image-builder/README.md"
+      ]
+    }
+  ],
+  "ancestry": [
+    {
+      "lower": "modernize-runtime",
+      "upper": "vhive-compatible",
+      "is_ancestor": true,
+      "merge_base": "b6caf19679cac3596bc908f0220f54a75eedc801"
+    },
+    {
+      "lower": "vhive-compatible",
+      "upper": "cri-native-snapshot-restore",
+      "is_ancestor": true,
+      "merge_base": "f2d1083855a27ca30213aaea93294f0da3f165d2"
+    },
+    {
+      "lower": "cri-native-snapshot-restore",
+      "upper": "damon-virtio-pmem",
+      "is_ancestor": true,
+      "merge_base": "4a7c8af7815942401de3e2cda8d2525344f54487"
+    }
+  ],
+  "ci_successes": {
+    "modernize-runtime": "https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43147763783",
+    "vhive-compatible": "https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43147763725",
+    "cri-native-snapshot-restore": "https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43147763743"
+  }
+}
