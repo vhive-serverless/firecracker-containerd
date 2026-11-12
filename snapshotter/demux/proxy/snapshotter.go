@@ -21,8 +21,8 @@ import (
 	"time"
 
 	snapshotsapi "github.com/containerd/containerd/api/services/snapshots/v1"
-	"github.com/containerd/containerd/snapshots"
-	"github.com/containerd/containerd/snapshots/proxy"
+	"github.com/containerd/containerd/v2/core/snapshots"
+	"github.com/containerd/containerd/v2/core/snapshots/proxy"
 	"github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/metrics"
 	"github.com/hashicorp/go-multierror"
 	"google.golang.org/grpc"

@@ -27,7 +27,7 @@ import (
 	"time"
 
 	snapshotsapi "github.com/containerd/containerd/api/services/snapshots/v1"
-	"github.com/containerd/containerd/contrib/snapshotservice"
+	"github.com/containerd/containerd/v2/contrib/snapshotservice"
 	"github.com/containerd/log"
 	"github.com/firecracker-microvm/firecracker-go-sdk/vsock"
 	"golang.org/x/sync/errgroup"
@@ -160,11 +160,11 @@ func initCache(config config.Config, monitor *metrics.Monitor) (*cache.RemoteSna
 
 	dialTimeout, err := time.ParseDuration(config.Snapshotter.Dialer.Timeout)
 	if err != nil {
-		return nil, fmt.Errorf("Error parsing dialer retry interval from config: %w", err)
+		return nil, fmt.Errorf("error parsing dialer retry interval from config: %w", err)
 	}
 	retryInterval, err := time.ParseDuration(config.Snapshotter.Dialer.RetryInterval)
 	if err != nil {
-		return nil, fmt.Errorf("Error parsing dialer retry interval from config: %w", err)
+		return nil, fmt.Errorf("error parsing dialer retry interval from config: %w", err)
 	}
 
 	vsockDial := func(ctx context.Context, host string, port uint64) (net.Conn, error) {

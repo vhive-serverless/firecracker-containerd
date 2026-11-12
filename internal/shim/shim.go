@@ -18,14 +18,14 @@ package shim
 import (
 	"context"
 
-	"github.com/containerd/containerd/runtime/v2/shim"
+	"github.com/containerd/containerd/v2/pkg/shim"
 )
 
 // FCControlSocketAddress is a unix socket address at which a shim
 // with the given namespace, the containerd socket address, and the vmID will listen and serve
 // the fccontrol api
 func FCControlSocketAddress(namespacedCtx context.Context, socketPath, vmID string) (string, error) {
-	shimSocketAddr, err := shim.SocketAddress(namespacedCtx, socketPath, vmID)
+	shimSocketAddr, err := shim.SocketAddress(namespacedCtx, socketPath, vmID, false)
 	if err != nil {
 		return "", err
 	}

@@ -28,7 +28,7 @@ const runtimeConfigPath = "/etc/containerd/firecracker-runtime.json"
 var DefaultRuntimeConfig = config.Config{
 	FirecrackerBinaryPath: "/usr/local/bin/firecracker",
 	KernelImagePath:       "/var/lib/firecracker-containerd/runtime/default-vmlinux.bin",
-	KernelArgs:            "ro console=ttyS0 noapic reboot=k panic=1 pci=off nomodules systemd.unified_cgroup_hierarchy=0 systemd.journald.forward_to_console systemd.log_color=false systemd.unit=firecracker.target init=/sbin/overlay-init",
+	KernelArgs:            "ro console=ttyS0 reboot=k panic=1 pci=off nomodules systemd.unified_cgroup_hierarchy=1 systemd.journald.forward_to_console systemd.log_color=false systemd.unit=firecracker.target init=/sbin/overlay-init",
 	RootDrive:             "/var/lib/firecracker-containerd/runtime/default-rootfs.img",
 	LogLevels:             []string{"debug"},
 	ShimBaseDir:           ShimBaseDir(),
@@ -44,7 +44,7 @@ func writeRuntimeConfig(options ...func(*config.Config)) error {
 		option(&config)
 	}
 
-	file, err := os.OpenFile(runtimeConfigPath, os.O_CREATE|os.O_WRONLY, 0600)
+	file, err := os.OpenFile(runtimeConfigPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}

@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/containerd/containerd/snapshots"
+	"github.com/containerd/containerd/v2/core/snapshots"
 	"github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/proxy"
 	"github.com/hashicorp/go-multierror"
 	log "github.com/sirupsen/logrus"

@@ -16,8 +16,8 @@ package main
 import (
 	"context"
 
-	task "github.com/containerd/containerd/api/runtime/task/v2"
-	"github.com/containerd/containerd/protobuf/types"
+	task "github.com/containerd/containerd/api/runtime/task/v3"
+	"github.com/containerd/containerd/v2/pkg/protobuf/types"
 	"github.com/containerd/log"
 	"github.com/firecracker-microvm/firecracker-containerd/internal/vm"
 	ioproxy "github.com/firecracker-microvm/firecracker-containerd/proto/service/ioproxy/ttrpc"
@@ -26,7 +26,7 @@ import (
 // ioProxyHandler implements IOProxyService that exposes the state of
 // IOProxy instances.
 type ioProxyHandler struct {
-	runcService task.TaskService
+	runcService task.TTRPCTaskService
 	taskManager vm.TaskManager
 }
 

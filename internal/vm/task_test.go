@@ -23,16 +23,16 @@ import (
 	"testing"
 	"time"
 
-	taskAPI "github.com/containerd/containerd/api/runtime/task/v2"
-	"github.com/containerd/containerd/protobuf"
-	"github.com/containerd/containerd/protobuf/types"
+	taskAPI "github.com/containerd/containerd/api/runtime/task/v3"
+	"github.com/containerd/containerd/v2/pkg/protobuf"
+	"github.com/containerd/containerd/v2/pkg/protobuf/types"
 	"github.com/sirupsen/logrus"
 	"github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/require"
 )
 
 type mockTaskService struct {
-	taskAPI.TaskService
+	taskAPI.TTRPCTaskService
 
 	// map of taskID to chan *taskAPI.CreateTaskRequest holding each Create request for that taskID
 	createRequests sync.Map

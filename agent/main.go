@@ -21,10 +21,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	taskAPI "github.com/containerd/containerd/api/runtime/task/v2"
-	"github.com/containerd/containerd/events/exchange"
-	"github.com/containerd/containerd/namespaces"
-	"github.com/containerd/containerd/sys/reaper"
+	taskAPI "github.com/containerd/containerd/api/runtime/task/v3"
+	"github.com/containerd/containerd/v2/core/events/exchange"
+	"github.com/containerd/containerd/v2/pkg/namespaces"
+	"github.com/containerd/containerd/v2/pkg/sys/reaper"
 	"github.com/containerd/log"
 	"github.com/containerd/ttrpc"
 	"github.com/firecracker-microvm/firecracker-go-sdk/vsock"
@@ -104,7 +104,7 @@ func main() {
 	if err != nil {
 		log.G(shimCtx).WithError(err).Fatal("failed to create task service")
 	}
-	taskAPI.RegisterTaskService(server, taskService)
+	taskAPI.RegisterTTRPCTaskService(server, taskService)
 
 	dh, err := newDriveHandler(blockPath, drivePath)
 	if err != nil {

@@ -22,11 +22,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/containerd/containerd"
-	"github.com/containerd/containerd/cio"
-	"github.com/containerd/containerd/containers"
-	"github.com/containerd/containerd/identifiers"
-	"github.com/containerd/containerd/oci"
+	containerd "github.com/containerd/containerd/v2/client"
+	"github.com/containerd/containerd/v2/core/containers"
+	"github.com/containerd/containerd/v2/defaults"
+	"github.com/containerd/containerd/v2/pkg/cio"
+	"github.com/containerd/containerd/v2/pkg/identifiers"
+	"github.com/containerd/containerd/v2/pkg/oci"
 	"github.com/firecracker-microvm/firecracker-containerd/runtime/firecrackeroci"
 	"github.com/opencontainers/runtime-spec/specs-go"
 )
@@ -72,7 +73,7 @@ func FromGuestImage(client *containerd.Client, vmID, image, snapshot string, vol
 		vmID:     vmID,
 		volumes:  volumes,
 	}
-	p.config.snapshotter = containerd.DefaultSnapshotter
+	p.config.snapshotter = defaults.DefaultSnapshotter
 
 	for _, opt := range opts {
 		opt(&p.config)
@@ -88,10 +89,8 @@ func (p *GuestVolumeImageProvider) Name() string {
 
 // pull the image.
 func (p *GuestVolumeImageProvider) pull(ctx context.Context) error {
-	remoteOpts := []containerd.RemoteOpt{
-		containerd.WithPullUnpack,
-		containerd.WithPullSnapshotter(p.config.snapshotter),
-	}
+	remoteOpts := make([]containerd.RemoteOpt, 0, 2+len(p.config.pullOpts))
+	remoteOpts = append(remoteOpts, containerd.WithPullUnpack, containerd.WithPullSnapshotter(p.config.snapshotter))
 	remoteOpts = append(remoteOpts, p.config.pullOpts...)
 	image, err := p.client.Pull(ctx, p.image, remoteOpts...)
 	if err != nil {
@@ -108,14 +107,14 @@ func mountHostDirs(_ string) oci.SpecOpts {
 			specs.Mount{
 				Source:      vmBinDir,
 				Destination: containerBinDir,
-				Type:        "bind",
-				Options:     []string{"bind", "ro"},
+				Type:        bindMountType,
+				Options:     []string{bindMountType, "ro"},
 			},
 			specs.Mount{
 				Source:      vmVolumesDir,
 				Destination: containerVolumesDir,
-				Type:        "bind",
-				Options:     []string{"bind"},
+				Type:        bindMountType,
+				Options:     []string{bindMountType},
 			},
 		)
 		return nil

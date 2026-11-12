@@ -23,16 +23,17 @@ import (
 // Helper implements the docker credential helper interface
 // with backing from firecracker's MMDS.
 // It expects MMDS to contain metadata under the docker-credentials key in the following format:
-// "docker-credentials": {
-//   "public.ecr.aws": {
-//     "username": "user",
-//     "password": "pass"
-//   },
-//   "docker.io": {
-//     "username": "user2",
-//     "password": "pass2"
-//   }
-// }
+//
+//	"docker-credentials": {
+//	  "public.ecr.aws": {
+//	    "username": "user",
+//	    "password": "pass"
+//	  },
+//	  "docker.io": {
+//	    "username": "user2",
+//	    "password": "pass2"
+//	  }
+//	}
 type Helper struct {
 	client *Client
 }

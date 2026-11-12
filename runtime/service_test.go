@@ -21,8 +21,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/containerd/containerd/api/runtime/task/v2"
-	"github.com/containerd/containerd/namespaces"
+	"github.com/containerd/containerd/api/runtime/task/v3"
+	"github.com/containerd/containerd/v2/pkg/namespaces"
 	"github.com/firecracker-microvm/firecracker-go-sdk"
 	models "github.com/firecracker-microvm/firecracker-go-sdk/client/models"
 	"github.com/sirupsen/logrus"
@@ -70,13 +70,13 @@ func TestBuildVMConfiguration(t *testing.T) {
 				Drives: []models.Drive{
 					{
 						DriveID:      firecracker.String("root_drive"),
-						PathOnHost:   firecracker.String("ROOT DRIVE"),
-						IsReadOnly:   firecracker.Bool(true),
+						PathOnHost:   "ROOT DRIVE",
+						IsReadOnly:   true,
 						IsRootDevice: firecracker.Bool(true),
 					},
 				},
 				MachineCfg: models.MachineConfiguration{
-					CPUTemplate: models.CPUTemplateC3,
+					CPUTemplate: new(models.CPUTemplateC3),
 					VcpuCount:   firecracker.Int64(defaultCPUCount),
 					MemSizeMib:  firecracker.Int64(defaultMemSizeMb),
 					Smt:         firecracker.Bool(false),
@@ -107,13 +107,13 @@ func TestBuildVMConfiguration(t *testing.T) {
 				Drives: []models.Drive{
 					{
 						DriveID:      firecracker.String("root_drive"),
-						PathOnHost:   firecracker.String("REQUEST ROOT DRIVE"),
-						IsReadOnly:   firecracker.Bool(false),
+						PathOnHost:   "REQUEST ROOT DRIVE",
+						IsReadOnly:   false,
 						IsRootDevice: firecracker.Bool(true),
 					},
 				},
 				MachineCfg: models.MachineConfiguration{
-					CPUTemplate: models.CPUTemplateC3,
+					CPUTemplate: new(models.CPUTemplateC3),
 					VcpuCount:   firecracker.Int64(2),
 					MemSizeMib:  firecracker.Int64(defaultMemSizeMb),
 					Smt:         firecracker.Bool(false),
@@ -147,13 +147,13 @@ func TestBuildVMConfiguration(t *testing.T) {
 				Drives: []models.Drive{
 					{
 						DriveID:      firecracker.String("root_drive"),
-						PathOnHost:   firecracker.String("REQUEST ROOT DRIVE"),
-						IsReadOnly:   firecracker.Bool(false),
+						PathOnHost:   "REQUEST ROOT DRIVE",
+						IsReadOnly:   false,
 						IsRootDevice: firecracker.Bool(true),
 					},
 				},
 				MachineCfg: models.MachineConfiguration{
-					CPUTemplate: models.CPUTemplateT2,
+					CPUTemplate: new(models.CPUTemplateT2),
 					VcpuCount:   firecracker.Int64(3),
 					MemSizeMib:  firecracker.Int64(defaultMemSizeMb),
 					Smt:         firecracker.Bool(false),
@@ -183,13 +183,13 @@ func TestBuildVMConfiguration(t *testing.T) {
 				Drives: []models.Drive{
 					{
 						DriveID:      firecracker.String("root_drive"),
-						PathOnHost:   firecracker.String("REQUEST ROOT DRIVE"),
-						IsReadOnly:   firecracker.Bool(true),
+						PathOnHost:   "REQUEST ROOT DRIVE",
+						IsReadOnly:   true,
 						IsRootDevice: firecracker.Bool(true),
 					},
 				},
 				MachineCfg: models.MachineConfiguration{
-					CPUTemplate: models.CPUTemplateC3,
+					CPUTemplate: new(models.CPUTemplateC3),
 					VcpuCount:   firecracker.Int64(defaultCPUCount),
 					MemSizeMib:  firecracker.Int64(defaultMemSizeMb),
 					Smt:         firecracker.Bool(false),
@@ -213,13 +213,13 @@ func TestBuildVMConfiguration(t *testing.T) {
 				Drives: []models.Drive{
 					{
 						DriveID:      firecracker.String("root_drive"),
-						PathOnHost:   firecracker.String("ROOT DRIVE"),
-						IsReadOnly:   firecracker.Bool(true),
+						PathOnHost:   "ROOT DRIVE",
+						IsReadOnly:   true,
 						IsRootDevice: firecracker.Bool(true),
 					},
 				},
 				MachineCfg: models.MachineConfiguration{
-					CPUTemplate: models.CPUTemplateC3,
+					CPUTemplate: new(models.CPUTemplateC3),
 					VcpuCount:   firecracker.Int64(defaultCPUCount),
 					MemSizeMib:  firecracker.Int64(defaultMemSizeMb),
 					Smt:         firecracker.Bool(false),
@@ -231,7 +231,7 @@ func TestBuildVMConfiguration(t *testing.T) {
 
 	for _, tc := range testcases {
 		if cpuTemp, err := internal.SupportCPUTemplate(); !cpuTemp && err == nil {
-			tc.expectedCfg.MachineCfg.CPUTemplate = ""
+			tc.expectedCfg.MachineCfg.CPUTemplate = nil
 		}
 		t.Run(tc.name, func(t *testing.T) {
 			svc := &service{
@@ -263,9 +263,9 @@ func TestBuildVMConfiguration(t *testing.T) {
 			drives := make([]models.Drive, tc.expectedStubDriveCount)
 			for i := 0; i < tc.expectedStubDriveCount; i++ {
 				hostPath := filepath.Join(tempDir, fmt.Sprintf("ctrstub%d", i))
-				drives[i].PathOnHost = firecracker.String(hostPath)
+				drives[i].PathOnHost = hostPath
 				drives[i].DriveID = firecracker.String(stubPathToDriveID(hostPath))
-				drives[i].IsReadOnly = firecracker.Bool(false)
+				drives[i].IsReadOnly = false
 				drives[i].IsRootDevice = firecracker.Bool(false)
 			}
 			tc.expectedCfg.Drives = append(tc.expectedCfg.Drives, drives...)

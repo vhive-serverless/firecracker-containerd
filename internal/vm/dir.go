@@ -20,8 +20,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/containerd/containerd/identifiers"
-	"github.com/containerd/containerd/runtime/v2/shim"
+	"github.com/containerd/containerd/v2/pkg/atomicfile"
+	"github.com/containerd/containerd/v2/pkg/identifiers"
 	"github.com/containerd/fifo"
 	"golang.org/x/sys/unix"
 
@@ -164,7 +164,15 @@ func (d Dir) CreateShimLogFifoLink(containerID string) error {
 
 // WriteAddress will write the actual address file in the VM dir.
 func (d Dir) WriteAddress(shimSocketAddress string) error {
-	return shim.WriteAddress(d.AddrFilePath(), shimSocketAddress)
+	f, err := atomicfile.New(d.AddrFilePath(), 0600)
+	if err != nil {
+		return err
+	}
+	if _, err := f.Write([]byte(shimSocketAddress)); err != nil {
+		f.Cancel()
+		return err
+	}
+	return f.Close()
 }
 
 func createSymlink(oldPath, newPath string, errMsgName string) error {

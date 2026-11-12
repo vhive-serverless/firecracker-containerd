@@ -14,9 +14,10 @@
 package main
 
 import (
+	"context"
 	"os"
 
-	"github.com/containerd/containerd/runtime/v2/shim"
+	"github.com/containerd/containerd/v2/pkg/shim"
 	"github.com/containerd/log"
 	"github.com/sirupsen/logrus"
 )
@@ -35,7 +36,7 @@ func init() {
 }
 
 func main() {
-	shim.Run(shimID, NewService, func(cfg *shim.Config) {
+	shim.RunShim(context.Background(), &shimManager{}, func(cfg *shim.Config) {
 		cfg.NoSetupLogger = true
 
 		// Just let child processes get reparented to init

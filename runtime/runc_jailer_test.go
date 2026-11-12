@@ -74,9 +74,9 @@ func TestBuildJailedRootHandler(t *testing.T) {
 		KernelImagePath: kernelImagePath,
 		Drives: []models.Drive{
 			{
-				PathOnHost:   firecracker.String(rootDrivePath),
+				PathOnHost:   rootDrivePath,
 				IsRootDevice: firecracker.Bool(true),
-				IsReadOnly:   firecracker.Bool(true),
+				IsReadOnly:   true,
 			},
 		},
 	}

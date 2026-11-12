@@ -15,7 +15,7 @@
 // containerd mounts.
 package mount
 
-import "github.com/containerd/containerd/mount"
+import "github.com/containerd/containerd/v2/core/mount"
 
 // Map returns the slice of results after applying the given function
 // to each item of a given slice.

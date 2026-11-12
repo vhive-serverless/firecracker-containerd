@@ -133,7 +133,7 @@ func (b Builder) Build() CPUSet {
 }
 
 func stringify(elems []int, ranges []_range) string {
-	strs := []string{}
+	strs := make([]string, 0, len(elems)+len(ranges))
 	for _, elem := range elems {
 		strs = append(strs, strconv.Itoa(elem))
 	}

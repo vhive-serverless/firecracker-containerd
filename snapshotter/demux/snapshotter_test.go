@@ -18,8 +18,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/containerd/containerd/namespaces"
-	"github.com/containerd/containerd/snapshots"
+	"github.com/containerd/containerd/v2/core/snapshots"
+	"github.com/containerd/containerd/v2/pkg/namespaces"
 	"github.com/containerd/log/logtest"
 
 	"github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/cache"
@@ -28,7 +28,7 @@ import (
 )
 
 func fetchOkSnapshotter(_ context.Context, _ string) (*proxy.RemoteSnapshotter, error) {
-	var snapshotter internal.SuccessfulSnapshotter = internal.SuccessfulSnapshotter{}
+	snapshotter := internal.SuccessfulSnapshotter{}
 	return &proxy.RemoteSnapshotter{Snapshotter: &snapshotter}, nil
 }
 
@@ -43,7 +43,7 @@ func createSnapshotterCacheWithSuccessfulSnapshotter(namespace string) *cache.Re
 }
 
 func fetchFailingSnapshotter(_ context.Context, _ string) (*proxy.RemoteSnapshotter, error) {
-	var snapshotter internal.FailingSnapshotter = internal.FailingSnapshotter{}
+	snapshotter := internal.FailingSnapshotter{}
 	return &proxy.RemoteSnapshotter{Snapshotter: &snapshotter}, nil
 }
 

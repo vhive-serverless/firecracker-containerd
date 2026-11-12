@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/containerd/containerd/snapshots"
+	"github.com/containerd/containerd/v2/core/snapshots"
 	"github.com/hashicorp/go-multierror"
 
 	"github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/internal"
