@@ -52,6 +52,7 @@ import (
 	"github.com/firecracker-microvm/firecracker-go-sdk/client/models"
 	"github.com/gofrs/uuid"
 	"github.com/hashicorp/go-multierror"
+	"github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/sys/unix"
 	"google.golang.org/grpc/codes"
@@ -62,6 +63,7 @@ import (
 	"github.com/firecracker-microvm/firecracker-containerd/internal"
 	"github.com/firecracker-microvm/firecracker-containerd/internal/bundle"
 	"github.com/firecracker-microvm/firecracker-containerd/internal/vm"
+	"github.com/firecracker-microvm/firecracker-containerd/internal/volfs"
 	"github.com/firecracker-microvm/firecracker-containerd/proto"
 	drivemount "github.com/firecracker-microvm/firecracker-containerd/proto/service/drivemount/ttrpc"
 	fccontrolTtrpc "github.com/firecracker-microvm/firecracker-containerd/proto/service/fccontrol/ttrpc"
@@ -154,6 +156,10 @@ type service struct {
 	driveMountStubs          []MountableStubDrive
 	exitAfterAllTasksDeleted bool // exit the VM and shim when all tasks are deleted
 
+	volumeTasks         sync.Map
+	volumeMu            sync.Mutex
+	volumeServer        *volfs.Server
+	volumesClosed       bool
 	blockDeviceTasks    sync.Map
 	legacyRestoredTasks sync.Map
 
@@ -332,6 +338,27 @@ func (m *shimManager) Start(shimCtx context.Context, opts *bootapi.BootstrapPara
 
 	var exitAfterAllTasksDeleted bool
 	containerCount := 0
+	configBytes, err := bundleDir.OCIConfig().Bytes()
+	if err != nil {
+		return nil, err
+	}
+	var spec specs.Spec
+	if err := json.Unmarshal(configBytes, &spec); err != nil {
+		return nil, err
+	}
+	cfg, err := config.LoadConfig("")
+	if err != nil {
+		return nil, err
+	}
+	criRequest, err := criVMRequest(&spec, cfg)
+	if err != nil {
+		return nil, err
+	}
+	if criRequest != nil {
+		vmID = criRequest.VMID
+		containerCount = int(criRequest.ContainerCount)
+		exitAfterAllTasksDeleted = true
+	}
 
 	if vmID == "" {
 		// If here, no VMID has been provided by the client for this container, so auto-generate a new one.
@@ -369,11 +396,21 @@ func (m *shimManager) Start(shimCtx context.Context, opts *bootapi.BootstrapPara
 	defer ttrpcClient.Close()
 
 	fcControlClient := fccontrolTtrpc.NewFirecrackerClient(ttrpcClient)
-	_, err = fcControlClient.CreateVM(shimCtx, &proto.CreateVMRequest{
+	request := &proto.CreateVMRequest{
 		VMID:                     vmID,
 		ExitAfterAllTasksDeleted: exitAfterAllTasksDeleted,
 		ContainerCount:           int32(containerCount),
-	})
+	}
+	if criRequest != nil {
+		request = criRequest
+	}
+	if criRequest != nil && criRequest.NetNS == "" {
+		// A workload may only join the VM created by its sandbox. Do not boot
+		// an unrelated VM if the sandbox has already disappeared.
+		_, err = fcControlClient.GetVMInfo(shimCtx, &proto.GetVMInfoRequest{VMID: vmID})
+	} else {
+		_, err = fcControlClient.CreateVM(shimCtx, request)
+	}
 	if err != nil {
 		errStatus, ok := status.FromError(err)
 		// ignore AlreadyExists errors, that just means the shim is already up and running
@@ -387,7 +424,9 @@ func (m *shimManager) Start(shimCtx context.Context, opts *bootapi.BootstrapPara
 	// - -address is required and NewService() won't be called if the flag is missing.
 	// So we log the version informaion here instead
 	str := ""
-	if exitAfterAllTasksDeleted {
+	if criRequest != nil {
+		str = " The VM will be torn down after its Pod tasks are deleted."
+	} else if exitAfterAllTasksDeleted {
 		str = " The VM will be torn down after serving a single task."
 	}
 	log.WithField("vmID", vmID).Infof("successfully started shim (git commit: %s).%s", revision, str)
@@ -1207,6 +1246,12 @@ func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTask
 		return nil, err
 	}
 	addressCreated, driveReserved := false, false
+	var volumeTokens []string
+	defer func() {
+		if retErr != nil {
+			retErr = errors.Join(retErr, s.revokeCRIVolumes(volumeTokens))
+		}
+	}()
 	defer func() {
 		if retErr == nil {
 			return
@@ -1276,6 +1321,15 @@ func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTask
 		logger.WithError(err).Error()
 		return nil, err
 	}
+	if err := prepareCRISpec(extraData, func(mount specs.Mount) (volfs.Descriptor, error) {
+		descriptor, err := s.registerCRIVolume(mount)
+		if err == nil {
+			volumeTokens = append(volumeTokens, descriptor.Token)
+		}
+		return descriptor, err
+	}); err != nil {
+		return nil, err
+	}
 
 	request.Options, err = typeurl.MarshalAnyToProto(extraData)
 	if err != nil {
@@ -1321,6 +1375,9 @@ func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTask
 		return nil, err
 	}
 
+	if len(volumeTokens) > 0 {
+		s.volumeTasks.Store(request.ID, volumeTokens)
+	}
 	return resp, nil
 }
 
@@ -1377,14 +1434,22 @@ func (s *service) Delete(requestCtx context.Context, req *taskAPI.DeleteRequest)
 	}
 
 	if _, restored := s.legacyRestoredTasks.LoadAndDelete(req.ID); restored {
+		// Legacy clones own a whole independent workload disk, not a new
+		// containerd image/snapshot bundle for the captured guest task.
 		return resp, nil
 	}
+
 	var result *multierror.Error
+	if tokens, ok := s.volumeTasks.LoadAndDelete(req.ID); ok {
+		if err := s.revokeCRIVolumes(tokens.([]string)); err != nil {
+			result = multierror.Append(result, err)
+		}
+	}
 
 	if _, contains := s.blockDeviceTasks.Load(req.ID); contains {
 		// Trying to release stub drive for further reuse
 		if err := s.containerStubHandler.Release(requestCtx, req.ID, s.driveMountClient, s.machine); err != nil {
-			result = multierror.Append(fmt.Errorf("failed to release stub drive for container: %s: %w", req.ID, err))
+			result = multierror.Append(result, fmt.Errorf("failed to release stub drive for container: %s: %w", req.ID, err))
 		} else {
 			s.blockDeviceTasks.Delete(req.ID)
 		}
@@ -1892,6 +1957,9 @@ func (s *service) Cleanup(requestCtx context.Context) (*taskAPI.DeleteResponse, 
 func (s *service) cleanup() error {
 	s.cleanupOnce.Do(func() {
 		var result *multierror.Error
+		if err := s.closeCRIVolumes(); err != nil {
+			result = multierror.Append(result, err)
+		}
 		// we ignore the error here due to cleanup will only succeed if the jailing
 		// process was killed via SIGKILL
 		if err := s.jailer.Close(); err != nil {

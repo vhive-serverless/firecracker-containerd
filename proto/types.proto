@@ -10,6 +10,25 @@ message ExtraData {
 	uint32 StdinPort = 3;
 	uint32 StdoutPort = 4;
 	uint32 StderrPort = 5;
+	repeated CRIFile CriFiles = 6;
+	repeated CRIVolume CriVolumes = 7;
+}
+
+// An authorized host volume matched by OCI mount index. No host path is used
+// as a guest output path; the agent mounts it inside its own task bundle.
+message CRIVolume {
+	uint32 MountIndex = 1;
+	string Token = 2;
+	bool FileOnly = 3;
+	bool ReadOnly = 4;
+}
+
+// Generated Pod configuration files copied from the host into a guest bundle.
+// Source is matched to an OCI bind mount; it is never used as a guest path.
+message CRIFile {
+	string Source = 1;
+	bytes Contents = 2;
+	uint32 Mode = 3;
 }
 
 // Message to specify network config for a Firecracker VM
