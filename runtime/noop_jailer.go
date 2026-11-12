@@ -14,8 +14,10 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"sync"
@@ -25,6 +27,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/firecracker-microvm/firecracker-containerd/config"
+	"github.com/firecracker-microvm/firecracker-containerd/internal"
 	"github.com/firecracker-microvm/firecracker-containerd/internal/vm"
 )
 
@@ -84,23 +87,24 @@ func (j *noopJailer) BuildJailedMachine(cfg *config.Config, machineConfig *firec
 			binary = "firecracker"
 		}
 		// Keep the SDK's host-side socket path. The VMM starts with its
-		// private cwd at the shared VM directory, so short names also retain
+		// private cwd at the live shared-directory alias, so short names also retain
 		// support for host VM directories longer than sockaddr_un.sun_path.
 		for index := range machineConfig.VsockDevices {
 			machineConfig.VsockDevices[index].Path = filepath.Base(j.shimDir.FirecrackerVSockPath())
 		}
 		inputs := append([]string(nil), j.restoreInputs...)
+		var writableInputs []string
 		for _, path := range []*string{&machineConfig.LogPath, &machineConfig.MetricsPath} {
 			if *path != "" {
 				*path, err = filepath.Abs(*path)
 				if err != nil {
 					return nil, err
 				}
-				inputs = append(inputs, *path)
+				writableInputs = append(writableInputs, *path)
 			}
 		}
 		args := []string{"--api-sock", filepath.Base(j.shimDir.FirecrackerSockPath()), vmmIDArg, vmID}
-		cmd, err = restoreNamespaceCommand(j.ctx, j.shimDir.RootPath(), binary, args, j.restoreMounts, inputs)
+		cmd, err = restoreNamespaceCommand(j.ctx, j.shimDir.RootPath(), binary, args, j.restoreMounts, inputs, writableInputs...)
 		if err != nil {
 			return nil, fmt.Errorf("build restore namespace: %w", err)
 		}
@@ -132,9 +136,6 @@ func (j *noopJailer) ExposeFileToJail(path string) error {
 	if err != nil {
 		return err
 	}
-	if pathWithin(path, shared) {
-		return nil
-	}
 	mount := restoreMount{Source: path, Target: path}
 	source, _, err := resolveRestoreBacking(path)
 	if err != nil {
@@ -149,7 +150,7 @@ func (j *noopJailer) ExposeFileToJail(path string) error {
 		}
 	}
 	mounts := []restoreMount{mount}
-	if err := validateRestoreMounts(mounts, shared); err != nil {
+	if err := validateRestoreMounts(mounts, restoreSharedDirectory); err != nil {
 		return err
 	}
 	mount = mounts[0]
@@ -157,6 +158,59 @@ func (j *noopJailer) ExposeFileToJail(path string) error {
 		return err
 	}
 	j.restoreMounts = append(j.restoreMounts, mount)
+	return nil
+}
+
+// exposeStubDrive may reuse an already captured private stub, but only after
+// checking the entire generated slot marker (including its zero padding).
+// Generic disk exposure still rejects replacement of a captured mount.
+func (j *noopJailer) exposeStubDrive(path, driveID string) error {
+	if !filepath.IsAbs(path) || filepath.Clean(path) != path || stubPathToDriveID(path) != driveID {
+		return fmt.Errorf("invalid reset stub identity")
+	}
+	j.restoreMu.RLock()
+	for _, mount := range j.restoreMounts {
+		if mount.Target != path {
+			continue
+		}
+		err := validatePristineStub(mount, driveID)
+		j.restoreMu.RUnlock()
+		return err
+	}
+	j.restoreMu.RUnlock()
+	return j.ExposeFileToJail(path)
+}
+
+func validatePristineStub(mount restoreMount, driveID string) error {
+	if mount.ReadOnly {
+		return fmt.Errorf("reset stub must be writable")
+	}
+	content, err := internal.GenerateStubContent(driveID)
+	if err != nil {
+		return err
+	}
+	size := (len(content) + fcSectorSize - 1) / fcSectorSize * fcSectorSize
+	expected := make([]byte, size)
+	copy(expected, content)
+	file, _, err := openRestoreBacking(mount.Source)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	info, err := file.Stat()
+	if err != nil {
+		return err
+	}
+	if !info.Mode().IsRegular() || info.Size() != int64(size) {
+		return fmt.Errorf("captured reset stub has invalid type or size")
+	}
+	actual, err := io.ReadAll(io.LimitReader(file, int64(size)+1))
+	if err != nil {
+		return err
+	}
+	if !bytes.Equal(actual, expected) {
+		return fmt.Errorf("captured reset stub does not match drive slot %s", driveID)
+	}
 	return nil
 }
 

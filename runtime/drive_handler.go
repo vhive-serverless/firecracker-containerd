@@ -161,7 +161,16 @@ func (h *StubDriveHandler) Release(
 		return fmt.Errorf("failed to unmount drive: %w", err)
 	}
 
-	err = machine.UpdateGuestDrive(requestCtx, drive.driveID, filepath.Base(drive.stubPath))
+	path := filepath.Base(drive.stubPath)
+	if j, unjailed := drive.jail.(*noopJailer); unjailed {
+		// Keep exported unjailed disk paths absolute and outside the reserved
+		// live-directory alias, so a subsequent checkpoint is restorable.
+		if err := j.exposeStubDrive(drive.stubPath, drive.driveID); err != nil {
+			return fmt.Errorf("failed to expose reset stub: %w", err)
+		}
+		path = drive.stubPath
+	}
+	err = machine.UpdateGuestDrive(requestCtx, drive.driveID, path)
 	if err != nil {
 		return fmt.Errorf("failed to patch drive: %w", err)
 	}

@@ -344,3 +344,33 @@ func TestRestoreBackingDescriptorSurvivesSourceReplacement(t *testing.T) {
 	_, _, err = openRestoreBacking(path)
 	require.Error(t, err, "a later character-device replacement must not become a new backing")
 }
+
+func TestSameIDRestoreMountPlan(t *testing.T) {
+	shared := t.TempDir()
+	backing := filepath.Join(shared, "private-clone")
+	require.NoError(t, os.WriteFile(backing, []byte("private"), 0600))
+	mounts := []restoreMount{{Source: backing, Target: filepath.Join(shared, "ctrstub0")}}
+	// The old absolute path belongs to tmpfs, while live shim files are at
+	// the reserved alias. Same-ID capture paths must remain unchanged.
+	require.NoError(t, validateRestoreMounts(mounts, restoreSharedDirectory))
+	require.Equal(t, filepath.Join(shared, "ctrstub0"), mounts[0].Target)
+	for _, target := range []string{restoreSharedDirectory, restoreSharedDirectory + "/ctrstub0", "/"} {
+		require.Error(t, validateRestoreMounts([]restoreMount{{Source: backing, Target: target}}, restoreSharedDirectory))
+	}
+	for _, input := range []string{restoreSharedDirectory + "/state", mounts[0].Target, shared, mounts[0].Target + "/state"} {
+		require.Error(t, validateRestoreInputs([]string{input}, mounts))
+	}
+	require.NoError(t, validateRestoreInputs([]string{filepath.Join(shared, "state"), filepath.Join(shared, "memory")}, mounts))
+}
+
+func TestRestoreAPIPath(t *testing.T) {
+	shared := t.TempDir()
+	j := &noopJailer{shimDir: vm.Dir(shared)}
+	stage := filepath.Join(shared, ".state-stage", "memory")
+	require.Equal(t, stage, restoreAPIPath(j, stage), "ordinary unjailed VM has its original cwd")
+	j.restoreMounts = []restoreMount{{Target: "/old/disk"}}
+	require.Equal(t, restoreSharedDirectory+"/.state-stage/memory", restoreAPIPath(j, stage))
+	require.Equal(t, "/outside/state", restoreAPIPath(j, "/outside/state"))
+	require.Equal(t, shared+"-sibling/state", restoreAPIPath(j, shared+"-sibling/state"))
+	require.Equal(t, stage, restoreAPIPath(&runcJailer{}, stage), "jailed API translation remains separate")
+}
