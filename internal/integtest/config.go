@@ -32,6 +32,11 @@ var DefaultRuntimeConfig = config.Config{
 	RootDrive:             "/var/lib/firecracker-containerd/runtime/default-rootfs.img",
 	LogLevels:             []string{"debug"},
 	ShimBaseDir:           ShimBaseDir(),
+	CRIContainerCount:     8,
+	CRIDefaultMemoryMiB:   config.DefaultCRIMemoryMiB,
+	CRIMemoryOverheadMiB:  config.DefaultCRIMemoryOverheadMiB,
+	CRICNIConfDir:         "/etc/cni/net.d",
+	CRICNICacheDir:        "/var/lib/cni",
 	JailerConfig: config.JailerConfig{
 		RuncBinaryPath: "/usr/local/bin/runc",
 		RuncConfigPath: "/etc/containerd/firecracker-runc-config.json",
