@@ -29,6 +29,15 @@ synchronization at `b2df9bc`, and cache eviction test synchronization at
 their scope and results. These checks do not change the functional acceptance
 revision or dependency pins.
 
+The current Step 2 source also carries two focused production corrections from
+Step 1: jailed VM socket path reporting (`93d594c`) and demux SIGPIPE handling
+(`e09cf27`, carried at this branch's source tip `7c8d2ce`). On clean source
+`7c8d2ce1fd562323b447f08a64b0d0f5e557247c`, both correction regressions and
+`make lint` passed. The [maintenance receipt](evidence/step2-socket-sigpipe-maintenance.md)
+records the commands and exact results. These targeted checks did not rerun the
+full runtime or vHive acceptance; `4e003b` remains the accepted Step 2 runtime
+revision.
+
 ## Functional validation history
 
 Earlier full acceptance runs covered the failed-create correction (`d959a78`) and
