@@ -3,8 +3,8 @@
 This document describes the maintained runtime foundation. See the
 [branch guide](modernization/README.md) for the incremental Step 1–4 features,
 exact dependency pins and acceptance limits. The stack uses containerd 2.3.7,
-Firecracker based on v1.18.0, and runc 1.4.2. VMM and SDK fork revisions differ
-by branch and are pinned in that branch's `docs/modernization/versions.json`.
+official Firecracker v1.18.0 and runc 1.4.2. The published vHive SDK revision
+and release checksums are pinned in `docs/modernization/versions.json`.
 
 ## Host and guest boundary
 
@@ -46,6 +46,20 @@ The [agent](../agent) runs **inside the microVM**. It embeds containerd's
 runc shim daemon for every container. It invokes the guest runc binary to create
 and manage OCI processes, forwards events and metrics, and carries process IO
 over vsock. The guest kernel supplies namespaces and cgroup v2 isolation.
+
+## Agent transport
+
+The guest retains lifecycle events in a bounded acknowledged journal. The host
+publishes each event before acknowledging it, and retries delivery across agent
+connection replacement without discarding the host publication cursor. Retained
+Wait calls use the stable task client; mutating task operations are not replayed.
+
+Framed stdin/stdout/stderr streams keep FIFO ownership independent of the network
+connection. Reconnecting a stream retains accepted bytes, FINs and acknowledgements.
+The reusable Prepare/Describe/Resume operations coordinate stream read gates and
+matching process cursors. Step 1 does not persist a snapshot cut or coordinate VM
+capture; those operations are introduced with the snapshot consumer in Step 2.
+See [migration scope and validation](modernization/upstream-migration.md).
 
 ## Storage and incremental features
 
