@@ -5,8 +5,9 @@ attempt. **No final Step 2 or published-vHive acceptance is established.** This
 documentation checkout retains runtime code
 `1c009d16649aed2e864b6e0330b740ba2802cb5f` unchanged. The latest recorded source,
 `9000f53fb03d`, fixes managed-task shutdown and **passes all three provisional
-vHive VM cases**. Full Step 2 regression is running separately when this receipt
-is collected; no result from that run is claimed here. Final published runtime
+vHive VM cases**. Its separately completed full Step 2 regression **failed at
+dependency/protobuf cleanliness before the runtime VM matrix**; this gives no
+runtime-regression verdict. Final published runtime
 dependency and installed-vHive consumer acceptance remain pending. Earlier
 failed and diagnostic attempts retain their original outcomes.
 
@@ -19,7 +20,7 @@ failed and diagnostic attempts retain their original outcomes.
 | `1c009d16649aed2e864b6e0330b740ba2802cb5f` | `02f863ae454e5976edeb0150726a79e2ddefab26` | Build/install/test-image preparation passed after the device-alias correction. `TestPauseSnapResume` passed. The two clone tests reached graceful StopVM but failed because the VMM did not exit before the host deadline and was forcefully terminated. Pipeline exited 1; no full-stack rerun is recorded at this revision. [Original summary](1c009d16649a/summary.json). |
 | `cf0d9708bb3412507ddcc5110fccb1b4545f6b75` | `6ddf649bcb5877b5b16da5e8daca02b788f9f9d8` | Build/install/test-image preparation passed with the bounded final agent drain. `TestPauseSnapResume` passed in 16.27 s; `TestSnapshotConcurrentClones` failed in 64.49 s and `TestSnapshotSourceMemoryAndDiskIsolation` failed in 45.43 s during graceful clone shutdown. Pipeline exited 1; no full-stack rerun is recorded. **The bounded drain did not fix worker acceptance.** [Original summary](cf0d9708bb34/summary.json). |
 | `82a1c43cc971a8e0e4100709a9e4e4d12c11a1b3` | `d59d6a654e4e1b1843e310e82283e74a03dadb64` | **Diagnostic instrumentation only; not a release candidate.** `TestPauseSnapResume` passed in 15.73 s; concurrent clones failed in 64.37 s and memory/disk isolation failed in 46.89 s at graceful clone shutdown. Pipeline exited 1. Agent and PID 1 console evidence below localizes the remaining shutdown wait; it does not establish acceptance. [Original summary](82a1c43cc971/summary.json). |
-| `9000f53fb03d23699b1a88fe167d6f4aa5a0a707` | `c7cf1a852be45366dd85e44ca703c88d6349d9b3` | Build/install/test-image preparation and all three unchanged provisional vHive cases **passed**: source pause/snapshot/resume 16.00 s, concurrent clones 27.57 s, source-memory/disk isolation 21.72 s. Pipeline exited 0. This does not include the separately running full regression or final published-consumer acceptance. [Original summary](9000f53fb03d/summary.json). |
+| `9000f53fb03d23699b1a88fe167d6f4aa5a0a707` | `c7cf1a852be45366dd85e44ca703c88d6349d9b3` | Build/install/test-image preparation and all three unchanged provisional vHive cases **passed**: source pause/snapshot/resume 16.00 s, concurrent clones 27.57 s, source-memory/disk isolation 21.72 s. That pipeline exited 0. The separate full regression exited 1 at dependency cleanliness before runtime VM cases; final published-consumer acceptance remains open. [Original provisional summary](9000f53fb03d/summary.json), [completed regression summary](9000f53fb03d-regression/summary.json). |
 
 At `1c009d16`, the continuity test reached its final clone stop after checking
 captured exec/counter continuity, independent source/clone writes, and clone
@@ -71,9 +72,28 @@ records exit 0 for build, install, test-images and vHive. The
 [test log](9000f53fb03d/vhive-9000f53fb03d.eNO7tGXN/vhive-tests.log) records all
 three PASS lines and the final continuity observation after successful clone
 stop. This establishes that the managed-task correction fixed the observed
-clone-stop failure in this provisional worker profile. The exact source's full
-Step 2 regression is running separately at collection time and is not marked
-passed here. Published-module and installed-consumer acceptance remain open.
+clone-stop failure in this provisional worker profile. The original provisional
+summary correctly records that the full regression was still running when it
+was collected; it is preserved unchanged. The completed result follows below.
+Published-module and installed-consumer acceptance remain open.
+
+## Separate full-regression dependency cleanliness failure
+
+The [final regression log](9000f53fb03d-regression/stage2-acceptance-9000f53fb03d.log)
+and [terminal status](9000f53fb03d-regression/stage2-full-regression-status-9000f53fb03d.txt)
+record exit 1 at the generated dependency/protobuf cleanliness gate, **before
+the runtime VM regression tests**. `go mod tidy` promotes the already-selected
+`github.com/containerd/errdefs/pkg v0.3.0` from indirect to direct because the new
+shutdown implementation imports `errgrpc`. The resulting `go.mod` diff is one
+insertion and one deletion, without a version change.
+
+This is a failed cleanliness gate, not a runtime VM regression result. It does
+not invalidate or broaden the separate three-case provisional vHive pass. The
+dependency classification correction is owned separately for Steps 2–4; full
+regression must be rerun from the corrected clean committed source with the
+unchanged acceptance checks. Only the frozen final summary and its two named
+hashed files are archived here; intermediate `*.initial-running-copy` files
+are deliberately excluded.
 
 ## Inputs and provisional consumer boundary
 
@@ -119,17 +139,19 @@ of the successful `9000` provisional harness.
 
 ## Integrity and scope
 
-The six attempt subdirectories are byte-identical copies of the original collections
+The seven attempt/phase subdirectories preserve the selected original collections
 `stage2-worker-evidence`, `stage2-718-worker-evidence`,
 `stage2-1c009-worker-evidence`, `stage2-cf0-worker-evidence` and
-`stage2-82-diagnostic-evidence` and `stage2-9000-worker-evidence`. Their original
+`stage2-82-diagnostic-evidence`, `stage2-9000-worker-evidence` and the final records
+from `stage2-9000-regression-evidence`. Their original
 `summary.json` files and all raw logs/provenance are unchanged; the cf0 summary
-includes its completed post-run cleanup check. The 91 files listed by the original summaries
+includes its completed post-run cleanup check. The 93 files listed by the original summaries
 were independently checked against their recorded lengths and SHA-256 hashes.
-[SHA256SUMS](SHA256SUMS) additionally covers all six original summary files:
-**97 original collection files**, plus two separately collected cf0 agent/rootfs
-provenance checks (**99 byte-preserved files total**). All prior 83 files remain
-unchanged; this append adds only the 9000 provisional acceptance collection.
+[SHA256SUMS](SHA256SUMS) additionally covers all seven original summary files:
+**100 original collection files**, plus two separately collected cf0 agent/rootfs
+provenance checks (**102 byte-preserved files total**). All prior 99 files remain
+unchanged; this append adds only the completed 9000 regression phase's final
+summary and two hashed records.
 Previous historical receipts were left untouched.
 Empty or repeated-content logs retain their per-attempt identity; Git deduplicates
 identical blob content.
@@ -138,6 +160,6 @@ The successful full-stack result belongs only to `b0498f3a598e`; it must not be
 reported as a rerun of `718f305b`, `1c009d16`, `cf0d9708`, diagnostic `82a1c43c`, or
 this documentation tip. No runtime native restore, CRI conformance, Kubernetes restore,
 Step 4 storage, PMEM, reclamation or memory-savings acceptance follows from this
-bundle. The successful 9000 provisional clone checks do not certify its separately
-running full regression or the final published/installed vHive consumer.
+bundle. The successful 9000 provisional clone checks do not certify the failed
+full-regression cleanliness gate or the final published/installed vHive consumer.
 Historical evidence elsewhere remains historical.
