@@ -1,0 +1,10 @@
+/build/image/vhive-acceptance.test: go1.26.11
+	path	github.com/vhive-serverless/vhive/ctriface.test
+	mod	github.com/vhive-serverless/vhive	(devel)	
+	build	-buildmode=exe
+	build	-compiler=gc
+	build	-trimpath=true
+	build	CGO_ENABLED=1
+	build	GOARCH=amd64
+	build	GOOS=linux
+	build	GOAMD64=v1
