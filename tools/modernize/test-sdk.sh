@@ -8,12 +8,12 @@ sdk_revision=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["
 sdk_src="$repo_dir/tmp/sdk-tests/$sdk_revision"
 fixtures="$repo_dir/tmp/sdk-testdata/$sdk_revision"
 image=${SDK_TEST_IMAGE:-"localhost/firecracker-containerd-test:$(git -C "$repo_dir" rev-parse --short=12 HEAD)"}
-vmm_build="$repo_dir/_submodules/firecracker/build/cargo_target/x86_64-unknown-linux-musl/release"
+vmm_build="$repo_dir/bin"
 test -x "$repo_dir/bin/firecracker"
 test -x "$vmm_build/jailer"
 mkdir -p "$(dirname "$sdk_src")" "$fixtures"
 if [ ! -d "$sdk_src/.git" ]; then
-    git clone --no-checkout https://github.com/JooyoungPark73/firecracker-go-sdk.git "$sdk_src"
+    git clone --no-checkout https://github.com/vhive-serverless/firecracker-go-sdk.git "$sdk_src"
 fi
 git -C "$sdk_src" checkout --detach "$sdk_revision"
 test -z "$(git -C "$sdk_src" status --porcelain)"
