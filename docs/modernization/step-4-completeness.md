@@ -23,4 +23,3 @@ Step 4 has substantial committed acceptance for the default devmapper runtime, d
 
 1. Resolve the guest stargz tmpfs path. The cleanest technical acceptance is to put its writable store/upper/work on verified per-VM disk, then test actual guest mount backing, workload write/copy-up/rename/delete, exhaustion/cleanup, and capture/restore behavior. If the intent is to exclude that optional image/profile, explicitly disable it from the supported Step 4 matrix and obtain/record that scope decision; current build and tests retain it, so the current evidence does not justify treating it as excluded.
 2. Preserve the distinction between Step 4 completion and overall inherited Step 3 completion. CRI and Pod restore remain WIP even though direct runtime restore and ordinary RuntimeClass lifecycle pass.
-

@@ -1,9 +1,9 @@
 # Modernization acceptance ledger
 
 Step 1 has passed worker acceptance from a committed checkout. See `step-1.md`
-for the tested revision, pushed dependency references, and evidence. Each later
-branch preserves its predecessor's functionality. Step 4 started from an explicitly
-authorized Step 3 WIP baseline; see the branch guide for forward-merge maintenance.
+for the tested revision, pushed dependency references, and evidence. The [branch guide](README.md) explains the incremental maintenance chain.
+Step 4 began from an explicitly authorized Step 3 WIP baseline; branching does
+not establish acceptance of the unfinished CRI or Kubernetes restore gates.
 
 ## Initial audit
 
