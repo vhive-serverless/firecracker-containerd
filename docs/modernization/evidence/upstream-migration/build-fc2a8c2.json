@@ -1,0 +1,12 @@
+{
+  "source_revision": "fc2a8c2023c915f98bb8b484902e05de12277b8b",
+  "worker": "amd218.utah.cloudlab.us",
+  "result": "complete build passed",
+  "command": "STACK_DIR=/users/nehalem/fc-ctrd-mod tools/modernize/build-stack.sh",
+  "lint": "make lint passed including license, final-commit metadata, parent and CRI golangci",
+  "sdk_revision": "dd9db322432989b96cff7a38a64703d60b6cabf9",
+  "firecracker": "official v1.18.0",
+  "runc_revision": "c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e",
+  "scope": "Build provenance only; VM acceptance pipeline still running at time of receipt",
+  "worker_build_log": "upstream-migration/evidence/runtime-build-fc2a8c2023c9.log"
+}

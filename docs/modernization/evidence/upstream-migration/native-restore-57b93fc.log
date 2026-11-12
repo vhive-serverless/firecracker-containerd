@@ -1,0 +1,54 @@
+make: Entering directory '/users/nehalem/fc-ctrd-mod/upstream-migration/runtime/runtime'
+make -C .. test-deps-in-docker
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/upstream-migration/runtime'
+docker run --rm \
+	--volume /users/nehalem/fc-ctrd-mod/upstream-migration/runtime:/src \
+	--volume gocache:/go \
+	--workdir /src \
+	public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 go mod download
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/upstream-migration/runtime'
+/users/nehalem/fc-ctrd-mod/upstream-migration/runtime/runtime/../tools/thinpool.sh reset "fc-upstream-probe-57b93fc"
+Device does not exist.
+Command failed.
+/users/nehalem/fc-ctrd-mod/upstream-migration/runtime/runtime/../tools/modernize/run-isolated-vm-test.sh "/users/nehalem/fc-ctrd-mod/upstream-migration/.ficd-test-vms/runtime" --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/upstream-migration/runtime/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/upstream-migration/runtime/runtime/..:/src \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-upstream-probe-57b93fc \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:57b93fc288e2 \
+	"go test -v -count=1 -timeout=1200s -run '^TestNativeRestore_Isolated$'"
+=== RUN   TestNativeRestore_Isolated
+=== RUN   TestNativeRestore_Isolated/jailed=false
+    native_restore_integ_test.go:147: 
+        	Error Trace:	/src/runtime/native_restore_integ_test.go:147
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Unknown desc = prepare guest IO: context deadline exceeded
+        	            	prepare guest IO: context deadline exceeded
+        	Test:       	TestNativeRestore_Isolated/jailed=false
+=== RUN   TestNativeRestore_Isolated/jailed=true
+    native_restore_integ_test.go:147: 
+        	Error Trace:	/src/runtime/native_restore_integ_test.go:147
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Unknown desc = prepare guest IO: context deadline exceeded
+        	            	prepare guest IO: context deadline exceeded
+        	Test:       	TestNativeRestore_Isolated/jailed=true
+--- FAIL: TestNativeRestore_Isolated (158.14s)
+    --- FAIL: TestNativeRestore_Isolated/jailed=false (78.98s)
+    --- FAIL: TestNativeRestore_Isolated/jailed=true (79.15s)
+FAIL
+exit status 1
+FAIL	github.com/firecracker-microvm/firecracker-containerd/runtime	158.155s
+make: *** [Makefile:58: integ-test-TestNativeRestore_Isolated] Error 1
+make: Leaving directory '/users/nehalem/fc-ctrd-mod/upstream-migration/runtime/runtime'
