@@ -1,12 +1,13 @@
 # Migrated Step 2 worker evidence
 
 These are revision-specific worker results, including every collected failed
-attempt. **No final Step 2 or published-vHive acceptance is established.** This
+attempt. **Step 2 source acceptance passed at exact `7386`; final published-vHive
+and installed-consumer acceptance remain pending.** This
 documentation checkout retains runtime code
 `1c009d16649aed2e864b6e0330b740ba2802cb5f` unchanged. The latest recorded source,
 `7386ab5c5e8c`, corrects the dependency classification after the managed-task
 shutdown fix and **passes all three unchanged provisional vHive VM cases**.
-Its full regression is running separately and is not claimed passed. The older
+Its full regression also passed, with the scope and skips recorded below. The older
 `9000` full-regression cleanliness failure remains recorded, without a runtime
 VM verdict. Final published runtime
 dependency and installed-vHive consumer acceptance remain pending. Earlier
@@ -22,7 +23,7 @@ failed and diagnostic attempts retain their original outcomes.
 | `cf0d9708bb3412507ddcc5110fccb1b4545f6b75` | `6ddf649bcb5877b5b16da5e8daca02b788f9f9d8` | Build/install/test-image preparation passed with the bounded final agent drain. `TestPauseSnapResume` passed in 16.27 s; `TestSnapshotConcurrentClones` failed in 64.49 s and `TestSnapshotSourceMemoryAndDiskIsolation` failed in 45.43 s during graceful clone shutdown. Pipeline exited 1; no full-stack rerun is recorded. **The bounded drain did not fix worker acceptance.** [Original summary](cf0d9708bb34/summary.json). |
 | `82a1c43cc971a8e0e4100709a9e4e4d12c11a1b3` | `d59d6a654e4e1b1843e310e82283e74a03dadb64` | **Diagnostic instrumentation only; not a release candidate.** `TestPauseSnapResume` passed in 15.73 s; concurrent clones failed in 64.37 s and memory/disk isolation failed in 46.89 s at graceful clone shutdown. Pipeline exited 1. Agent and PID 1 console evidence below localizes the remaining shutdown wait; it does not establish acceptance. [Original summary](82a1c43cc971/summary.json). |
 | `9000f53fb03d23699b1a88fe167d6f4aa5a0a707` | `c7cf1a852be45366dd85e44ca703c88d6349d9b3` | Build/install/test-image preparation and all three unchanged provisional vHive cases **passed**: source pause/snapshot/resume 16.00 s, concurrent clones 27.57 s, source-memory/disk isolation 21.72 s. That pipeline exited 0. The separate full regression exited 1 at dependency cleanliness before runtime VM cases; final published-consumer acceptance remains open. [Original provisional summary](9000f53fb03d/summary.json), [completed regression summary](9000f53fb03d-regression/summary.json). |
-| `7386ab5c5e8c3519ad1698c27f548803e714e304` | `45c82884ea40ff22e5407da36911cf344d6f9e6c` | After the metadata-only direct-dependency correction, build/install/test-images and the same three VM cases **passed**: 15.50 s, 28.12 s and 21.73 s respectively. Pipeline exited 0. Full regression is running separately; final published-consumer/installed-stack acceptance is pending. [Original summary](7386ab5c5e8c/summary.json). |
+| `7386ab5c5e8c3519ad1698c27f548803e714e304` | `45c82884ea40ff22e5407da36911cf344d6f9e6c` | After the metadata-only direct-dependency correction, build/install/test-images and the same three VM cases **passed**: 15.50 s, 28.12 s and 21.73 s respectively. The separate full-stack regression also **passed**, with 127 top-level passes, one top-level skip and eight nested StopVM skips. Both pipelines exited 0. Final published-consumer/installed-stack acceptance remains pending. [Original provisional summary](7386ab5c5e8c/summary.json), [full-stack summary](7386ab5c5e8c-regression/summary.json). |
 
 At `1c009d16`, the continuity test reached its final clone stop after checking
 captured exec/counter continuity, independent source/clone writes, and clone
@@ -91,9 +92,8 @@ insertion and one deletion, without a version change.
 
 This is a failed cleanliness gate, not a runtime VM regression result. It does
 not invalidate or broaden the separate three-case provisional vHive pass. The
-dependency classification correction is recorded at `7386` below; its full
-regression retry remains separately in progress, using unchanged acceptance
-checks. Only the frozen final summary and its two named
+dependency classification correction and passing retry are recorded at `7386`
+below, using unchanged acceptance checks. Only the frozen final summary and its two named
 hashed files are archived here; intermediate `*.initial-running-copy` files
 are deliberately excluded.
 
@@ -112,8 +112,43 @@ records exit 0 for build, install, test-images and vHive. The
 28.12 s and `TestSnapshotSourceMemoryAndDiskIsolation` PASS in 21.73 s. This
 repeats the provisional profile's source continuation, independent clones and
 graceful stops at the corrected exact revision. Full Step 2 regression is
-running separately when this collection is frozen; it is **not claimed passed**.
-Published runtime dependency and installed-vHive consumer acceptance remain open.
+running separately when that original collection was frozen. That summary is
+unchanged; the completed passing full-regression receipt follows below. Published
+runtime dependency and installed-vHive consumer acceptance remain open.
+
+## Completed full-stack acceptance at 7386
+
+The [full-stack log](7386ab5c5e8c-regression/stage2-acceptance-7386ab5c5e8c.log),
+[terminal status](7386ab5c5e8c-regression/stage2-full-regression-status-7386ab5c5e8c.txt)
+and [original summary](7386ab5c5e8c-regression/summary.json) record exit 0 and
+`COMMITTED_STACK_ACCEPTANCE_OK` at exact clean source `7386ab5c5e8c`, tree
+`45c82884ea40ff22e5407da36911cf344d6f9e6c`. The recorded procedure is
+`tools/modernize/test-stack.sh` after the separately recorded build/private
+installation. It covers lint, image builds, short/root package checks,
+tidy/protobuf cleanliness, isolated runtime/snapshotter integration, thin-pool
+isolation and the published SDK suite.
+
+There are 127 verbose top-level passes: 36 runtime, five snapshotter and 86 SDK
+tests across SDK packages. These counts exclude subtests and the separate three
+vHive cases. SDK `TestLogAndMetrics` is the sole top-level skip. The existing
+StopVM subtests `SIGKILLFirecracker`, `ErrorExit`, `PauseStop` and `Suspend`, each
+ordinary/jailed, retain eight nested skips. The summary records a clean worker
+checkout, removal of the dedicated runtime/stargz pools and preservation of
+shared pools and the unrelated Kubernetes container.
+
+The generated [binary hashes](7386ab5c5e8c-regression/acceptance/binaries.sha256),
+[agent build information](7386ab5c5e8c-regression/acceptance/agent-build-info),
+[module graph](7386ab5c5e8c-regression/acceptance/go-modules.json),
+[runtime revision](7386ab5c5e8c-regression/acceptance/runtime-revision) and
+[test-image inspection](7386ab5c5e8c-regression/acceptance/test-image.json) retain
+the actual final test artifacts; agent metadata identifies clean `7386`.
+The prior install log records installed rootfs SHA-256
+`9bdbe96a2eed4fb12eeef92988e8566d1678130fd241fdddbb5dfbb879a33165`;
+the final full-stack test rootfs is
+`0ac849ba5a06348dd53bd6ccec43ec20849ce0ba3f203ff9a06858b7db31961a`.
+Image rebuilding explains the distinct artifacts; no byte identity or final
+installed-vHive acceptance is inferred. This evidence/documentation tip was not
+built or tested. Later Stage 3/4 validation has its own source and receipts.
 
 ## Inputs and provisional consumer boundary
 
@@ -124,8 +159,8 @@ release binaries, published SDK
 Use each recorded runtime's `docs/modernization/versions.json` for its complete
 input lock. Each attempt retains installed runtime/shim/kernel/rootfs hashes in
 its install log, plus vHive test binary hashes/metadata, selected module graph
-and base-image identity. Only `b0498f3a598e` also has the full-stack generated
-agent/build provenance collection. Image preparation can rebuild guest images
+and base-image identity. `b0498f3a598e` and `7386ab5c5e8c` also have full-stack
+generated agent/build provenance collections. Image preparation can rebuild guest images
 after installation; no installed/test-rootfs byte identity is asserted here.
 The separately collected [cf0 agent/rootfs diagnostic](diagnostics/cf0-agent-rootfs-provenance.txt)
 records matching SHA-256
@@ -159,27 +194,27 @@ of the successful `9000` and `7386` provisional harness runs.
 
 ## Integrity and scope
 
-The eight attempt/phase subdirectories preserve the selected original collections
+The nine attempt/phase subdirectories preserve the selected original collections
 `stage2-worker-evidence`, `stage2-718-worker-evidence`,
 `stage2-1c009-worker-evidence`, `stage2-cf0-worker-evidence` and
 `stage2-82-diagnostic-evidence`, `stage2-9000-worker-evidence` and the final records
-from `stage2-9000-regression-evidence`, plus `stage2-7386-worker-evidence`. Their original
+from `stage2-9000-regression-evidence`, plus `stage2-7386-worker-evidence` and
+`stage2-7386-regression-evidence`. Their original
 `summary.json` files and all raw logs/provenance are unchanged; the cf0 summary
-includes its completed post-run cleanup check. The 108 files listed by the original summaries
+includes its completed post-run cleanup check. The 115 files listed by the original summaries
 were independently checked against their recorded lengths and SHA-256 hashes.
-[SHA256SUMS](SHA256SUMS) additionally covers all eight original summary files:
-**116 original collection files**, plus two separately collected cf0 agent/rootfs
-provenance checks (**118 byte-preserved files total**). All prior 102 files remain
-unchanged; this append adds only the 7386 provisional acceptance collection.
+[SHA256SUMS](SHA256SUMS) additionally covers all nine original summary files:
+**124 original collection files**, plus two separately collected cf0 agent/rootfs
+provenance checks (**126 byte-preserved files total**). All prior 118 files remain
+unchanged; this append adds only the completed 7386 full-regression collection.
 Previous historical receipts were left untouched.
 Empty or repeated-content logs retain their per-attempt identity; Git deduplicates
 identical blob content.
 
-The successful full-stack result belongs only to `b0498f3a598e`; it must not be
-reported as a rerun of `718f305b`, `1c009d16`, `cf0d9708`, diagnostic `82a1c43c`, `9000`, `7386`, or
-this documentation tip. No runtime native restore, CRI conformance, Kubernetes restore,
+The successful full-stack results belong to exact `b0498f3a598e` and `7386ab5c5e8c`;
+they must not be attributed to the other failed sources or this documentation
+tip. No runtime native restore, CRI conformance, Kubernetes restore,
 Step 4 storage, PMEM, reclamation or memory-savings acceptance follows from this
-bundle. Successful 9000/7386 provisional clone checks do not certify the older
-failed full-regression gate, the separately running corrected-source full
-regression, or the final published/installed vHive consumer.
+bundle. The successful 7386 source/full-stack and provisional clone results do
+not certify the final published runtime dependency or installed vHive consumer.
 Historical evidence elsewhere remains historical.

@@ -1,11 +1,12 @@
 # firecracker-containerd
 
 This branch uses official Firecracker/jailer v1.18.0 release binaries, the
-published vHive SDK dd9db32, and containerd v2.3.7. The recorded Step 1
-lint/build/install/test-stack pipeline passed on clean source `1074bdc8f2b6`;
-the later documentation tip was not rebuilt. See the
-[modernization procedure and validation status](docs/modernization/step-1.md)
-for the complete worker build, installation, tests, and dependency revisions.
+published vHive SDK dd9db32, and containerd v2.3.7. Exact source `7386ab5c5e8c`
+passed full-stack regression and all three provisional vHive source/clone VM
+cases. Final published-module and installed-vHive consumer acceptance remain
+pending; this documentation tip was not tested. See the
+[Step 2 procedure and acceptance scope](docs/modernization/step-2.md) for worker
+commands, exact source/artifact provenance and retained skips.
 
 [![BuildKite](https://badge.buildkite.com/aab4ae547d5e5079a5915522e8cdb18492349aef67aae5a8c5.svg?branch=main)](https://buildkite.com/firecracker-microvm/firecracker-containerd)
 [![GitHub Actions](https://github.com/firecracker-microvm/firecracker-containerd/actions/workflows/build.yaml/badge.svg)](https://github.com/firecracker-microvm/firecracker-containerd/actions)
