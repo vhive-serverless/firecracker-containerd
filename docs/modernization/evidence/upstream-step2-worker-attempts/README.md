@@ -1,14 +1,14 @@
-# Migrated Step 2 worker attempts: incomplete
+# Migrated Step 2 worker evidence
 
 These are revision-specific worker results, including every collected failed
 attempt. **No final Step 2 or published-vHive acceptance is established.** This
 documentation checkout retains runtime code
-`1c009d16649aed2e864b6e0330b740ba2802cb5f` unchanged. The latest worker attempt,
-`82a1c43cc971`, is **diagnostic only, not a release candidate**, and still fails
-clone shutdown. Its console markers show that the agent successfully exits and
-guest PID 1 waits for remaining workload processes. The speculative `cf0d9708`
-bounded drain did not address that observed failure. Agent-owned task kill/wait
-correction and fresh acceptance remain pending.
+`1c009d16649aed2e864b6e0330b740ba2802cb5f` unchanged. The latest recorded source,
+`9000f53fb03d`, fixes managed-task shutdown and **passes all three provisional
+vHive VM cases**. Full Step 2 regression is running separately when this receipt
+is collected; no result from that run is claimed here. Final published runtime
+dependency and installed-vHive consumer acceptance remain pending. Earlier
+failed and diagnostic attempts retain their original outcomes.
 
 ## Recorded sources and outcomes
 
@@ -19,6 +19,7 @@ correction and fresh acceptance remain pending.
 | `1c009d16649aed2e864b6e0330b740ba2802cb5f` | `02f863ae454e5976edeb0150726a79e2ddefab26` | Build/install/test-image preparation passed after the device-alias correction. `TestPauseSnapResume` passed. The two clone tests reached graceful StopVM but failed because the VMM did not exit before the host deadline and was forcefully terminated. Pipeline exited 1; no full-stack rerun is recorded at this revision. [Original summary](1c009d16649a/summary.json). |
 | `cf0d9708bb3412507ddcc5110fccb1b4545f6b75` | `6ddf649bcb5877b5b16da5e8daca02b788f9f9d8` | Build/install/test-image preparation passed with the bounded final agent drain. `TestPauseSnapResume` passed in 16.27 s; `TestSnapshotConcurrentClones` failed in 64.49 s and `TestSnapshotSourceMemoryAndDiskIsolation` failed in 45.43 s during graceful clone shutdown. Pipeline exited 1; no full-stack rerun is recorded. **The bounded drain did not fix worker acceptance.** [Original summary](cf0d9708bb34/summary.json). |
 | `82a1c43cc971a8e0e4100709a9e4e4d12c11a1b3` | `d59d6a654e4e1b1843e310e82283e74a03dadb64` | **Diagnostic instrumentation only; not a release candidate.** `TestPauseSnapResume` passed in 15.73 s; concurrent clones failed in 64.37 s and memory/disk isolation failed in 46.89 s at graceful clone shutdown. Pipeline exited 1. Agent and PID 1 console evidence below localizes the remaining shutdown wait; it does not establish acceptance. [Original summary](82a1c43cc971/summary.json). |
+| `9000f53fb03d23699b1a88fe167d6f4aa5a0a707` | `c7cf1a852be45366dd85e44ca703c88d6349d9b3` | Build/install/test-image preparation and all three unchanged provisional vHive cases **passed**: source pause/snapshot/resume 16.00 s, concurrent clones 27.57 s, source-memory/disk isolation 21.72 s. Pipeline exited 0. This does not include the separately running full regression or final published-consumer acceptance. [Original summary](9000f53fb03d/summary.json). |
 
 At `1c009d16`, the continuity test reached its final clone stop after checking
 captured exec/counter continuity, independent source/clone writes, and clone
@@ -48,16 +49,35 @@ not explain these worker failures.
 
 The source vHive path deletes its task with `WithProcessKill` before StopVM;
 restored clones have no corresponding host task handle and skip that deletion.
-The next corrective work is bounded agent-owned shutdown of managed guest tasks,
-including kill/wait/event/IO correctness. It is not yet validated by this bundle;
-raising the acceptance timeout is not a correction. Both the speculative `cf0`
+The corrective work is bounded agent-owned shutdown of managed guest tasks,
+including kill/wait/event/IO correctness. Its provisional worker result is
+recorded below; broader validation remains separately scoped. Both the speculative `cf0`
 implementation and the `82` diagnostic instrumentation are archived outside the
 intended corrective release code ancestry. These receipts remain as failed and
 diagnostic evidence regardless of later results.
 
+## Corrective provisional acceptance at 9000
+
+Exact source `9000f53fb03d23699b1a88fe167d6f4aa5a0a707` descends directly from
+`1c009d16`, excluding the speculative `cf0` drain and `82` instrumentation from
+implementation ancestry. Managed guest tasks are stopped before final agent
+cancellation. With that correction, the same three tests now complete all their
+existing source/clone continuity, isolation and graceful-stop assertions. No
+acceptance timeout, test source or assertion was changed to obtain the result;
+the runtime shutdown timeout and harness files match the `1c009d16` source.
+
+The [command-status receipt](9000f53fb03d/stage2-command-status-9000f53fb03d.tsv)
+records exit 0 for build, install, test-images and vHive. The
+[test log](9000f53fb03d/vhive-9000f53fb03d.eNO7tGXN/vhive-tests.log) records all
+three PASS lines and the final continuity observation after successful clone
+stop. This establishes that the managed-task correction fixed the observed
+clone-stop failure in this provisional worker profile. The exact source's full
+Step 2 regression is running separately at collection time and is not marked
+passed here. Published-module and installed-consumer acceptance remain open.
+
 ## Inputs and provisional consumer boundary
 
-All five source locks select official, unmodified Firecracker/jailer v1.18.0
+All six source locks select official, unmodified Firecracker/jailer v1.18.0
 release binaries, published SDK
 `dd9db322432989b96cff7a38a64703d60b6cabf9`
 (`v0.0.0-20261112180021-dd9db3224329`), containerd v2.3.7 and runc v1.4.2.
@@ -95,22 +115,22 @@ receipt explicitly says `purpose=provisional-local-module-candidate`, and each
 module. This is **provisional local-replacement coverage**, not validation of
 vHive consuming a published runtime module through its finalized installation
 manifest. That published-consumer/installed-stack gate remains open, independently
-of future success of the provisional harness.
+of the successful `9000` provisional harness.
 
 ## Integrity and scope
 
-The five attempt subdirectories are byte-identical copies of the original collections
+The six attempt subdirectories are byte-identical copies of the original collections
 `stage2-worker-evidence`, `stage2-718-worker-evidence`,
 `stage2-1c009-worker-evidence`, `stage2-cf0-worker-evidence` and
-`stage2-82-diagnostic-evidence`. Their original
+`stage2-82-diagnostic-evidence` and `stage2-9000-worker-evidence`. Their original
 `summary.json` files and all raw logs/provenance are unchanged; the cf0 summary
-includes its completed post-run cleanup check. The 76 files listed by the original summaries
+includes its completed post-run cleanup check. The 91 files listed by the original summaries
 were independently checked against their recorded lengths and SHA-256 hashes.
-[SHA256SUMS](SHA256SUMS) additionally covers all five original summary files:
-**81 original collection files**, plus two separately collected cf0 agent/rootfs
-provenance checks (**83 byte-preserved files total**). All prior 67 files remain
-unchanged; this append adds only the 82 diagnostic collection and cf0 test-image
-proof. Previous historical receipts were left untouched.
+[SHA256SUMS](SHA256SUMS) additionally covers all six original summary files:
+**97 original collection files**, plus two separately collected cf0 agent/rootfs
+provenance checks (**99 byte-preserved files total**). All prior 83 files remain
+unchanged; this append adds only the 9000 provisional acceptance collection.
+Previous historical receipts were left untouched.
 Empty or repeated-content logs retain their per-attempt identity; Git deduplicates
 identical blob content.
 
@@ -118,5 +138,6 @@ The successful full-stack result belongs only to `b0498f3a598e`; it must not be
 reported as a rerun of `718f305b`, `1c009d16`, `cf0d9708`, diagnostic `82a1c43c`, or
 this documentation tip. No runtime native restore, CRI conformance, Kubernetes restore,
 Step 4 storage, PMEM, reclamation or memory-savings acceptance follows from this
-bundle. Fresh exact-source full validation and all required graceful clone
-shutdown checks remain pending. Historical evidence elsewhere remains historical.
+bundle. The successful 9000 provisional clone checks do not certify its separately
+running full regression or the final published/installed vHive consumer.
+Historical evidence elsewhere remains historical.
