@@ -19,18 +19,23 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"testing"
 	"time"
 
+	taskAPI "github.com/containerd/containerd/api/runtime/task/v3"
 	containerd "github.com/containerd/containerd/v2/client"
 	"github.com/containerd/containerd/v2/pkg/cio"
 	"github.com/containerd/containerd/v2/pkg/namespaces"
 	"github.com/containerd/containerd/v2/pkg/oci"
+	"github.com/containerd/containerd/v2/pkg/ttrpcutil"
 	crimeta "github.com/firecracker-microvm/firecracker-containerd/internal/cri"
 	"github.com/firecracker-microvm/firecracker-containerd/internal/integtest"
+	"github.com/firecracker-microvm/firecracker-containerd/internal/vm"
 	"github.com/firecracker-microvm/firecracker-containerd/proto"
 	"github.com/firecracker-microvm/firecracker-containerd/runtime/firecrackeroci"
+	"github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/stretchr/testify/require"
 )
 
@@ -66,12 +71,17 @@ func TestNativeCheckpointInterrupt_Isolated(t *testing.T) {
 
 			image, err := alpineImage(ctx, client, defaultSnapshotterName)
 			require.NoError(t, err)
+			shared := t.TempDir()
+			require.NoError(t, os.WriteFile(filepath.Join(shared, "state"), []byte("before"), 0600))
+			const app = `counter=40; token=$(head -c 16 /dev/urandom | od -An -tx1 | tr -d ' \n'); while :; do if test -f /request; then rm /request; counter=$((counter+1)); echo "$token:$counter" >/response.next; mv /response.next /response; fi; sleep .02; done`
+			const probe = "rm -f /response; touch /request; while ! test -f /response; do sleep .01; done; cat /response"
 			container, err := client.NewContainer(ctx, id+"-task",
 				containerd.WithSnapshotter(defaultSnapshotterName),
 				containerd.WithNewSnapshot(id+"-task", image),
 				containerd.WithNewSpec(firecrackeroci.WithVMID(id), oci.WithDefaultPathEnv,
 					oci.WithAnnotations(map[string]string{crimeta.ContainerTypeAnnotation: "container", crimeta.SandboxIDAnnotation: id}),
-					oci.WithProcessArgs("/bin/sh", "-ec", "echo ready >/state; exec sleep 200")))
+					oci.WithMounts([]specs.Mount{{Type: "bind", Source: shared, Destination: "/shared", Options: []string{"rbind", "rw"}}}),
+					oci.WithProcessArgs("/bin/sh", "-ec", app)))
 			require.NoError(t, err)
 			t.Cleanup(func() {
 				cleanup, stop := context.WithTimeout(context.WithoutCancel(ctx), 20*time.Second)
@@ -95,7 +105,13 @@ func TestNativeCheckpointInterrupt_Isolated(t *testing.T) {
 				require.NoError(t, err)
 			})
 			require.NoError(t, process.Start(ctx))
-			require.Equal(t, "ready", nativeExec(ctx, t, process, "cat /state"))
+			initial := nativeExec(ctx, t, process, probe)
+			require.True(t, strings.HasSuffix(initial, ":41"), initial)
+			require.Equal(t, "before", nativeExec(ctx, t, process, "cat /shared/state"))
+			sourceDir, err := vm.ShimDir(integtest.ShimBaseDir(), defaultNamespace, id)
+			require.NoError(t, err)
+			before, err := vm.ReadRecoveryState(sourceDir)
+			require.NoError(t, err)
 
 			interruptClient, err := integtest.NewFCControlClient(integtest.ContainerdSockPath)
 			require.NoError(t, err)
@@ -136,12 +152,41 @@ func TestNativeCheckpointInterrupt_Isolated(t *testing.T) {
 				state, err := process.Status(ctx)
 				return err == nil && state.Status == containerd.Running && checkpointPathAbsent(artifact)
 			}, 60*time.Second, 100*time.Millisecond, "interrupted capture must thaw the task and remove staged artifacts")
-			require.Equal(t, "ready", nativeExec(ctx, t, process, "cat /state"), "source task must remain usable")
+			require.Equal(t, strings.TrimSuffix(initial, "41")+"42", nativeExec(ctx, t, process, probe), "interrupted capture must retain shell memory")
+			after, err := vm.ReadRecoveryState(sourceDir)
+			require.NoError(t, err)
+			require.Equal(t, before.VMM, after.VMM, "source VMM must not restart")
+			require.Equal(t, "after", nativeExec(ctx, t, process, "echo after >/shared/state; sync; cat /shared/state"), "interruption must thaw shared-volume writes")
+			contents, err := os.ReadFile(filepath.Join(shared, "state"))
+			require.NoError(t, err)
+			require.Equal(t, "after\n", string(contents))
 
 			subsequent := filepath.Join(t.TempDir(), "successful")
 			_, err = control.CheckpointVM(ctx, &proto.CheckpointVMRequest{VMID: id, Directory: subsequent})
 			require.NoError(t, err, "a later capture must succeed after interruption cleanup")
 			require.FileExists(t, filepath.Join(subsequent, "manifest.json"))
+			require.Equal(t, strings.TrimSuffix(initial, "41")+"43", nativeExec(ctx, t, process, probe), "source must also resume after the next successful capture")
+			cloneID := id + "-clone"
+			_, err = control.CreateVM(ctx, &proto.CreateVMRequest{VMID: cloneID, NativeCheckpointDirectory: subsequent, TimeoutSeconds: 120})
+			require.NoError(t, err, "capture following interruption must be restorable")
+			t.Cleanup(func() {
+				cleanup, stop := context.WithTimeout(context.WithoutCancel(ctx), 20*time.Second)
+				defer stop()
+				_, err := control.StopVM(cleanup, &proto.StopVMRequest{VMID: cloneID})
+				require.NoError(t, err)
+			})
+			cloneDir, err := vm.ShimDir(integtest.ShimBaseDir(), defaultNamespace, cloneID)
+			require.NoError(t, err)
+			address, err := os.ReadFile(cloneDir.AddrFilePath())
+			require.NoError(t, err)
+			connection, err := ttrpcutil.NewClient(string(address))
+			require.NoError(t, err)
+			defer connection.Close()
+			rpc, err := connection.Client()
+			require.NoError(t, err)
+			restored := taskAPI.NewTTRPCTaskClient(rpc)
+			require.Equal(t, strings.TrimSuffix(initial, "41")+"43", nativeRestoredExec(ctx, t, restored, process.ID(), probe))
+			require.Equal(t, "after", nativeRestoredExec(ctx, t, restored, process.ID(), "cat /shared/state"))
 			require.NoError(t, os.RemoveAll(subsequent))
 		})
 	}
