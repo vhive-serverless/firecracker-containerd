@@ -1,18 +1,23 @@
 # Modernization acceptance ledger
 
-## Current migrated Step 1 status
+## Current migrated Step 2 status
 
 The maintained base is `firecracker-v1.18-containerdv2`; its vHive successor is
 `firecracker-v1.18-containerdv2-vhive-integration`. Official Firecracker/jailer
 1.18.0 binaries and the published vHive SDK dd9db32 are selected in the current
-lock and module manifests. Fresh exact-candidate worker build/install and VM
-acceptance remain pending. Local compilation checks are recorded separately in
-[the local validation note](upstream-step1-local-validation.md).
+lock and module manifests. Clean source
+`7386ab5c5e8c3519ad1698c27f548803e714e304` passed build/private installation,
+the full stack and three provisional vHive source/clone cases. The
+[current receipt](evidence/upstream-step2-worker-attempts/README.md) records
+127 full-stack top-level passes, the SDK metrics skip, eight nested StopVM
+skips, exact artifacts and failed prior attempts. This documentation tip was
+not rebuilt. Final published-module and installed-vHive consumer acceptance
+remain pending; source acceptance does not establish those consumer gates.
 
 The checklist below preserves the original modernization ledger. Its checked
 items, former branch names, planned later steps and acceptance statements
 belong to that historical source, not the migrated candidates. See the
-[current branch guide](README.md) and [Step 1 procedure](step-1.md) for current
+[current branch guide](README.md) and [Step 2 procedure](step-2.md) for current
 inputs and validation gates. Step 3 remains WIP; Kubernetes Pod restore is
 deferred to the 1.38 interface work.
 

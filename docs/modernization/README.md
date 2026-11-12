@@ -12,8 +12,8 @@ firecracker-v1.18-containerdv2
 
 | Step | Branch | Scope and acceptance |
 | --- | --- | --- |
-| 1 | `firecracker-v1.18-containerdv2` | Modernized OCI runtime, acknowledged events and framed IO; migrated candidate VM acceptance pending. |
-| 2 | `firecracker-v1.18-containerdv2-vhive-integration` | Adds standalone vHive and coordinated legacy snapshot/restore; migrated candidate VM acceptance pending. |
+| 1 | `firecracker-v1.18-containerdv2` | Modernized OCI runtime, acknowledged events and framed IO; its own exact-source acceptance at `1074bdc8f2b6` is documented on the Step 1 branch. |
+| 2 | `firecracker-v1.18-containerdv2-vhive-integration` | Adds standalone vHive and coordinated legacy snapshot/restore; full-stack regression and three provisional vHive VM cases passed at `7386ab5c5e8c`. [Receipt and scope](evidence/upstream-step2-worker-attempts/README.md). Final published/installed consumer acceptance remains pending. |
 | 3 | `cri-native-snapshot-restore` | Adds CRI integration, ordinary RuntimeClass Pods and native checkpoint components; **WIP**, with historical CRI failures, fresh migrated candidate validation pending, and Kubernetes Pod restore deferred to the 1.38 interface work. |
 | 4 | `damon-virtio-pmem` | Adds disk-backed guest storage, pmem/DAX, DAMON/reporting and memory evaluation; historical direct runtime acceptance is revision-specific and does not validate the migrated candidate. Fresh migrated validation and inherited Step 3 gates remain open. |
 
@@ -32,9 +32,13 @@ The migrated stack uses official Firecracker and jailer v1.18.0 release
 archives, verified against checksums in `versions.json`, and the published
 `vhive-serverless/firecracker-go-sdk` branch `firecracker-v1.18.0`, commit
 `dd9db322432989b96cff7a38a64703d60b6cabf9`. Runtime builds fetch the official
-binaries rather than compiling a custom VMM. Fresh exact-commit runtime VM
-acceptance is pending; historical runtime receipts and standalone SDK acceptance
-do not close that gate. See [migration scope](upstream-migration.md).
+binaries rather than compiling a custom VMM. Exact Step 2 source `7386ab5c5e8c`
+passed full-stack regression and all three provisional source/clone VM cases;
+see [Step 2 scope and reproduction](step-2.md). The receipt distinguishes that
+tested source from this documentation tip and preserves actual binary/image
+provenance, skips and failed earlier attempts. Final published-runtime-module
+and installed-vHive consumer acceptance remain open. Later-stage results have
+their own source revisions and gates.
 
 Use this checkout's [versions.json](versions.json), module manifests and gitlinks.
 `selected_inputs` describes this branch's dependency selection; `existing`
