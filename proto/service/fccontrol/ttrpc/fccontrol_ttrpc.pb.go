@@ -13,6 +13,7 @@ type FirecrackerService interface {
 	CreateVM(context.Context, *proto.CreateVMRequest) (*proto.CreateVMResponse, error)
 	PauseVM(context.Context, *proto.PauseVMRequest) (*emptypb.Empty, error)
 	ResumeVM(context.Context, *proto.ResumeVMRequest) (*emptypb.Empty, error)
+	CreateSnapshot(context.Context, *proto.CreateSnapshotRequest) (*emptypb.Empty, error)
 	StopVM(context.Context, *proto.StopVMRequest) (*emptypb.Empty, error)
 	GetVMInfo(context.Context, *proto.GetVMInfoRequest) (*proto.GetVMInfoResponse, error)
 	SetVMMetadata(context.Context, *proto.SetVMMetadataRequest) (*emptypb.Empty, error)
@@ -47,6 +48,13 @@ func RegisterFirecrackerService(srv *ttrpc.Server, svc FirecrackerService) {
 					return nil, err
 				}
 				return svc.ResumeVM(ctx, &req)
+			},
+			"CreateSnapshot": func(ctx context.Context, unmarshal func(interface{}) error) (interface{}, error) {
+				var req proto.CreateSnapshotRequest
+				if err := unmarshal(&req); err != nil {
+					return nil, err
+				}
+				return svc.CreateSnapshot(ctx, &req)
 			},
 			"StopVM": func(ctx context.Context, unmarshal func(interface{}) error) (interface{}, error) {
 				var req proto.StopVMRequest
@@ -144,6 +152,14 @@ func (c *firecrackerClient) PauseVM(ctx context.Context, req *proto.PauseVMReque
 func (c *firecrackerClient) ResumeVM(ctx context.Context, req *proto.ResumeVMRequest) (*emptypb.Empty, error) {
 	var resp emptypb.Empty
 	if err := c.client.Call(ctx, "Firecracker", "ResumeVM", req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *firecrackerClient) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotRequest) (*emptypb.Empty, error) {
+	var resp emptypb.Empty
+	if err := c.client.Call(ctx, "Firecracker", "CreateSnapshot", req, &resp); err != nil {
 		return nil, err
 	}
 	return &resp, nil

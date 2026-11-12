@@ -36,8 +36,8 @@ func (s *service) journalClient() eventbridge.JournalClient {
 	}}
 }
 
-// resumeEventForwarding starts acknowledged delivery and retains its publication
-// cursor across agent session replacement.
+// resumeEventForwarding preserves the host publication cursor on source resume.
+// A new clone initializes from the guest's captured acknowledged cursor.
 func (s *service) resumeEventForwarding(ctx context.Context) error {
 	s.eventMu.Lock()
 	defer s.eventMu.Unlock()
@@ -45,7 +45,16 @@ func (s *service) resumeEventForwarding(ctx context.Context) error {
 		return err
 	}
 	if s.eventCancel != nil {
-		return nil
+		if !s.eventStopping {
+			return nil
+		}
+		select {
+		case <-s.eventDone:
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+		s.eventCancel, s.eventDone = nil, nil
+		s.eventStopping = false
 	}
 	journal := s.journalClient()
 	if s.eventForwarder == nil {
@@ -100,4 +109,27 @@ func (s *service) closeAgentOnShutdown() {
 	if s.remotePublisher != nil {
 		_ = s.remotePublisher.Close()
 	}
+}
+
+// pauseEventForwarding cancels the long poll, waits for any publication to
+// finish, then synchronizes the receipt before vCPU pause. A failure must abort
+// snapshot preparation; otherwise a host-only publication cursor could be lost.
+func (s *service) pauseEventForwarding(ctx context.Context) error {
+	s.eventMu.Lock()
+	defer s.eventMu.Unlock()
+	if s.eventCancel != nil {
+		s.eventStopping = true
+		s.eventCancel()
+		select {
+		case <-s.eventDone:
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+		s.eventCancel, s.eventDone = nil, nil
+		s.eventStopping = false
+	}
+	if s.eventForwarder == nil {
+		return nil
+	}
+	return s.journalClient().Ack(ctx, s.eventForwarder.Cursor())
 }
