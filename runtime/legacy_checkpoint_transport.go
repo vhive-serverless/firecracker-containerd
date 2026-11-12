@@ -16,6 +16,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sort"
 	"time"
 
@@ -126,6 +127,9 @@ func (s *service) resumePreparedVM(ctx context.Context) error {
 		// Certify a fresh round trip on every retained IO stream before
 		// reporting source recovery; gates remain closed during this check.
 		if pending.IOPrepared {
+			if err := s.reconnectSourceIO(ctx, pending.Cut); err != nil {
+				return err
+			}
 			if _, err := s.prepareIOTransport(ctx); err != nil {
 				return err
 			}
@@ -152,5 +156,32 @@ func (s *service) resumePreparedVM(ctx context.Context) error {
 		pending.Tasks = pending.Tasks[1:]
 	}
 	s.pendingPause = nil
+	return nil
+}
+
+// reconnectSourceIO replaces network generations after a snapshot invalidates
+// vsock connections. An idle sender cannot observe the old connection's reset
+// until its next frame, so do not wait for implicit reconnection to recertify a
+// prepared cut. Attach reuses both FIFO pumps and their current cursors; omitting
+// replacement cursors also retains a restored source's noninitial session.
+func (s *service) reconnectSourceIO(ctx context.Context, cut *checkpointTransportCut) error {
+	if cut == nil {
+		return fmt.Errorf("source IO reconnect requires a prepared transport cut")
+	}
+	for _, process := range cut.Processes {
+		if len(process.Streams) == 0 {
+			continue
+		}
+		s.fifosMu.Lock()
+		host, ok := s.fifos[process.TaskID][process.ExecID]
+		s.fifosMu.Unlock()
+		if !ok {
+			return fmt.Errorf("source IO reconnect missing FIFOs for %s/%s", process.TaskID, process.ExecID)
+		}
+		// Fresh ports give the guest new listener lifetimes as well as new sockets.
+		if err := s.attachNewProxy(ctx, s.logger, process.TaskID, process.ExecID, host); err != nil {
+			return fmt.Errorf("reconnect source IO %s/%s: %w", process.TaskID, process.ExecID, err)
+		}
+	}
 	return nil
 }

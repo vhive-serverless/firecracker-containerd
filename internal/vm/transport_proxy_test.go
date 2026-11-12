@@ -20,6 +20,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -374,4 +375,79 @@ func TestTransportProxyCloseCancelsLazyFIFOOpen(t *testing.T) {
 	local.mu.Lock()
 	require.Nil(t, local.file, "cancelled open must not leak a FIFO descriptor")
 	local.mu.Unlock()
+}
+
+// A snapshot can invalidate a connection without waking an idle sender, which
+// does not read the socket until it has sent another frame. Simulate a lost
+// barrier write while the old socket remains open, then replace only the network
+// generations as source recovery does through AttachIO.
+type transportDroppedWritesConn struct {
+	net.Conn
+	drop atomic.Bool
+}
+
+func (c *transportDroppedWritesConn) Write(p []byte) (int, error) {
+	if c.drop.Load() {
+		return len(p), nil
+	}
+	return c.Conn.Write(p)
+}
+
+func TestTransportProxySourceReconnectAfterIdleReset(t *testing.T) {
+	for _, session := range []string{"initial", "restored-source-session"} {
+		for _, fin := range []bool{false, true} {
+			name := session + "/open"
+			if fin {
+				name = session + "/finished"
+			}
+			t.Run(name, func(t *testing.T) {
+				ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+				defer cancel()
+				sourcePath := filepath.Join(t.TempDir(), "guest-output")
+				sinkPath := filepath.Join(t.TempDir(), "host-output")
+				require.NoError(t, ensureTransportFIFO(sinkPath))
+				reader, err := os.OpenFile(sinkPath, os.O_RDONLY|unix.O_NONBLOCK, 0)
+				require.NoError(t, err)
+				defer reader.Close()
+				cursor := TransportCursor{StreamID: "task/exec/stdout", SessionID: session, Offset: 17, FIN: fin}
+				link := newTransportTestLink()
+				guest := newTransportProxy(nil, &IOConnectorPair{transport: &transportPair{path: sourcePath, sender: true, cursor: &cursor, connect: link.connect(link.left)}}, nil)
+				host := newTransportProxy(nil, &IOConnectorPair{transport: &transportPair{path: sinkPath, cursor: &cursor, connect: link.connect(link.right)}}, nil)
+				defer guest.Close()
+				defer host.Close()
+				guestInit, _ := guest.start(transportProxyTestProcess(ctx))
+				hostInit, _ := host.start(transportProxyTestProcess(ctx))
+				left, right := net.Pipe()
+				stale := &transportDroppedWritesConn{Conn: left}
+				link.left <- stale
+				link.right <- right
+				require.NoError(t, <-guestInit)
+				require.NoError(t, <-hostInit)
+				require.NoError(t, guest.PrepareIO(ctx))
+				retained := guest.streams["stdout"]
+				destination := host.streams["stdout"]
+				require.Equal(t, cursor, retained.sender.Status().Cursor)
+				stale.drop.Store(true)
+				prepareCtx, stop := context.WithTimeout(ctx, 30*time.Millisecond)
+				err = guest.PrepareIO(prepareCtx)
+				stop()
+				require.ErrorIs(t, err, context.DeadlineExceeded, "a fresh barrier cannot cross the stale connection")
+				require.False(t, retained.sender.Status().Prepared)
+				next := newTransportTestLink()
+				// Nil replacement cursors retain the source session, byte cut and FIN.
+				guestConfig := newTransportProxy(nil, &IOConnectorPair{transport: &transportPair{path: sourcePath, sender: true, connect: next.connect(next.left)}}, nil)
+				hostConfig := newTransportProxy(nil, &IOConnectorPair{transport: &transportPair{path: sinkPath, connect: next.connect(next.right)}}, nil)
+				require.NoError(t, guest.rebind(ctx, guestConfig))
+				require.NoError(t, host.rebind(ctx, hostConfig))
+				next.attach()
+				require.NoError(t, guest.PrepareIO(ctx))
+				require.Same(t, retained, guest.streams["stdout"])
+				require.Same(t, destination, host.streams["stdout"])
+				require.Equal(t, cursor, retained.sender.Status().Cursor)
+				require.Equal(t, cursor, destination.receiver.Cursor())
+				require.True(t, retained.sender.Status().Paused)
+				require.False(t, retained.sender.Status().Reading)
+			})
+		}
+	}
 }
