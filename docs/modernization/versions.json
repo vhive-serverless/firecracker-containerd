@@ -3,15 +3,15 @@
   "status": "Steps 1 and 2 corrected and accepted on the worker; this branch preserves the vHive milestone",
   "step_1_validation": {
     "runtime_branch": "modernize-runtime",
-    "completion_commit": "6585eba92db4f8c55f6567cf8d2c8d695adcba05",
-    "tested_runtime_commit": "6585eba92db4f8c55f6567cf8d2c8d695adcba05",
-    "worker_checkout": "/users/nehalem/fc-ctrd-mod/step1-failed-create-committed",
-    "install_prefix": "/users/nehalem/fc-ctrd-mod/install/6585eba92db4",
-    "acceptance_receipt": "evidence/6585eba-acceptance-receipt.log",
-    "completion_log_sha256": "9b5310e6e36b5e893ba49a987d9c9d5f003aecb366d9df95c39db4086b3b2dd1",
-    "previous_completion_commit": "e7395acb2c88cfe8c5d32ba61ff65c17e031858c",
+    "completion_commit": "06bd2058ba7938ad31eec9e17ac4d2e4c33a958f",
+    "tested_runtime_commit": "06bd2058ba7938ad31eec9e17ac4d2e4c33a958f",
+    "worker_checkout": "/users/nehalem/fc-ctrd-mod/step1-io-committed",
+    "install_prefix": "/users/nehalem/fc-ctrd-mod/install/06bd2058ba79",
+    "acceptance_receipt": "evidence/06bd205-telemetry-acceptance-receipt.log",
+    "previous_completion_commit": "3adc9f64ebc0fd623f8072b53084c8b8eebcdef4",
     "initial_tested_runtime_commit": "e666612819bc1efa71c645434bc36385f92e6423",
-    "worker_toolchains": "evidence/e666612819bc-worker-toolchains.log"
+    "worker_toolchains": "evidence/e666612819bc-worker-toolchains.log",
+    "result": "120 top-level acceptance cases passed (36 runtime, 5 snapshotter, 79 SDK); one existing SDK metrics skip; 3 targeted jailer race tests passed"
   },
   "worker": {
     "ssh": "nehalem@amd218.utah.cloudlab.us",
@@ -212,5 +212,31 @@
     "evidence_sha256": "666d90dbfd00ac03f609876f25164cc8ec3a2cc6f4e712f544c3ea4d13e47ca6",
     "validation": "200 targeted repetitions with GOMAXPROCS=1, 50 targeted race repetitions, whole cache package race; all passed on designated worker with Go 1.26.11",
     "scope": "Test-only synchronization fix; production code unchanged; no new VM acceptance or Step 3 completion claim."
-  }
+  },
+  "step_1_previous_validation": {
+    "runtime_branch": "modernize-runtime",
+    "completion_commit": "3adc9f64ebc0fd623f8072b53084c8b8eebcdef4",
+    "tested_runtime_commit": "3adc9f64ebc0fd623f8072b53084c8b8eebcdef4",
+    "worker_checkout": "/users/nehalem/fc-ctrd-mod/step1-metrics-committed",
+    "install_prefix": "/users/nehalem/fc-ctrd-mod/install/3adc9f64ebc0",
+    "acceptance_receipt": "evidence/3adc9f6-metrics-acceptance-receipt.log",
+    "previous_completion_commit": "e7395acb2c88cfe8c5d32ba61ff65c17e031858c",
+    "initial_tested_runtime_commit": "e666612819bc1efa71c645434bc36385f92e6423",
+    "worker_toolchains": "evidence/e666612819bc-worker-toolchains.log",
+    "result": "119 top-level acceptance cases passed; one existing SDK metrics skip"
+  },
+  "step_1_validation_history": [
+    {
+      "runtime_branch": "modernize-runtime",
+      "completion_commit": "6585eba92db4f8c55f6567cf8d2c8d695adcba05",
+      "tested_runtime_commit": "6585eba92db4f8c55f6567cf8d2c8d695adcba05",
+      "worker_checkout": "/users/nehalem/fc-ctrd-mod/step1-failed-create-committed",
+      "install_prefix": "/users/nehalem/fc-ctrd-mod/install/6585eba92db4",
+      "acceptance_receipt": "evidence/6585eba-acceptance-receipt.log",
+      "completion_log_sha256": "9b5310e6e36b5e893ba49a987d9c9d5f003aecb366d9df95c39db4086b3b2dd1",
+      "previous_completion_commit": "e7395acb2c88cfe8c5d32ba61ff65c17e031858c",
+      "initial_tested_runtime_commit": "e666612819bc1efa71c645434bc36385f92e6423",
+      "worker_toolchains": "evidence/e666612819bc-worker-toolchains.log"
+    }
+  ]
 }
