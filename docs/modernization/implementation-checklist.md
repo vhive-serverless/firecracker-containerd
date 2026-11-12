@@ -1,6 +1,11 @@
 # Modernization acceptance ledger
 
-## Current migrated Step 1 status
+## Current migrated Step 3 status
+
+Migrated Step 3 is a candidate with local compile/unit checks only. The historical
+checkboxes below retain their original scope; they do not certify this migrated
+upstream tree. CRI/native restore remains WIP and Kubernetes Pod restore remains
+deferred to 1.38.
 
 The maintained base is `firecracker-v1.18-containerdv2`; its vHive successor is
 `firecracker-v1.18-containerdv2-vhive-integration`. Official Firecracker/jailer
@@ -48,18 +53,20 @@ deferred to the 1.38 interface work.
 - [x] Worker repeated operations and representative failures without resource leaks; relevant tests pass.
 - [x] Commit/push all repositories; validate committed checkout without untracked state; capture exact versions/commands/paths and limitations.
 
-## Historical Step 2: vhive-compatible (not started)
+## Historical Step 2: vhive-compatible
 
-- [ ] Create branch from validated Step 1 completion commit.
-- [ ] Inspect integration behavior/dependencies, port SDK/runtime/network/storage/snapshot changes without downgrades.
-- [ ] Pin and deploy supported vHive on worker.
-- [ ] Demonstrate function deploy/invoke/repeated invoke/cleanup and applicable snapshot/restore.
-- [ ] Provide end-to-end regression script and rerun Step 1 acceptance.
-- [ ] Push compatible dependency/runtime commits, validate independent committed reconstruction and report revisions/commands/results/limitations.
+- [x] Create branch from validated Step 1 completion commit.
+- [x] Inspect integration behavior/dependencies, port SDK/runtime/network/storage/snapshot changes without downgrades.
+- [x] Pin and deploy supported vHive on worker.
+- [x] Demonstrate function deploy/invoke/repeated invoke/cleanup and applicable snapshot/restore.
+- [x] Provide end-to-end regression script and rerun Step 1 acceptance.
+- [x] Push compatible dependency/runtime commits, validate independent committed reconstruction and report revisions/commands/results/limitations.
 
-## Historical Step 3: cri-native-snapshot-restore (not started)
+## Historical Step 3: cri-native-snapshot-restore (WIP)
 
-- [ ] Create branch from validated Step 2 completion commit.
+- [x] Create branch from validated Step 2 completion commit.
+- [x] Independently validate a released upstream v1.37.2 single-node stock-runtime baseline: Pods, exec, logs, filesystem writes, DNS and API discovery; record that this does not satisfy the Firecracker or Pod restore gates below.
+- [x] Validate ordinary Firecracker RuntimeClass Pods on required k3s v1.37.2+k3s1 from a clean deployment checkout: two containers in one VMM, shared/projected volumes, exec/logs, exact IPv4 DNS answer, Service networking from a runc Pod, positive container statistics and cleanup; receipt 1085202. This does not satisfy the remaining CRI or restore gates.
 - [ ] Verify installed k3s v1.37.2+k3s1 binary/component versions and actual Pod checkpoint/restore alpha APIs/gates/RPCs; select newer compatible release only if required.
 - [ ] Define Pod-to-VM mapping; reuse containerd CRI for sandbox/container lifecycle with Firecracker integration.
 - [ ] Connect supported Kubernetes Pod checkpoint/restore and applicable CheckpointPod/RestorePod CRI RPCs to native VM implementation.
