@@ -1,0 +1,5 @@
+Analysis started only after named observation identities exited; separate pinned venv, no system package changes.
+python3 -m venv /users/nehalem/fc-ctrd-mod/evidence/memory-results-0a268c5589c3/venv (ensurepip unavailable; isolated pip25.3 wheel bootstrap described in REPRODUCE.md and pip-bootstrap.log)
+/users/nehalem/fc-ctrd-mod/evidence/memory-results-0a268c5589c3/venv/bin/python -m pip install --only-binary=:all: matplotlib==3.10.7 numpy==2.3.4
+/users/nehalem/fc-ctrd-mod/evidence/memory-results-0a268c5589c3/venv/bin/python /users/nehalem/fc-ctrd-mod/evidence/memory-results-0a268c5589c3/make_results.py --summary /users/nehalem/fc-ctrd-mod/evidence/memory-summary-0a268c5589c3 --raw /users/nehalem/fc-ctrd-mod/evidence/memory-matrix-0a268c5589c3 --output /users/nehalem/fc-ctrd-mod/evidence/memory-results-0a268c5589c3/artifacts-verified
+/users/nehalem/fc-ctrd-mod/evidence/memory-results-0a268c5589c3/venv/bin/python /users/nehalem/fc-ctrd-mod/evidence/memory-results-0a268c5589c3/write_report.py --results /users/nehalem/fc-ctrd-mod/evidence/memory-results-0a268c5589c3/artifacts-verified

@@ -1,0 +1,78 @@
+2026-11-11T14:41:49.747413+00:00
+Result: PASS; optional ext4 image production and host read-only validation.
+Worker: nehalem@amd218.utah.cloudlab.us
+Checkout: /users/nehalem/fc-ctrd-mod/step4-pmem-images
+Tested source: e76967bf13111a4818b4e57868fe2d1cc38de9ba
+Base source: 8f8d00fc2fb122d40c2e034f62e67978ba194c1e
+Image source implementation: 8f90a028be609d1a22d649d7a08b9033d726dfbd; sidecar-ignore correction: e76967bf13111a4818b4e57868fe2d1cc38de9ba
+Producer: /users/nehalem/fc-ctrd-mod/step4-storage-dev; clean exact 8f8d00fc2fb122d40c2e034f62e67978ba194c1e
+Producer agent verified against bin/receipts/storage/binaries.sha256; runc verified against bin/receipts/build/binaries.sha256.
+No Go/Rust compilation; reused unchanged verified worker binaries. Producer checkout left unchanged.
+Build command:
+export STACK_DIR=/users/nehalem/fc-ctrd-mod
+export PATH="$STACK_DIR/toolchains/go1.26.11/bin:$PATH"
+cd "$STACK_DIR/step4-pmem-images"
+cp "$STACK_DIR/step4-storage-dev/agent/agent" agent/agent
+cp "$STACK_DIR/step4-storage-dev/_submodules/runc/runc" _submodules/runc/runc
+export DOCKER_IMAGE_TAG=$(git rev-parse --short=12 HEAD)
+make image-dax -o agent-in-docker -o _submodules/runc/runc
+
+Docker image: fc-image-builder:e76967bf1311
+sha256:6a7ac03ed88c308c6f473d1c12e1e3d3e862d09425372a19ffcacc942e1b99a4
+Tool versions:
+debootstrap	1.0.141
+e2fsprogs	1.47.2-3+b12
+squashfs-tools	1:4.6.1-1
+mke2fs 1.47.2 (1-Jan-2025)
+	Using EXT2FS Library version 1.47.2
+
+Image:
+fddd6a51d06feeaf41f65d879b52f81062e5b92f027f7f5e0e197d78d2882b3c  /users/nehalem/fc-ctrd-mod/step4-pmem-images/tools/image-builder/rootfs-dax.img
+SquashFS source:
+879c2d341a485d10f23a53770a9761eeb2059e039e09bb77bd8f1a7d0b4b2f78  rootfs.img
+Normalized source and mounted-image tree SHA256:
+e3ca712b9cbd1831f045a3905b6397962267c0bd97586c9d2eedaa2a22d6ee3d  -
+Capacity: 536870912 bytes; block size:4096; blocks:131072; alignment:2097152 bytes.
+Nominal guest pmem page metadata:8388608 bytes, assuming 64-byte struct page and 4096-byte pages; estimate only.
+apparent_bytes=536870912 allocated_blocks=418096 allocation_block_bytes=512 mode=444 uid=0 gid=0
+Host allocation:214065152 bytes (418096 blocks of 512 bytes); sparse image, no compression.
+Ext4 superblock clean; no has_journal feature; e2fsck -f -n passed with builder 1.47.2 and worker host 1.47.0.
+Host mount used mount -t ext4 -o loop,ro,noload; showed ext4 ro,relatime,norecovery.
+Normalized archive comparison: tar --sort=name --numeric-owner --format=gnu --mtime=@0 -cf - . | sha256sum
+Comparison includes contents, modes, numeric ownership, symlink/hardlink targets and special devices; normalizes timestamps; does not claim ACL/xattr equality.
+Both original source-tree and mounted-image archive hashes matched exactly.
+Expected negative check: touch on read-only mount failed with Read-only file system.
+Repeated conversion: docker run --rm --security-opt=apparmor=unconfined --cap-add=sys_admin --cap-add=sys_chroot --volume "$PWD/tools/image-builder:/src" --entrypoint=/bin/bash fc-image-builder:e76967bf1311 -c './build-dax-rootfs.sh rootfs.img /tmp/repeat.img && cmp rootfs-dax.img /tmp/repeat.img && echo IDENTICAL_EXT4_CONVERSION_BYTES_OK'
+Identical source SquashFS converted twice to byte-identical ext4 images.
+Cleanup: validation mount unmounted; associated image loop device absent; source checkout clean.
+No guest DAX activation, runtime launch or memory saving demonstrated by this image-only check.
+Initial setup failures retained here: git clone --reference rejected a linked-worktree reference; plain clone succeeded. Initial agent/build-receipt comparison failed because test-storage.sh rebuilt agent after the build receipt; actual agent matched the later storage receipt and embedded source revision. No producer changes were made.
+
+Evidence: e76967b-dax-image-inputs.log
+fad24ae2e489b25d1dcc51d40d1ab73674f47ea9ad0b4f0ae72b13e1930c97c5  /users/nehalem/fc-ctrd-mod/evidence/e76967b-pmem-images/inputs.log
+	build	CGO_ENABLED=0
+	build	GOARCH=amd64
+	build	GOOS=linux
+	build	GOAMD64=v1
+
+Evidence: e76967b-dax-image-build.log
+f3bf08d84a6eff1990278c11c9e2ca1816d513d0fe76566b88e89406849cd1c4  /users/nehalem/fc-ctrd-mod/evidence/e76967b-pmem-images/build.log
+fc-root-dax: 7221/32768 files (0.1% non-contiguous), 53930/131072 blocks
+dumpe2fs 1.47.2 (1-Jan-2025)
+DAX_ROOT_IMAGE_READY bytes=536870912 block_size=4096 nominal_pmem_metadata_bytes=8388608
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/step4-pmem-images/tools/image-builder'
+
+Evidence: e76967b-dax-image-repeat.log
+c50bc526e3005e5615f179e5a9b0d83b4d4e9e96ca47664eeb634fe6eed36b25  /users/nehalem/fc-ctrd-mod/evidence/e76967b-pmem-images/repeat.log
+fc-root-dax: 7221/32768 files (0.1% non-contiguous), 53930/131072 blocks
+dumpe2fs 1.47.2 (1-Jan-2025)
+DAX_ROOT_IMAGE_READY bytes=536870912 block_size=4096 nominal_pmem_metadata_bytes=8388608
+IDENTICAL_EXT4_CONVERSION_BYTES_OK
+
+Evidence: e76967b-dax-image-validate.log
+712972e62497d2715119b85fd2404a4100f29ae2122bd2b0b1a304ac710fba63  /users/nehalem/fc-ctrd-mod/evidence/e76967b-pmem-images/validate.log
+READ_ONLY_WRITE_REJECTED_OK
+800d159ea61ddef2fd8a6400752ce3ccf299e446ef966d78fcb414b5bfb6a890  /users/nehalem/fc-ctrd-mod/step4-pmem-images/tmp/dax-image-validate.k8mRC0Oq/mount/usr/local/bin/agent
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  /users/nehalem/fc-ctrd-mod/step4-pmem-images/tmp/dax-image-validate.k8mRC0Oq/mount/usr/local/bin/runc
+IMMUTABLE_EXT4_IMAGE_CONTENTS_AND_CLEANUP_OK
+
