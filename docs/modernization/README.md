@@ -26,8 +26,10 @@ milestones, not as descriptions of every later branch's storage or dependencies.
 Use this checkout's [versions.json](versions.json), module manifests and gitlinks.
 `selected_inputs` describes this branch's dependency selection; `existing`
 describes the historical pre-modernization baseline. Validation entries name the
-exact tested source, which can predate documentation or test-only maintenance.
-Never substitute a later branch's dependency manifest when building an earlier one.
+exact tested source and scope. Later documentation, test-only maintenance, and
+production fixes may not have repeated broader acceptance; use each maintenance
+receipt to distinguish focused checks from full VM acceptance. Never substitute a
+later branch's dependency manifest when building an earlier one.
 
 The scripts in `tools/modernize/` prepare the worker, build and privately install
 the stack, and run acceptance. Follow the branch-specific milestone procedure
