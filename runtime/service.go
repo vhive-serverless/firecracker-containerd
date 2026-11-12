@@ -883,14 +883,14 @@ func (s *service) GetVMInfo(_ context.Context, _ *proto.GetVMInfoRequest) (*prot
 // rootfs/api.socket). Absolute paths are already authoritative and are kept.
 func (s *service) firecrackerSocketPath() (string, error) {
 	if s.machineConfig == nil {
-		return "", errors.New("Firecracker machine configuration is unavailable")
+		return "", errors.New("firecracker machine configuration is unavailable")
 	}
 	socketPath := s.machineConfig.SocketPath
 	if filepath.IsAbs(socketPath) {
 		return socketPath, nil
 	}
 	if s.jailer == nil {
-		return "", errors.New("Firecracker jailer is unavailable")
+		return "", errors.New("firecracker jailer is unavailable")
 	}
 	if filepath.Clean(s.jailer.JailPath().RootPath()) != filepath.Clean(s.shimDir.RootPath()) {
 		return filepath.Join(s.shimDir.RootPath(), socketPath), nil
