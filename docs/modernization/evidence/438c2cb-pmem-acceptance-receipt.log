@@ -1,0 +1,77 @@
+Committed pmem/DAX and native capture component acceptance PASS; Step3/overallStep4 remain WIP.
+Wed Nov 11 15:49:45 UTC 2026
+worker=nehalem@amd218.utah.cloudlab.us
+checkout=/users/nehalem/fc-ctrd-mod/step4-pmem-dev
+commands=tools/modernize/build-stack.sh; tools/modernize/install-stack.sh; tools/modernize/test-pmem.sh
+TMPDIR=/tmp/fc-pmem-438c2cb
+STACK_DIR=/users/nehalem/fc-ctrd-mod
+source_clean=true
+private_pool_removed=true
+438c2cb6ea0c7de719bed8eef08b3ba0db1d31b8
+ ce86b117d59ca93b1c04b791a251b445ace76703 _submodules/firecracker (v1.18.0-2-gce86b117d)
+ c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e _submodules/runc (v1.4.2)
+ 3070538befb5a6c09f93e99164762b3a76310357 _submodules/stargz-snapshotter (cmd/v0.18.2)
+go version go1.26.11 linux/amd64
+ce15b3d35a4811fbf164371b72f57757cce5e846ad5959b547a471fd564a6e89  bin/firecracker
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  _submodules/runc/runc
+409d664e734c1ffeb7a57efd18daac26d379f1cc7af5d0b42e52758404455276  _submodules/stargz-snapshotter/out/containerd-stargz-grpc
+a79e19be0908232696041c9015ea59f88a19f31a1bd9ee2bfac36143497dc346  agent/agent
+6d84d2b3a36aa860e7c826f62e8a640a504dbb71dd892167f743a35ba00d6bfc  runtime/containerd-shim-aws-firecracker
+0f4a32b481af4013316f74df55198a6a0f9a55805bad460ddb0629f5688e3e9d  firecracker-control/cmd/containerd/firecracker-containerd
+558e07f1c51726bf0285eac52a2f7c544743be2c9cc3ebbe982600c1afcb99dc  cri/firecracker-cri
+f7c763775c948bd8b779e432e5f4d418463a96a3e222b959df2d648c5b798dac  default-vmlinux.bin
+e2d4f5588d116cdddc5b19d4127601a66e9eb544d9abfb2a4bda5c3f91c46dbe  tools/image-builder/rootfs.img
+64101f4e112cb6e0eb1c2ab70093d4dc86e8498094d402d851c62a1a5116f57b  tools/image-builder/rootfs-dax.img
+08ac35524118fb259b229415889b64e2c5c100a4dc15c93ad87d03f706fcf827  tools/memory-probe/fc-memory-probe
+7644a5a9549eb5d056949d55777a12f4a0fd7f3765d8254a95e38801d32e5801  /users/nehalem/fc-ctrd-mod/evidence/438c2cb-pmem-build.log
+a314e7363c8b41683496eff9797b9ebd1d3f00e4199884a9f24298d076b76da2  /users/nehalem/fc-ctrd-mod/evidence/438c2cb-pmem-install.log
+95d46fdb6e8147931370b244bba46902aa4f04f90be9a9bfb56a279b7d622ec8  /users/nehalem/fc-ctrd-mod/evidence/438c2cb-pmem-acceptance.log
+1c4687ed361870d9254c7a905dc648f6c07daafebda1497d8add42fa19b03b80  /users/nehalem/fc-ctrd-mod/evidence/438c2cb-pmem-results.log
+test_image=sha256:e2adc3bd2930cf20b79e5fa95f50bdff9764a7f4a588feb3571eff521c712933
+6d84d2b3a36aa860e7c826f62e8a640a504dbb71dd892167f743a35ba00d6bfc  /usr/local/bin/containerd-shim-aws-firecracker
+0f4a32b481af4013316f74df55198a6a0f9a55805bad460ddb0629f5688e3e9d  /usr/local/bin/firecracker-containerd
+ce15b3d35a4811fbf164371b72f57757cce5e846ad5959b547a471fd564a6e89  /usr/local/bin/firecracker
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  /usr/local/bin/runc
+e2d4f5588d116cdddc5b19d4127601a66e9eb544d9abfb2a4bda5c3f91c46dbe  /var/lib/firecracker-containerd/runtime/default-rootfs.img
+d13cc6be186b0bd56000918757b3e46b75a18edf1b9c6ce331288380e84b23a5  rootfs.img
+124944654f741792a7d73b95e72f488a3e8f1bfbf5028f1586959235d45886aa  -
+0 issues.
+0 issues.
+=== RUN   TestImmutableRootCache
+--- PASS: TestImmutableRootCache (0.19s)
+=== RUN   TestImmutableRootRejectsInvalidBacking
+--- PASS: TestImmutableRootRejectsInvalidBacking (0.12s)
+=== RUN   TestImmutableRootConfiguration
+--- PASS: TestImmutableRootConfiguration (0.05s)
+=== RUN   TestImmutableRootCaptureAndCloneFiles
+--- PASS: TestImmutableRootCaptureAndCloneFiles (0.14s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	1.563s
+DAX_ROOT_IMAGE_READY bytes=536870912 block_size=4096 nominal_pmem_metadata_bytes=8388608
+=== RUN   TestBindImmutableImageToJail
+--- PASS: TestBindImmutableImageToJail (0.00s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	0.018s
+=== RUN   TestPmemRoot_Isolated
+=== RUN   TestPmemRoot_Isolated/pmem=false/jailed=false
+=== RUN   TestPmemRoot_Isolated/pmem=false/jailed=true
+=== RUN   TestPmemRoot_Isolated/pmem=true/jailed=false
+=== RUN   TestPmemRoot_Isolated/pmem=true/jailed=true
+--- PASS: TestPmemRoot_Isolated (52.03s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	52.051s
+=== RUN   TestPmemNativeCheckpoint_Isolated
+=== RUN   TestPmemNativeCheckpoint_Isolated/jailed=false
+=== RUN   TestPmemNativeCheckpoint_Isolated/jailed=true
+--- PASS: TestPmemNativeCheckpoint_Isolated (112.23s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	112.245s
+=== RUN   TestPmemBlockNativeCheckpoint_Isolated
+=== RUN   TestPmemBlockNativeCheckpoint_Isolated/jailed=false
+=== RUN   TestPmemBlockNativeCheckpoint_Isolated/jailed=true
+--- PASS: TestPmemBlockNativeCheckpoint_Isolated (97.31s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	97.324s
+COMMITTED_PMEM_DAX_AND_CAPTURE_OK
+Scope: full build/private install/lint/race/forced proto; actual lower-file DAX with 8 VMs pmem/block across both jailers; same cached inode, readonly sharing, private writes, copyup/rename/delete, mmap/refault and anon canary; probe hash checked in all guest arms; repeated combined pmem+DAMON native capture with independent upper/container/FUSE state; matched ext4 block-control native capture; no native restore or controlled savings evaluation acceptance.
+Kernel reused from previously verified worker build of exact unchanged kernel source/config; reuse hashes retained in evidence/pmem-dev-reused-kernel.sha256.

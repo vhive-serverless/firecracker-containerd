@@ -1,0 +1,45 @@
+make: Entering directory '/users/nehalem/fc-ctrd-mod/step4-capture-interrupt-dev/runtime'
+mkdir logs
+make -C .. test-deps-in-docker
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/step4-capture-interrupt-dev'
+docker run --rm \
+	--volume /users/nehalem/fc-ctrd-mod/step4-capture-interrupt-dev:/src \
+	--volume gocache:/go \
+	--workdir /src \
+	public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 go mod download
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/step4-capture-interrupt-dev'
+/users/nehalem/fc-ctrd-mod/step4-capture-interrupt-dev/runtime/../tools/thinpool.sh reset "fc-step4-capture-interrupt-dev"
+Device does not exist.
+Command failed.
+/users/nehalem/fc-ctrd-mod/step4-capture-interrupt-dev/runtime/../tools/modernize/run-isolated-vm-test.sh "/users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-capture-interrupt-dev" --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-capture-interrupt-dev/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-capture-interrupt-dev/runtime/..:/src \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-capture-interrupt-dev \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestNativeCheckpointInterrupt_Isolated$'"
+=== RUN   TestNativeCheckpointInterrupt_Isolated
+=== RUN   TestNativeCheckpointInterrupt_Isolated/jailed=false
+    native_checkpoint_interrupt_integ_test.go:124: capture completed before observed VMM pause (early error=<nil>, artifact exists=true); refusing retry-to-green
+=== RUN   TestNativeCheckpointInterrupt_Isolated/jailed=true
+    native_checkpoint_interrupt_integ_test.go:124: capture completed before observed VMM pause (early error=<nil>, artifact exists=true); refusing retry-to-green
+--- FAIL: TestNativeCheckpointInterrupt_Isolated (25.07s)
+    --- FAIL: TestNativeCheckpointInterrupt_Isolated/jailed=false (10.96s)
+    --- FAIL: TestNativeCheckpointInterrupt_Isolated/jailed=true (14.11s)
+FAIL
+exit status 1
+FAIL	github.com/firecracker-microvm/firecracker-containerd/runtime	25.085s
+make: *** [Makefile:58: integ-test-TestNativeCheckpointInterrupt_Isolated] Error 1
+make: Leaving directory '/users/nehalem/fc-ctrd-mod/step4-capture-interrupt-dev/runtime'

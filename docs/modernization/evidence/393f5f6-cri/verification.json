@@ -1,0 +1,44 @@
+{
+  "harness_source": "393f5f61240a2ac925dfef99e1894b6eb748cff1",
+  "runtime_source": "72f4fc9173bef33cc1c981ad285758716f635e02",
+  "runtime_image": "sha256:0ed23833cf6043e6f2e0fa6ef3e590cfd9626c03e69d66303f9a693b079021b5",
+  "worker": "nehalem@amd218.utah.cloudlab.us",
+  "source_clean": true,
+  "selection": "unfiltered",
+  "counts": {
+    "skipped": 29,
+    "passed": 97,
+    "failed": 16
+  },
+  "failed_tests": [
+    "[k8s.io] Security Context | NamespaceOption | runtime should support HostPID",
+    "[k8s.io] Security Context | NamespaceOption | runtime should support HostIpc is true",
+    "[k8s.io] Security Context | NamespaceOption | runtime should support HostNetwork is true",
+    "[k8s.io] Container Mount Propagation | runtime should support mount propagation | mount with 'rshared' should support propagation from host to container and vice versa",
+    "[k8s.io] Container Mount Propagation | runtime should support mount propagation | mount with 'rslave' should support propagation from host to container",
+    "[k8s.io] Streaming | runtime should support streaming interfaces | runtime should support portforward in host network",
+    "[k8s.io] AppArmor | runtime should support deprecated apparmor_profile field | should fail with an unloaded apparmor_profile",
+    "[k8s.io] AppArmor | runtime should support deprecated apparmor_profile field | should enforce a apparmor_profile blocking writes",
+    "[k8s.io] AppArmor | runtime should support deprecated apparmor_profile field | should enforce a permissive deprecated profile",
+    "[k8s.io] AppArmor | runtime should support apparmor field | should fail with an unloaded apparmor_profile",
+    "[k8s.io] AppArmor | runtime should support apparmor field | should enforce a apparmor_profile blocking writes",
+    "[k8s.io] AppArmor | runtime should support apparmor field | should enforce a permissive deprecated profile",
+    "[k8s.io] AppArmor | runtime should prefer new apparmor field | should fail with an unloaded apparmor_profile",
+    "[k8s.io] AppArmor | runtime should prefer new apparmor field | should enforce a apparmor_profile blocking writes",
+    "[k8s.io] AppArmor | runtime should prefer new apparmor field | should work with apparmor profile",
+    "[k8s.io] Container Mount Readonly | runtime should support readonly mounts | should support non-recursive readonly mounts"
+  ],
+  "same_failure_names_as_20727f4": true,
+  "private_storage_pool_container_removed": true,
+  "scope": "Regression with disk-backed writable upper; suite failed, CRI conformance remains WIP.",
+  "raw_sha256": {
+    "393f5f6-cri-full.log": "128674656fa4bd9fbddf74dd831142f40814f7a55819cbbd71f2ff8a63cdbaeb",
+    "cri-393f5f61240a.KF0dbsbG/report.json": "61e6eb94d3bf1f70baf410de2980ac22eed82254a128cd3e836639c7d28a7d6c",
+    "cri-393f5f61240a.KF0dbsbG/inputs.log": "66fafcd58f5183ad4d36acfc9bf98a42eb99569a2effb5e223c4adcef405301f",
+    "cri-393f5f61240a.KF0dbsbG/exit-status": "f01e8a115979ccae6133c4006d96adfba797886ecd962a800e768e4ac9132ecb",
+    "cri-393f5f61240a.KF0dbsbG/critest.log": "aa8487371f91d101223c33c05332c93ff394fbbc709dc982ca4bcc2ee8b57607",
+    "cri-393f5f61240a.KF0dbsbG/runtime-version.log": "69af0867be4b53b03a5a8c16749c22fdca099d5354e321bd82a22a352011731b",
+    "cri-393f5f61240a.KF0dbsbG/cri-version.log": "2b3b31958fde9ea98034688cb3dd20766c6c5afe644f848ef1f094e7c9307b67",
+    "cri-393f5f61240a.KF0dbsbG/tasks-at-exit.log": "e534c26cb27299b3032819e28e6ad94f42dcd896fffbe8520146779346f9c11e"
+  }
+}

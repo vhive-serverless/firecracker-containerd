@@ -1,0 +1,6 @@
+=== RUN   TestGuestOverlayAllocation
+--- PASS: TestGuestOverlayAllocation (0.48s)
+=== RUN   TestGuestOverlayRejectsRAMAndCleansFailure
+--- PASS: TestGuestOverlayRejectsRAMAndCleansFailure (0.25s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	1.786s
