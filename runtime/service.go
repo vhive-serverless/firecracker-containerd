@@ -166,6 +166,8 @@ type service struct {
 	cleanupErr  error
 	cleanupOnce sync.Once
 
+	vmRequest        json.RawMessage
+	nativeRestore    *nativeRestore
 	snapshotMu       sync.RWMutex
 	pendingPause     *pendingVMPause
 	legacyRestoreCut *checkpointTransportCut
@@ -518,8 +520,16 @@ func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRe
 	)
 
 	s.vmStartOnce.Do(func() {
-		err = s.createVM(ctxWithTimeout, request)
 		createRan = true
+		if request.NativeCheckpointDirectory != "" {
+			restored, restoreErr := s.prepareNativeRestore(ctxWithTimeout, request)
+			if restoreErr != nil {
+				err = restoreErr
+				return
+			}
+			request = restored
+		}
+		err = s.createVM(ctxWithTimeout, request)
 	})
 	if !createRan {
 		return nil, status.Error(codes.AlreadyExists, "shim cannot create VM more than once")
@@ -603,14 +613,26 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 			if e := s.jailer.Stop(true); e != nil {
 				s.logger.WithError(e).Debug("failed to stop firecracker")
 			}
+			if s.nativeRestore != nil {
+				err = errors.Join(err, s.closeCRIVolumes(), s.jailer.Close())
+			}
 		}
 	}()
 
+	if s.nativeRestore != nil {
+		if err := s.cloneNativeRestore(requestCtx, request); err != nil {
+			return err
+		}
+	}
 	s.machineConfig, err = s.buildVMConfiguration(request)
 	if err != nil {
 		return fmt.Errorf("failed to build VM configuration: %w", err)
 	}
 
+	s.vmRequest, err = json.Marshal(request)
+	if err != nil {
+		return fmt.Errorf("record VM creation request: %w", err)
+	}
 	opts := []firecracker.Opt{}
 
 	if v, ok := s.config.DebugHelper.GetFirecrackerSDKLogLevel(); ok {
@@ -644,7 +666,9 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 	}
 
 	opts = append(opts, jailedOpts...)
-	if request.LoadSnapshot {
+	if s.nativeRestore != nil {
+		opts = append(opts, s.nativeLoadOpt())
+	} else if request.LoadSnapshot {
 		opts = append(opts, snapshotRestoreOpt(s.machineConfig, request))
 	}
 
@@ -659,6 +683,9 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 	if request.LoadSnapshot {
 		s.machine.Handlers.FcInit = s.machine.Handlers.FcInit.AppendAfter(firecracker.SetupNetworkHandlerName, populateRestoreTaps)
 	}
+	if s.nativeRestore != nil {
+		s.machine.Handlers.FcInit = s.machine.Handlers.FcInit.AppendAfter(firecracker.SetupNetworkHandlerName, s.nativeLoadHandler())
+	}
 	if err := s.configureRecovery(); err != nil {
 		return fmt.Errorf("failed to record VM recovery state: %w", err)
 	}
@@ -667,6 +694,11 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 		return fmt.Errorf("failed to start the VM: %w", err)
 	}
 
+	if s.nativeRestore != nil {
+		if err := s.machine.ResumeVM(requestCtx); err != nil {
+			return err
+		}
+	}
 	if err := s.connectAgent(requestCtx); err != nil {
 		return err
 	}
@@ -675,9 +707,12 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 	if err := s.verifyRestoredEventCursor(requestCtx); err != nil {
 		return err
 	}
-	if request.LoadSnapshot {
+	switch {
+	case s.nativeRestore != nil:
+		err = s.adoptNativeProcesses(requestCtx)
+	case request.LoadSnapshot:
 		err = s.adoptLegacyTransport(requestCtx)
-	} else {
+	default:
 		err = s.mountDrives(requestCtx)
 	}
 	if err != nil {
