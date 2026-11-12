@@ -67,6 +67,7 @@ type nativeForkLine struct {
 type nativeForkStream struct {
 	taskID, execID, token string
 	pid                   uint32
+	namespacePID          uint64
 	count                 int
 	io                    *cio.DirectIO
 	stdout, stderr        <-chan nativeForkLine
@@ -232,6 +233,7 @@ func TestNativeForkTransport_Isolated(t *testing.T) {
 					}
 					stream := nativeForkOpen(ctx, t, original.taskID, original.execID, cio.NewFIFOSet(config, nil))
 					stream.token, stream.pid, stream.count = original.token, original.pid, original.count
+					stream.namespacePID = original.namespacePID
 					state, err := clone.backend.State(ctx, &taskAPI.StateRequest{ID: stream.taskID, ExecID: stream.execID})
 					require.NoError(t, err)
 					require.Equal(t, original.pid, state.Pid)
@@ -392,11 +394,15 @@ func nativeForkReady(ctx context.Context, t *testing.T, stream *nativeForkStream
 	require.Len(t, parts, 3)
 	require.Equal(t, "ready", parts[0])
 	require.Len(t, parts[1], 32)
-	require.Equal(t, strconv.FormatUint(uint64(pid), 10), parts[2])
+	// Shell and task API PIDs belong to different PID namespaces.
+	namespacePID, err := strconv.ParseUint(parts[2], 10, 32)
+	require.NoError(t, err)
+	require.NotZero(t, namespacePID)
 	other, ok := nativeForkRead(ctx, t, stream.stderr)
 	require.True(t, ok, "stderr closed before readiness")
 	require.Equal(t, ready, other)
 	stream.token, stream.pid = parts[1], pid
+	stream.namespacePID = namespacePID
 }
 
 func nativeForkExchange(ctx context.Context, t *testing.T, stream *nativeForkStream, label string, count int) {
@@ -425,7 +431,7 @@ func nativeForkExchange(ctx context.Context, t *testing.T, stream *nativeForkStr
 		}{{"out", stream.stdout}, {"err", stream.stderr}} {
 			line, ok := nativeForkRead(ctx, t, output.lines)
 			require.True(t, ok, "%s closed for %s/%s", output.name, stream.taskID, stream.execID)
-			require.Equal(t, fmt.Sprintf("%s|%s|%d|%d|%s", output.name, stream.token, stream.pid, stream.count+index+1, record), line,
+			require.Equal(t, fmt.Sprintf("%s|%s|%d|%d|%s", output.name, stream.token, stream.namespacePID, stream.count+index+1, record), line,
 				"stream lost, duplicated, reordered, replayed input or restarted: %s/%s", stream.taskID, stream.execID)
 		}
 	}
