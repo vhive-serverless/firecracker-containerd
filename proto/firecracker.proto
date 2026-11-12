@@ -52,6 +52,9 @@ message CreateVMRequest {
     string ContainerSnapshotPath = 19;
     MemoryBackend MemBackend = 20;
     bool EnableDiffSnapshots = 21;
+
+    // Restore a native checkpoint, including its existing guest processes.
+    string NativeCheckpointDirectory = 22;
 }
 
 message CreateVMResponse {
@@ -84,6 +87,13 @@ message CreateSnapshotRequest {
     string VMID = 1;
     string MemFilePath = 2;
     string SnapshotPath = 3;
+}
+
+// CheckpointVMRequest captures the complete VM with independent drive and
+// volume data. Directory must be an absolute, previously nonexistent path.
+message CheckpointVMRequest {
+    string VMID = 1;
+    string Directory = 2;
 }
 
 message StopVMRequest {
