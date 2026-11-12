@@ -150,7 +150,7 @@ func TestImmutableRootCaptureAndCloneFiles(t *testing.T) {
 	require.Len(t, manifest.Pmem, 1)
 	for _, name := range []string{"memory", "state"} {
 		require.NoError(t, os.WriteFile(filepath.Join(artifact, name), []byte(name), 0600))
-		file, err := copyNativeFile(ctx, filepath.Join(artifact, name), t.TempDir(), name)
+		file, err := copySnapshotFile(ctx, filepath.Join(artifact, name), t.TempDir(), name)
 		require.NoError(t, err)
 		if name == "memory" {
 			manifest.Memory = file

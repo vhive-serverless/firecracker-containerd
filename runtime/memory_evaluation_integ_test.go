@@ -180,7 +180,7 @@ func TestMemoryEvaluation_Isolated(t *testing.T) {
 	t.Cleanup(func() { _ = control.Close() })
 	input := filepath.Join(out, "input")
 	require.NoError(t, os.Mkdir(input, 0755))
-	copied, err := copyNativeFile(ctx, source, input, "root.img")
+	copied, err := copySnapshotFile(ctx, source, input, "root.img")
 	require.NoError(t, err)
 	inputImage := filepath.Join(input, "root.img")
 	// #nosec G302 -- This per-trial immutable input must be readable across VM identities.

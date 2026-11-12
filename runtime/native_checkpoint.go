@@ -15,12 +15,9 @@ package main
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"sort"
@@ -42,20 +39,15 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type nativeFile struct {
-	Path, SHA256 string
-	Size         int64
-}
-
 type nativeDrive struct {
 	ID       string
 	ReadOnly bool
-	File     nativeFile
+	File     snapshotFile
 }
 
 type nativePmem struct {
 	ID   string
-	File nativeFile
+	File snapshotFile
 }
 
 type nativeProcess struct {
@@ -97,7 +89,7 @@ type nativeCheckpoint struct {
 	VsockPortCount uint32
 	Drives         []nativeDrive
 	Pmem           []nativePmem
-	Memory, State  nativeFile
+	Memory, State  snapshotFile
 	Transport      *checkpointTransportCut
 }
 
@@ -246,7 +238,7 @@ func (s *service) CheckpointVM(ctx context.Context, req *proto.CheckpointVMReque
 				return nil, err
 			}
 		}
-		file, err := copyNativeFile(ctx, path, stage, fmt.Sprintf("drives/%08x", index))
+		file, err := copySnapshotFile(ctx, path, stage, fmt.Sprintf("drives/%08x", index))
 		if err != nil {
 			return nil, fmt.Errorf("capture drive %s: %w", *drive.DriveID, err)
 		}
@@ -275,7 +267,7 @@ func (s *service) CheckpointVM(ctx context.Context, req *proto.CheckpointVMReque
 		return nil, err
 	}
 	for _, path := range []string{filepath.Join(stage, "drives"), stage} {
-		if err := syncNativeDirectory(path); err != nil {
+		if err := syncSnapshotDirectory(path); err != nil {
 			return nil, err
 		}
 	}
@@ -289,7 +281,7 @@ func (s *service) CheckpointVM(ctx context.Context, req *proto.CheckpointVMReque
 		return nil, err
 	}
 	stage = ""
-	if err := syncNativeDirectory(parent); err != nil {
+	if err := syncSnapshotDirectory(parent); err != nil {
 		return nil, err
 	}
 	return &types.Empty{}, nil
@@ -416,85 +408,12 @@ func (s *service) nativeVMFiles(ctx context.Context, stage string, manifest *nat
 	if err := s.machine.CreateSnapshot(ctx, filepath.Join(apiDirectory, "memory"), filepath.Join(apiDirectory, "state")); err != nil {
 		return err
 	}
-	manifest.Memory, err = copyNativeFile(ctx, filepath.Join(directory, "memory"), stage, "memory")
+	manifest.Memory, err = copySnapshotFile(ctx, filepath.Join(directory, "memory"), stage, "memory")
 	if err != nil {
 		return err
 	}
-	manifest.State, err = copyNativeFile(ctx, filepath.Join(directory, "state"), stage, "state")
+	manifest.State, err = copySnapshotFile(ctx, filepath.Join(directory, "state"), stage, "state")
 	return err
-}
-
-func copyNativeFile(ctx context.Context, source, directory, name string) (_ nativeFile, err error) {
-	input, err := os.OpenFile(source, os.O_RDONLY|unix.O_NONBLOCK, 0)
-	if err != nil {
-		return nativeFile{}, err
-	}
-	defer input.Close()
-	info, err := input.Stat()
-	if err != nil {
-		return nativeFile{}, err
-	}
-	if !info.Mode().IsRegular() && (info.Mode()&os.ModeDevice == 0 || info.Mode()&os.ModeCharDevice != 0) {
-		return nativeFile{}, unix.EINVAL
-	}
-	size, err := input.Seek(0, io.SeekEnd)
-	if err != nil {
-		return nativeFile{}, err
-	}
-	if size < 0 || size > 1<<40 {
-		return nativeFile{}, unix.EFBIG
-	}
-	if _, err = input.Seek(0, io.SeekStart); err != nil {
-		return nativeFile{}, err
-	}
-	output, err := os.OpenFile(filepath.Join(directory, name), os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
-	if err != nil {
-		return nativeFile{}, err
-	}
-	defer func() { err = errors.Join(err, output.Close()) }()
-	hash := sha256.New()
-	buffer := make([]byte, 1<<20)
-	for offset := int64(0); offset < size; {
-		if err := ctx.Err(); err != nil {
-			return nativeFile{}, err
-		}
-		chunk := min(int64(len(buffer)), size-offset)
-		if _, err := io.ReadFull(input, buffer[:chunk]); err != nil {
-			return nativeFile{}, err
-		}
-		_, _ = hash.Write(buffer[:chunk])
-		if !allNativeZeros(buffer[:chunk]) {
-			if _, err := output.WriteAt(buffer[:chunk], offset); err != nil {
-				return nativeFile{}, err
-			}
-		}
-		offset += chunk
-	}
-	if err := output.Truncate(size); err != nil {
-		return nativeFile{}, err
-	}
-	if err := output.Sync(); err != nil {
-		return nativeFile{}, err
-	}
-	return nativeFile{Path: name, SHA256: hex.EncodeToString(hash.Sum(nil)), Size: size}, nil
-}
-
-func allNativeZeros(data []byte) bool {
-	for _, b := range data {
-		if b != 0 {
-			return false
-		}
-	}
-	return true
-}
-
-func syncNativeDirectory(path string) error {
-	file, err := os.Open(path)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	return file.Sync()
 }
 
 func rejectNativeOwnedDirectory(parent, owned string) error {

@@ -163,7 +163,7 @@ func (s *service) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotR
 	if err := os.Remove(req.SnapshotPath + snapshotDriveMetadataSuffix); err != nil && !os.IsNotExist(err) {
 		return nil, err
 	}
-	if err := syncNativeDirectory(filepath.Dir(req.SnapshotPath)); err != nil {
+	if err := syncSnapshotDirectory(filepath.Dir(req.SnapshotPath)); err != nil {
 		return nil, err
 	}
 	if err := publishSnapshotFile(ctx, filepath.Join(stage, "memory"), req.MemFilePath); err != nil {
@@ -191,7 +191,7 @@ func publishSnapshotFile(ctx context.Context, source, destination string) error 
 	if err := os.Remove(name); err != nil {
 		return err
 	}
-	if _, err := copyNativeFile(ctx, source, filepath.Dir(name), filepath.Base(name)); err != nil {
+	if _, err := copySnapshotFile(ctx, source, filepath.Dir(name), filepath.Base(name)); err != nil {
 		return err
 	}
 	return os.Rename(name, destination)

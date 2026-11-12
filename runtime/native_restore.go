@@ -154,7 +154,7 @@ func validateNativeRestore(manifest *nativeCheckpoint) error {
 			return syscall.EINVAL
 		}
 	}
-	files := []nativeFile{manifest.Memory, manifest.State}
+	files := []snapshotFile{manifest.Memory, manifest.State}
 	drives := make(map[string]bool)
 	rootCount := 0
 	for index, drive := range manifest.Drives {
@@ -291,7 +291,7 @@ func (s *service) cloneNativeRestore(ctx context.Context, request *proto.CreateV
 		return err
 	}
 	defer root.Close()
-	files := []nativeFile{restore.manifest.Memory, restore.manifest.State}
+	files := []snapshotFile{restore.manifest.Memory, restore.manifest.State}
 	for _, drive := range restore.manifest.Drives {
 		files = append(files, drive.File)
 	}
@@ -308,7 +308,7 @@ func (s *service) cloneNativeRestore(ctx context.Context, request *proto.CreateV
 			_ = input.Close()
 			return errors.Join(err, syscall.EINVAL)
 		}
-		copied, err := copyNativeFile(ctx, fmt.Sprintf("/proc/self/fd/%d", input.Fd()), restore.workspace, saved.Path)
+		copied, err := copySnapshotFile(ctx, fmt.Sprintf("/proc/self/fd/%d", input.Fd()), restore.workspace, saved.Path)
 		_ = input.Close()
 		if err != nil {
 			return err
@@ -318,7 +318,7 @@ func (s *service) cloneNativeRestore(ctx context.Context, request *proto.CreateV
 		}
 		path := filepath.Join(restore.workspace, saved.Path)
 		if saved.Path == upper {
-			// copyNativeFile preserves sparse workload disks. Only the guest
+			// copySnapshotFile preserves sparse workload disks. Only the guest
 			// upper must retain the full capacity promised by fresh creation.
 			file, err := os.OpenFile(path, os.O_RDWR|unix.O_NOFOLLOW, 0)
 			if err != nil {

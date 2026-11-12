@@ -93,8 +93,8 @@ func TestNativeRestoreMountPlan(t *testing.T) {
 						Drives: []*models.Drive{{DriveID: fc.String("workload"), PathOnHost: captured}},
 						Pmem:   []*models.Pmem{{ID: fc.String(pmemRootID), PathOnHost: fc.String(capturedPmem), ReadOnly: true}},
 					},
-					Drives: []nativeDrive{{ID: "workload", File: nativeFile{Path: "drives/0"}}},
-					Pmem:   []nativePmem{{ID: pmemRootID, File: nativeFile{Path: "pmem/0"}}},
+					Drives: []nativeDrive{{ID: "workload", File: snapshotFile{Path: "drives/0"}}},
+					Pmem:   []nativePmem{{ID: pmemRootID, File: snapshotFile{Path: "pmem/0"}}},
 				},
 				files: map[string]string{"drives/0": clone, "pmem/0": pmem, "memory": filepath.Join(shared, "memory"), "state": filepath.Join(shared, "state")},
 			}

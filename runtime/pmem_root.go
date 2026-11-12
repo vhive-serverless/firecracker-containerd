@@ -68,7 +68,7 @@ func (s *service) captureImmutableRoot(ctx context.Context, stage string, manife
 	if err := os.Mkdir(filepath.Join(stage, "pmem"), 0700); err != nil {
 		return err
 	}
-	saved, err := copyNativeFile(ctx, backing, stage, "pmem/00000000")
+	saved, err := copySnapshotFile(ctx, backing, stage, "pmem/00000000")
 	if err != nil {
 		return err
 	}
@@ -76,7 +76,7 @@ func (s *service) captureImmutableRoot(ctx context.Context, stage string, manife
 		return fmt.Errorf("pmem backing changed during capture")
 	}
 	manifest.Pmem = []nativePmem{{ID: pmemRootID, File: saved}}
-	return syncNativeDirectory(filepath.Join(stage, "pmem"))
+	return syncSnapshotDirectory(filepath.Join(stage, "pmem"))
 }
 
 func (s *service) configureImmutableRoot(ctx context.Context, request *proto.CreateVMRequest) error {
@@ -163,7 +163,7 @@ func cacheImmutableImage(ctx context.Context, source, directory, digest string) 
 		return "", err
 	}
 	defer os.RemoveAll(stage)
-	saved, err := copyNativeFile(ctx, source, stage, "image")
+	saved, err := copySnapshotFile(ctx, source, stage, "image")
 	if err != nil {
 		return "", err
 	}
@@ -189,7 +189,7 @@ func cacheImmutableImage(ctx context.Context, source, directory, digest string) 
 	if err := verifyImmutableImage(ctx, path, digest); err != nil {
 		return "", err
 	}
-	if err := syncNativeDirectory(directory); err != nil {
+	if err := syncSnapshotDirectory(directory); err != nil {
 		return "", err
 	}
 	return path, nil

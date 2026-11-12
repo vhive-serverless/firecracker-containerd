@@ -182,7 +182,7 @@ func testNativeCheckpoint(t *testing.T, pmem, ext4 bool) {
 				require.Len(t, task.VolumeTokens, 1)
 			}
 			checkNativeVolumes(ctx, t, artifact, "shared-before\n")
-			files := make([]nativeFile, 0, 2+len(manifest.Drives))
+			files := make([]snapshotFile, 0, 2+len(manifest.Drives))
 			files = append(files, manifest.Memory, manifest.State)
 			for _, drive := range manifest.Drives {
 				files = append(files, drive.File)

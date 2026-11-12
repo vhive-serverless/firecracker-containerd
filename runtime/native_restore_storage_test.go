@@ -52,7 +52,7 @@ func nativeCloneStorageFixture(t *testing.T, destination string) (*service, *pro
 	t.Helper()
 	artifact := t.TempDir()
 	require.NoError(t, os.Mkdir(filepath.Join(artifact, "drives"), 0700))
-	file := func(name string, size int64) nativeFile {
+	file := func(name string, size int64) snapshotFile {
 		path := filepath.Join(artifact, name)
 		output, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL|os.O_RDWR, 0600)
 		require.NoError(t, err)
@@ -60,7 +60,7 @@ func nativeCloneStorageFixture(t *testing.T, destination string) (*service, *pro
 		_, err = output.WriteAt([]byte(name), 0)
 		require.NoError(t, err)
 		require.NoError(t, output.Close())
-		return nativeFile{Path: name, Size: size, SHA256: hashPmemImage(t, path)}
+		return snapshotFile{Path: name, Size: size, SHA256: hashPmemImage(t, path)}
 	}
 	request := &proto.CreateVMRequest{ContainerCount: 1, GuestRoot: &proto.GuestRootStorage{Mode: "disk", SizeMib: 64}}
 	encoded, err := json.Marshal(request)
