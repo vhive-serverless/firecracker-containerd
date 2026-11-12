@@ -1,0 +1,60 @@
+{
+  "revision": "1074bdc8f2b602c9f986d3975d5c94b40bd1cac7",
+  "tree": "d786b6116dd3b855c2b2bc57ac727ecb354ce534",
+  "worker": "amd218.utah.cloudlab.us",
+  "pipeline_exit_code": 0,
+  "result": "PASS",
+  "commands": [
+    "make lint",
+    "tools/modernize/build-stack.sh",
+    "tools/modernize/install-stack.sh",
+    "tools/modernize/test-stack.sh"
+  ],
+  "acceptance_marker": "COMMITTED_STACK_ACCEPTANCE_OK",
+  "verbose_top_level_passes": 127,
+  "verbose_top_level_skips": [
+    "TestLogAndMetrics (0.00s)"
+  ],
+  "limitations": [
+    "SDK TestLogAndMetrics is explicitly skipped; this receipt does not establish that test.",
+    "Step 1 acceptance does not establish legacy vHive, native restore, CRI conformance or Step 4 storage acceptance."
+  ],
+  "files": {
+    "acceptance/agent-build-info": {
+      "bytes": 6169,
+      "sha256": "e83f986de3518bcc0f3ba298d03b721ccbdcf90e002f36c01dbaea07bbe93de7"
+    },
+    "acceptance/binaries.sha256": {
+      "bytes": 1168,
+      "sha256": "a0e3c60e0a25894afca3dd32b5f5db42780a8302a929b5371e0dd70986e5c89f"
+    },
+    "acceptance/go-modules.json": {
+      "bytes": 120535,
+      "sha256": "e4b570e651075c151080ed9232ea698896f9b2a700cf9e22c5a0e4c27ee2045f"
+    },
+    "acceptance/runtime-revision": {
+      "bytes": 41,
+      "sha256": "c07b756d614607633f3df13835e773cf3f1cd75b1e0396a10a406d75b3085df2"
+    },
+    "acceptance/test-image.json": {
+      "bytes": 3647,
+      "sha256": "2a562076ffcf1bc8525792ddc27aa7a5e852c2bad98a60804a8a3cdd2586e51b"
+    },
+    "stage1-acceptance-1074bdc8f2b6.log": {
+      "bytes": 289347,
+      "sha256": "273ae2de4e6e9f5642ab995750c2fb1e7521e2b087ad34b6a41e5df136707a70"
+    },
+    "stage1-build-1074bdc8f2b6.log": {
+      "bytes": 225028,
+      "sha256": "078f8c83190273533e683ef14a2cc0d2bd12782288d589c294ab0baf94e0a0c7"
+    },
+    "stage1-install-1074bdc8f2b6.log": {
+      "bytes": 9098,
+      "sha256": "afc1460c92d5f146c02b6943701a88ed4304f60e5ae5704034b5440dabc94756"
+    },
+    "stage1-lint-1074bdc8f2b6.log": {
+      "bytes": 1178,
+      "sha256": "3fe36d0ae3791a5f5b419ec4b23c17aecdff8e35ae4d6924f91e54a510b0d668"
+    }
+  }
+}

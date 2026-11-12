@@ -25,7 +25,13 @@ unit test, without its Step 2 snapshot consumer.
 
 Historical receipts under `evidence/` preserve their original tested revisions.
 The SDK dd9db32 receipt reports the SDK suite only. Neither it nor the historical
-Step 1 acceptance validates this reconstructed runtime. Fresh committed worker
-VM acceptance, jail modes, integration images and privileged filesystem/network
-checks remain pending. Local compilation/unit evidence is recorded separately
-in the parent workspace candidate report; no VM validation is claimed.
+Step 1 acceptance validates this reconstructed runtime. The new
+[worker receipt](evidence/upstream-step1-1074bdc8f2b6/README.md) records the
+successful lint/build/install/test-stack pipeline on clean migrated source
+`1074bdc8f2b602c9f986d3975d5c94b40bd1cac7`, tree
+`d786b6116dd3b855c2b2bc57ac727ecb354ce534`, including isolated runtime and
+snapshotter VM checks and the published SDK suite. SDK `TestLogAndMetrics`
+remains explicitly skipped. This documentation tip was not rebuilt; separate
+lifecycle/crash-runner and later-stage acceptance are not established. The
+receipt preserves raw binary provenance and distinguishes installed and final
+test rootfs images. Earlier local compilation/unit evidence remains separate.

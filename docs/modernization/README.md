@@ -12,7 +12,7 @@ firecracker-v1.18-containerdv2
 
 | Step | Branch | Scope and acceptance |
 | --- | --- | --- |
-| 1 | `firecracker-v1.18-containerdv2` | Modernized OCI runtime, acknowledged events and framed IO; migrated candidate VM acceptance pending. |
+| 1 | `firecracker-v1.18-containerdv2` | Modernized OCI runtime, acknowledged events and framed IO; the recorded lint/build/install/test-stack worker pipeline passed at `1074bdc8f2b6`, with one explicit SDK skip. [Receipt and scope](evidence/upstream-step1-1074bdc8f2b6/README.md). |
 | 2 | `firecracker-v1.18-containerdv2-vhive-integration` | Adds standalone vHive and coordinated legacy snapshot/restore; migrated candidate VM acceptance pending. |
 | 3 | `cri-native-snapshot-restore` | Adds CRI integration, ordinary RuntimeClass Pods and native checkpoint components; **WIP**, with historical CRI failures, fresh migrated candidate validation pending, and Kubernetes Pod restore deferred to the 1.38 interface work. |
 | 4 | `damon-virtio-pmem` | Adds disk-backed guest storage, pmem/DAX, DAMON/reporting and memory evaluation; historical direct runtime acceptance is revision-specific and does not validate the migrated candidate. Fresh migrated validation and inherited Step 3 gates remain open. |
@@ -32,9 +32,13 @@ The migrated stack uses official Firecracker and jailer v1.18.0 release
 archives, verified against checksums in `versions.json`, and the published
 `vhive-serverless/firecracker-go-sdk` branch `firecracker-v1.18.0`, commit
 `dd9db322432989b96cff7a38a64703d60b6cabf9`. Runtime builds fetch the official
-binaries rather than compiling a custom VMM. Fresh exact-commit runtime VM
-acceptance is pending; historical runtime receipts and standalone SDK acceptance
-do not close that gate. See [migration scope](upstream-migration.md).
+binaries rather than compiling a custom VMM. The recorded Step 1 worker pipeline
+passed at exact source `1074bdc8f2b6`; its
+[receipt](evidence/upstream-step1-1074bdc8f2b6/README.md) distinguishes the tested
+source from this documentation tip, the SDK skip, and installed versus final
+test images. Separate lifecycle/crash-runner evidence and later-stage VM
+acceptance remain pending. Historical runtime receipts and standalone SDK
+acceptance do not establish those results. See [migration scope](upstream-migration.md).
 
 Use this checkout's [versions.json](versions.json), module manifests and gitlinks.
 `selected_inputs` describes this branch's dependency selection; `existing`

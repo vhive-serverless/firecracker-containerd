@@ -5,8 +5,12 @@
 The maintained base is `firecracker-v1.18-containerdv2`; its vHive successor is
 `firecracker-v1.18-containerdv2-vhive-integration`. Official Firecracker/jailer
 1.18.0 binaries and the published vHive SDK dd9db32 are selected in the current
-lock and module manifests. Fresh exact-candidate worker build/install and VM
-acceptance remain pending. Local compilation checks are recorded separately in
+lock and module manifests. The four-command lint/build/install/test-stack worker
+pipeline passed at exact clean source `1074bdc8f2b6`; see the
+[receipt and limitations](evidence/upstream-step1-1074bdc8f2b6/README.md).
+The documentation tip was not rebuilt, SDK `TestLogAndMetrics` is explicitly
+skipped, and separate lifecycle/crash-runner and later-stage acceptance remain
+pending. Earlier local compilation checks are recorded separately in
 [the local validation note](upstream-step1-local-validation.md).
 
 The checklist below preserves the original modernization ledger. Its checked

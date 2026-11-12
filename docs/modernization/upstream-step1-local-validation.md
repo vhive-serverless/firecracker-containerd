@@ -1,4 +1,9 @@
-# Local validation of the migrated Step 1 candidate
+# Earlier local validation of the migrated Step 1 candidate
+
+This page preserves the earlier local-check scope. The later exact-source
+[worker pipeline receipt](evidence/upstream-step1-1074bdc8f2b6/README.md)
+records lint/build/install/test-stack acceptance at `1074bdc8f2b6`; it does not
+retroactively broaden these local checks or establish later-stage acceptance.
 
 The implementation in `6f4e0c5c94322b5f3bf2cf521cdc448480c281f7` passed local
 checks with Go 1.26.11:
@@ -12,7 +17,8 @@ checks with Go 1.26.11:
 
 The parent workspace records exact commands, logs and hashes in
 `migration-upstream/stage1-candidate-report.json`. These are local checks;
-privileged integration and exact-candidate VM acceptance remain pending. The
+privileged integration and exact-candidate VM acceptance remained pending at
+that local-check checkpoint. The
 candidate submodules are uninitialized, and full Make/Docker/kernel/rootfs
 builds were not run. Final reconstructed logical commits must carry the
 project-required DCO signoff; these disposable implementation commits are

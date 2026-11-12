@@ -4,9 +4,15 @@
 
 The maintained branch is `firecracker-v1.18-containerdv2`. This migrated
 candidate uses official Firecracker/jailer v1.18.0 binaries and the published
-vHive SDK dd9db32. Fresh exact-commit worker build/install, lifecycle and VM
-acceptance are pending. [Local compilation and unit checks](upstream-step1-local-validation.md)
-are separate evidence; they do not establish VM acceptance.
+vHive SDK dd9db32. The recorded lint/build/install/test-stack worker pipeline
+passed on clean source `1074bdc8f2b602c9f986d3975d5c94b40bd1cac7`, tree
+`d786b6116dd3b855c2b2bc57ac727ecb354ce534`. The later documentation/evidence
+commit was not rebuilt. The [worker receipt](evidence/upstream-step1-1074bdc8f2b6/README.md)
+preserves raw logs, binary/input provenance, 127 verbose top-level passes and
+the single explicit SDK `TestLogAndMetrics` skip. It distinguishes the installed
+rootfs from the subsequently rebuilt final test image. Separate lifecycle and
+crash-runner runs are not recorded for this source. [Earlier local compilation
+and unit checks](upstream-step1-local-validation.md) remain separate evidence.
 
 The archived original Step 1 acceptance at `06bd205` and its personal SDK pin
 remain in the historical records below. Those receipts do not validate the
@@ -91,8 +97,11 @@ Both crash tests check that containerd removes the task bundle as well as the VM
 
 Select the exact committed migrated Step 1 revision before running this
 procedure. Do not substitute a historical receipt revision for the new candidate.
-The commands below describe the required gate; they have not yet established
-acceptance of this candidate.
+The worker receipt above records the four successful lint/build/install/test-stack
+commands at `1074bdc8f2b6`. The broader procedure below also includes separate
+`run-worker.sh` and `test-crash-recovery.py` runs; those two runs are not recorded
+for this source and remain additional checks. Do not attribute them to the
+four-command pipeline or to this documentation tip.
 
 Full stack builds and VM acceptance run on `nehalem@amd218.utah.cloudlab.us`.
 The default workspace is `/users/nehalem/fc-ctrd-mod`. The scripts support
