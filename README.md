@@ -1,6 +1,6 @@
 # firecracker-containerd
 
-> PROVISIONAL HISTORY DRAFT: Step 3 code and inputs match `751c03c6f9a98b8726bc4d9066efce78db96952d`. New acceptance and final documentation/results integration are pending. Earlier receipts retain their exact named source scope.
+> PROVISIONAL HISTORY DRAFT: Corrected Step 4 history is being prepared against `bbcaf820056d78e33887059465504c6647f3d983`. Acceptance and final documentation/results integration are pending. Earlier receipts retain their exact named source scope.
 
 This branch uses official Firecracker/jailer v1.18.0 release binaries, the
 published vHive SDK dd9db32, and containerd v2.3.7. Exact Step 3 source
@@ -9,6 +9,15 @@ and focused CRI checks. CRI remains WIP; Kubernetes Pod restore is deferred to
 1.38, and final published/installed vHive acceptance remains pending. See the
 [Step 3 procedure and acceptance scope](docs/modernization/step-3.md). This later
 documentation tip was not built or tested.
+
+This Step 4 candidate adds private guest storage, PMEM/DAX, bounded DAMON and
+free-page reporting. See [Step 4 status](docs/modernization/step-4.md), the
+[historical memory evaluation](tools/memory-eval/results/0a268c5589c3/REPORT.md)
+and [reference acceptance scopes](docs/modernization/upstream-migration.md).
+Fresh acceptance of this exact migrated tree remains pending. CRI remains WIP;
+Kubernetes whole-Pod checkpoint/restore is deferred to the 1.38 interface work.
+The upstream overview below is historical; use the branch guide for current
+build and reproduction commands.
 
 [![BuildKite](https://badge.buildkite.com/aab4ae547d5e5079a5915522e8cdb18492349aef67aae5a8c5.svg?branch=main)](https://buildkite.com/firecracker-microvm/firecracker-containerd)
 [![GitHub Actions](https://github.com/firecracker-microvm/firecracker-containerd/actions/workflows/build.yaml/badge.svg)](https://github.com/firecracker-microvm/firecracker-containerd/actions)
