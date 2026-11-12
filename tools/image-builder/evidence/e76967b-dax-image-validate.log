@@ -1,0 +1,66 @@
+Filesystem volume name:   fc-root-dax
+Last mounted on:          <not available>
+Filesystem UUID:          30b5df10-6ad9-4c79-9d64-06b319188e41
+Filesystem magic number:  0xEF53
+Filesystem revision #:    1 (dynamic)
+Filesystem features:      ext_attr resize_inode dir_index filetype extent 64bit flex_bg metadata_csum_seed sparse_super large_file huge_file dir_nlink extra_isize metadata_csum
+Filesystem flags:         signed_directory_hash 
+Default mount options:    user_xattr acl
+Filesystem state:         clean
+Errors behavior:          Continue
+Filesystem OS type:       Linux
+Inode count:              32768
+Block count:              131072
+Reserved block count:     0
+Overhead clusters:        2251
+Free blocks:              77142
+Free inodes:              25547
+First block:              0
+Block size:               4096
+Fragment size:            4096
+Group descriptor size:    64
+Reserved GDT blocks:      63
+Blocks per group:         32768
+Fragments per group:      32768
+Inodes per group:         8192
+Inode blocks per group:   512
+Flex block group size:    16
+Filesystem created:       Tue Nov 10 00:00:00 2026
+Last mount time:          n/a
+Last write time:          Tue Nov 10 00:00:00 2026
+Mount count:              0
+Maximum mount count:      -1
+Last checked:             Tue Nov 10 00:00:00 2026
+Check interval:           0 (<none>)
+Lifetime writes:          210 MB
+Reserved blocks uid:      0 (user root)
+Reserved blocks gid:      0 (group root)
+First inode:              11
+Inode size:               256
+Required extra isize:     32
+Desired extra isize:      32
+Default directory hash:   half_md4
+Directory Hash Seed:      30b5df10-6ad9-4c79-9d64-06b319188e41
+Checksum type:            crc32c
+Checksum:                 0x0568e1c0
+Checksum seed:            0xff2e6137
+
+879c2d341a485d10f23a53770a9761eeb2059e039e09bb77bd8f1a7d0b4b2f78  rootfs.img
+fddd6a51d06feeaf41f65d879b52f81062e5b92f027f7f5e0e197d78d2882b3c  rootfs-dax.img
+e3ca712b9cbd1831f045a3905b6397962267c0bd97586c9d2eedaa2a22d6ee3d  -
+image_bytes=536870912 allocated_blocks=418096 allocation_block_bytes=512 mode=444 uid=0 gid=0
+e2fsck 1.47.0 (5-Feb-2023)
+Pass 1: Checking inodes, blocks, and sizes
+Pass 2: Checking directory structure
+Pass 3: Checking directory connectivity
+Pass 4: Checking reference counts
+Pass 5: Checking group summary information
+fc-root-dax: 7221/32768 files (0.1% non-contiguous), 53930/131072 blocks
+/dev/loop16 ext4 ro,relatime,norecovery
+mounted_tree_sha256=e3ca712b9cbd1831f045a3905b6397962267c0bd97586c9d2eedaa2a22d6ee3d
+source_tree_sha256=e3ca712b9cbd1831f045a3905b6397962267c0bd97586c9d2eedaa2a22d6ee3d
+touch: cannot touch '/users/nehalem/fc-ctrd-mod/step4-pmem-images/tmp/dax-image-validate.k8mRC0Oq/mount/.read-only-probe': Read-only file system
+READ_ONLY_WRITE_REJECTED_OK
+800d159ea61ddef2fd8a6400752ce3ccf299e446ef966d78fcb414b5bfb6a890  /users/nehalem/fc-ctrd-mod/step4-pmem-images/tmp/dax-image-validate.k8mRC0Oq/mount/usr/local/bin/agent
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  /users/nehalem/fc-ctrd-mod/step4-pmem-images/tmp/dax-image-validate.k8mRC0Oq/mount/usr/local/bin/runc
+IMMUTABLE_EXT4_IMAGE_CONTENTS_AND_CLEANUP_OK

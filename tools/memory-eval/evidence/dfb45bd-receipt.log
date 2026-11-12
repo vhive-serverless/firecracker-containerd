@@ -1,0 +1,39 @@
+2026-11-11T15:42:37.308996+00:00
+Result: PASS; read-only sampler parsing, bounds, identity and real worker sampling.
+Worker: nehalem@amd218.utah.cloudlab.us
+Checkout: /users/nehalem/fc-ctrd-mod/step4-host-sampler
+Tested source: dfb45bd7bdec2d59184f4fc077e654f8d3589857
+Python: Python 3.12.3
+Commands:
+python3 -m unittest discover -s tools/memory-eval -p test_sample_host.py -v
+python3 tools/memory-eval/test_worker_sample.py --output-dir /users/nehalem/fc-ctrd-mod/evidence/dfb45bd-host-sampler/owned-process
+12 unit tests PASS: stat field indexing and complex comm; malformed stat; native memory units and rollup header; cgroup I/O; permission classification; PID reuse before/during capture; real disappearance fixture; cgroup replacement; finite bounds; exclusive output; timestamps.
+Actual worker smoke: PASS; owned temporary process touched 16 MiB, wrote/fsynced its private 1 MiB file and used CPU, then was terminated/reaped by the validation harness during sampling. The production sampler sent no signals.
+Actual CLI used two repeated --pid arguments, interval 0.2 s and duration 1.2 s.
+Explicit cgroup: /sys/fs/cgroup/user.slice/user-20005.slice/session-2331.scope
+This existing SSH session cgroup includes other session processes; its charges are not attributed solely to the owned child.
+Collected samples: 6
+Owned process status sequence: ["ok", "ok", "ok", "ok", "exited", "exited"]
+First alive PSS (kB): 21132
+First alive RSS (kB): 26668
+First alive CPU utime/stime (clock ticks): [16, 1]
+First alive I/O write_bytes: 1048576
+Cgroup memory.current/stat/events and cpu.stat read successfully; io.stat was absent in this existing session cgroup and recorded as not_found, yielding partial observations. No controller was enabled or changed.
+Cgroup status sequence: ["partial", "partial", "partial", "partial", "partial", "partial"]
+End record: {"elapsed_s": 1.2000906389876036, "monotonic_ns": 79737502182308, "reason": "duration", "samples": 6, "timestamp_utc": "2026-11-11T15:41:31.045705+00:00", "type": "end"}
+All records contain UTC and monotonic emission timestamps; each process and sample has its collection window. No integrals or savings estimates calculated.
+No local execution/compilation, Go/Rust builds, cache drops, reclaim, cgroup changes or unrelated process signaling. Owned child reaped and temporary input file removed.
+Clean committed source checkout verified before and after validation. Other worker checkouts untouched.
+
+Evidence: python-version.log
+5b3e43dc38ca01e3f5a7854ba50d4330864b0c1e0f646650b2c78cf072acc366  /users/nehalem/fc-ctrd-mod/evidence/dfb45bd-host-sampler/python-version.log
+
+Evidence: unit.log
+bdce955fa1be7a1239dbb5f6dc205a7dbd5f5a00eaf0af3a799ba0243a7fddc7  /users/nehalem/fc-ctrd-mod/evidence/dfb45bd-host-sampler/unit.log
+
+Evidence: smoke.log
+dc6c1129a9a508bfb94e1bf4b515ea6532fcc3a93e52d2bc694d4d70559884df  /users/nehalem/fc-ctrd-mod/evidence/dfb45bd-host-sampler/smoke.log
+
+Evidence: owned-process/owned-process.jsonl
+943416ddf984c5a2268051641d39e9858d62de1c889b8dd9e93b297dbfa4b59e  /users/nehalem/fc-ctrd-mod/evidence/dfb45bd-host-sampler/owned-process/owned-process.jsonl
+

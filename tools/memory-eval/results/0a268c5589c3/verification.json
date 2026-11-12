@@ -1,0 +1,16 @@
+{
+  "source_revision": "0a268c5589c37832e1c3dc89a7b60ed2701e0b9e",
+  "label": "COMMITTED OBSERVATIONS",
+  "trials": 21,
+  "blocks": 3,
+  "arms": 7,
+  "guest_vms": 42,
+  "predefined_paired_comparisons": 12,
+  "input_file_hashes_verified": 168,
+  "cgroup_integrals_recomputed": 42,
+  "vmm_idle_pss_integrals_recomputed": 21,
+  "paired_metric_differences_checked": 72,
+  "all_guest_payload_and_canary_checks_passed": true,
+  "plots": 4,
+  "reporting_freshness_limitation": "recorded Firecracker reporting frames may precede final flush consumption"
+}
