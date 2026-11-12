@@ -96,6 +96,11 @@ copies or devices described above. See
 
 ## Evidence and outstanding gates
 
+- [Complete stack build](evidence/upstream-migration/build-fc2a8c2.json) at
+  `fc2a8c2` passed full lint and build with official Firecracker/jailer and
+  correctly embedded runc/runtime revisions. The
+  [binary receipt](evidence/upstream-migration/build-fc2a8c2-receipt.log) records
+  exact hashes. VM acceptance at this revision remains pending.
 - The [current SDK worker summary](evidence/upstream-migration/sdk-dd9db32-worker.json)
   and [raw log](evidence/upstream-migration/sdk-dd9db32-worker.log) record 86
   passing top-level privileged tests at SDK `dd9db32`, with one existing skip.
