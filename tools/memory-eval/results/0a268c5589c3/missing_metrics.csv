@@ -1,0 +1,43 @@
+trial,metric,reason
+b00-00-pmem,full_trial.vm_aggregate_pss_mapped_view,window lacks bracketing samples
+b00-00-pmem,full_trial.physical_io_delta,sample value: missing/invalid nonnegative number
+b00-01-ext4-reclaim,full_trial.vm_aggregate_pss_mapped_view,window lacks bracketing samples
+b00-01-ext4-reclaim,full_trial.physical_io_delta,sample value: missing/invalid nonnegative number
+b00-02-ext4-block,full_trial.vm_aggregate_pss_mapped_view,window lacks bracketing samples
+b00-02-ext4-block,full_trial.physical_io_delta,sample value: missing/invalid nonnegative number
+b00-03-disk,full_trial.vm_aggregate_pss_mapped_view,window lacks bracketing samples
+b00-03-disk,full_trial.physical_io_delta,sample value: missing/invalid nonnegative number
+b00-04-original,full_trial.vm_aggregate_pss_mapped_view,window lacks bracketing samples
+b00-04-original,full_trial.physical_io_delta,sample value: missing/invalid nonnegative number
+b00-05-combined,full_trial.vm_aggregate_pss_mapped_view,window lacks bracketing samples
+b00-05-combined,full_trial.physical_io_delta,sample value: missing/invalid nonnegative number
+b00-06-reclaim,full_trial.vm_aggregate_pss_mapped_view,window lacks bracketing samples
+b00-06-reclaim,full_trial.physical_io_delta,sample value: missing/invalid nonnegative number
+b01-00-combined,full_trial.vm_aggregate_pss_mapped_view,window lacks bracketing samples
+b01-00-combined,full_trial.physical_io_delta,sample value: missing/invalid nonnegative number
+b01-01-reclaim,full_trial.vm_aggregate_pss_mapped_view,window lacks bracketing samples
+b01-01-reclaim,full_trial.physical_io_delta,sample value: missing/invalid nonnegative number
+b01-02-ext4-block,full_trial.vm_aggregate_pss_mapped_view,window lacks bracketing samples
+b01-02-ext4-block,full_trial.physical_io_delta,sample value: missing/invalid nonnegative number
+b01-03-original,full_trial.vm_aggregate_pss_mapped_view,window lacks bracketing samples
+b01-03-original,full_trial.physical_io_delta,sample value: missing/invalid nonnegative number
+b01-04-pmem,full_trial.vm_aggregate_pss_mapped_view,window lacks bracketing samples
+b01-04-pmem,full_trial.physical_io_delta,sample value: missing/invalid nonnegative number
+b01-05-disk,full_trial.vm_aggregate_pss_mapped_view,window lacks bracketing samples
+b01-05-disk,full_trial.physical_io_delta,sample value: missing/invalid nonnegative number
+b01-06-ext4-reclaim,full_trial.vm_aggregate_pss_mapped_view,window lacks bracketing samples
+b01-06-ext4-reclaim,full_trial.physical_io_delta,sample value: missing/invalid nonnegative number
+b02-00-reclaim,full_trial.vm_aggregate_pss_mapped_view,window lacks bracketing samples
+b02-00-reclaim,full_trial.physical_io_delta,sample value: missing/invalid nonnegative number
+b02-01-pmem,full_trial.vm_aggregate_pss_mapped_view,window lacks bracketing samples
+b02-01-pmem,full_trial.physical_io_delta,sample value: missing/invalid nonnegative number
+b02-02-disk,full_trial.vm_aggregate_pss_mapped_view,window lacks bracketing samples
+b02-02-disk,full_trial.physical_io_delta,sample value: missing/invalid nonnegative number
+b02-03-combined,full_trial.vm_aggregate_pss_mapped_view,window lacks bracketing samples
+b02-03-combined,full_trial.physical_io_delta,sample value: missing/invalid nonnegative number
+b02-04-ext4-reclaim,full_trial.vm_aggregate_pss_mapped_view,window lacks bracketing samples
+b02-04-ext4-reclaim,full_trial.physical_io_delta,sample value: missing/invalid nonnegative number
+b02-05-ext4-block,full_trial.vm_aggregate_pss_mapped_view,window lacks bracketing samples
+b02-05-ext4-block,full_trial.physical_io_delta,sample value: missing/invalid nonnegative number
+b02-06-original,full_trial.vm_aggregate_pss_mapped_view,window lacks bracketing samples
+b02-06-original,full_trial.physical_io_delta,sample value: missing/invalid nonnegative number

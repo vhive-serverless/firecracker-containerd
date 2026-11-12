@@ -1,0 +1,176 @@
+Offline memory matrix analyzer QA: PASS. Development observations only; no repeated-study result.
+Date: 2026-11-12 (Asia/Singapore); worker raw timestamps are UTC.
+Topic: work/step4-eval-analysis
+Base: 5f2de8395696c58f4e062a6355f6d43b8b23e8bb
+Exact tested source: d1dfc65f26e2efaa8d45cc706aad5a20a7832b8f
+Implementation commits, in order:
+9ad5464d6424f439cb5080d16a966ce7cf3a3422
+c0880395048bf76f8f2db8b9ca6dbee9162149c2
+468dfbd2249f33026724a10a427caeb4cd74d085
+d1dfc65f26e2efaa8d45cc706aad5a20a7832b8f
+Worker: nehalem@amd218.utah.cloudlab.us
+Worker checkout: /users/nehalem/fc-ctrd-mod/step4-eval-analysis-committed
+Worker evidence: /users/nehalem/fc-ctrd-mod/evidence/d1dfc65-eval-analysis
+Python: 3.12.3
+Source clean before and after validation. No Go/Rust compilation or local test execution.
+
+Scope: new summarize_matrix.py and its tests only, plus this new receipt. No driver,
+provenance, runtime, config, proto, kernel, Makefile, manifest, prior-branch or goal
+changes. No matrix/VM execution, cache drop, reclaim request, process sampling or
+/dev/sdb operation. Existing observations were read without changing them. Analysis
+outputs are new files under this task's evidence directory. Final unit fixtures use
+TMPDIR within the owned checkout and are removed by unittest cleanup.
+
+Outputs: summary.json, trials.json/csv, arms.json/csv, paired.json/csv. Every output
+is labeled DEVELOPMENT ONLY for an explicit --allow-development invocation. Strict
+mode requires passed matrix and trial records, clean committed manifest/trial flags,
+matching source/runtime/binary/build receipt identities, consistent probe bytes and
+compatible measurement provenance. Host/idle/sampling/backing-device protocol
+identity prevents pooling incompatible matrices. Development groups remain separate.
+The analyzer's own SHA-256 and each trial input's SHA-256 are recorded in JSON.
+
+Accounting and validity:
+- Primary memory: dedicated cgroup memory.current sampled peak, mean, endpoints and
+  trapezoid byte-seconds. Full host phase start->workload_complete is separate from
+  the fixed common idle window. Default idle offset/window are 5s/20s; this legacy
+  10s-idle smoke requires the explicitly recorded development override 2s/5s.
+- Idle starts at max(vm idle_start.received_host_monotonic_ns)+offset and ends
+  strictly before both guest idle_end records. Host/PSS samples must bracket it;
+  gaps over max-gap (default 1.5s), missing core values, identity changes, counter
+  resets, malformed records and failed correctness/provenance checks reject analysis.
+  Window endpoints use local linear interpolation, not extrapolation or zero fill.
+  Sampled peaks and trapezoid integrals do not establish unsampled true peaks.
+- Cgroup CPU usage/user/system microsecond deltas and memory.stat pgfault/pgmajfault
+  deltas are computed separately for both windows. Faults remain counters, not bytes.
+- VMM aggregate PSS is a separate mapped-memory view; shared RSS is never summed.
+  Full-trial PSS is explicitly unavailable when startup is not bracketed. Idle-only
+  per-VMM own minflt/majflt and /proc/io deltas are separate views and are not added
+  to cgroup, guest or physical-I/O counters. Optional read failures remain NA+reason.
+- Host meminfo is explicitly a whole-host/unrelated-workload view. It is not added
+  to PSS or cgroup charges. Guest AnonPages/Cached/MemTotal and available other fields
+  are actual probe phase endpoints, not invented common-window guest samples.
+- Physical I/O prefers manifest.backing_device.physical_major_minor; explicit
+  --physical-device overrides it. Legacy fallback resolves the current matrix-output
+  filesystem's /sys/dev/block partition parent. Moved observations need recorded
+  provenance or an explicit device. This smoke resolves filesystem8:3 to physical8:0.
+- io.stat layers are recorded individually and never summed. Missing initial device
+  counters/read errors yield NA+reason for that delta, while valid memory/CPU results
+  survive. The selected physical cumulative counter at window end uses immediate
+  valid brackets independently, includes pre-phase work since fresh cgroup creation,
+  and is labeled separately. Raw edge values/times and read errors are retained.
+- CreateVM/readback durations, guest CPU/fault counters, instrumented phase timing,
+  reporting traffic/descriptors, file st_blocks allocation and pool backing fields
+  are retained as available. Probe timings include sampling/hash/canary work and are
+  not pure storage latency. Reporting traffic is not unique freed bytes; st_blocks
+  sums are per-file allocation observations, not unique physical extents.
+- CSV annotations expose window boundaries, the selected device and unavailable
+  metric/layer reasons. Missing numeric cells remain empty, never zero-filled.
+- Block pairs are original->disk, disk->reclaim, ext4-block->pmem and
+  ext4-reclaim->combined. Differences are target-minus-baseline with medians/min/max
+  and counts. No SquashFS/ext4 format difference is attributed to pmem. No savings
+  percentage or paper claim is generated.
+
+Actual verification:
+24 tests passed, no failures/skips. They exercise exact interpolation/integration,
+edge brackets, missing values, gaps/sequences, counter resets, process/cgroup reuse,
+provenance/dirty/mixed protocol rejection, separate physical I/O layers, partial
+optional I/O without fabricated zeros, cumulative end counters, CSV/JSON values,
+guest/host fault fields and block-pair controls. Python syntax compilation passed.
+The final scoped invocation is preserved below.
+
+The recorded eval-dev-original single-arm smoke processed successfully with explicit
+--allow-development and 2s offset/5s window. Its outputs say DEVELOPMENT ONLY:
+1 trial, 1 arm, 0 paired blocks. The output audit confirmed both window boundaries,
+physical8:0, host fault and idle VMM own-I/O views, full-PSS unavailability and all
+expected files. No performance or memory-savings conclusion follows from that smoke.
+The same observations in strict mode were rejected with exit2 for dirty/legacy/mixed
+source provenance, and no rejected output directory was created. This is an expected
+successful guard test; it is not acceptance of the old dirty matrix.
+
+Commands (all on the designated worker, from exact committed checkout):
+cd /users/nehalem/fc-ctrd-mod/step4-eval-analysis-committed
+mkdir -p tmp
+export TMPDIR="$PWD/tmp"
+python3 -m unittest discover -s tools/memory-eval -p test_summarize_matrix.py -v
+python3 -m py_compile tools/memory-eval/summarize_matrix.py tools/memory-eval/test_summarize_matrix.py
+python3 tools/memory-eval/summarize_matrix.py \
+  --input /users/nehalem/fc-ctrd-mod/evidence/eval-dev-original \
+  --output /users/nehalem/fc-ctrd-mod/evidence/d1dfc65-eval-analysis/smoke-summary \
+  --allow-development --idle-offset 2 --idle-window 5
+# Expected exit2 and no output directory:
+python3 tools/memory-eval/summarize_matrix.py \
+  --input /users/nehalem/fc-ctrd-mod/evidence/eval-dev-original \
+  --output /users/nehalem/fc-ctrd-mod/evidence/d1dfc65-eval-analysis/rejected-summary \
+  --idle-offset 2 --idle-window 5
+# Default final committed-data invocation, NOT executed for this receipt:
+# python3 tools/memory-eval/summarize_matrix.py --input /final/committed/matrix --output /new/analysis
+
+Repeated committed matrix execution and final synthesis remain owned by the lead.
+This receipt completes analyzer QA only. Step 3 remains WIP; no milestone is marked complete.
+
+Final scoped unit/syntax log:
+TMPDIR=/users/nehalem/fc-ctrd-mod/step4-eval-analysis-committed/tmp
+test_layers_not_summed_and_new_layer_not_zero_filled (test_summarize_matrix.IOTests.test_layers_not_summed_and_new_layer_not_zero_filled) ... ok
+test_partition_ascends_to_parent (test_summarize_matrix.IOTests.test_partition_ascends_to_parent) ... ok
+test_physical_io_read_error_does_not_erase_memory_cpu_measurements (test_summarize_matrix.IOTests.test_physical_io_read_error_does_not_erase_memory_cpu_measurements) ... ok
+test_recorded_backing_precedes_current_analyzer_filesystem (test_summarize_matrix.IOTests.test_recorded_backing_precedes_current_analyzer_filesystem) ... ok
+test_counter_reset_rejected (test_summarize_matrix.InterpolationTests.test_counter_reset_rejected) ... ok
+test_exact_trapezoid_and_interpolated_edges (test_summarize_matrix.InterpolationTests.test_exact_trapezoid_and_interpolated_edges) ... ok
+test_missing_interior_value_is_not_filtered_or_zero_filled (test_summarize_matrix.InterpolationTests.test_missing_interior_value_is_not_filtered_or_zero_filled) ... ok
+test_no_extrapolation_or_gap_interpolation (test_summarize_matrix.InterpolationTests.test_no_extrapolation_or_gap_interpolation) ... ok
+test_vm_identity_cannot_change_between_valid_rows (test_summarize_matrix.InterpolationTests.test_vm_identity_cannot_change_between_valid_rows) ... ok
+test_changed_cgroup_inode_rejected (test_summarize_matrix.MatrixTests.test_changed_cgroup_inode_rejected) ... ok
+test_cli_rejection_creates_no_output (test_summarize_matrix.MatrixTests.test_cli_rejection_creates_no_output) ... ok
+test_default_window_and_equal_guest_end_are_rejected (test_summarize_matrix.MatrixTests.test_default_window_and_equal_guest_end_are_rejected) ... ok
+test_different_idle_protocol_is_mixed_even_with_same_source (test_summarize_matrix.MatrixTests.test_different_idle_protocol_is_mixed_even_with_same_source) ... ok
+test_dirty_or_legacy_requires_explicit_development_label (test_summarize_matrix.MatrixTests.test_dirty_or_legacy_requires_explicit_development_label) ... ok
+test_failed_trial_never_accepted_even_in_development (test_summarize_matrix.MatrixTests.test_failed_trial_never_accepted_even_in_development) ... ok
+test_full_and_common_idle_are_distinct_with_exact_metrics (test_summarize_matrix.MatrixTests.test_full_and_common_idle_are_distinct_with_exact_metrics) ... ok
+test_idle_vm_pss_gap_rejected (test_summarize_matrix.MatrixTests.test_idle_vm_pss_gap_rejected) ... ok
+test_manifest_build_receipt_mismatch_rejected (test_summarize_matrix.MatrixTests.test_manifest_build_receipt_mismatch_rejected) ... ok
+test_missing_or_permission_denied_sample_rejected (test_summarize_matrix.MatrixTests.test_missing_or_permission_denied_sample_rejected) ... ok
+test_missing_sample_sequence_rejected (test_summarize_matrix.MatrixTests.test_missing_sample_sequence_rejected) ... ok
+test_mixed_sources_rejected_or_kept_in_separate_development_groups (test_summarize_matrix.MatrixTests.test_mixed_sources_rejected_or_kept_in_separate_development_groups) ... ok
+test_optional_vmm_io_permission_failure_is_explicit_not_zero (test_summarize_matrix.MatrixTests.test_optional_vmm_io_permission_failure_is_explicit_not_zero) ... ok
+test_missing_metrics_do_not_become_zeros_in_arm_statistics (test_summarize_matrix.PairTests.test_missing_metrics_do_not_become_zeros_in_arm_statistics) ... ok
+test_pairs_are_within_block_and_pmem_uses_ext4_controls (test_summarize_matrix.PairTests.test_pairs_are_within_block_and_pmem_uses_ext4_controls) ... ok
+
+----------------------------------------------------------------------
+Ran 24 tests in 0.102s
+
+OK
+SCOPED_TEMP_UNIT_AND_SYNTAX_PASS source_clean=true
+
+Actual development processing and output audit:
+{"label": "DEVELOPMENT ONLY", "trials": 1, "arms": 1, "paired_blocks": 0, "output": "/users/nehalem/fc-ctrd-mod/evidence/d1dfc65-eval-analysis/smoke-summary"}
+strict_rejection_exit=2
+{"status": "SMOKE_OUTPUT_AUDIT_PASS", "label": "DEVELOPMENT ONLY", "trials": 1, "paired_blocks": 0, "physical_device": "8:0", "windows": {"full_trial": {"start_host_monotonic_ns": 80786368661256, "end_host_monotonic_ns": 80818878812629}, "common_idle": {"start_host_monotonic_ns": 80805551219901, "end_host_monotonic_ns": 80810551219901}}, "host_fault_deltas": {"full_trial": {"pgfault": 227106.67297235213, "pgmajfault": 0.0}, "common_idle": {"pgfault": 2.0, "pgmajfault": 0.0}}, "vmm_idle_own_deltas": {"vm0": {"stat_faults": {"status": "ok", "deltas": {"minflt": 0.0, "majflt": 0.0}}, "proc_io": {"status": "ok", "deltas": {"read_bytes": 0.0, "write_bytes": 0.0, "rchar": 0.0, "wchar": 0.0, "syscr": 0.0, "syscw": 0.0, "cancelled_write_bytes": 0.0}}}, "vm1": {"stat_faults": {"status": "ok", "deltas": {"minflt": 0.0, "majflt": 0.0}}, "proc_io": {"status": "ok", "deltas": {"read_bytes": 0.0, "write_bytes": 40960.0, "rchar": 16.0, "wchar": 40976.0, "syscr": 2.0, "syscw": 12.0, "cancelled_write_bytes": 0.0}}}}}
+source_clean=true
+
+Expected strict rejection:
+{"status": "rejected", "error": "provenance rejected: dirty/unknown source; manifest not committed acceptance; matrix not committed acceptance; mixed source/runtime revisions; runtime version mismatch; evaluation binary source not exact/clean; missing evaluation source digest; evaluation binary digest/receipt mismatch; evaluation build-info receipt mismatch"}
+
+Final source, log, output and recorded-input SHA-256 audit:
+worker_checkout=/users/nehalem/fc-ctrd-mod/step4-eval-analysis-committed
+d1dfc65f26e2efaa8d45cc706aad5a20a7832b8f
+source_clean=true
+tools/memory-eval/summarize_matrix.py
+tools/memory-eval/test_summarize_matrix.py
+113e5befb4c52393475fed07922ec75062c78974b3066cf30c0778a671b96a63  /users/nehalem/fc-ctrd-mod/step4-eval-analysis-committed/tools/memory-eval/summarize_matrix.py
+273f85839ca508d7b4c6e589dc6e883395bda97176c7847cbfb5472e1a1affa6  /users/nehalem/fc-ctrd-mod/step4-eval-analysis-committed/tools/memory-eval/test_summarize_matrix.py
+4ee572bfbdb33551c01971cca13af0ec6aa27a3722d46b3793f12dfb30a96925  /users/nehalem/fc-ctrd-mod/evidence/d1dfc65-eval-analysis/unit.log
+3e5c10ea135bb0320c4fad2b63af7bbc5a2b294672aaa753d60c1137bf56c405  /users/nehalem/fc-ctrd-mod/evidence/d1dfc65-eval-analysis/unit-scoped-temp.log
+106e024a4363daeb972ad3fc33a8d9a79f33e3a4793a44a9797fe2688a956f01  /users/nehalem/fc-ctrd-mod/evidence/d1dfc65-eval-analysis/smoke.log
+81f172d6d0745a025704c6fae73ee455b1b579802907afead0e7d3589fc30c24  /users/nehalem/fc-ctrd-mod/evidence/d1dfc65-eval-analysis/strict-rejection.log
+6e20b61c60024ac0c11169ea49311533c4f2dcdc43be6ee77d5d9e4a1e298841  /users/nehalem/fc-ctrd-mod/evidence/d1dfc65-eval-analysis/audit.log
+28bd34e3debc93ce9064f50614ea50ef25f2c5dd1da6448f0422768e20899a7e  /users/nehalem/fc-ctrd-mod/evidence/d1dfc65-eval-analysis/smoke-summary/arms.csv
+db542c346dacf7445ef68494f66413558097db64c1a9edef035b1f354f9eae9f  /users/nehalem/fc-ctrd-mod/evidence/d1dfc65-eval-analysis/smoke-summary/arms.json
+69746fa96eccbb5e86f15452c8989104f49ab449b79859a9b4db4ef6cae6e113  /users/nehalem/fc-ctrd-mod/evidence/d1dfc65-eval-analysis/smoke-summary/paired.csv
+32370fce60e03856a83de38d35c12dfd5745ad4e61a48a1cf8ea0ec05d1dac3f  /users/nehalem/fc-ctrd-mod/evidence/d1dfc65-eval-analysis/smoke-summary/paired.json
+f78341ffbc677f4229f25576d35e50372970855cbc712d343cf38c0664d8b50c  /users/nehalem/fc-ctrd-mod/evidence/d1dfc65-eval-analysis/smoke-summary/summary.json
+b799ae1dc9b330192f10117f24cbe6da48de013ba40ebd917f583812641b82ad  /users/nehalem/fc-ctrd-mod/evidence/d1dfc65-eval-analysis/smoke-summary/trials.csv
+fb0686ea2a795022c608142073c4d7187364644c2b1ab042ec30b2eadc935006  /users/nehalem/fc-ctrd-mod/evidence/d1dfc65-eval-analysis/smoke-summary/trials.json
+recorded_input_manifest_sha256=6d0d98f676e9078e6fa8d640ac6bf8b0a828f033921b27ad03956b862b40d766
+recorded_input_matrix_result_sha256=adbbcb066b7e98f7cd215f82c93bf718b20ade4656cd50a47169b1ffc9d1ddd1
+recorded_trial_input_sha256={"disk-allocation.json": "cc0cc61068f14f6a90adff4fe24b34047485d6663240221290626e54f4fc4051", "host.jsonl": "fdd49720a999bb26e90bd8ae969cd7a0d09b5e2f3a6e3781f06ac0aa2539fd76", "phases.jsonl": "9d9fa3fdf3a6f2a69603a5fadb43d9fb4cbd6228b837c640246a7eb8f2f97f7f", "trial.json": "adc2bb0d889de4b7d2abfbaa48e4f143f74e215dc80ff0a2ed9426c84ea9b500", "vm-processes.jsonl": "0405824fe54254fc4f5bc22ee1dd6c4b08198c2a5d8121676e4373209e7964ef", "vm0-probe.json": "9b85953f0265b260d31ffff3b520f42d5d3ec8d49069d2bef46b9223e27182d0", "vm1-probe.json": "0de9787c7e5a264bdd4b8ee72dfa157a2850729e68019d648bef9397e51c673c", "vmm-pids.json": "2950c4535e7fa752a3390477158340853257235758c9cb077c470ee6f9724418"}
+6deafba2a5e9a2510e388c3adf57996e83419541e07d86c5a65fc3018b8e015a  /users/nehalem/fc-ctrd-mod/evidence/d1dfc65-eval-analysis/final-audit.log

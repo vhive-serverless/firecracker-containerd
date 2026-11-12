@@ -1,0 +1,103 @@
+{
+  "evaluation_revision": "0a268c5589c37832e1c3dc89a7b60ed2701e0b9e",
+  "label": "COMMITTED OBSERVATIONS",
+  "worker": "nehalem@amd218.utah.cloudlab.us",
+  "matrix_worker_path": "/users/nehalem/fc-ctrd-mod/evidence/memory-matrix-0a268c5589c3",
+  "summary_worker_path": "/users/nehalem/fc-ctrd-mod/evidence/memory-summary-0a268c5589c3",
+  "analysis_worker_path": "/users/nehalem/fc-ctrd-mod/evidence/memory-results-0a268c5589c3",
+  "observations_completed_before_analysis": true,
+  "named_process_identities_confirmed_absent": [
+    [
+      3407742,
+      8364761
+    ],
+    [
+      3505273,
+      8411267
+    ]
+  ],
+  "evaluation_receipt_worker_path": "/users/nehalem/fc-ctrd-mod/evidence/0a268c5-evaluation-receipt.log",
+  "evaluation_receipt_sha256": "1911a54d6149549a568bdb27e27734acf5d73db54291490af7131b6b933c16be",
+  "evaluation_identity": {
+    "source_revision": "0a268c5589c37832e1c3dc89a7b60ed2701e0b9e",
+    "runtime_revision": "0a268c5589c37832e1c3dc89a7b60ed2701e0b9e",
+    "runtime_image": "sha256:35ba882baf266e1b0780154b922b44be151da7bfe32d5f24db0c321da6af1bc0",
+    "builder_image": "sha256:f6f227dce7c179b0697033dd93fe778daf1f63c16ed0d0a7a841a5280b280f5b",
+    "test_binary_sha256": "c52631426a01e9b1b0e35d3d8f007dc0a042089a91177d1d02bc4b2952442802",
+    "sampler_sha256": "505b59fdca8c57a1ee952fd982292aa860fd08e333a0ef6343fbf8c956577845",
+    "evaluation_build": {
+      "binary_sha256": "c52631426a01e9b1b0e35d3d8f007dc0a042089a91177d1d02bc4b2952442802",
+      "build_info": {
+        "source_digest": "a6fc9f228afd83a8c1a489c5d810a735d6bf5f79a40d1e925c646c6f762f615b",
+        "source_dirty": false,
+        "source_revision": "0a268c5589c37832e1c3dc89a7b60ed2701e0b9e"
+      },
+      "receipt": {
+        "build_info": {
+          "source_digest": "a6fc9f228afd83a8c1a489c5d810a735d6bf5f79a40d1e925c646c6f762f615b",
+          "source_dirty": false,
+          "source_revision": "0a268c5589c37832e1c3dc89a7b60ed2701e0b9e"
+        },
+        "binary_sha256": "c52631426a01e9b1b0e35d3d8f007dc0a042089a91177d1d02bc4b2952442802",
+        "go_version": "go version go1.26.11 linux/amd64"
+      }
+    },
+    "image_sha256": {
+      "squash": "66e2b0adf81636b537aa3de151d1944438bf3530cbf419f5427b2aa7f84314dd",
+      "ext4": "3333a2a540fdbbb74a0ad8fdeb57e8c6335e8a7d5ef7d88f156b2b7774b57a29"
+    },
+    "measurement_protocol": {
+      "idle_seconds": 30,
+      "sampling_interval_s": 0.5,
+      "host_uname": "Linux node-005.cluster.ntu-cloud-pg0.utah.cloudlab.us 6.8.0-147-generic #147-Ubuntu SMP PREEMPT_DYNAMIC Thu Sep 24 11:33:16 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux",
+      "cache_state": "fresh private cache copies; digest verification warms host backing; no global cache drops",
+      "ksm_run": "0",
+      "physical_device": "8:0"
+    }
+  },
+  "provenance_id": "78324b679b2d2a192bb0e5395afb5b45654b923924a3175b69963e519099577e",
+  "analyzer_sha256": "113e5befb4c52393475fed07922ec75062c78974b3066cf30c0778a671b96a63",
+  "summary_configuration": {
+    "idle_offset_s": 5,
+    "idle_window_s": 20,
+    "max_gap_s": 1.5,
+    "boundary_estimate": "linear interpolation; no extrapolation or zero fill"
+  },
+  "raw_archive_sha256": "3c65da18d4706b324244e03691b7542620dbf74537ee8349d138f492b6fa8dc2",
+  "raw_archive_bytes": 3750007,
+  "excluded_large_image_files": {
+    "squash": {
+      "path": "/users/nehalem/fc-ctrd-mod/evidence/memory-matrix-0a268c5589c3/images/squash.img",
+      "sha256": "66e2b0adf81636b537aa3de151d1944438bf3530cbf419f5427b2aa7f84314dd",
+      "logical_bytes": 75497472,
+      "allocated_bytes": 74141696
+    },
+    "ext4": {
+      "path": "/users/nehalem/fc-ctrd-mod/evidence/memory-matrix-0a268c5589c3/images/ext4.img",
+      "sha256": "3333a2a540fdbbb74a0ad8fdeb57e8c6335e8a7d5ef7d88f156b2b7774b57a29",
+      "logical_bytes": 536870912,
+      "allocated_bytes": 217546752
+    }
+  },
+  "original_summary_file_sha256": {
+    "arms.csv": "5c2d351e9b1c7aacbe0e22a56f1438c2cd70d0f3cbdf812fba189e36fb7ed67b",
+    "arms.json": "075b672cd85b1ceaf6c0b342ffdef598a335af953040287c8b51d159ca770042",
+    "paired.csv": "a7ec2b1151ed475ac3a6be371cdaa7903bd13d491a73ac2d72ee5c0de8897e73",
+    "paired.json": "21af1633227a11357a32dae40d009e99e3289a42cfc0e0f10144d31ed0a56e12",
+    "summary.json": "63a50e406f0665aceba00a8eae55b2e737f9e865a27f4683410b0762ad5a36f5",
+    "trials.csv": "649e4731392c3d80f69733fe97404d4c65eaddbd12e9dd1ce3d9f1ae5cb8087d",
+    "trials.json": "2b279c5e5eff1e5b6f145451671730de6cb897c38835f9cd2ea7ac261e970b0c"
+  },
+  "analysis_script_sha256": {
+    "make_results.py": "aa7f2edbd26c79ca2a3d4909f9b70822a82ce953b671d5f704ccf8b82e28f17d",
+    "write_report.py": "7c1179da47064543b1737bd0c3999ea1beb4d5d90253acd0a00f1dcc5a88caa5"
+  },
+  "analysis_notes": [
+    "No evaluator/analyzer/runtime source modifications or new observations.",
+    "Standalone figures visually reviewed; layout regeneration retained identical observations and numeric metrics.",
+    "Initial extra validation used a required cleanup_errors field; successful raw trials omit it. Helper corrected to optional field semantics consistent with strict analyzer, and final verification passed. Failure log retained.",
+    "Reporting frames may precede final FlushMetrics consumption; recorded counters do not certify final traffic/failure totals.",
+    "No native-restore claim is made by this matrix."
+  ],
+  "created_utc": "2026-11-11T17:34:55.414848+00:00"
+}
