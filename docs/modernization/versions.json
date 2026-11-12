@@ -340,5 +340,12 @@
       "initial_tested_runtime_commit": "e666612819bc1efa71c645434bc36385f92e6423",
       "worker_toolchains": "evidence/e666612819bc-worker-toolchains.log"
     }
-  ]
+  ],
+  "kubernetes_pod_restore_deferral": {
+    "confirmed_by_user": "2026-11-12",
+    "target": "Kubernetes 1.38 interface work",
+    "status": "Deferred pending usable upstream interfaces; not accepted",
+    "last_interface_probe": "2026-11-11; k3s1.37.2, upstream1.37.2, upstream1.38.0-beta.0 lacked required workflow",
+    "scope": "External API deferral is separate from CRI conformance failures and current Step4 storage work."
+  }
 }

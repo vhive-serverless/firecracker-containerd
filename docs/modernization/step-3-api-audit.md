@@ -1,9 +1,17 @@
 # Step 3 prerequisite audit
 
-Step 3 is incomplete. This branch starts from the accepted Step 2 commit
-`122d7084043a1e0b237fea9eb57de8d2eb48c486`, whose
-[worker receipt](evidence/122d7084043a-acceptance-receipt.log) records all
-runtime and vHive acceptance gates. Step 4 has not started.
+This records the **2026-11-11** released-interface audit. The user confirmed on
+2026-11-12 that Kubernetes Pod checkpoint/restore integration is deferred to the
+1.38 interface work. Missing endpoints in the tested releases are an external
+availability limitation, not a failed implementation of an available API.
+A 1.38 milestone target does not prove support in a particular binary: rerun the
+probe and inspect the workflow before enabling integration.
+
+Step 3 remains WIP for separately recorded CRI failures and future Pod restore
+integration. Step 4 is already underway under the explicit ordering exception.
+The original prerequisite was the accepted Step 2 revision `122d7084043a`, whose
+[worker receipt](evidence/122d7084043a-acceptance-receipt.log) preserves that
+historical baseline. Later maintained branch tips are documented separately.
 
 The [committed worker probe receipt](evidence/f649858-kubernetes-api-audit.log)
 records the binary hashes, gate errors, raw log hashes, and audit exit status.
@@ -57,11 +65,11 @@ alone would not disprove an opt-in alpha feature; it is recorded alongside
 the rejected gate and missing source call paths, rather than treated as a
 replacement for those checks.
 
-## Upstream implementation status
+## Upstream implementation status at the recorded audit
 
 The [checkpoint implementation PR](https://github.com/kubernetes/kubernetes/pull/140186)
 and [restore implementation PR](https://github.com/kubernetes/kubernetes/pull/143579)
-remain open. The restore series builds on the checkpoint series. Heads
+were open at the November 11 audit. The restore series builds on the checkpoint series. Heads
 observed during the audit were:
 
 - Checkpoint: `27d02988e4fb3008c4d29e9db6ad844f58cb8d1b`.
@@ -69,7 +77,7 @@ observed during the audit were:
 - Kubernetes master: `c41dac6b0f518f2068c98b323964949fd015e760`.
 
 Those are implementation candidates, not released Kubernetes interfaces.
-The current PRs also differ from older KEP text: the checkpoint resource
+The audited PRs also differ from older KEP text: the checkpoint resource
 is in `node.k8s.io/v1alpha1`, and restore uses a structured
 `Pod.spec.restoreFrom`. A custom CRD or a Firecracker-only snapshot
 endpoint would not satisfy the requested Kubernetes acceptance gate.
