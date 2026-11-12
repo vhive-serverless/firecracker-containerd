@@ -61,6 +61,7 @@ func (m *taskManager) AdoptProcess(ctx context.Context, saved RestoredProcess, b
 	if err != nil {
 		return nil, err
 	}
+	defer close(proc.admissionDone)
 	defer func() {
 		if err != nil {
 			proc.cancel()
