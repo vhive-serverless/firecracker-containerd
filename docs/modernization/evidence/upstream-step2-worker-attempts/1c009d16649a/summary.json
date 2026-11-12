@@ -1,0 +1,80 @@
+{
+  "runtime_revision": "1c009d16649aed2e864b6e0330b740ba2802cb5f",
+  "pipeline_exit_code": 1,
+  "build_install_images": "PASS",
+  "vhive_candidate_result": "FAIL",
+  "passes": [
+    "TestPauseSnapResume (16.20s)"
+  ],
+  "failures": [
+    "TestSnapshotConcurrentClones (64.39s)",
+    "TestSnapshotSourceMemoryAndDiskIsolation (46.65s)"
+  ],
+  "failure_scope": "Both clone tests reach graceful StopSingleVM; agent Shutdown returns without error but machine.Wait times out. Root cause pending. No ELOOP backing rejection remains.",
+  "partial_evidence": "Fatal assertions before continuity line157 establish preserved captured exec/counter, independent source/clone disk data, and clone functionality after source deletion. Whole test remains FAIL.",
+  "files": {
+    "stage2-build-1c009d16649a.log": {
+      "bytes": 104515,
+      "sha256": "42b0f268b3f1d9612b9fb0290fff3d0f9abf7b6ba7d6cd0dcc7411a104ab005f"
+    },
+    "stage2-install-1c009d16649a.log": {
+      "bytes": 9098,
+      "sha256": "3d05ab57428035226cdbf9fa37f43eda66391ef50335004b481176f27fbb99e7"
+    },
+    "stage2-test-images-1c009d16649a.log": {
+      "bytes": 109694,
+      "sha256": "b96bd81e73b172fbd37ba06548a267efd4c37da7c94ba2dc56add68da69c0e80"
+    },
+    "stage2-vhive-1c009d16649a.log": {
+      "bytes": 9967,
+      "sha256": "4efef29c9808b8b9a4753f7c8a1c3c0217fcd4875f99841eddfdc35cef2a546b"
+    },
+    "vhive-1c009d16649a.uCEKG76s/acceptance.log": {
+      "bytes": 6057,
+      "sha256": "6791f7ca0b7174230bcd8e8c883fe3afd0d377049f50debedd1a98fc5bf64934"
+    },
+    "vhive-1c009d16649a.uCEKG76s/binaries.sha256": {
+      "bytes": 506,
+      "sha256": "7a8b34e9d6b1d36121efde70477f3ab7ca99face0001ae0abe843151bcf8dac2"
+    },
+    "vhive-1c009d16649a.uCEKG76s/containerd.out": {
+      "bytes": 392091,
+      "sha256": "c8ee869c45729e684b2fdd7f24b62fb5d9245322fa82b46d6ff5605d3227654c"
+    },
+    "vhive-1c009d16649a.uCEKG76s/demux-snapshotter.out": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "vhive-1c009d16649a.uCEKG76s/http-address-resolver.out": {
+      "bytes": 81,
+      "sha256": "84f7190a77cf2f7b9179b037b9c476b7699baef01e3e94d3420b6924aec60dd6"
+    },
+    "vhive-1c009d16649a.uCEKG76s/inputs": {
+      "bytes": 484,
+      "sha256": "3e208e474c4b8d8e22ae9f05cc4b56c644fcf708279e4c8933d65164b862c383"
+    },
+    "vhive-1c009d16649a.uCEKG76s/modules.json": {
+      "bytes": 99263,
+      "sha256": "2daa8aaa5f814cfdf76e66a0ca9a2e3261e93f51242d939e828b6711ade98b75"
+    },
+    "vhive-1c009d16649a.uCEKG76s/test-buildinfo.txt": {
+      "bytes": 289,
+      "sha256": "27e526fb97d891510e983512c1eebf3e442b8701d14ebd9529ab0c1efed1ea2f"
+    },
+    "vhive-1c009d16649a.uCEKG76s/vhive-runtime-version": {
+      "bytes": 244,
+      "sha256": "1da3ac4b99ea5a9f2902035b81ef414ebc5edacbe86425b297ad02450f2d04b1"
+    },
+    "vhive-1c009d16649a.uCEKG76s/vhive-tests.log": {
+      "bytes": 5813,
+      "sha256": "13c19bab4053fb8d35e69e8a7a3043560aac9c321505a5ad4a056850ebbd84e4"
+    }
+  },
+  "post_run_cleanup": {
+    "runtime_checkout": "clean",
+    "dedicated_vhive_pool": "absent from dmsetup thin-pool listing",
+    "dedicated_container": "absent from docker ps",
+    "unrelated_kubernetes_container": "fcmod-upstream-137-control-plane remains running",
+    "pipeline": "terminal exit1; no later VM suite running"
+  }
+}
