@@ -163,8 +163,21 @@ func enterRestoreNamespace(configPath string) error {
 			bindings = append(bindings, binding{device, device, false, false})
 		}
 	}
+	var backings []*os.File
+	defer func() {
+		for _, backing := range backings {
+			_ = backing.Close()
+		}
+	}()
 	for _, mount := range plan.Mounts {
-		bindings = append(bindings, binding{mount.Source, mount.Target, false, mount.ReadOnly})
+		backing, _, err := openRestoreBacking(mount.Source)
+		if err != nil {
+			return err
+		}
+		backings = append(backings, backing)
+		// Bind the validated inode, not a source pathname that could change
+		// between validation and mount. This helper has not changed root yet.
+		bindings = append(bindings, binding{fmt.Sprintf("/proc/self/fd/%d", backing.Fd()), mount.Target, false, mount.ReadOnly})
 	}
 	seen := map[string]bool{restoreExecutable: true}
 	for _, mount := range plan.Mounts {
@@ -281,9 +294,11 @@ func installRestoreMount(path string) (retErr error) {
 	if closeErr != nil {
 		return closeErr
 	}
-	if err := validateRestoreMounts([]restoreMount{plan.Mount}, plan.SharedDirectory); err != nil {
+	mounts := []restoreMount{plan.Mount}
+	if err := validateRestoreMounts(mounts, plan.SharedDirectory); err != nil {
 		return err
 	}
+	plan.Mount = mounts[0]
 	identity, err := vm.ReadProcessIdentity(plan.Process.PID)
 	if err != nil || identity != plan.Process {
 		return fmt.Errorf("restore VMM process identity changed")
@@ -317,7 +332,7 @@ func installRestoreMount(path string) (retErr error) {
 	if filesystem.Type != unix.TMPFS_MAGIC {
 		return fmt.Errorf("restore mount target is not a private tmpfs root")
 	}
-	source, err := os.OpenFile(plan.Mount.Source, os.O_RDONLY|unix.O_NOFOLLOW|unix.O_NONBLOCK, 0)
+	source, _, err := openRestoreBacking(plan.Mount.Source)
 	if err != nil {
 		return err
 	}

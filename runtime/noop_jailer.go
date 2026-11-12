@@ -136,17 +136,23 @@ func (j *noopJailer) ExposeFileToJail(path string) error {
 		return nil
 	}
 	mount := restoreMount{Source: path, Target: path}
+	source, _, err := resolveRestoreBacking(path)
+	if err != nil {
+		return err
+	}
 	for _, existing := range j.restoreMounts {
-		if existing.Target == path && existing.Source == path {
+		if existing.Target == path && existing.Source == source {
 			return nil
 		}
 		if pathWithin(existing.Target, path) || pathWithin(path, existing.Target) {
 			return fmt.Errorf("new disk overlaps captured backing %s", path)
 		}
 	}
-	if err := validateRestoreMounts([]restoreMount{mount}, shared); err != nil {
+	mounts := []restoreMount{mount}
+	if err := validateRestoreMounts(mounts, shared); err != nil {
 		return err
 	}
+	mount = mounts[0]
 	if err := addRestoreMount(j.ctx, j.process, shared, mount); err != nil {
 		return err
 	}
