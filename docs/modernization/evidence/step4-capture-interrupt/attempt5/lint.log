@@ -1,0 +1,9 @@
+/users/nehalem/fc-ctrd-mod/step4-capture-interrupt-dev/bin/ltag -t ./.headers -excludes "tools _submodules tmp bin" -check -v
+No template file for Dockerfile, shall skip all Dockerfile
+No template file for bash scripts, shall skip all bash scripts
+/users/nehalem/fc-ctrd-mod/step4-capture-interrupt-dev/bin/git-validation -run DCO,short-subject -range HEAD~1..HEAD
+ * 907fc268 "Record broader Step 4 regression results and retained CRI failures" ... PASS
+/users/nehalem/fc-ctrd-mod/step4-capture-interrupt-dev/bin/golangci-lint run
+0 issues.
+cd cri && /users/nehalem/fc-ctrd-mod/step4-capture-interrupt-dev/bin/golangci-lint run --config ../.golangci.yml
+0 issues.

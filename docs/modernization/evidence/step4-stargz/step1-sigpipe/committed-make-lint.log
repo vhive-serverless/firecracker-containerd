@@ -1,0 +1,7 @@
+/users/nehalem/fc-ctrd-mod/step1-sigpipe-dev/bin/ltag -t ./.headers -excludes "tools _submodules tmp bin" -check -v
+No template file for Dockerfile, shall skip all Dockerfile
+No template file for bash scripts, shall skip all bash scripts
+/users/nehalem/fc-ctrd-mod/step1-sigpipe-dev/bin/git-validation -run DCO,short-subject -range HEAD~1..HEAD
+ * e09cf274 "Ignore SIGPIPE in demux service lifecycle" ... PASS
+/users/nehalem/fc-ctrd-mod/step1-sigpipe-dev/bin/golangci-lint run
+0 issues.

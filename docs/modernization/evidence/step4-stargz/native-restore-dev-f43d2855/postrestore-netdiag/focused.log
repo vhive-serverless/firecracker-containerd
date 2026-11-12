@@ -1,0 +1,41 @@
+=== RUN   TestStargzNativeRestore_Isolated
+    stargz_restore_integ_test.go:94: isolated stargz network bridge=fc-sgz0 subnet=198.18.42.0/24 uplink=eth0 nameservers=[128.110.156.4]
+=== RUN   TestStargzNativeRestore_Isolated/ext4-block
+=== RUN   TestStargzNativeRestore_Isolated/ext4-block/jailed=true
+    stargz_restore_integ_test.go:107: guest routing and DNS configuration:
+        guest route:
+        Iface	Destination	Gateway 	Flags	RefCnt	Use	Metric	Mask		MTU	Window	IRTT                                                       
+        eth0	00000000	012A12C6	0003	0	0	0	00000000	0	0	0                                                                               
+        eth0	002A12C6	00000000	0001	0	0	0	00FFFFFF	0	0	0                                                                               
+        guest resolv.conf:
+        #MANUAL
+        nameserver 128.110.156.4
+        guest ghcr.io DNS:
+        140.82.114.34   STREAM ghcr.io
+    stargz_restore_integ_test.go:107: capturing restore network on sgrR011 to /var/log/firecracker-containerd-test/sgzR-1-1-sgrR011.pcap
+    stargz_restore_integ_test.go:107: capturing restore network on eth0 to /var/log/firecracker-containerd-test/sgzR-1-1-eth0.pcap
+    stargz_restore_integ_test.go:107: post-restore guest route, MTU, sockets, DNS, and fresh HTTPS TCP connects:
+        restored guest route:
+        Iface	Destination	Gateway 	Flags	RefCnt	Use	Metric	Mask		MTU	Window	IRTT                                                       
+        eth0	00000000	012A12C6	0003	0	0	0	00000000	0	0	0                                                                               
+        eth0	002A12C6	00000000	0001	0	0	0	00FFFFFF	0	0	0                                                                               
+        restored guest resolver:
+        #MANUAL
+        nameserver 128.110.156.4
+        restored guest interface MTU:
+        1500
+        restored guest TCP sockets:
+          sl  local_address rem_address   st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode                                                     
+           0: 0100007F:202A 00000000:0000 0A 00000000:00000000 00:00000000 00000000     0        0 1824 2 00000000f5c3c4e8 100 0 0 10 0                      
+           1: 022A12C6:CDD8 9A6CC7B9:01BB 01 00000000:00000000 02:000009FD 00000000     0        0 1869 2 00000000b8c54f2c 21 4 23 10 52                     
+           2: 022A12C6:D2BC 2272528C:01BB 01 00000000:00000000 02:000009D7 00000000     0        0 1849 2 000000002ff701cf 28 4 12 10 -1                     
+          sl  local_address                         remote_address                        st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode
+        DNS ghcr.io: DNS_FAILED
+        TCP ghcr.io:443 CONNECTED
+        DNS pkg-containers.githubusercontent.com: 185.199.108.154 STREAM pkg-containers.githubusercontent.com
+        TCP pkg-containers.githubusercontent.com:443 CONNECTED
+--- PASS: TestStargzNativeRestore_Isolated (110.51s)
+    --- PASS: TestStargzNativeRestore_Isolated/ext4-block (110.44s)
+        --- PASS: TestStargzNativeRestore_Isolated/ext4-block/jailed=true (110.44s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter	110.532s

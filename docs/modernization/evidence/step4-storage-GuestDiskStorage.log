@@ -1,0 +1,98 @@
+make: Entering directory '/users/nehalem/fc-ctrd-mod/step4-storage-dev/runtime'
+make -C .. test-deps-in-docker
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/step4-storage-dev'
+docker run --rm \
+	--volume /users/nehalem/fc-ctrd-mod/step4-storage-dev:/src \
+	--volume gocache:/go \
+	--workdir /src \
+	public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 go mod download
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/step4-storage-dev'
+/users/nehalem/fc-ctrd-mod/step4-storage-dev/runtime/../tools/thinpool.sh reset "fc-step4-storage-dev"
+Name:              fc-step4-storage-dev
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 6
+Number of targets: 1
+
+docker run --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-storage-dev/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-storage-dev/runtime/..:/src \
+	--volume /users/nehalem/fc-ctrd-mod/step4-storage-dev/runtime/vm-storage:/srv/firecracker_containerd_tests \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-storage-dev \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:step4-storage-dev \
+	"go test -v -count=1 -timeout=360s -run '^TestGuestDiskStorage_Isolated$'"
+=== RUN   TestGuestDiskStorage_Isolated
+=== RUN   TestGuestDiskStorage_Isolated/jailed=false
+    guest_storage_integ_test.go:79: Host private disk: /srv/firecracker_containerd_tests/default#guest-disk-false/guest-overlay.ext4: UUID="7c50661f-98b1-425e-8368-2cbd6cac1b31" VERSION="1.0" BLOCK_SIZE="1024" TYPE="ext4" USAGE="filesystem"
+    guest_storage_integ_test.go:108: Guest inspection: guest_upper_magic=ef53
+        141 55 0:21 / / rw,noatime - overlay overlayfs:/overlay/root rw,lowerdir=/,upperdir=/overlay/root,workdir=/overlay/work,uuid=on
+        142 141 0:47 / /proc rw,nosuid,nodev,noexec,relatime - proc proc rw
+        143 141 0:48 / /dev rw,nosuid - tmpfs tmpfs rw,size=65536k,mode=755
+        144 143 0:49 / /dev/pts rw,nosuid,noexec,relatime - devpts devpts rw,gid=5,mode=620,ptmxmode=666
+        145 143 0:50 / /dev/shm rw,nosuid,nodev,noexec,relatime - tmpfs shm rw,size=65536k
+        146 143 0:45 / /dev/mqueue rw,nosuid,nodev,noexec,relatime - mqueue mqueue rw
+        147 141 0:51 / /sys ro,nosuid,nodev,noexec,relatime - sysfs sysfs ro
+        148 141 0:52 / /run rw,nosuid - tmpfs tmpfs rw,size=65536k,mode=755
+        149 141 254:32 / /overlay ro,noatime master:4 - ext4 /dev/vdc rw
+        56 142 0:47 /bus /proc/bus ro,nosuid,nodev,noexec,relatime - proc proc rw
+        57 142 0:47 /fs /proc/fs ro,nosuid,nodev,noexec,relatime - proc proc rw
+        58 142 0:47 /irq /proc/irq ro,nosuid,nodev,noexec,relatime - proc proc rw
+        59 142 0:47 /sys /proc/sys ro,nosuid,nodev,noexec,relatime - proc proc rw
+        60 142 0:47 /sysrq-trigger /proc/sysrq-trigger ro,nosuid,nodev,noexec,relatime - proc proc rw
+        61 142 0:53 / /proc/acpi ro,relatime - tmpfs tmpfs ro
+        62 142 0:48 /null /proc/interrupts rw,nosuid - tmpfs tmpfs rw,size=65536k,mode=755
+        63 142 0:48 /null /proc/kcore rw,nosuid - tmpfs tmpfs rw,size=65536k,mode=755
+        64 142 0:48 /null /proc/keys rw,nosuid - tmpfs tmpfs rw,size=65536k,mode=755
+        65 142 0:48 /null /proc/timer_list rw,nosuid - tmpfs tmpfs rw,size=65536k,mode=755
+        66 147 0:54 / /sys/firmware ro,relatime - tmpfs tmpfs ro
+        67 142 0:55 / /proc/scsi ro,relatime - tmpfs tmpfs ro
+        reboot=k panic=1 pci=off systemd.unified_cgroup_hierarchy=1 systemd.log_color=false console=ttyS0 nomodules systemd.journald.forward_to_console systemd.unit=firecracker.target init=/sbin/overlay-init overlay_root=UUID=7c50661f-98b1-425e-8368-2cbd6cac1b31 ro pci=off root=/dev/vda ro virtio_mmio.device=4K@0xc0001000:5 virtio_mmio.device=4K@0xc0002000:6 virtio_mmio.device=4K@0xc0003000:7 virtio_mmio.device=4K@0xc0004000:8
+        disk-write-copyup-rename-delete-enospc=passed
+=== RUN   TestGuestDiskStorage_Isolated/jailed=true
+    guest_storage_integ_test.go:79: Host private disk: /srv/firecracker_containerd_tests/default#guest-disk-true/rootfs/guest-overlay.ext4: UUID="fcc5c333-7bee-47c6-b603-014e9166272f" VERSION="1.0" BLOCK_SIZE="1024" TYPE="ext4" USAGE="filesystem"
+    guest_storage_integ_test.go:108: Guest inspection: guest_upper_magic=ef53
+        141 55 0:21 / / rw,noatime - overlay overlayfs:/overlay/root rw,lowerdir=/,upperdir=/overlay/root,workdir=/overlay/work,uuid=on
+        142 141 0:47 / /proc rw,nosuid,nodev,noexec,relatime - proc proc rw
+        143 141 0:48 / /dev rw,nosuid - tmpfs tmpfs rw,size=65536k,mode=755
+        144 143 0:49 / /dev/pts rw,nosuid,noexec,relatime - devpts devpts rw,gid=5,mode=620,ptmxmode=666
+        145 143 0:50 / /dev/shm rw,nosuid,nodev,noexec,relatime - tmpfs shm rw,size=65536k
+        146 143 0:45 / /dev/mqueue rw,nosuid,nodev,noexec,relatime - mqueue mqueue rw
+        147 141 0:51 / /sys ro,nosuid,nodev,noexec,relatime - sysfs sysfs ro
+        148 141 0:52 / /run rw,nosuid - tmpfs tmpfs rw,size=65536k,mode=755
+        149 141 254:32 / /overlay ro,noatime master:4 - ext4 /dev/vdc rw
+        56 142 0:47 /bus /proc/bus ro,nosuid,nodev,noexec,relatime - proc proc rw
+        57 142 0:47 /fs /proc/fs ro,nosuid,nodev,noexec,relatime - proc proc rw
+        58 142 0:47 /irq /proc/irq ro,nosuid,nodev,noexec,relatime - proc proc rw
+        59 142 0:47 /sys /proc/sys ro,nosuid,nodev,noexec,relatime - proc proc rw
+        60 142 0:47 /sysrq-trigger /proc/sysrq-trigger ro,nosuid,nodev,noexec,relatime - proc proc rw
+        61 142 0:53 / /proc/acpi ro,relatime - tmpfs tmpfs ro
+        62 142 0:48 /null /proc/interrupts rw,nosuid - tmpfs tmpfs rw,size=65536k,mode=755
+        63 142 0:48 /null /proc/kcore rw,nosuid - tmpfs tmpfs rw,size=65536k,mode=755
+        64 142 0:48 /null /proc/keys rw,nosuid - tmpfs tmpfs rw,size=65536k,mode=755
+        65 142 0:48 /null /proc/timer_list rw,nosuid - tmpfs tmpfs rw,size=65536k,mode=755
+        66 147 0:54 / /sys/firmware ro,relatime - tmpfs tmpfs ro
+        67 142 0:55 / /proc/scsi ro,relatime - tmpfs tmpfs ro
+        nomodules systemd.journald.forward_to_console systemd.log_color=false systemd.unified_cgroup_hierarchy=1 systemd.unit=firecracker.target init=/sbin/overlay-init overlay_root=UUID=fcc5c333-7bee-47c6-b603-014e9166272f ro console=ttyS0 reboot=k panic=1 pci=off pci=off root=/dev/vda ro virtio_mmio.device=4K@0xc0001000:5 virtio_mmio.device=4K@0xc0002000:6 virtio_mmio.device=4K@0xc0003000:7 virtio_mmio.device=4K@0xc0004000:8
+        disk-write-copyup-rename-delete-enospc=passed
+--- PASS: TestGuestDiskStorage_Isolated (10.09s)
+    --- PASS: TestGuestDiskStorage_Isolated/jailed=false (4.26s)
+    --- PASS: TestGuestDiskStorage_Isolated/jailed=true (5.83s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	10.105s
+make: Leaving directory '/users/nehalem/fc-ctrd-mod/step4-storage-dev/runtime'

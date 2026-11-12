@@ -1,0 +1,5 @@
+Blob: sha256:4212523da282d68d5e938cc87081bf8e582cd48a4dcbcf9f4b08cf6acc91cae2
+Host: token exchange succeeded; authenticated HEAD 200, connect 0.064s, first byte 0.224s; Range bytes=0-0 returned 206, 1 byte, connect 0.079s, first byte 0.277s.
+Docker test container bridge: token exchange succeeded; authenticated HEAD 200, connect 0.075s, first byte 0.250s; Range bytes=0-0 returned 206, 1 byte, connect 0.079s, first byte 0.290s.
+Guest diagnostic (VMID sgzR-1-0): /proc/net/route default via 012A12C6 (little-endian 198.18.42.1), connected 198.18.42.0/24; /etc/resolv.conf nameserver 128.110.156.4; getent ahostsv4 ghcr.io returned 140.82.113.34 and 140.82.112.33 in different cases.
+Active test namespace interfaces: Docker eth0=1500, fc-sgz0=1500, restored TAP sgrR011=1500. Host interfaces (including uplink eno33np0)=1500. Host tracepath to 140.82.112.34 reported PMTU 1500. Container image did not include tracepath.

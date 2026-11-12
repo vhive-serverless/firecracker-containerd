@@ -1,0 +1,133 @@
+Development acceptance of the stargz storage initializer and built guest image.
+Production source de2e471; test script transferred separately at recorded SHA.
+This is not VM or full committed-stack acceptance.
+
+--- provenance.txt ---
+source_revision=de2e471d87a8dfb925e437c480407070f9b72483
+active_checkout_status=
+test_image=localhost/firecracker-containerd-test:de2e471d87a8
+test_image_id=sha256:49e8d981deb0551407fbf5039e4e3a4ed2c5e345eeba606aa5c716ccca2f4175 created=2026-11-11T21:34:49.794806938-07:00
+rootfs_stargz=/users/nehalem/fc-ctrd-mod/step4-stargz-closeout/tools/image-builder/rootfs-stargz.img
+rootfs_size=106090496 bytes
+c4ec65fe5542687b93bb46ee9c3ad0e9a36be34f6a71ade3ccbe0f01b83b2968  /users/nehalem/fc-ctrd-mod/step4-stargz-closeout/tools/image-builder/rootfs-stargz.img
+8817d1e65346b6587360f736b7713c506225ae49e332b1069898744bbed2abde  /tmp/fcmod-stargz-init-work/test-stargz-storage-init.sh
+5f78318dd34956ab251c171bb4d65008aeac232c55af7e1b3768cc6b3e0918d6  /tmp/fcmod-stargz-init-work/prepare-stargz-storage
+
+--- commands.txt ---
+# Worker checkout / test run
+repo=/users/nehalem/fc-ctrd-mod/step4-stargz-closeout
+work=/tmp/fcmod-stargz-init-work
+bash -n "$work/test-stargz-storage-init.sh"
+bash "$work/test-stargz-storage-init.sh" \
+  localhost/firecracker-containerd-test:de2e471d87a8 \
+  "$work/prepare-stargz-storage"
+
+# Read-only rootfs inspection (the image and source inputs are read-only bind mounts).
+docker run --rm --interactive --network none \
+  --mount type=bind,source="$repo/tools/image-builder/rootfs-stargz.img",target=/input/rootfs-stargz.img,readonly \
+  --mount type=bind,source="$repo/tools/image-builder/files_stargz/usr/local/bin/prepare-stargz-storage",target=/source/prepare-stargz-storage,readonly \
+  --mount type=bind,source="$repo/tools/image-builder/files_stargz/etc/systemd/system/stargz-snapshotter.service",target=/source/stargz-snapshotter.service,readonly \
+  --entrypoint /bin/bash fc-image-builder:de2e471d87a8 -s
+# The in-container commands were unsquashfs -cat for both files, sha256sum and
+# cmp against read-only source mounts, grep of ExecStartPre, and unsquashfs -lls
+# for executable mode. Source image SHA256 before/after is in provenance files.
+
+--- acceptance.log ---
+test_image=localhost/firecracker-containerd-test:de2e471d87a8
+helper=/tmp/fcmod-stargz-init-work/prepare-stargz-storage
+5f78318dd34956ab251c171bb4d65008aeac232c55af7e1b3768cc6b3e0918d6  /tmp/fcmod-stargz-init-work/prepare-stargz-storage
+MOUNT_NAMESPACE_PRIVATE host=mnt:[4026531841] container=mnt:[4026533674] propagation=private
+PASS: absent_backing rejected (guest upper is not mounted at /rom/overlay)
+PASS: absent backing is fail-closed
+PASS: unsupported_backing rejected (unsupported guest-upper filesystem)
+PASS: unsupported backing filesystem is fail-closed
+PASS: implicit_tmpfs rejected (RAM guest upper requires explicit overlay_root=ram)
+RAM_BIND_ID source=172:2 store=172:2
+PASS: explicit overlay_root=ram control binds correctly and is idempotent
+EXT4_UPPER fstype=ext4 source=/dev/loop16 majmin=7:16 loop=/dev/loop16
+EXT4_BIND_ID source=1808:12 store=1808:12
+PASS: ext4 backing matches the exact loop device; source identity, write-through, and idempotence verified
+PASS: mismatched_existing_store rejected (existing store mount does not reference the private guest upper)
+PASS: mismatched existing store mount is fail-closed
+STARGZ_STORAGE_INIT_ACCEPTANCE_OK
+STARGZ_STORAGE_INIT_CLEANUP_OK
+STARGZ_STORAGE_INIT_CONTAINER_OK
+
+--- exit.txt ---
+0
+
+--- post-run-status.txt ---
+leftover_test_containers=
+active_checkout_status=
+--- rootfs-inspection-provenance.txt ---
+builder_image=fc-image-builder:de2e471d87a8
+builder_image_id=sha256:48ac8b8af46c866df11aa4551bf51d071506716f31a18ead55bd1bb9f345baca created=2026-11-11T07:39:15.774650937-07:00
+rootfs_image=/users/nehalem/fc-ctrd-mod/step4-stargz-closeout/tools/image-builder/rootfs-stargz.img
+rootfs_before_size=106090496 bytes mode=644
+c4ec65fe5542687b93bb46ee9c3ad0e9a36be34f6a71ade3ccbe0f01b83b2968  /users/nehalem/fc-ctrd-mod/step4-stargz-closeout/tools/image-builder/rootfs-stargz.img
+5f78318dd34956ab251c171bb4d65008aeac232c55af7e1b3768cc6b3e0918d6  /users/nehalem/fc-ctrd-mod/step4-stargz-closeout/tools/image-builder/files_stargz/usr/local/bin/prepare-stargz-storage
+c3f4523ec92643e08caffa6ad27cade094a22ee5df2e26d477c62953c9bef93f  /users/nehalem/fc-ctrd-mod/step4-stargz-closeout/tools/image-builder/files_stargz/etc/systemd/system/stargz-snapshotter.service
+
+--- rootfs-inspection.log ---
+embedded_service_sha256=c3f4523ec92643e08caffa6ad27cade094a22ee5df2e26d477c62953c9bef93f  /tmp/embedded-stargz-snapshotter.service
+source_service_sha256=c3f4523ec92643e08caffa6ad27cade094a22ee5df2e26d477c62953c9bef93f  /source/stargz-snapshotter.service
+embedded_helper_sha256=5f78318dd34956ab251c171bb4d65008aeac232c55af7e1b3768cc6b3e0918d6  /tmp/embedded-prepare-stargz-storage
+source_helper_sha256=5f78318dd34956ab251c171bb4d65008aeac232c55af7e1b3768cc6b3e0918d6  /source/prepare-stargz-storage
+ExecStartPre=/usr/local/bin/prepare-stargz-storage
+lrwxrwxrwx root/root                46 2026-11-12 04:20 squashfs-root/etc/systemd/system/firecracker.target.wants/stargz-snapshotter.service -> /etc/systemd/system/stargz-snapshotter.service
+-rw-r--r-- root/root               811 2026-11-12 04:20 squashfs-root/etc/systemd/system/stargz-snapshotter.service
+-rwxr-xr-x root/root              1109 2026-11-12 04:20 squashfs-root/usr/local/bin/prepare-stargz-storage
+STARGZ_ROOTFS_HELPER_SOURCE_MATCH_OK
+
+--- rootfs-after.txt ---
+rootfs_after_size=106090496 bytes mode=644
+c4ec65fe5542687b93bb46ee9c3ad0e9a36be34f6a71ade3ccbe0f01b83b2968  /users/nehalem/fc-ctrd-mod/step4-stargz-closeout/tools/image-builder/rootfs-stargz.img
+
+--- Subsequent autoclear-loop and signal-status hardening ---
+
+--- provenance.txt ---
+source_revision=de2e471d87a8dfb925e437c480407070f9b72483
+active_checkout_status=
+test_image=localhost/firecracker-containerd-test:de2e471d87a8
+test_image_id=sha256:49e8d981deb0551407fbf5039e4e3a4ed2c5e345eeba606aa5c716ccca2f4175 created=2026-11-11T21:34:49.794806938-07:00
+d0f12e2d4bdba4ac063c1f22b6fdda9c921268fb4b37eaab97af26f3a59a93e8  /tmp/fcmod-stargz-init-autoclear/test-stargz-storage-init.sh
+5f78318dd34956ab251c171bb4d65008aeac232c55af7e1b3768cc6b3e0918d6  /tmp/fcmod-stargz-init-autoclear/prepare-stargz-storage
+
+--- commands.txt ---
+# Worker host: nehalem@amd218.utah.cloudlab.us
+work=/tmp/fcmod-stargz-init-autoclear
+bash -n "$work/test-stargz-storage-init.sh"
+bash "$work/test-stargz-storage-init.sh" \
+  localhost/firecracker-containerd-test:de2e471d87a8 \
+  "$work/prepare-stargz-storage"
+# This version uses mount -o loop and verifies AUTOCLEAR=1 plus no loop
+# association for the owned image after unmount.
+
+--- acceptance.log ---
+test_image=localhost/firecracker-containerd-test:de2e471d87a8
+helper=/tmp/fcmod-stargz-init-autoclear/prepare-stargz-storage
+5f78318dd34956ab251c171bb4d65008aeac232c55af7e1b3768cc6b3e0918d6  /tmp/fcmod-stargz-init-autoclear/prepare-stargz-storage
+MOUNT_NAMESPACE_PRIVATE host=mnt:[4026531841] container=mnt:[4026533674] propagation=private
+PASS: absent_backing rejected (guest upper is not mounted at /rom/overlay)
+PASS: absent backing is fail-closed
+PASS: unsupported_backing rejected (unsupported guest-upper filesystem)
+PASS: unsupported backing filesystem is fail-closed
+PASS: implicit_tmpfs rejected (RAM guest upper requires explicit overlay_root=ram)
+RAM_BIND_ID source=172:2 store=172:2
+PASS: explicit overlay_root=ram control binds correctly and is idempotent
+EXT4_UPPER fstype=ext4 source=/dev/loop18 majmin=7:18 loop=/dev/loop18 autoclear=1 image=/tmp/stargz-storage-init.jg4Pof/guest-upper.ext4
+EXT4_BIND_ID source=1810:12 store=1810:12
+PASS: ext4 backing matches the exact loop device; source identity, write-through, and idempotence verified
+PASS: mismatched_existing_store rejected (existing store mount does not reference the private guest upper)
+PASS: mismatched existing store mount is fail-closed
+PASS: owned autoclear loop detached after unmount
+STARGZ_STORAGE_INIT_ACCEPTANCE_OK
+STARGZ_STORAGE_INIT_CLEANUP_OK
+STARGZ_STORAGE_INIT_CONTAINER_OK
+
+--- exit.txt ---
+0
+
+--- post-run-status.txt ---
+leftover_test_containers=
+active_checkout_status=
