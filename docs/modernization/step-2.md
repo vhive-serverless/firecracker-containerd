@@ -1,33 +1,52 @@
 # Step 2: vHive compatibility
 
-The latest validated runtime is `d959a78de45faf1d8d13fea282b7fb980b629789`
-on `vhive-compatible`. Its clean worker checkout
-`/users/nehalem/fc-ctrd-mod/vhive-failed-create-committed` passed build,
-installation, 35 runtime and 5 snapshotter isolated tests, and 79 SDK tests
-with the existing SDK log/metrics skip. Two independent vHive deployment,
-invocation, snapshot, source-stop, new-VMM restore and cleanup runs also passed.
-The [current receipt](evidence/d959a78-acceptance-receipt.log) records inputs,
-process identities, artifact hashes, log hashes and cleanup.
+## Current status
 
-The supported deployment is the pinned vHive standalone orchestrator with
-devmapper, a single function container per unjailed VM, an immutable guest root,
-and Firecracker's File memory backend. The acceptance test runs vHive's
-orchestrator and function gRPC services, containerd, the shim, the guest agent,
-runc, and KVM on the worker in `worker.txt`. The stock containerd instance that
-vHive's legacy CRI proxy expects runs in the test container with separate state
-and socket paths. This is the vHive milestone; Kubernetes and Pod checkpoint
-integration are separate.
+The functional acceptance revision for this milestone is
+`4e0033b81a17d9a32c2861263c2792ebcfe37ebd`. This is the tested runtime revision,
+not a claim that every later documentation or maintenance commit reran the full
+suite. Its clean worker checkout passed build, private installation,
+36 runtime, five snapshotter and 79 SDK tests (one existing SDK metrics skip),
+plus two independent standalone vHive deploy/invoke/snapshot/source-stop/
+restore/cleanup runs. The [acceptance receipt](evidence/4e0033b-fifo-acceptance-receipt.log)
+records the tested source, artifacts, process identities and cleanup. It also
+preserves two failed harness attempts caused by lint-lock contention and an
+overlong temporary path; the successful full rerun used a short private temp
+directory without source changes.
 
-This branch started from Step 1 completion commit
-`207899bf3c45ad83d07b06d161b4dcec4a0c338b` and includes the later validated
-shutdown correction `e7395acb2c88cfe8c5d32ba61ff65c17e031858c` and task
-creation cleanup correction `6585eba92db4f8c55f6567cf8d2c8d695adcba05`.
-The [Step 1 receipt](evidence/6585eba-acceptance-receipt.log) records its full
-acceptance. The latter correction releases a reserved drive and owned bundle
-links after a failed guest create, allowing a healthy container to reuse the
-same one-slot VMM. The previous vHive completion at `122d7084043a` remains
-documented in its [receipt](evidence/122d7084043a-acceptance-receipt.log).
-The VMM, SDK and vHive source pins below are unchanged by this correction.
+The accepted correction prepares telemetry hard links or cross-filesystem bind
+mounts before runc starts. Its real-VM regression verified delivery to both
+external FIFO readers, and all eight jailed/unjailed `TestCreateVM_Isolated`
+cases passed. This runtime coverage accompanies a standalone, unjailed vHive
+deployment. It does not validate Kubernetes or Pod checkpoint/restore.
+
+Commits after that full acceptance contain bounded maintenance checks, not a
+new runtime or vHive run: install failure propagation at `46b2fa2`, task-test
+synchronization at `b2df9bc`, and cache eviction test synchronization at
+`be200ad`. The [install receipt](evidence/46b2fa2-install-guard-receipt.log),
+[task-test receipt](evidence/b2df9bc-task-wait-sync-receipt.log), and shared
+[cache-test receipt](evidence/step4-cache-test/verification.json) document
+their scope and results. These checks do not change the functional acceptance
+revision or dependency pins.
+
+## Functional validation history
+
+Earlier full acceptance runs covered the failed-create correction (`d959a78`) and
+metrics/I/O corrections (`2780f2e`). This branch started from Step 1 completion
+commit `207899bf3c45ad83d07b06d161b4dcec4a0c338b`, and carries the validated
+Step 1 task-create cleanup fix at `6585eba`. That fix releases a reserved drive
+and owned bundle links after a failed guest create; its [Step 1 receipt](evidence/6585eba-acceptance-receipt.log)
+records full acceptance. The earlier vHive integration checkpoint `122d7084043a`
+is retained in its [receipt](evidence/122d7084043a-acceptance-receipt.log).
+Each result remains tied to its own source revision and receipt.
+
+The supported profile is the pinned standalone vHive orchestrator with
+devmapper, one function container per unjailed VM, an immutable guest root, and
+Firecracker's File memory backend. The worker test runs vHive's orchestrator
+and function gRPC services, containerd, the shim, guest agent, runc, and KVM.
+The stock containerd expected by vHive's legacy CRI proxy runs in the test
+container with separate state and socket paths. This acceptance does not cover
+Kubernetes or Pod checkpoint/restore.
 
 ## Port and inputs
 
@@ -76,11 +95,15 @@ stops the VMM before removing the device and returning its network to the pool.
 ## Reproduce on the worker
 
 In a fresh clone from the project's configured remote, check out the
-`vhive-compatible` completion commit. Use the [Step 1 worker setup](step-1.md)
+Step 2 functional acceptance revision `4e0033b81a17d9a32c2861263c2792ebcfe37ebd`.
+Use the [Step 1 worker setup](step-1.md)
 for the pinned tools, sudo, KVM, and Docker. Then run:
 
 ```sh
-git checkout --detach d959a78de45faf1d8d13fea282b7fb980b629789
+git checkout --detach 4e0033b81a17d9a32c2861263c2792ebcfe37ebd
+export STACK_DIR=/users/nehalem/fc-ctrd-mod
+export TMPDIR=/tmp/s2f-4e0033b
+mkdir -p "$TMPDIR"
 tools/modernize/build-stack.sh
 tools/modernize/install-stack.sh
 tools/modernize/test-stack.sh
@@ -113,3 +136,16 @@ standalone vHive profile. Jailed, multi-drive, remote snapshotter, userfaultfd,
 and prewarmed shim combinations are outside that profile. The vHive path
 restores the guest function; it does not rebuild Kubernetes or containerd
 task ownership inside a restored VM.
+
+## Cache eviction test maintenance
+
+Commit `be200ad` fixes the timing-dependent eviction error test
+observed in [CI run 43079780458](https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43079780458).
+The test now waits for the reaper error log, checks its text, and verifies the
+entry was removed. Production code is unchanged. The clean committed worker
+checkout passed 200 targeted repetitions with one scheduler thread, 50 targeted
+race repetitions and the full cache package under the race detector.
+The [shared receipt](evidence/step4-cache-test/verification.json) records all four
+validated milestone backports, exact commands and raw hashes. The old failure
+was not reproduced in 30 baseline repetitions; these checks are test maintenance,
+not new full-stack acceptance. Step 3 CRI and Kubernetes restore remain WIP.

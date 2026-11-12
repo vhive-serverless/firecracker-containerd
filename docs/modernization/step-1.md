@@ -1,29 +1,37 @@
 # Step 1: modernized runtime
 
-Branch: `modernize-runtime`. The latest validated implementation is
-`b7e5c426e2f91ad90adb67dbbbe4ecb91dc62e9f`. Its clean worker checkout
-`/users/nehalem/fc-ctrd-mod/step1-io-committed` passed build,
-installation and full acceptance: 35 isolated runtime tests, 5 snapshotter
-tests and 79 SDK tests, with the existing SDK log/metrics skip. The
-[current receipt](evidence/b7e5c42-io-acceptance-receipt.log) records revisions,
-artifact hashes, raw log hashes and cleanup. Earlier acceptance and native
-deployment evidence remain below.
+## Current status
 
-The latest correction closes blocked proxy streams, cancels pending vsock
-accepts and drains replaced readers before reconnecting I/O. An older proxy's
-completion can no longer close its replacement. The
-[regression before correction](evidence/step1-io-close-before.log) reproduced
-the blocked reader; [committed race tests](evidence/b7e5c42-io-race.log) also
-exercise repeated replacement against a real FIFO. The full base acceptance
-passed 119 top-level cases (35 runtime, five snapshotter and 79 SDK), with only
-the existing SDK metrics skip. The earlier task creation recovery acceptance
-remains in its [receipt](evidence/6585eba-acceptance-receipt.log).
+The functional acceptance revision for this milestone is
+`06bd2058ba7938ad31eec9e17ac4d2e4c33a958f`. This is the tested runtime revision,
+not a claim that every later documentation or maintenance commit reran the full
+suite. Its clean worker checkout passed build, private installation, 36 runtime,
+five snapshotter and 79 SDK tests (one existing SDK metrics skip), plus three
+targeted jailer race tests. The [acceptance receipt](evidence/06bd205-telemetry-acceptance-receipt.log)
+records the tested source, artifacts, Docker image and raw log hashes.
 
-The installed stack pulled an OCI image and ran it inside Firecracker, where
-it wrote and read back a file on its ext4 container root. A second native test
-started a task, used exec to write a file, restarted the controller, and used exec
-again to verify the file. It then killed the shim and verified that the VMM,
-VM directory, and containerd task bundle were removed.
+Commits after that acceptance contain bounded maintenance checks, not another
+full runtime run: install failure propagation at `1adbcfc`, task-test
+synchronization at `8797ff8`, and cache eviction test synchronization at
+`1a56f6a`. The [install receipt](evidence/1adbcfc-install-guard-receipt.log),
+[task-test receipt](evidence/8797ff8-task-wait-sync-receipt.log), and shared
+[cache-test receipt](evidence/step4-cache-test/verification.json) document
+their scope and results. These checks do not change the acceptance revision or
+dependency pins.
+
+## Functional validation history
+
+The initial committed milestone acceptance is recorded at `e666612819bc`; later
+full acceptance runs covered the task-create cleanup fix (`6585eba`), metrics
+and I/O corrections (`3adc9f6`), and the cross-filesystem telemetry correction
+(`06bd205`). Each result remains tied to its own source revision and receipt.
+That functional run prepares telemetry links or bind mounts before runc starts,
+preserving log and metrics FIFO readers across filesystems. Its real-VM
+cross-filesystem regression and all eight jailed/unjailed
+`TestCreateVM_Isolated` cases passed. Earlier detailed results and receipts
+remain below. The initial acceptance also demonstrated an OCI image writing
+and reading a file on its ext4 container root, plus native task survival across
+a controller restart and cleanup after shim termination.
 
 ## Stack and compatibility
 
@@ -37,8 +45,8 @@ needed for this step. The SDK `modernize-runtime` branch preserves the earlier
 
 The runtime uses containerd v2.3.7 (API v1.11.1), runc v1.4.2, CNI plugins v1.9.1,
 CNI library v1.3.0, and stargz-snapshotter v0.18.2. The retained tc-redirect-tap
-revision `34bf829e9a5c99df47318c7feeb637576df239fc` is still the upstream HEAD
-verified on the worker; it is intentionally pinned rather than following HEAD.
+revision `34bf829e9a5c99df47318c7feeb637576df239fc` was the upstream HEAD
+at the recorded worker audit; it is intentionally pinned rather than following HEAD.
 The stargz v0.19.1 module would force containerd v2.4.2 and is not part of this
 stack. The remote-snapshotter child module repeats the SDK replacement because
 Go does not inherit replacements from dependency modules.
@@ -108,7 +116,7 @@ checkout=$(mktemp -d "$STACK_DIR/step1-repro.XXXXXXXX")
 git clone --branch modernize-runtime --recurse-submodules \
   https://github.com/vhive-serverless/firecracker-containerd.git "$checkout"
 cd "$checkout"
-git checkout --detach 6585eba92db4f8c55f6567cf8d2c8d695adcba05
+git checkout --detach 06bd2058ba7938ad31eec9e17ac4d2e4c33a958f
 tools/modernize/prepare-worker.sh
 # If provisioning added the Docker group, reconnect and return to this checkout.
 revision=$(git rev-parse --short=12 HEAD)
@@ -236,3 +244,16 @@ The guest storage layout is intentionally unchanged. CRI, Kubernetes Pod
 checkpoint/restore, and the memory experiments belong to subsequent milestones.
 The original baseline and its actual Linux 4.14.174 kernel are documented in
 `baseline-audit.md` with a separate storage trace.
+
+## Cache eviction test maintenance
+
+Commit `1a56f6a` fixes the timing-dependent eviction error test
+observed in [CI run 43079780458](https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43079780458).
+The test now waits for the reaper error log, checks its text, and verifies the
+entry was removed. Production code is unchanged. The clean committed worker
+checkout passed 200 targeted repetitions with one scheduler thread, 50 targeted
+race repetitions and the full cache package under the race detector.
+The [shared receipt](evidence/step4-cache-test/verification.json) records all four
+validated milestone backports, exact commands and raw hashes. The old failure
+was not reproduced in 30 baseline repetitions; these checks are test maintenance,
+not new full-stack acceptance. Step 3 CRI and Kubernetes restore remain WIP.

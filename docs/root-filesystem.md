@@ -5,15 +5,17 @@ the Firecracker virtual machine where containers run.  This document specifies
 the hard requirements for that root filesystem, the development tools we built,
 and some thoughts around where we might land for a production recommendation.
 
+This page describes the common guest requirements. Use the
+[branch-specific modernization procedure](modernization/README.md) to reproduce
+the tested image, kernel and storage configuration. Step 1 preserves the tmpfs
+guest upper; Step 4 adds a disk-backed upper and an optional ext4 DAX lower.
+
 ## Requirements
 
 * The firecracker-containerd agent, configured to start on boot
 * runc
 * Standard Linux filesystem mounts like procfs and sysfs
-* A cgroup v1 filesystem configured and mounted, with the controllers you intend
-  to use for your containers (typical controllers include things like blkio,
-  cpu, cpuacct, cpuset, devices, freezer, hugetlb, memory, net_cls, net_prio,
-  perf_event, pids, and rdma, though you may not use all of them)
+* A unified cgroup v2 filesystem configured and mounted for OCI resource control
 * Any supporting software you may be interested in leveraging inside the VM
   (e.g., a local caching DNS resolver)
 * Any supporting dynamically-linked libraries necessary to run the components
