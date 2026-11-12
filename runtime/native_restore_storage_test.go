@@ -47,7 +47,7 @@ func nativeCloneStorageFixture(t *testing.T, destination string) (*service, *pro
 	request := &proto.CreateVMRequest{ContainerCount: 1, GuestRoot: &proto.GuestRootStorage{Mode: "disk", SizeMib: 64}}
 	encoded, err := json.Marshal(request)
 	require.NoError(t, err)
-	manifest := &nativeCheckpoint{Version: 1, RuntimeConfig: &config.Config{}, CreateRequest: encoded,
+	manifest := &nativeCheckpoint{Version: 2, Transport: &checkpointTransportCut{Version: 1}, RuntimeConfig: &config.Config{}, CreateRequest: encoded,
 		Memory: file("memory", 64), State: file("state", 64), VMConfig: &models.FullVMConfiguration{}}
 	manifest.Drives = []nativeDrive{
 		{ID: "root_drive", ReadOnly: true, File: file("drives/00000000", 64)},

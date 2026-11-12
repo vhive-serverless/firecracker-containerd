@@ -11,6 +11,9 @@ import (
 type IOProxyService interface {
 	State(context.Context, *StateRequest) (*StateResponse, error)
 	Attach(context.Context, *AttachRequest) (*emptypb.Empty, error)
+	Prepare(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
+	Describe(context.Context, *emptypb.Empty) (*DescribeResponse, error)
+	Resume(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
 }
 
 func RegisterIOProxyService(srv *ttrpc.Server, svc IOProxyService) {
@@ -29,6 +32,27 @@ func RegisterIOProxyService(srv *ttrpc.Server, svc IOProxyService) {
 					return nil, err
 				}
 				return svc.Attach(ctx, &req)
+			},
+			"Prepare": func(ctx context.Context, unmarshal func(interface{}) error) (interface{}, error) {
+				var req emptypb.Empty
+				if err := unmarshal(&req); err != nil {
+					return nil, err
+				}
+				return svc.Prepare(ctx, &req)
+			},
+			"Describe": func(ctx context.Context, unmarshal func(interface{}) error) (interface{}, error) {
+				var req emptypb.Empty
+				if err := unmarshal(&req); err != nil {
+					return nil, err
+				}
+				return svc.Describe(ctx, &req)
+			},
+			"Resume": func(ctx context.Context, unmarshal func(interface{}) error) (interface{}, error) {
+				var req emptypb.Empty
+				if err := unmarshal(&req); err != nil {
+					return nil, err
+				}
+				return svc.Resume(ctx, &req)
 			},
 		},
 	})
@@ -55,6 +79,30 @@ func (c *ioproxyClient) State(ctx context.Context, req *StateRequest) (*StateRes
 func (c *ioproxyClient) Attach(ctx context.Context, req *AttachRequest) (*emptypb.Empty, error) {
 	var resp emptypb.Empty
 	if err := c.client.Call(ctx, "IOProxy", "Attach", req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *ioproxyClient) Prepare(ctx context.Context, req *emptypb.Empty) (*emptypb.Empty, error) {
+	var resp emptypb.Empty
+	if err := c.client.Call(ctx, "IOProxy", "Prepare", req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *ioproxyClient) Describe(ctx context.Context, req *emptypb.Empty) (*DescribeResponse, error) {
+	var resp DescribeResponse
+	if err := c.client.Call(ctx, "IOProxy", "Describe", req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (c *ioproxyClient) Resume(ctx context.Context, req *emptypb.Empty) (*emptypb.Empty, error) {
+	var resp emptypb.Empty
+	if err := c.client.Call(ctx, "IOProxy", "Resume", req, &resp); err != nil {
 		return nil, err
 	}
 	return &resp, nil

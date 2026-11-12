@@ -73,6 +73,7 @@ type runcJailer struct {
 	runcClient    runc.Runc
 	started       bool
 	preparedFifos map[string]string
+	restoreMounts []restoreMount
 }
 
 const firecrackerFileName = "firecracker"
@@ -236,67 +237,71 @@ func (j *runcJailer) BuildJailedRootHandler(cfg *config.Config, machineConfig *f
 				return err
 			}
 
-			// copy the kernel image
-			newKernelImagePath := filepath.Join(rootPath, kernelImageFileName)
-			j.logger.WithField("newKernelImagePath", newKernelImagePath).Debug("copying kernel image")
-			if err := j.copyFileToJail(m.Cfg.KernelImagePath, newKernelImagePath, 0400); err != nil {
-				return err
-			}
-
-			m.Cfg.KernelImagePath = kernelImageFileName
-
-			// copy drives to new contents path
-			for i, d := range m.Cfg.Drives {
-				drivePath := d.PathOnHost
-				fileName := filepath.Base(drivePath)
-				newDrivePath := filepath.Join(rootPath, fileName)
-
-				f, err := os.Open(drivePath)
-				if err != nil {
-					return fmt.Errorf("failed to open drive file: %w", err)
-				}
-
-				// This closes the file in the event an error occurred, otherwise we
-				// call close down below.
-				defer f.Close()
-
-				// Runtime-owned writable disks are allocated inside the jail and
-				// already have its ownership. Copying a file onto itself destroys it.
-				if d.IsReadOnly && filepath.Dir(drivePath) == filepath.Join(cfg.ShimBaseDir, ".pmem-images") {
-					if err := j.bindImmutableImageToJail(drivePath, newDrivePath); err != nil {
-						return err
-					}
-				} else if filepath.Clean(drivePath) != filepath.Clean(newDrivePath) && !internal.IsStubDrive(f) {
-					mode := 0600
-					if d.IsReadOnly {
-						mode = 0400
-					}
-					if err := j.exposeFileToJail(drivePath, newDrivePath, os.FileMode(mode)); err != nil {
-						return err
-					}
-				}
-
-				if err := f.Close(); err != nil {
-					j.logger.WithError(err).Debug("failed to close drive file")
-				}
-
-				j.logger.WithField("drive", newDrivePath).Debug("Adding drive")
-				m.Cfg.Drives[i].PathOnHost = fileName
-			}
-
-			// Immutable pmem images share a verified inode across jails. Copying
-			// or chowning this backing would defeat explicit read-only sharing.
-			for i, device := range m.Cfg.PmemDevices {
-				if !device.ReadOnly || device.PathOnHost == nil {
-					return fmt.Errorf("jailed pmem requires immutable read-only backing")
-				}
-				name := filepath.Base(*device.PathOnHost)
-				if err := j.bindImmutableImageToJail(*device.PathOnHost, filepath.Join(rootPath, name)); err != nil {
+			if len(j.restoreMounts) == 0 {
+				// copy the kernel image
+				newKernelImagePath := filepath.Join(rootPath, kernelImageFileName)
+				j.logger.WithField("newKernelImagePath", newKernelImagePath).Debug("copying kernel image")
+				if err := j.copyFileToJail(m.Cfg.KernelImagePath, newKernelImagePath, 0400); err != nil {
 					return err
 				}
-				m.Cfg.PmemDevices[i].PathOnHost = firecracker.String(name)
-			}
 
+				m.Cfg.KernelImagePath = kernelImageFileName
+
+				// copy drives to new contents path
+				for i, d := range m.Cfg.Drives {
+					drivePath := d.PathOnHost
+					fileName := filepath.Base(drivePath)
+					newDrivePath := filepath.Join(rootPath, fileName)
+
+					f, err := os.Open(drivePath)
+					if err != nil {
+						return fmt.Errorf("failed to open drive file: %w", err)
+					}
+
+					// This closes the file in the event an error occurred, otherwise we
+					// call close down below.
+					defer f.Close()
+
+					// Runtime-owned writable disks are allocated inside the jail and
+					// already have its ownership. Copying a file onto itself destroys it.
+					if d.IsReadOnly && filepath.Dir(drivePath) == filepath.Join(cfg.ShimBaseDir, ".pmem-images") {
+						if err := j.bindImmutableImageToJail(drivePath, newDrivePath); err != nil {
+							return err
+						}
+					} else if filepath.Clean(drivePath) != filepath.Clean(newDrivePath) && !internal.IsStubDrive(f) {
+						mode := 0600
+						if d.IsReadOnly {
+							mode = 0400
+						}
+						if err := j.exposeFileToJail(drivePath, newDrivePath, os.FileMode(mode)); err != nil {
+							return err
+						}
+					}
+
+					if err := f.Close(); err != nil {
+						j.logger.WithError(err).Debug("failed to close drive file")
+					}
+
+					j.logger.WithField("drive", newDrivePath).Debug("Adding drive")
+					m.Cfg.Drives[i].PathOnHost = fileName
+				}
+
+				// Immutable pmem images share a verified inode across jails. Copying
+				// or chowning this backing would defeat explicit read-only sharing.
+				for i, device := range m.Cfg.PmemDevices {
+					if !device.ReadOnly || device.PathOnHost == nil {
+						return fmt.Errorf("jailed pmem requires immutable read-only backing")
+					}
+					name := filepath.Base(*device.PathOnHost)
+					if err := j.bindImmutableImageToJail(*device.PathOnHost, filepath.Join(rootPath, name)); err != nil {
+						return err
+					}
+					m.Cfg.PmemDevices[i].PathOnHost = firecracker.String(name)
+				}
+
+			} else if err := j.prepareRestoreMounts(); err != nil {
+				return err
+			}
 			// Setting the proper path to where the vsock path should be
 			for i, v := range m.Cfg.VsockDevices {
 				j.logger.WithField("vsock path", v.Path).Debug("vsock device path being set relative to jailed directory")

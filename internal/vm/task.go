@@ -15,7 +15,9 @@ package vm
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"sort"
 	"sync"
 	"time"
 
@@ -72,6 +74,13 @@ type TaskManager interface {
 	// IsProxyOpen returns true if the given task or exec has an IO proxy
 	// which hasn't been closed.
 	IsProxyOpen(string, string) (bool, error)
+
+	// PrepareIO drains locally owned senders; prepare the peer concurrently.
+	PrepareIO(context.Context) error
+	// DescribeIO returns clean cuts only after both peers completed PrepareIO.
+	DescribeIO() ([]TransportProcessIO, error)
+	// ResumeIO releases prepared reads or aborts a failed preparation.
+	ResumeIO()
 }
 
 // NewTaskManager initializes a new TaskManager
@@ -193,6 +202,7 @@ func (m *taskManager) CreateTask(
 
 	defer func() {
 		if err != nil {
+			ioProxy.Close()
 			proc.cancel()
 			m.deleteProc(taskID, execID)
 		}
@@ -239,6 +249,7 @@ func (m *taskManager) ExecProcess(
 
 	defer func() {
 		if err != nil {
+			ioProxy.Close()
 			proc.cancel()
 			m.deleteProc(taskID, execID)
 		}
@@ -287,6 +298,7 @@ func (m *taskManager) DeleteProcess(
 	// IOProxy implementation being used for this proc. There's no extra timeout here
 	// in order to keep things simpler.
 	<-proc.ioCopyDone
+	proc.proxy.Close()
 
 	return resp, nil
 }
@@ -358,6 +370,15 @@ func (m *taskManager) AttachIO(ctx context.Context, taskID, execID string, proxy
 	if err != nil {
 		return err
 	}
+	if current, ok := proc.proxy.(*transportProxy); ok {
+		replacement, framed := proxy.(*transportProxy)
+		if !framed {
+			proxy.Close()
+			return errors.New("cannot replace framed streams with a raw IO proxy")
+		}
+		defer proxy.Close()
+		return current.rebind(ctx, replacement)
+	}
 
 	// Stop the old FIFO readers before installing new ones. Otherwise two
 	// generations can consume the same process output after reconnection.
@@ -388,6 +409,89 @@ func (m *taskManager) AttachIO(ctx context.Context, taskID, execID string, proxy
 
 func monitorIO(done <-chan error, proc *vmProc, proxy IOProxy) {
 	<-done
+	if _, framed := proxy.(CheckpointIOProxy); framed {
+		// Retain network replay/FIN acknowledgements until final Delete/Close.
+		return
+	}
 	proxy.Close()
 	proc.logger.Debug("closed proxy")
+}
+
+type transportProcessProxy struct {
+	taskID string
+	execID string
+	proxy  IOProxy
+}
+
+func (m *taskManager) ioProcesses() []transportProcessProxy {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	processes := make([]transportProcessProxy, 0)
+	for _, task := range m.tasks {
+		for _, proc := range task {
+			processes = append(processes, transportProcessProxy{taskID: proc.taskID, execID: proc.execID, proxy: proc.proxy})
+		}
+	}
+	return processes
+}
+
+func (m *taskManager) PrepareIO(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	processes := m.ioProcesses()
+	errs := make(chan error, len(processes))
+	for _, proc := range processes {
+		proxy := proc.proxy
+		if _, null := proxy.(*nullIOProxy); null {
+			errs <- nil
+			continue
+		}
+		framed, ok := proxy.(CheckpointIOProxy)
+		if !ok {
+			errs <- fmt.Errorf("process %s/%s uses unsupported raw checkpoint IO", proc.taskID, proc.execID)
+			continue
+		}
+		go func() { errs <- framed.PrepareIO(ctx) }()
+	}
+	var combined error
+	for range processes {
+		combined = errors.Join(combined, <-errs)
+	}
+	return combined
+}
+
+func (m *taskManager) DescribeIO() ([]TransportProcessIO, error) {
+	processes := m.ioProcesses()
+	result := make([]TransportProcessIO, 0, len(processes))
+	for _, proc := range processes {
+		entry := TransportProcessIO{TaskID: proc.taskID, ExecID: proc.execID}
+		if _, null := proc.proxy.(*nullIOProxy); !null {
+			framed, ok := proc.proxy.(CheckpointIOProxy)
+			if !ok {
+				return nil, fmt.Errorf("process %s/%s uses unsupported raw checkpoint IO", proc.taskID, proc.execID)
+			}
+			var err error
+			entry.Streams, err = framed.DescribeIO()
+			if err != nil {
+				return nil, err
+			}
+		}
+		result = append(result, entry)
+	}
+	sort.Slice(result, func(i, j int) bool {
+		if result[i].TaskID == result[j].TaskID {
+			return result[i].ExecID < result[j].ExecID
+		}
+		return result[i].TaskID < result[j].TaskID
+	})
+	return result, nil
+}
+
+func (m *taskManager) ResumeIO() {
+	for _, proc := range m.ioProcesses() {
+		if framed, ok := proc.proxy.(CheckpointIOProxy); ok {
+			framed.ResumeIO()
+		}
+	}
 }

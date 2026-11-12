@@ -144,7 +144,7 @@ func TestImmutableRootCaptureAndCloneFiles(t *testing.T) {
 	savedRequest, err := json.Marshal(request)
 	require.NoError(t, err)
 	live := svc.machineConfig.PmemDevices[0]
-	manifest := &nativeCheckpoint{Version: 1, RuntimeConfig: cfg, CreateRequest: savedRequest, VMConfig: &models.FullVMConfiguration{Pmem: []*models.Pmem{&live}}}
+	manifest := &nativeCheckpoint{Version: 2, Transport: &checkpointTransportCut{Version: 1}, RuntimeConfig: cfg, CreateRequest: savedRequest, VMConfig: &models.FullVMConfiguration{Pmem: []*models.Pmem{&live}}}
 	artifact := t.TempDir()
 	require.NoError(t, svc.captureImmutableRoot(ctx, artifact, manifest))
 	require.Len(t, manifest.Pmem, 1)
@@ -178,5 +178,11 @@ func TestImmutableRootCaptureAndCloneFiles(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "memory", string(data), "cloned files must not advance the artifact")
 	live.PathOnHost = fc.String("/relocated/cache.img")
-	require.ErrorContains(t, clone.configureImmutableRoot(ctx, restored), "captured immutable cache pathname")
+	clone.machineConfig = &fc.Config{KernelArgs: "ro"}
+	require.NoError(t, clone.configureImmutableRoot(ctx, restored))
+	require.NoError(t, clone.prepareSnapshotMounts(restored))
+	backing, mapped := restoreBackingPath(clone.jailer, "/relocated/cache.img")
+	require.True(t, mapped, "relocated captured pmem paths must resolve inside the private VMM filesystem")
+	require.Equal(t, restored.RootDrive.HostPath, backing)
+	require.NoError(t, verifyImmutableImage(ctx, backing, digest))
 }

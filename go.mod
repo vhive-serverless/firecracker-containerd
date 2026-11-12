@@ -183,4 +183,4 @@ require (
 	tags.cncf.io/container-device-interface/specs-go v1.1.0 // indirect
 )
 
-replace github.com/firecracker-microvm/firecracker-go-sdk => github.com/JooyoungPark73/firecracker-go-sdk v0.0.0-20261111093432-832b1a5132e0
+replace github.com/firecracker-microvm/firecracker-go-sdk => github.com/vhive-serverless/firecracker-go-sdk v0.0.0-20261112170243-76af8abe7709

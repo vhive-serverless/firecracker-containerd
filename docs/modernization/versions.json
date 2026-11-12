@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "Steps 1 and 2 preserved; Step 3 CRI explicitly WIP and Kubernetes Pod restore deferred to 1.38 interface work; Step 4 storage/memory scope accepted at 06b55e3",
+  "status": "Upstream Firecracker migration in progress; historical validation below does not validate the new stack. Step 3 CRI WIP; Kubernetes Pod restore deferred to 1.38.",
   "step_1_validation": {
     "runtime_branch": "modernize-runtime",
     "completion_commit": "06bd2058ba7938ad31eec9e17ac4d2e4c33a958f",
@@ -99,11 +99,15 @@
       "base_tag": "v1.18.0",
       "base_tag_object": "07a7c2e20a8f4f661702551d02fc3eca679842a5",
       "base_commit": "eaf83bb718a559d324613d566eaf776b31a62340",
-      "fork": "https://github.com/JooyoungPark73/firecracker.git",
-      "branch": "cri-native-snapshot-restore",
-      "commit": "ce86b117d59ca93b1c04b791a251b445ace76703",
+      "branch": "v1.18.0",
+      "commit": "eaf83bb718a559d324613d566eaf776b31a62340",
       "rust": "1.97.0",
-      "target": "x86_64-unknown-linux-musl"
+      "target": "x86_64-unknown-linux-musl",
+      "binary_source": "official GitHub release",
+      "release_archive_sha256": {
+        "x86_64": "1ac8eec866dd5eea14efecf6323e22b23eea24054545338a5b34bc5bca6623cd",
+        "aarch64": "2a6130ff0338901ff9d7fbd73ce046c6b1c6123889dc84a34d678aa53bd0c0c2"
+      }
     },
     "go": {
       "version": "1.26.11",
@@ -115,10 +119,10 @@
     "k3s_release_reported_runc": "v1.4.2",
     "swagger_generator_previous_work": "v0.33.1",
     "sdk": {
-      "remote": "git@github.com:JooyoungPark73/firecracker-go-sdk.git",
-      "branch": "cri-native-snapshot-restore",
-      "commit": "832b1a5132e06f5e2167b64b97b5cd8946604005",
-      "module_replacement": "github.com/JooyoungPark73/firecracker-go-sdk v0.0.0-20261111093432-832b1a5132e0"
+      "remote": "https://github.com/vhive-serverless/firecracker-go-sdk.git",
+      "branch": "firecracker-v1.18.0",
+      "commit": "76af8abe770941a987e6071677b8228df75cdd86",
+      "module_replacement": "github.com/vhive-serverless/firecracker-go-sdk v0.0.0-20261112170243-76af8abe7709"
     },
     "containerd": {
       "version": "v2.3.7",

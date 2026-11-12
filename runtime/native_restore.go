@@ -15,6 +15,7 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -22,11 +23,11 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"syscall"
 
 	taskAPI "github.com/containerd/containerd/api/runtime/task/v3"
-	"github.com/containerd/containerd/api/types/task"
 	"github.com/containerd/containerd/v2/pkg/cio"
 	"github.com/containerd/containerd/v2/pkg/identifiers"
 	"github.com/firecracker-microvm/firecracker-containerd/internal/bundle"
@@ -136,8 +137,22 @@ func (s *service) prepareNativeRestore(ctx context.Context, incoming *proto.Crea
 }
 
 func validateNativeRestore(manifest *nativeCheckpoint) error {
-	if manifest.Version != 1 || manifest.VMConfig == nil || manifest.RuntimeConfig == nil || len(manifest.CreateRequest) == 0 || len(manifest.Drives) != len(manifest.VMConfig.Drives) || len(manifest.Drives) > 256 || len(manifest.Pmem) != len(manifest.VMConfig.Pmem) || len(manifest.Pmem) > 1 {
+	if manifest.Version != 2 || manifest.Transport == nil || manifest.Transport.Version != 1 || manifest.VMConfig == nil || manifest.RuntimeConfig == nil || len(manifest.CreateRequest) == 0 || len(manifest.Drives) != len(manifest.VMConfig.Drives) || len(manifest.Drives) > 256 || len(manifest.Pmem) != len(manifest.VMConfig.Pmem) || len(manifest.Pmem) > 1 {
 		return syscall.EINVAL
+	}
+	if !slices.Equal(manifest.ResumeTasks, manifest.Transport.ResumeTasks) {
+		return syscall.EINVAL
+	}
+	if err := validateCheckpointTransport(manifest.Transport); err != nil {
+		return err
+	}
+	if len(manifest.Transport.Processes) != len(manifest.Processes) {
+		return syscall.EINVAL
+	}
+	for _, process := range manifest.Processes {
+		if _, ok := checkpointProcessStreams(manifest.Transport, process.TaskID, process.ExecID); !ok {
+			return syscall.EINVAL
+		}
 	}
 	files := []nativeFile{manifest.Memory, manifest.State}
 	drives := make(map[string]bool)
@@ -385,7 +400,7 @@ func (r *nativeRestore) drivePath(id string) string {
 
 func (s *service) nativeLoadOpt() fc.Opt {
 	restore := s.nativeRestore
-	return fc.WithSnapshot(restore.files["memory"], restore.files["state"], fc.WithSnapshotVsockReset(true))
+	return fc.WithSnapshot(restore.files["memory"], restore.files["state"])
 }
 
 func (s *service) nativeLoadHandler() fc.Handler {
@@ -410,13 +425,6 @@ func (s *service) nativeLoadHandler() fc.Handler {
 			return err
 		}
 		machine.Cfg.Snapshot.VsockOverride = &models.VsockOverride{UdsPath: fc.String(machine.Cfg.VsockDevices[0].Path)}
-		for _, drive := range s.nativeRestore.manifest.Drives {
-			path, err := apiPath(s.nativeRestore.files[drive.File.Path])
-			if err != nil {
-				return err
-			}
-			machine.Cfg.Snapshot.DriveOverrides = append(machine.Cfg.Snapshot.DriveOverrides, &models.DriveOverride{DriveID: fc.String(drive.ID), PathOnHost: fc.String(path)})
-		}
 		for index, network := range machine.Cfg.NetworkInterfaces {
 			original := s.nativeRestore.manifest.VMConfig.NetworkInterfaces[index]
 			machine.Cfg.Snapshot.NetworkOverrides = append(machine.Cfg.Snapshot.NetworkOverrides, &models.NetworkOverride{IfaceID: original.IfaceID, HostDevName: fc.String(network.StaticConfiguration.HostDevName)})
@@ -466,7 +474,16 @@ func (s *service) adoptNativeProcesses(ctx context.Context) error {
 			s.volumeTasks.Store(saved.ID, append([]string(nil), saved.VolumeTokens...))
 		}
 	}
+	cloneSession := rand.Text()
 	for _, saved := range restore.manifest.Processes {
+		streams, found := checkpointProcessStreams(restore.manifest.Transport, saved.TaskID, saved.ExecID)
+		if !found {
+			return fmt.Errorf("missing captured IO for %s/%s", saved.TaskID, saved.ExecID)
+		}
+		streams = append([]vm.TransportStreamIO(nil), streams...)
+		for index := range streams {
+			streams[index].Cursor.SessionID = cloneSession
+		}
 		base := filepath.Join(s.shimDir.RootPath(), "native-io", saved.TaskID, "init")
 		if saved.ExecID != "" {
 			base = filepath.Join(s.shimDir.RootPath(), "native-io", saved.TaskID, "exec-"+saved.ExecID)
@@ -489,13 +506,13 @@ func (s *service) adoptNativeProcesses(ctx context.Context) error {
 			}
 		}
 		proxy := vm.NewNullIOProxy()
-		if saved.State.Status != task.Status_STOPPED {
-			attach := &ioproxy.AttachRequest{ID: saved.TaskID, ExecID: saved.ExecID, StdinPort: s.nextVSockPort(), StdoutPort: s.nextVSockPort(), StderrPort: s.nextVSockPort()}
+		if len(streams) > 0 {
+			attach := &ioproxy.AttachRequest{ID: saved.TaskID, ExecID: saved.ExecID, StdinPort: s.nextVSockPort(), StdoutPort: s.nextVSockPort(), StderrPort: s.nextVSockPort(), Streams: transportStreamsToWire(streams)}
 			if _, err := s.ioProxyClient.Attach(ctx, attach); err != nil {
 				return err
 			}
 			var err error
-			proxy, err = s.newIOProxy(s.logger, fifos.Stdin, fifos.Stdout, fifos.Stderr, &proto.ExtraData{StdinPort: attach.StdinPort, StdoutPort: attach.StdoutPort, StderrPort: attach.StderrPort})
+			proxy, err = s.newIOProxyWithCut(s.logger, fifos.Stdin, fifos.Stdout, fifos.Stderr, &proto.ExtraData{StdinPort: attach.StdinPort, StdoutPort: attach.StdoutPort, StderrPort: attach.StderrPort}, streams)
 			if err != nil {
 				return err
 			}
@@ -512,6 +529,9 @@ func (s *service) adoptNativeProcesses(ctx context.Context) error {
 		if err := s.machine.SetMetadata(ctx, restore.manifest.Metadata); err != nil {
 			return err
 		}
+	}
+	if err := s.resumeIOTransport(ctx); err != nil {
+		return err
 	}
 	for _, id := range restore.manifest.ResumeTasks {
 		if _, err := s.agentClient.Resume(ctx, &taskAPI.ResumeRequest{ID: id}); err != nil {

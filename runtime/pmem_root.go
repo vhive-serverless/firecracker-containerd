@@ -52,16 +52,23 @@ func (s *service) captureImmutableRoot(ctx context.Context, stage string, manife
 	if _, jailed := s.jailer.(*runcJailer); jailed {
 		expected = filepath.Base(expected)
 	}
-	if device == nil || device.ID == nil || *device.ID != pmemRootID || !device.ReadOnly || !device.RootDevice || device.PathOnHost == nil || *device.PathOnHost != expected {
+	if device == nil || device.ID == nil || *device.ID != pmemRootID || !device.ReadOnly || !device.RootDevice || device.PathOnHost == nil {
 		return fmt.Errorf("pmem configuration no longer matches immutable root")
 	}
-	if err := verifyImmutableImage(ctx, root.HostPath, root.ImageSha256); err != nil {
+	backing, remapped := restoreBackingPath(s.jailer, *device.PathOnHost)
+	if !remapped {
+		if *device.PathOnHost != expected {
+			return fmt.Errorf("pmem configuration no longer matches immutable root path")
+		}
+		backing = root.HostPath
+	}
+	if err := verifyImmutableImage(ctx, backing, root.ImageSha256); err != nil {
 		return err
 	}
 	if err := os.Mkdir(filepath.Join(stage, "pmem"), 0700); err != nil {
 		return err
 	}
-	saved, err := copyNativeFile(ctx, root.HostPath, stage, "pmem/00000000")
+	saved, err := copyNativeFile(ctx, backing, stage, "pmem/00000000")
 	if err != nil {
 		return err
 	}
@@ -103,20 +110,8 @@ func (s *service) configureImmutableRoot(ctx context.Context, request *proto.Cre
 	if err := validateDaxRootImage(path); err != nil {
 		return err
 	}
-	if s.nativeRestore != nil {
-		// Firecracker has no pmem pathname override on snapshot load. A jailed
-		// snapshot uses the digest basename; an unjailed snapshot requires the
-		// same canonical cache location on the destination.
-		expected := path
-		if _, jailed := s.jailer.(*runcJailer); jailed {
-			expected = filepath.Base(path)
-		}
-		for _, device := range s.nativeRestore.manifest.VMConfig.Pmem {
-			if device.PathOnHost == nil || *device.PathOnHost != expected {
-				return fmt.Errorf("native pmem restore requires the captured immutable cache pathname")
-			}
-		}
-	}
+	// Restore mount mappings expose the verified cache inode at the captured
+	// VMM path; the destination cache pathname need not match the source host.
 	for _, argument := range strings.Fields(s.machineConfig.KernelArgs) {
 		if strings.HasPrefix(argument, "rootfstype=") || strings.HasPrefix(argument, "rootflags=") || strings.HasPrefix(argument, "root=") {
 			return fmt.Errorf("pmem root conflicts with explicit root kernel arguments")

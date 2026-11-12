@@ -1,0 +1,15 @@
+{
+  "status": "development component evidence, not final stack acceptance",
+  "worker": "nehalem@amd218.utah.cloudlab.us",
+  "initial_source_archive_sha256": "f8e96a92f4203a573eff041b819c42d8418e8c97da4e3df0ec78acc9c5923c52",
+  "updated_files_sha256": {
+    "runtime/restore_namespace.go": "ba097aa64d0a885fb4b9c31235929b7dd4423fe00a944bda522a5fbaf46b1c3e",
+    "runtime/restore_namespace_test.go": "92884b52222fbd11740898255075ef3058e0f203b40bd655dbf850996b6d7364"
+  },
+  "passed": [
+    "TestRestoreNamespaceIsolation",
+    "TestRestoreNamespaceReleaseAPI"
+  ],
+  "official_firecracker_sha256": "b33f46cd6d88834cf6a4f8d184f08f219809c636236bffd286d233a60602a2ba",
+  "note": "Initial isolation test exposed cross-namespace bind EINVAL; fixed with detached open_tree/move_mount. Release test validates preboot API/disk open only, not snapshot restore."
+}

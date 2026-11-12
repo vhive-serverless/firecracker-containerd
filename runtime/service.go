@@ -37,7 +37,6 @@ import (
 	bootapi "github.com/containerd/containerd/api/runtime/bootstrap/v1"
 	taskAPI "github.com/containerd/containerd/api/runtime/task/v3"
 	"github.com/containerd/containerd/api/types/task"
-	"github.com/containerd/containerd/v2/core/events/exchange"
 	"github.com/containerd/containerd/v2/pkg/cio"
 	"github.com/containerd/containerd/v2/pkg/namespaces"
 	"github.com/containerd/containerd/v2/pkg/protobuf"
@@ -52,7 +51,6 @@ import (
 	"github.com/firecracker-microvm/firecracker-go-sdk"
 	"github.com/firecracker-microvm/firecracker-go-sdk/client/models"
 	ops "github.com/firecracker-microvm/firecracker-go-sdk/client/operations"
-	"github.com/firecracker-microvm/firecracker-go-sdk/vsock"
 	"github.com/gofrs/uuid"
 	"github.com/hashicorp/go-multierror"
 	"github.com/opencontainers/runtime-spec/specs-go"
@@ -112,7 +110,6 @@ var (
 // implements shimapi
 type service struct {
 	taskManager     vm.TaskManager
-	eventExchange   *exchange.Exchange
 	remotePublisher shim.Publisher
 	namespace       string
 
@@ -146,7 +143,13 @@ type service struct {
 	vmReady                  chan struct{}
 	vmStartOnce              sync.Once
 	agentClient              taskAPI.TTRPCTaskService
-	eventBridgeClient        eventbridge.Getter
+	agentRPCMu               sync.RWMutex
+	agentRPC                 *ttrpc.Client
+	eventMu                  sync.Mutex
+	eventForwarder           *eventbridge.JournalForwarder
+	eventCancel              context.CancelFunc
+	eventDone                chan struct{}
+	eventStopping            bool
 	driveMountClient         drivemount.DriveMounterService
 	ioProxyClient            ioproxy.IOProxyService
 	jailer                   jailer
@@ -154,11 +157,12 @@ type service struct {
 	driveMountStubs          []MountableStubDrive
 	exitAfterAllTasksDeleted bool // exit the VM and shim when all tasks are deleted
 
-	blockDeviceTasks sync.Map
-	volumeTasks      sync.Map
-	volumeMu         sync.Mutex
-	volumeServer     *volfs.Server
-	volumesClosed    bool
+	blockDeviceTasks    sync.Map
+	volumeTasks         sync.Map
+	legacyRestoredTasks sync.Map
+	volumeMu            sync.Mutex
+	volumeServer        *volfs.Server
+	volumesClosed       bool
 
 	cleanupErr  error
 	cleanupOnce sync.Once
@@ -171,6 +175,8 @@ type service struct {
 	vmRequest        json.RawMessage
 	apiSocketPath    string
 	nativeRestore    *nativeRestore
+	pendingPause     *pendingVMPause
+	legacyRestoreCut *checkpointTransportCut
 	restoredIO       []*proto.RestoredProcessIO
 
 	// fifos have stdio FIFOs containerd passed to the shim. The key is [taskID][execID].
@@ -226,7 +232,6 @@ func NewService(shimCtx context.Context, remotePublisher shim.Publisher, sd shut
 
 	s := &service{
 		taskManager:     vm.NewTaskManager(shimCtx, logger),
-		eventExchange:   exchange.NewExchange(),
 		remotePublisher: remotePublisher,
 		namespace:       namespace,
 
@@ -244,7 +249,7 @@ func NewService(shimCtx context.Context, remotePublisher shim.Publisher, sd shut
 		fifos:   make(map[string]map[string]cio.Config),
 	}
 
-	s.startEventForwarders(remotePublisher)
+	go s.closeAgentOnShutdown()
 
 	err = s.serveFCControl(sd)
 	if err != nil {
@@ -254,39 +259,6 @@ func NewService(shimCtx context.Context, remotePublisher shim.Publisher, sd shut
 	}
 
 	return s, nil
-}
-
-func (s *service) startEventForwarders(remotePublisher shim.Publisher) {
-	ns, ok := namespaces.Namespace(s.shimCtx)
-	if !ok {
-		s.logger.Error("failed to fetch the namespace from the context")
-	}
-	ctx := namespaces.WithNamespace(context.Background(), ns)
-
-	// Republish each event received on our exchange to the provided remote publisher.
-	// TODO ideally we would be forwarding events instead of re-publishing them, which would
-	// preserve the events' original timestamps and namespaces. However, as of this writing,
-	// the containerd v2 runtime model only provides a shim with a publisher, not a forwarder.
-	republishCh := eventbridge.Republish(ctx, s.eventExchange, remotePublisher)
-
-	go func() {
-		<-s.vmReady
-
-		// Once the VM is ready, also start forwarding events from it to our exchange
-		attachCh := eventbridge.Attach(ctx, s.eventBridgeClient, s.eventExchange)
-
-		err := <-attachCh
-		if err != nil && err != context.Canceled {
-			s.logger.WithError(err).Error("error while forwarding events from VM agent")
-		}
-
-		err = <-republishCh
-		if err != nil && err != context.Canceled {
-			s.logger.WithError(err).Error("error while republishing events")
-		}
-
-		remotePublisher.Close()
-	}()
 }
 
 // TODO we have to create separate listeners for the fccontrol service and shim service because
@@ -683,11 +655,10 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 		logger.Logger.SetLevel(v)
 		opts = append(opts, firecracker.WithLogger(logger))
 	}
-	relVSockPath, err := s.jailer.JailPath().FirecrackerVSockRelPath()
-	if err != nil {
-		return fmt.Errorf("failed to get relative path to firecracker vsock: %w", err)
-	}
 
+	if err := s.prepareSnapshotMounts(request); err != nil {
+		return fmt.Errorf("prepare private restore disk mappings: %w", err)
+	}
 	jailedOpts, err := s.jailer.BuildJailedMachine(s.config, s.machineConfig, s.vmID)
 	if err != nil {
 		return fmt.Errorf("failed to build jailed machine options: %w", err)
@@ -744,23 +715,17 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 		}
 	}
 
-	s.logger.Info("calling agent")
-	conn, err := vsock.DialContext(requestCtx, relVSockPath, defaultVsockPort,
-		vsock.WithLogger(s.logger),
-		vsock.WithRetryTimeout(defaultCreateVMTimeout))
-	if err != nil {
-		return fmt.Errorf("failed to dial the VM over vsock: %w", err)
+	if err := s.connectAgent(requestCtx); err != nil {
+		return err
 	}
-
-	rpcClient := ttrpc.NewClient(conn, ttrpc.WithOnClose(func() { _ = conn.Close() }))
-	s.agentClient = taskAPI.NewTTRPCTaskClient(rpcClient)
-	s.eventBridgeClient = eventbridge.NewGetterClient(rpcClient)
-	s.driveMountClient = drivemount.NewDriveMounterClient(rpcClient)
-	s.ioProxyClient = ioproxy.NewIOProxyClient(rpcClient)
 	s.exitAfterAllTasksDeleted = request.ExitAfterAllTasksDeleted
-
+	if err := s.verifyRestoredEventCursor(requestCtx); err != nil {
+		return err
+	}
 	if s.nativeRestore != nil {
 		err = s.adoptNativeProcesses(requestCtx)
+	} else if request.LoadSnapshot {
+		err = s.adoptLegacyTransport(requestCtx)
 	} else {
 		err = s.mountDrives(requestCtx)
 	}
@@ -768,6 +733,9 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 		return err
 	}
 
+	if err := s.resumeEventForwarding(requestCtx); err != nil {
+		return fmt.Errorf("start acknowledged agent events: %w", err)
+	}
 	s.logger.Info("successfully started the VM")
 	return nil
 }
@@ -808,41 +776,31 @@ func (s *service) StopVM(requestCtx context.Context, request *proto.StopVMReques
 
 // ResumeVM resumes a VM
 func (s *service) ResumeVM(ctx context.Context, _ *proto.ResumeVMRequest) (*types.Empty, error) {
-	s.nativeMu.RLock()
-	defer s.nativeMu.RUnlock()
-	defer logPanicAndDie(s.logger)
-
-	err := s.waitVMReady()
-	if err != nil {
-		s.logger.WithError(err).Error()
+	if err := s.waitVMReady(); err != nil {
 		return nil, err
 	}
-
-	if err := s.machine.ResumeVM(ctx); err != nil {
-		s.logger.WithError(err).Error()
+	if err := s.lockSnapshotTransition(ctx); err != nil {
 		return nil, err
 	}
-
+	defer s.nativeMu.Unlock()
+	if err := s.resumePreparedVM(ctx); err != nil {
+		return nil, err
+	}
 	return &types.Empty{}, nil
 }
 
 // PauseVM pauses a VM
 func (s *service) PauseVM(ctx context.Context, _ *proto.PauseVMRequest) (*types.Empty, error) {
-	s.nativeMu.RLock()
-	defer s.nativeMu.RUnlock()
-	defer logPanicAndDie(s.logger)
-
-	err := s.waitVMReady()
-	if err != nil {
-		s.logger.WithError(err).Error()
+	if err := s.waitVMReady(); err != nil {
 		return nil, err
 	}
-
-	if err := s.machine.PauseVM(ctx); err != nil {
-		s.logger.WithError(err).Error()
+	if err := s.lockSnapshotTransition(ctx); err != nil {
 		return nil, err
 	}
-
+	defer s.nativeMu.Unlock()
+	if err := s.prepareLegacyPause(ctx); err != nil {
+		return nil, err
+	}
 	return &types.Empty{}, nil
 }
 
@@ -1270,43 +1228,20 @@ func (s *service) buildRootDrive(req *proto.CreateVMRequest) []models.Drive {
 }
 
 func (s *service) newIOProxy(logger *logrus.Entry, stdin, stdout, stderr string, extraData *proto.ExtraData) (vm.IOProxy, error) {
-	var ioConnectorSet vm.IOProxy
+	return s.newIOProxyWithCut(logger, stdin, stdout, stderr, extraData, nil)
+}
 
-	relVSockPath, err := s.jailer.JailPath().FirecrackerVSockRelPath()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get relative path to firecracker vsock: %w", err)
-	}
-
+func (s *service) newIOProxyWithCut(logger *logrus.Entry, stdin, stdout, stderr string, extraData *proto.ExtraData, streams []vm.TransportStreamIO) (vm.IOProxy, error) {
 	if vm.IsAgentOnlyIO(stdout, logger) {
-		ioConnectorSet = vm.NewNullIOProxy()
-	} else {
-		var stdinConnectorPair *vm.IOConnectorPair
-		if stdin != "" {
-			stdinConnectorPair = &vm.IOConnectorPair{
-				ReadConnector:  vm.ReadFIFOConnector(stdin),
-				WriteConnector: vm.VSockDialConnector(defaultVSockConnectTimeout, relVSockPath, extraData.StdinPort),
-			}
-		}
-
-		var stdoutConnectorPair *vm.IOConnectorPair
-		if stdout != "" {
-			stdoutConnectorPair = &vm.IOConnectorPair{
-				ReadConnector:  vm.VSockDialConnector(defaultVSockConnectTimeout, relVSockPath, extraData.StdoutPort),
-				WriteConnector: vm.WriteFIFOConnector(stdout),
-			}
-		}
-
-		var stderrConnectorPair *vm.IOConnectorPair
-		if stderr != "" {
-			stderrConnectorPair = &vm.IOConnectorPair{
-				ReadConnector:  vm.VSockDialConnector(defaultVSockConnectTimeout, relVSockPath, extraData.StderrPort),
-				WriteConnector: vm.WriteFIFOConnector(stderr),
-			}
-		}
-
-		ioConnectorSet = vm.NewIOConnectorProxy(stdinConnectorPair, stdoutConnectorPair, stderrConnectorPair)
+		return vm.NewNullIOProxy(), nil
 	}
-	return ioConnectorSet, nil
+	path, err := s.jailer.JailPath().FirecrackerVSockRelPath()
+	if err != nil {
+		return nil, fmt.Errorf("resolve IO vsock path: %w", err)
+	}
+	return vm.NewTransportHostIOProxy(defaultVSockConnectTimeout, path,
+		vm.TransportPorts{Stdin: extraData.StdinPort, Stdout: extraData.StdoutPort, Stderr: extraData.StderrPort},
+		stdin, stdout, stderr, streams), nil
 }
 
 func (s *service) addFIFOs(taskID, execID string, config cio.Config) error {
@@ -1345,6 +1280,9 @@ func (s *service) deleteFIFOs(taskID, execID string) error {
 func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTaskRequest) (_ *taskAPI.CreateTaskResponse, retErr error) {
 	s.nativeMu.RLock()
 	defer s.nativeMu.RUnlock()
+	if s.pendingPause != nil {
+		return nil, status.Error(codes.FailedPrecondition, "VM snapshot transition is in progress")
+	}
 	logger := s.logger.WithField(logTaskID, request.ID)
 	defer logPanicAndDie(logger)
 
@@ -1509,6 +1447,9 @@ func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTask
 func (s *service) Start(requestCtx context.Context, req *taskAPI.StartRequest) (*taskAPI.StartResponse, error) {
 	s.nativeMu.RLock()
 	defer s.nativeMu.RUnlock()
+	if s.pendingPause != nil {
+		return nil, status.Error(codes.FailedPrecondition, "VM snapshot transition is in progress")
+	}
 	defer logPanicAndDie(log.G(requestCtx))
 
 	log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, logExecID: req.ExecID}).Debug("start")
@@ -1527,6 +1468,9 @@ func (s *service) Start(requestCtx context.Context, req *taskAPI.StartRequest) (
 func (s *service) Delete(requestCtx context.Context, req *taskAPI.DeleteRequest) (*taskAPI.DeleteResponse, error) {
 	s.nativeMu.RLock()
 	defer s.nativeMu.RUnlock()
+	if s.pendingPause != nil {
+		return nil, status.Error(codes.FailedPrecondition, "VM snapshot transition is in progress")
+	}
 	defer logPanicAndDie(log.G(requestCtx))
 	logger := log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, logExecID: req.ExecID})
 
@@ -1549,6 +1493,12 @@ func (s *service) Delete(requestCtx context.Context, req *taskAPI.DeleteRequest)
 	// Only delete a process as like runc when there is ExecID
 	// https://github.com/containerd/containerd/blob/f3e148b1ccf268450c87427b5dbb6187db3d22f1/runtime/v2/runc/container.go#L320
 	if req.ExecID != "" {
+		return resp, nil
+	}
+
+	if _, restored := s.legacyRestoredTasks.LoadAndDelete(req.ID); restored {
+		// Legacy clones own a whole independent workload disk, not a new
+		// containerd image/snapshot bundle for the captured guest task.
 		return resp, nil
 	}
 
@@ -1590,6 +1540,9 @@ func (s *service) Delete(requestCtx context.Context, req *taskAPI.DeleteRequest)
 func (s *service) Exec(requestCtx context.Context, req *taskAPI.ExecProcessRequest) (*types.Empty, error) {
 	s.nativeMu.RLock()
 	defer s.nativeMu.RUnlock()
+	if s.pendingPause != nil {
+		return nil, status.Error(codes.FailedPrecondition, "VM snapshot transition is in progress")
+	}
 	defer logPanicAndDie(log.G(requestCtx))
 	logger := s.logger.WithField(logTaskID, req.ID).WithField(logExecID, req.ExecID)
 	logger.Debug("exec")
@@ -1641,6 +1594,9 @@ func (s *service) Exec(requestCtx context.Context, req *taskAPI.ExecProcessReque
 func (s *service) ResizePty(requestCtx context.Context, req *taskAPI.ResizePtyRequest) (*types.Empty, error) {
 	s.nativeMu.RLock()
 	defer s.nativeMu.RUnlock()
+	if s.pendingPause != nil {
+		return nil, status.Error(codes.FailedPrecondition, "VM snapshot transition is in progress")
+	}
 	defer logPanicAndDie(log.G(requestCtx))
 
 	log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, logExecID: req.ExecID}).Debug("resize_pty")
@@ -1660,6 +1616,9 @@ func (s *service) ResizePty(requestCtx context.Context, req *taskAPI.ResizePtyRe
 func (s *service) State(requestCtx context.Context, req *taskAPI.StateRequest) (*taskAPI.StateResponse, error) {
 	s.nativeMu.RLock()
 	defer s.nativeMu.RUnlock()
+	if s.pendingPause != nil {
+		return nil, status.Error(codes.FailedPrecondition, "VM snapshot transition is in progress")
+	}
 	defer logPanicAndDie(log.G(requestCtx))
 
 	logger := log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, logExecID: req.ExecID})
@@ -1745,6 +1704,9 @@ func (s *service) attachNewProxy(
 func (s *service) Pause(requestCtx context.Context, req *taskAPI.PauseRequest) (*types.Empty, error) {
 	s.nativeMu.RLock()
 	defer s.nativeMu.RUnlock()
+	if s.pendingPause != nil {
+		return nil, status.Error(codes.FailedPrecondition, "VM snapshot transition is in progress")
+	}
 	defer logPanicAndDie(log.G(requestCtx))
 
 	log.G(requestCtx).WithField(logTaskID, req.ID).Debug("pause")
@@ -1764,6 +1726,9 @@ func (s *service) Pause(requestCtx context.Context, req *taskAPI.PauseRequest) (
 func (s *service) Resume(requestCtx context.Context, req *taskAPI.ResumeRequest) (*types.Empty, error) {
 	s.nativeMu.RLock()
 	defer s.nativeMu.RUnlock()
+	if s.pendingPause != nil {
+		return nil, status.Error(codes.FailedPrecondition, "VM snapshot transition is in progress")
+	}
 	defer logPanicAndDie(log.G(requestCtx))
 
 	log.G(requestCtx).WithField(logTaskID, req.ID).Debug("resume")
@@ -1783,6 +1748,9 @@ func (s *service) Resume(requestCtx context.Context, req *taskAPI.ResumeRequest)
 func (s *service) Kill(requestCtx context.Context, req *taskAPI.KillRequest) (*types.Empty, error) {
 	s.nativeMu.RLock()
 	defer s.nativeMu.RUnlock()
+	if s.pendingPause != nil {
+		return nil, status.Error(codes.FailedPrecondition, "VM snapshot transition is in progress")
+	}
 	defer logPanicAndDie(log.G(requestCtx))
 
 	log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, logExecID: req.ExecID}).Debug("kill")
@@ -1818,6 +1786,9 @@ func (s *service) Pids(requestCtx context.Context, req *taskAPI.PidsRequest) (*t
 func (s *service) CloseIO(requestCtx context.Context, req *taskAPI.CloseIORequest) (*types.Empty, error) {
 	s.nativeMu.RLock()
 	defer s.nativeMu.RUnlock()
+	if s.pendingPause != nil {
+		return nil, status.Error(codes.FailedPrecondition, "VM snapshot transition is in progress")
+	}
 	defer logPanicAndDie(log.G(requestCtx))
 
 	log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, logExecID: req.ExecID}).Debug("close_io")
@@ -1837,6 +1808,9 @@ func (s *service) CloseIO(requestCtx context.Context, req *taskAPI.CloseIOReques
 func (s *service) Checkpoint(requestCtx context.Context, req *taskAPI.CheckpointTaskRequest) (*types.Empty, error) {
 	s.nativeMu.RLock()
 	defer s.nativeMu.RUnlock()
+	if s.pendingPause != nil {
+		return nil, status.Error(codes.FailedPrecondition, "VM snapshot transition is in progress")
+	}
 	defer logPanicAndDie(log.G(requestCtx))
 
 	log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, "path": req.Path}).Info("checkpoint")
@@ -1881,6 +1855,9 @@ func (s *service) Connect(requestCtx context.Context, req *taskAPI.ConnectReques
 func (s *service) Shutdown(requestCtx context.Context, req *taskAPI.ShutdownRequest) (*types.Empty, error) {
 	s.nativeMu.RLock()
 	defer s.nativeMu.RUnlock()
+	if s.pendingPause != nil {
+		return nil, status.Error(codes.FailedPrecondition, "VM snapshot transition is in progress")
+	}
 	defer logPanicAndDie(log.G(requestCtx))
 	s.logger.WithFields(logrus.Fields{logTaskID: req.ID, "now": req.Now}).Debug("Shutdown")
 
@@ -1992,6 +1969,9 @@ func (s *service) Stats(requestCtx context.Context, req *taskAPI.StatsRequest) (
 func (s *service) Update(requestCtx context.Context, req *taskAPI.UpdateTaskRequest) (*types.Empty, error) {
 	s.nativeMu.RLock()
 	defer s.nativeMu.RUnlock()
+	if s.pendingPause != nil {
+		return nil, status.Error(codes.FailedPrecondition, "VM snapshot transition is in progress")
+	}
 	defer logPanicAndDie(log.G(requestCtx))
 	log.G(requestCtx).WithField(logTaskID, req.ID).Debug("update")
 

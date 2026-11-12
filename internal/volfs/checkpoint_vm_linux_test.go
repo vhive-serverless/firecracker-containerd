@@ -103,6 +103,10 @@ func TestVolumeCheckpointRealVM(t *testing.T) {
 	require.Equal(t, "41", initial.State)
 	require.Equal(t, "41", initial.Shared)
 	require.Equal(t, "orphan41", initial.Orphan)
+	// The probe protocol has no in-flight request here. Established vsock
+	// connections do not survive upstream snapshot creation; retain the guest
+	// listener and reconnect the probe after source resume.
+	require.NoError(t, connection.Close())
 	require.NoError(t, source.PauseVM(ctx))
 	frozen, err := server.Freeze(ctx)
 	require.NoError(t, err)
@@ -113,10 +117,13 @@ func TestVolumeCheckpointRealVM(t *testing.T) {
 		require.NoError(t, err)
 	}
 	memory, state := filepath.Join(base, "memory"), filepath.Join(base, "state")
-	err = source.CreateSnapshot(ctx, memory, state, fc.WithRetainedSourceVsock(true))
+	err = source.CreateSnapshot(ctx, memory, state)
 	require.NoError(t, frozen.Close())
 	require.NoError(t, err)
 	require.NoError(t, source.ResumeVM(ctx))
+	connection, err = fcvsock.DialContext(ctx, sourceVsock, 1234)
+	require.NoError(t, err)
+	defer connection.Close()
 	advanced := call(connection, "advance")
 	require.Equal(t, 42, advanced.Counter)
 	require.Equal(t, "42", advanced.Shared)
@@ -134,7 +141,7 @@ func TestVolumeCheckpointRealVM(t *testing.T) {
 	restoredVsock := filepath.Join(base, "restored.vsock")
 	serve(restoredServer, restoredVsock)
 	restored := launch("volume-restored", fc.Config{}, fc.WithSnapshot(memory, state,
-		fc.WithSnapshotVsockReset(true), func(cfg *fc.SnapshotConfig) {
+		func(cfg *fc.SnapshotConfig) {
 			cfg.VsockOverride = &models.VsockOverride{UdsPath: fc.String(restoredVsock)}
 		}))
 	newPID, err := restored.PID()

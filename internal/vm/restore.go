@@ -78,9 +78,6 @@ func (m *taskManager) AdoptProcess(ctx context.Context, saved RestoredProcess, b
 		return nil, err
 	}
 	go m.monitorExit(proc, backend)
-	go func() {
-		<-copyDone
-		proxy.Close()
-	}()
+	go monitorIO(copyDone, proc, proxy)
 	return state, nil
 }

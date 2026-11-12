@@ -15,15 +15,20 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"github.com/containerd/containerd/v2/pkg/protobuf/types"
 	"github.com/containernetworking/plugins/pkg/ns"
 	"github.com/firecracker-microvm/firecracker-containerd/proto"
 	firecracker "github.com/firecracker-microvm/firecracker-go-sdk"
 	"github.com/firecracker-microvm/firecracker-go-sdk/client/models"
+	ops "github.com/firecracker-microvm/firecracker-go-sdk/client/operations"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -70,15 +75,10 @@ func validateSnapshotRestore(req *proto.CreateVMRequest) error {
 // snapshotRestoreOpt translates the legacy vHive request to explicit drive IDs.
 // The caller provides the restored workload backing; the guest root is immutable.
 func snapshotRestoreOpt(cfg *firecracker.Config, req *proto.CreateVMRequest) firecracker.Opt {
-	root := cfg.Drives[0]
 	configure := func(snapshot *firecracker.SnapshotConfig) {
 		snapshot.ResumeVM = true
 		snapshot.EnableDiffSnapshots = req.EnableDiffSnapshots
 		snapshot.VsockOverride = &models.VsockOverride{UdsPath: firecracker.String(cfg.VsockDevices[0].Path)}
-		snapshot.DriveOverrides = []*models.DriveOverride{
-			{DriveID: root.DriveID, PathOnHost: firecracker.String(root.PathOnHost)},
-			{DriveID: firecracker.String(stubPathToDriveID("ctrstub0")), PathOnHost: firecracker.String(req.ContainerSnapshotPath)},
-		}
 	}
 	if backend := req.MemBackend; backend != nil {
 		return firecracker.WithSnapshot("", req.SnapshotPath, configure,
@@ -108,11 +108,21 @@ var populateRestoreTaps = firecracker.Handler{
 
 // CreateSnapshot saves a paused vHive VM. vHive separately captures the
 // devmapper disk and passes its independent backing on restore.
-func (s *service) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotRequest) (*types.Empty, error) {
-	s.nativeMu.RLock()
-	defer s.nativeMu.RUnlock()
+func (s *service) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotRequest) (_ *types.Empty, retErr error) {
+	if err := s.lockSnapshotTransition(ctx); err != nil {
+		return nil, err
+	}
+	defer s.nativeMu.Unlock()
+	defer func() {
+		if retErr != nil && s.pendingPause != nil {
+			cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
+			defer cancel()
+			retErr = errors.Join(retErr, s.resumePreparedVM(cleanup))
+		}
+	}()
 	if !filepath.IsAbs(req.MemFilePath) || !filepath.IsAbs(req.SnapshotPath) ||
-		filepath.Clean(req.MemFilePath) == filepath.Clean(req.SnapshotPath) {
+		filepath.Clean(req.MemFilePath) != req.MemFilePath || filepath.Clean(req.SnapshotPath) != req.SnapshotPath ||
+		req.MemFilePath == req.SnapshotPath || req.MemFilePath == req.SnapshotPath+snapshotDriveMetadataSuffix {
 		return nil, status.Error(codes.InvalidArgument, "memory and snapshot paths must be distinct absolute paths")
 	}
 	if err := s.waitVMReady(); err != nil {
@@ -121,8 +131,87 @@ func (s *service) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotR
 	if _, ok := s.jailer.(*noopJailer); !ok || len(s.machineConfig.PmemDevices) != 0 || len(s.machineConfig.Drives) != 2 || !s.machineConfig.Drives[0].IsReadOnly {
 		return nil, status.Error(codes.FailedPrecondition, "snapshot requires an unjailed VM with a read-only root and one workload drive")
 	}
-	if err := s.machine.CreateSnapshot(ctx, req.MemFilePath, req.SnapshotPath); err != nil {
+	if s.pendingPause == nil || s.pendingPause.Cut == nil || !s.pendingPause.VMPaused {
+		return nil, status.Error(codes.FailedPrecondition, "snapshot requires a prepared PauseVM transport barrier")
+	}
+	api := firecracker.NewClient(s.apiSocketPath, s.logger, false)
+	exported, err := api.GetExportVMConfig(func(params *ops.GetExportVMConfigParams) { params.SetContext(ctx) })
+	if err != nil {
+		return nil, err
+	}
+	metadata, err := snapshotDrivePaths(exported.Payload, false)
+	if err != nil {
+		return nil, err
+	}
+	metadata.Transport = s.pendingPause.Cut
+	if len(metadata.Drives) != 2 {
+		return nil, status.Error(codes.FailedPrecondition, "legacy snapshot requires exactly two captured drives")
+	}
+	// Stage inside the per-VM directory, which remains writable and visible
+	// even when this VMM was itself restored into a private filesystem root.
+	stage, err := os.MkdirTemp(s.jailer.JailPath().RootPath(), ".legacy-state-")
+	if err != nil {
+		return nil, err
+	}
+	defer os.RemoveAll(stage)
+	s.pendingPause.MayReset = true
+	if err := s.machine.CreateSnapshot(ctx, filepath.Join(stage, "memory"), filepath.Join(stage, "state")); err != nil {
+		return nil, err
+	}
+	// Invalidate any old publication marker before replacing either payload.
+	// Failure leaves an explicitly unusable artifact, never a stale valid cut.
+	if err := os.Remove(req.SnapshotPath + snapshotDriveMetadataSuffix); err != nil && !os.IsNotExist(err) {
+		return nil, err
+	}
+	if err := syncNativeDirectory(filepath.Dir(req.SnapshotPath)); err != nil {
+		return nil, err
+	}
+	if err := publishSnapshotFile(ctx, filepath.Join(stage, "memory"), req.MemFilePath); err != nil {
+		return nil, err
+	}
+	if err := publishSnapshotFile(ctx, filepath.Join(stage, "state"), req.SnapshotPath); err != nil {
+		return nil, err
+	}
+	if err := publishSnapshotDriveMetadata(req.SnapshotPath, metadata); err != nil {
 		return nil, err
 	}
 	return &types.Empty{}, nil
+}
+
+func publishSnapshotFile(ctx context.Context, source, destination string) error {
+	temporary, err := os.CreateTemp(filepath.Dir(destination), ".snapshot-publish-")
+	if err != nil {
+		return err
+	}
+	name := temporary.Name()
+	defer os.Remove(name)
+	if err := temporary.Close(); err != nil {
+		return err
+	}
+	if err := os.Remove(name); err != nil {
+		return err
+	}
+	if _, err := copyNativeFile(ctx, source, filepath.Dir(name), filepath.Base(name)); err != nil {
+		return err
+	}
+	return os.Rename(name, destination)
+}
+
+// The sidecar is the publication marker and must travel with the state file.
+// Older snapshots without one cannot safely infer original disk paths.
+func publishSnapshotDriveMetadata(state string, metadata *snapshotDriveMetadata) error {
+	file, err := os.CreateTemp(filepath.Dir(state), ".snapshot-drives-")
+	if err != nil {
+		return err
+	}
+	defer os.Remove(file.Name())
+	err = json.NewEncoder(file).Encode(metadata)
+	if err == nil {
+		err = file.Sync()
+	}
+	err = errors.Join(err, file.Close())
+	if err != nil {
+		return err
+	}
+	return os.Rename(file.Name(), state+snapshotDriveMetadataSuffix)
 }

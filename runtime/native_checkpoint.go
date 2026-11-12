@@ -98,6 +98,7 @@ type nativeCheckpoint struct {
 	Drives         []nativeDrive
 	Pmem           []nativePmem
 	Memory, State  nativeFile
+	Transport      *checkpointTransportCut
 }
 
 // CheckpointVM coordinates a native VM capture. All external writers of exported
@@ -121,6 +122,9 @@ func (s *service) CheckpointVM(ctx context.Context, req *proto.CheckpointVMReque
 		}
 	}
 	defer s.nativeMu.Unlock()
+	if s.pendingPause != nil {
+		return nil, status.Error(codes.FailedPrecondition, "previous pause recovery must finish before checkpoint")
+	}
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -164,8 +168,8 @@ func (s *service) CheckpointVM(ctx context.Context, req *proto.CheckpointVMReque
 		}
 	}
 	var frozen *volfs.FrozenServer
-	var resumed []string
-	vmPaused := false
+	pending := &pendingVMPause{}
+	s.pendingPause = pending
 	thaw := func() error {
 		cleanupCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
 		defer cancel()
@@ -174,37 +178,29 @@ func (s *service) CheckpointVM(ctx context.Context, req *proto.CheckpointVMReque
 			cleanupErr = errors.Join(cleanupErr, frozen.Close())
 			frozen = nil
 		}
-		if vmPaused {
-			paused, err := s.isPaused(cleanupCtx)
-			if err != nil || paused {
-				if err := s.machine.ResumeVM(cleanupCtx); err != nil {
-					return errors.Join(cleanupErr, err)
-				}
-			}
-			vmPaused = false
-		}
-		pending := resumed
-		resumed = nil
-		for _, id := range pending {
-			_, err := s.agentClient.Resume(cleanupCtx, &taskAPI.ResumeRequest{ID: id})
-			cleanupErr = errors.Join(cleanupErr, err)
-			if err != nil {
-				resumed = append(resumed, id)
-			}
+		if s.pendingPause != nil {
+			cleanupErr = errors.Join(cleanupErr, s.resumePreparedVM(cleanupCtx))
 		}
 		return cleanupErr
 	}
 	defer func() { retErr = errors.Join(retErr, thaw()) }()
 	for _, process := range manifest.Processes {
 		if process.ExecID == "" && process.State.Status == task.Status_RUNNING {
-			resumed = append(resumed, process.TaskID)
+			pending.Tasks = append(pending.Tasks, process.TaskID)
 			if _, err := s.agentClient.Pause(ctx, &taskAPI.PauseRequest{ID: process.TaskID}); err != nil {
 				return nil, err
 			}
 		}
 	}
-	manifest.ResumeTasks = append([]string(nil), resumed...)
-	vmPaused = true
+	manifest.ResumeTasks = append([]string(nil), pending.Tasks...)
+	pending.IOPrepared = true
+	manifest.Transport, err = s.prepareIOTransport(ctx)
+	if err != nil {
+		return nil, err
+	}
+	pending.Cut = manifest.Transport
+	manifest.Transport.ResumeTasks = append([]string(nil), pending.Tasks...)
+	pending.VMPaused = true
 	if err := s.machine.PauseVM(ctx); err != nil {
 		return nil, err
 	}
@@ -220,6 +216,7 @@ func (s *service) CheckpointVM(ctx context.Context, req *proto.CheckpointVMReque
 			return nil, err
 		}
 	}
+	pending.MayReset = true
 	if err := s.nativeVMFiles(ctx, stage, manifest); err != nil {
 		return nil, err
 	}
@@ -234,9 +231,12 @@ func (s *service) CheckpointVM(ctx context.Context, req *proto.CheckpointVMReque
 		if drive == nil || drive.DriveID == nil {
 			return nil, fmt.Errorf("missing live drive identity")
 		}
-		path := drive.PathOnHost
-		if _, jailed := s.jailer.(*runcJailer); jailed {
-			path = filepath.Join(s.jailer.JailPath().RootPath(), strings.TrimPrefix(path, "/"))
+		path, remapped := restoreBackingPath(s.jailer, drive.PathOnHost)
+		if !remapped {
+			path = drive.PathOnHost
+			if _, jailed := s.jailer.(*runcJailer); jailed {
+				path = filepath.Join(s.jailer.JailPath().RootPath(), strings.TrimPrefix(path, "/"))
+			}
 		}
 		if drive.IsRootDevice != nil && *drive.IsRootDevice && drive.IsReadOnly && created.GetRootDrive().GetImageSha256() != "" {
 			// Shared immutable block controls are bind-mounted only inside the
@@ -301,7 +301,7 @@ func (s *service) nativeMetadata(ctx context.Context) (*nativeCheckpoint, error)
 	if err != nil {
 		return nil, err
 	}
-	manifest := &nativeCheckpoint{Version: 1, VMID: s.vmID, Namespace: s.namespace, CreateRequest: append(json.RawMessage(nil), s.vmRequest...), RuntimeConfig: s.config,
+	manifest := &nativeCheckpoint{Version: 2, VMID: s.vmID, Namespace: s.namespace, CreateRequest: append(json.RawMessage(nil), s.vmRequest...), RuntimeConfig: s.config,
 		VMConfig: response.Payload, NetNS: s.machine.Cfg.NetNS, ContainerSlots: make(map[string]nativeSlot)}
 	for _, network := range s.machine.Cfg.NetworkInterfaces {
 		if network.StaticConfiguration == nil {
@@ -413,7 +413,7 @@ func (s *service) nativeVMFiles(ctx context.Context, stage string, manifest *nat
 		}
 		apiDirectory = "/" + rel
 	}
-	if err := s.machine.CreateSnapshot(ctx, filepath.Join(apiDirectory, "memory"), filepath.Join(apiDirectory, "state"), fc.WithRetainedSourceVsock(true)); err != nil {
+	if err := s.machine.CreateSnapshot(ctx, filepath.Join(apiDirectory, "memory"), filepath.Join(apiDirectory, "state")); err != nil {
 		return err
 	}
 	manifest.Memory, err = copyNativeFile(ctx, filepath.Join(directory, "memory"), stage, "memory")
