@@ -52,3 +52,10 @@ appropriate to that diff and preserve receipts before pushing. Use separate
 checkouts, install prefixes, test storage and thin pools for concurrent builds.
 The branch chain does not make Step 3 complete: Step 4 was started from its WIP
 baseline by explicit exception on 2026-11-11.
+
+## Recorded branch-chain audit
+
+The [forward-merge receipt](evidence/branch-chain-audit.json) records the original
+and reconciled tips, all three ancestor checks and unchanged source/dependency
+selections. The [agent footprint audit](agent-footprint.md) answers the DSec and
+Go/Rust comparison using a pinned Step 4 image.

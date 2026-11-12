@@ -6,6 +6,8 @@ for the complete worker build, installation, tests, and dependency revisions.
 
 On `damon-virtio-pmem`, see [Step 4 status](docs/modernization/step-4.md) and the
 [21-trial memory evaluation](tools/memory-eval/results/0a268c5589c3/REPORT.md).
+Step 4 also retains an unresolved tmpfs-backed guest stargz store; see the
+[completion audit](docs/modernization/step-4-completeness.md).
 Step 3 remains explicitly WIP: Kubernetes Pod checkpoint/restore and full CRI
 conformance have not been accepted.
 
