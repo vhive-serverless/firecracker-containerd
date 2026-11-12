@@ -1,5 +1,9 @@
 # Quickstart with firecracker-containerd
 
+> Historical upstream guide: version requirements and command examples below
+> are not the tested setup for the maintained Step 1–4 branches. Follow the
+> [modernization branch guide](modernization/README.md) and its pinned worker procedures.
+
 This quickstart guide provides simple steps to get a working
 firecracker-containerd environment, with each of the major components built from
 source.  Once you have completed this quickstart, you should be able to run and
