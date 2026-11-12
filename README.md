@@ -3,8 +3,17 @@
 This branch uses official Firecracker/jailer v1.18.0 release binaries, the
 published vHive SDK dd9db32, and containerd v2.3.7. Fresh VM acceptance of
 the migrated candidate is pending. See the
-[modernization procedure and validation status](docs/modernization/step-1.md)
+[modernization procedure and validation status](docs/modernization/README.md)
 for the complete worker build, installation, tests, and dependency revisions.
+
+This Step 4 candidate adds private guest storage, PMEM/DAX, bounded DAMON and
+free-page reporting. See [Step 4 status](docs/modernization/step-4.md), the
+[historical memory evaluation](tools/memory-eval/results/0a268c5589c3/REPORT.md)
+and [reference acceptance scopes](docs/modernization/upstream-migration.md).
+Fresh acceptance of this exact migrated tree remains pending. CRI remains WIP;
+Kubernetes whole-Pod checkpoint/restore is deferred to the 1.38 interface work.
+The upstream overview below is historical; use the branch guide for current
+build and reproduction commands.
 
 [![BuildKite](https://badge.buildkite.com/aab4ae547d5e5079a5915522e8cdb18492349aef67aae5a8c5.svg?branch=main)](https://buildkite.com/firecracker-microvm/firecracker-containerd)
 [![GitHub Actions](https://github.com/firecracker-microvm/firecracker-containerd/actions/workflows/build.yaml/badge.svg)](https://github.com/firecracker-microvm/firecracker-containerd/actions)
