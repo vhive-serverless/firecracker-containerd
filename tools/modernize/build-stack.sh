@@ -22,9 +22,10 @@ export DOCKER_IMAGE_TAG="$(git rev-parse --short=12 HEAD)"
 # Force Go linking so revision metadata cannot come from an earlier checkout.
 make -B agent runtime examples firecracker-control/cmd/containerd snapshotter \
     docker-credential-mmds volume cri cni-bins test-cni-bins
-# Verify official release checksums and rebuild runc for this revision.
+# Verify the official VMM release and rebuild runc after every checkout.
+# A binary from an earlier milestone must never be selected by mtime.
 make -B firecracker runc
-make kernel default-vmlinux image image-stargz
+make kernel default-vmlinux image image-stargz image-dax image-stargz-dax
 mkdir -p bin/receipts/build
 go list -m -json all > bin/receipts/build/go-modules.json
 (cd cri && go list -m -json all) > bin/receipts/build/cri-go-modules.json
@@ -38,8 +39,8 @@ for binary in bin/firecracker bin/jailer _submodules/runc/runc \
     sha256sum "$binary"
 done > bin/receipts/build/binaries.sha256
 go version -m agent/agent > bin/receipts/build/agent-build-info
+go version -m cri/firecracker-cri > bin/receipts/build/cri-build-info
 bin/firecracker --version
 _submodules/runc/runc --version
 firecracker-control/cmd/containerd/firecracker-containerd --version
-go version -m cri/firecracker-cri > bin/receipts/build/cri-build-info
 cri/firecracker-cri --version
