@@ -1,0 +1,21 @@
+{
+  "runtime_revision": "57b93fc288e2c606d8d1b291fc11103c81311511",
+  "sdk_revision": "dd9db322432989b96cff7a38a64703d60b6cabf9",
+  "firecracker": "official v1.18.0",
+  "worker": "amd218.utah.cloudlab.us",
+  "test": "TestNativeRestore_Isolated",
+  "result": "failed",
+  "cases": [
+    {
+      "jailed": false,
+      "result": "failed"
+    },
+    {
+      "jailed": true,
+      "result": "failed"
+    }
+  ],
+  "failure": "CheckpointVM returned prepare guest IO: context deadline exceeded during source recovery in both jail modes; restore not reached",
+  "worker_log": "upstream-migration/evidence/native-restore-57b93fc-containerd.log",
+  "scope": "Diagnostic development revision, not release acceptance"
+}
