@@ -1,0 +1,55 @@
+2026-11-11T11:12:17Z
+Result: PASS; component validation, not whole-Pod or Kubernetes restore acceptance
+e21b3f6a29da715382a5feeb60be005b08b36226
+Capture and restore host volume sessions alongside VM snapshots
+Signed-off-by: JooYoung Park <jooyoung.park73@gmail.com>
+
+go version go1.26.11 linux/amd64
+6.8.0-147-generic
+Worker: nehalem@amd218.utah.cloudlab.us
+Checkout: /users/nehalem/fc-ctrd-mod/native-volume-committed
+VMM source checkout: /users/nehalem/fc-ctrd-mod/cri-committed
+20727f4002990a522c4d46bc174475959c28f93c
+ce15b3d35a4811fbf164371b72f57757cce5e846ad5959b547a471fd564a6e89  /users/nehalem/fc-ctrd-mod/cri-committed/bin/firecracker
+f7c763775c948bd8b779e432e5f4d418463a96a3e222b959df2d648c5b798dac  /users/nehalem/fc-ctrd-mod/cri-committed/default-vmlinux.bin
+Commands: go test -mod=readonly -race -count=1 -timeout=180s -v ./internal/volfs; make lint; go test -mod=readonly -race -c -o /tmp/fcmod-e21b3f6-volume.test ./internal/volfs; sudo -n env VOLFS_MOUNT_TESTS=1 unshare --mount --propagation private /tmp/fcmod-e21b3f6-volume.test -test.v -test.count=1 -test.timeout=180s; FC_NATIVE_VMM=$task_root/cri-committed/bin/firecracker FC_NATIVE_KERNEL=$task_root/cri-committed/default-vmlinux.bin tools/modernize/test-native-volumes.sh
+
+Evidence: e21b3f6-volume-unit.log
+8108311b34adffd96ad4041740e00029d6bc5ad4dc48dd7a469797e7b3dde50b  /users/nehalem/fc-ctrd-mod/evidence/e21b3f6-volume-unit.log
+--- PASS: TestRPCCapabilityRevocationAndSessionOwnership (0.00s)
+=== RUN   TestRPCRejectsOversizedFrameBeforeReadingBody
+--- PASS: TestRPCRejectsOversizedFrameBeforeReadingBody (0.00s)
+=== RUN   TestRPCClientCancellationAndClose
+--- PASS: TestRPCClientCancellationAndClose (0.00s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/internal/volfs	1.859s
+
+Evidence: e21b3f6-volume-lint.log
+ac72c0bfe466f064043d0b72df9dfc165d3a4d7b339ba9b3f353ddfbbbae45c6  /users/nehalem/fc-ctrd-mod/evidence/e21b3f6-volume-lint.log
+No template file for bash scripts, shall skip all bash scripts
+/users/nehalem/fc-ctrd-mod/native-volume-committed/bin/git-validation -run DCO,short-subject -range HEAD~1..HEAD
+ * e21b3f6a "Capture and restore host volume sessions alongside VM snapshots" ... PASS
+/users/nehalem/fc-ctrd-mod/native-volume-committed/bin/golangci-lint run
+0 issues.
+cd cri && /users/nehalem/fc-ctrd-mod/native-volume-committed/bin/golangci-lint run --config ../.golangci.yml
+0 issues.
+
+Evidence: e21b3f6-volume-mount.log
+180da516e889f709bcbfa478a65ae830f8f8b91c926a6b0392ec454d095be697  /users/nehalem/fc-ctrd-mod/evidence/e21b3f6-volume-mount.log
+=== RUN   TestRPCCapabilityRevocationAndSessionOwnership
+--- PASS: TestRPCCapabilityRevocationAndSessionOwnership (0.00s)
+=== RUN   TestRPCRejectsOversizedFrameBeforeReadingBody
+--- PASS: TestRPCRejectsOversizedFrameBeforeReadingBody (0.00s)
+=== RUN   TestRPCClientCancellationAndClose
+--- PASS: TestRPCClientCancellationAndClose (0.00s)
+PASS
+
+Evidence: e21b3f6-volume-vm.log
+423842569d2b05295c0e7798a5edebcc40e2d40a7f60781294a38ec74cfedcee  /users/nehalem/fc-ctrd-mod/evidence/e21b3f6-volume-vm.log
+47ca720d5de3d8769bcfbbfcb10d0da41872ab2204d938ea782d3df7836f0bae  /tmp/fc-volume-fixture.HK6KdS/init
+6caece58c127ebd022fc467a1a9957fd61361b7fd919f624bdffb3993a1f8110  /tmp/fc-volume-fixture.HK6KdS/initrd.cpio
+b896a44a99a7ffeae187692427e028443a85fa9149866d72075a606cae4e7514  /tmp/fc-volume-fixture.HK6KdS/native-volume.test
+=== RUN   TestVolumeCheckpointRealVM
+    checkpoint_vm_linux_test.go:153: source_pid=537070 restored_pid=537088 captured_counter=41 restored_counter=42 inode=2 shared=42 orphan=orphan42
+--- PASS: TestVolumeCheckpointRealVM (2.13s)
+PASS
