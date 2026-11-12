@@ -357,14 +357,8 @@ func (ts *TaskService) Start(requestCtx context.Context, req *taskAPI.StartReque
 	defer logPanicAndDie(logger)
 	logger.Debug("start")
 
-	if req.ExecID == "" {
-		ts.exitPublisher.begin(req.ID)
-	}
-	resp, err := ts.runcService.Start(requestCtx, req)
+	resp, err := ts.taskManager.StartProcess(requestCtx, req, &startPublisher{TTRPCTaskService: ts.runcService, publisher: ts.exitPublisher})
 	if err != nil {
-		if req.ExecID == "" {
-			ts.exitPublisher.forget(req.ID)
-		}
 		logger.WithError(err).Error("start failed")
 		return nil, err
 	}
@@ -736,8 +730,17 @@ func (ts *TaskService) Shutdown(requestCtx context.Context, req *taskAPI.Shutdow
 	defer logPanicAndDie(logger)
 	logger.Debug("shutdown")
 
-	// shimCancel will result in the runc shim to be canceled in addition to unblocking agent's
-	// main func, which will allow it to exit gracefully.
+	// Stop managed workloads while the reaper, event publisher and stream
+	// transports are still alive. Restored tasks have no caller-side task
+	// handle, so relying on clients to delete them leaves PID1 waiting for
+	// application SIGTERM grace after the agent has already exited.
+	if err := ts.taskManager.Shutdown(requestCtx, ts.runcService); err != nil {
+		return nil, err
+	}
+	if err := ts.exitPublisher.waitAll(requestCtx); err != nil {
+		return nil, err
+	}
+	// Cancel only after confirmed exits, output completion and journal publication.
 	defer ts.shimCancel()
 
 	logger.Debug("going to gracefully shutdown agent")
