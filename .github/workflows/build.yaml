@@ -2,9 +2,9 @@ name: Build
 
 on:
   push:
-    branches: [ main, master, modernize-runtime, vhive-compatible, cri-native-snapshot-restore, damon-virtio-pmem ]
+    branches: [ main, master, firecracker-v1.18-containerdv2, firecracker-v1.18-containerdv2-vhive-integration, cri-native-snapshot-restore, damon-virtio-pmem ]
   pull_request:
-    branches: [ main, master, modernize-runtime, vhive-compatible, cri-native-snapshot-restore, damon-virtio-pmem ]
+    branches: [ main, master, firecracker-v1.18-containerdv2, firecracker-v1.18-containerdv2-vhive-integration, cri-native-snapshot-restore, damon-virtio-pmem ]
 
 jobs:
   build:
@@ -26,18 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          # By default, the checkout action only fetches the last commit,
-          # but we want to run DCO check against all commit messages.
-          # Assuming that a pull request may have multiple commits,
-          # fetching the single commit doesn't work for us.
-          #
-          # While DCO check (on Makefile) checks latest 20 commits,
-          # the checkout action automatically creates a merge commit
-          # for merging "main" into a pull request branch.
-          # In addition to that, Git cannot recognize merge commits when
-          # one of the parents is missing.
-          # So, we will fetch 30 commits just in case to have
-          # 20 actual commits with associated merged commits.
+          # Preserve ancestry for the configured DCO range and merge parents.
           fetch-depth: 30
       - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
         with:

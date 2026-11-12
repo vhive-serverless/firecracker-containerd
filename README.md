@@ -1,6 +1,8 @@
 # firecracker-containerd
 
-This branch pins Firecracker v1.18.0 and containerd v2.3.7. See the
+This branch uses official Firecracker/jailer v1.18.0 release binaries, the
+published vHive SDK dd9db32, and containerd v2.3.7. Fresh VM acceptance of
+the migrated candidate is pending. See the
 [modernization procedure and validation status](docs/modernization/step-1.md)
 for the complete worker build, installation, tests, and dependency revisions.
 
@@ -58,9 +60,11 @@ For more detailed information on the components and how they work, see
 ## Maintained branches and usage
 
 Use the [Step 1–4 branch guide](docs/modernization/README.md) for build,
-installation, validation and forward-merge maintenance. `modernize-runtime` is
-the maintained base; later branches add vHive, CRI/native checkpoint components,
-and disk-backed storage/memory mechanisms in order. Each branch pins its own
+installation, validation and forward-merge maintenance.
+`firecracker-v1.18-containerdv2` is the maintained base;
+`firecracker-v1.18-containerdv2-vhive-integration` adds vHive. Later branches
+add CRI/native checkpoint components and disk-backed storage/memory mechanisms
+in order. Each branch pins its own
 stack. Step 3 and inherited Kubernetes/CRI acceptance gates remain WIP.
 
 The original general getting-started and quickstart pages are historical

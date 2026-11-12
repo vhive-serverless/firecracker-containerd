@@ -1,11 +1,22 @@
 # Modernization acceptance ledger
 
-Step 1 has passed worker acceptance from a committed checkout. See `step-1.md`
-for the tested revision, pushed dependency references, and evidence. The [branch guide](README.md) explains the incremental maintenance chain.
-Step 4 began from an explicitly authorized Step 3 WIP baseline; branching does
-not establish acceptance of the unfinished CRI or Kubernetes restore gates.
+## Current migrated Step 1 status
 
-## Initial audit
+The maintained base is `firecracker-v1.18-containerdv2`; its vHive successor is
+`firecracker-v1.18-containerdv2-vhive-integration`. Official Firecracker/jailer
+1.18.0 binaries and the published vHive SDK dd9db32 are selected in the current
+lock and module manifests. Fresh exact-candidate worker build/install and VM
+acceptance remain pending. Local compilation checks are recorded separately in
+[the local validation note](upstream-step1-local-validation.md).
+
+The checklist below preserves the original modernization ledger. Its checked
+items, former branch names, planned later steps and acceptance statements
+belong to that historical source, not the migrated candidates. See the
+[current branch guide](README.md) and [Step 1 procedure](step-1.md) for current
+inputs and validation gates. Step 3 remains WIP; Kubernetes Pod restore is
+deferred to the 1.38 interface work.
+
+## Historical initial audit
 
 - [x] Read the requested specification and worker.txt; check ancestor/repository instructions (no AGENTS.md found).
 - [x] Inventory local Git status, remotes, branches, module declarations, submodule pins and build inputs in versions.json.
@@ -18,7 +29,7 @@ not establish acceptance of the unfinished CRI or Kubernetes restore gates.
 - [x] Complete host-to-guest-to-container storage trace, including volumes and stargz.
 - [x] Pin compatible target revisions and reproducible build/artifact configurations.
 
-## Step 1: modernize-runtime
+## Historical Step 1: modernize-runtime
 
 - [x] Create runtime branch from master be68640 (current upstream dependency and security fixes; vHive changes ported in Step 2).
 - [x] Preserve relevant SDK 1.14 work and regenerate from exact v1.18.0 Swagger using a pinned generator.
@@ -37,7 +48,7 @@ not establish acceptance of the unfinished CRI or Kubernetes restore gates.
 - [x] Worker repeated operations and representative failures without resource leaks; relevant tests pass.
 - [x] Commit/push all repositories; validate committed checkout without untracked state; capture exact versions/commands/paths and limitations.
 
-## Step 2: vhive-compatible (not started)
+## Historical Step 2: vhive-compatible (not started)
 
 - [ ] Create branch from validated Step 1 completion commit.
 - [ ] Inspect integration behavior/dependencies, port SDK/runtime/network/storage/snapshot changes without downgrades.
@@ -46,7 +57,7 @@ not establish acceptance of the unfinished CRI or Kubernetes restore gates.
 - [ ] Provide end-to-end regression script and rerun Step 1 acceptance.
 - [ ] Push compatible dependency/runtime commits, validate independent committed reconstruction and report revisions/commands/results/limitations.
 
-## Step 3: cri-native-snapshot-restore (not started)
+## Historical Step 3: cri-native-snapshot-restore (not started)
 
 - [ ] Create branch from validated Step 2 completion commit.
 - [ ] Verify installed k3s v1.37.2+k3s1 binary/component versions and actual Pod checkpoint/restore alpha APIs/gates/RPCs; select newer compatible release only if required.
@@ -61,7 +72,7 @@ not establish acceptance of the unfinished CRI or Kubernetes restore gates.
 - [ ] Document identity, networking, same-node/cross-node and alpha limitations.
 - [ ] Commit/push implementation, manifests/gates/tests, dependency pins and independent reproduction procedure; report outcome/revisions/results.
 
-## Step 4: damon-virtio-pmem (not started)
+## Historical Step 4: damon-virtio-pmem (not started)
 
 - [ ] Create branch from validated Step 3 completion commit; scope limited to writable storage and memory reduction.
 - [ ] Read arXiv 2609.22978; verify current running host/guest/container storage and persistence boundaries before changes.

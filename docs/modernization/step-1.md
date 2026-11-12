@@ -2,54 +2,40 @@
 
 ## Current status
 
-The functional acceptance revision for this milestone is
-`06bd2058ba7938ad31eec9e17ac4d2e4c33a958f`. This is the tested runtime revision,
-not a claim that every later documentation or maintenance commit reran the full
-suite. Its clean worker checkout passed build, private installation, 36 runtime,
-five snapshotter and 79 SDK tests (one existing SDK metrics skip), plus three
-targeted jailer race tests. The [acceptance receipt](evidence/06bd205-telemetry-acceptance-receipt.log)
-records the tested source, artifacts, Docker image and raw log hashes.
+The maintained branch is `firecracker-v1.18-containerdv2`. This migrated
+candidate uses official Firecracker/jailer v1.18.0 binaries and the published
+vHive SDK dd9db32. Fresh exact-commit worker build/install, lifecycle and VM
+acceptance are pending. [Local compilation and unit checks](upstream-step1-local-validation.md)
+are separate evidence; they do not establish VM acceptance.
 
-Commits after that acceptance contain bounded maintenance checks, not another
-full runtime run: install failure propagation at `1adbcfc`, task-test
-synchronization at `8797ff8`, and cache eviction test synchronization at
-`1a56f6a`. The [install receipt](evidence/1adbcfc-install-guard-receipt.log),
-[task-test receipt](evidence/8797ff8-task-wait-sync-receipt.log), and shared
-[cache-test receipt](evidence/step4-cache-test/verification.json) document
-their scope and results. These checks do not change the acceptance revision or
-dependency pins.
+The archived original Step 1 acceptance at `06bd205` and its personal SDK pin
+remain in the historical records below. Those receipts do not validate the
+new inputs or the acknowledged-event/framed-IO migration. Standalone SDK
+acceptance likewise does not validate the reconstructed runtime. See the
+[migration scope](upstream-migration.md) and [branch guide](README.md).
 
-## Functional validation history
+## Current stack and compatibility
 
-The initial committed milestone acceptance is recorded at `e666612819bc`; later
-full acceptance runs covered the task-create cleanup fix (`6585eba`), metrics
-and I/O corrections (`3adc9f6`), and the cross-filesystem telemetry correction
-(`06bd205`). Each result remains tied to its own source revision and receipt.
-That functional run prepares telemetry links or bind mounts before runc starts,
-preserving log and metrics FIFO readers across filesystems. Its real-VM
-cross-filesystem regression and all eight jailed/unjailed
-`TestCreateVM_Isolated` cases passed. Earlier detailed results and receipts
-remain below. The initial acceptance also demonstrated an OCI image writing
-and reading a file on its ext4 container root, plus native task survival across
-a controller restart and cleanup after shim termination.
+Use this checkout's `versions.json`, `go.mod`, `go.sum`, child module manifests
+and gitlinks for the selected graph. Firecracker source is pinned at official
+v1.18.0 commit `eaf83bb718a559d324613d566eaf776b31a62340`; builds fetch the official
+Firecracker and jailer release binaries and verify the architecture-specific
+archive checksums in `versions.json`. No custom VMM or local Rust build is used.
 
-## Stack and compatibility
-
-`versions.json`, `go.mod`, `go.sum`, the child module manifests, and the gitlinks
-pin the complete source graph. The selected VMM is upstream Firecracker v1.18.0,
-commit `eaf83bb718a559d324613d566eaf776b31a62340`. No VMM source modification is
-needed for this step. The SDK `modernize-runtime` branch preserves the earlier
-`feat/update-firecracker-1.14` work and adds Swagger v1.18 generation with
-`go-swagger v0.33.1`; its pushed commit is
-`0d7a093c9b0cee5b93d0b9551888a571bb478154`.
+The SDK repository is `https://github.com/vhive-serverless/firecracker-go-sdk`,
+branch `firecracker-v1.18.0`, commit
+`dd9db322432989b96cff7a38a64703d60b6cabf9`. Its published Go replacement is
+`github.com/vhive-serverless/firecracker-go-sdk v0.0.0-20261112180021-dd9db3224329`.
+The VMM and SDK schemas match the official release schema. `modules.txt` is a
+historical captured graph; generate a current graph from the exact checkout.
 
 The runtime uses containerd v2.3.7 (API v1.11.1), runc v1.4.2, CNI plugins v1.9.1,
 CNI library v1.3.0, and stargz-snapshotter v0.18.2. The retained tc-redirect-tap
 revision `34bf829e9a5c99df47318c7feeb637576df239fc` was the upstream HEAD
 at the recorded worker audit; it is intentionally pinned rather than following HEAD.
 The stargz v0.19.1 module would force containerd v2.4.2 and is not part of this
-stack. The remote-snapshotter child module repeats the SDK replacement because
-Go does not inherit replacements from dependency modules.
+stack. Each child module must repeat the SDK replacement when it consumes the SDK,
+because Go does not inherit replacements from dependency modules.
 
 The shim uses containerd's version 3 ttrpc task service and the current manager
 bootstrap interface. Containerd config version 4 requires explicit gRPC and ttrpc
@@ -68,8 +54,8 @@ and enables command-line virtio MMIO devices. The legacy `noapic` argument cause
 ACPI/virtio initialization failures on the new kernel and has been removed.
 Unified cgroups are enabled. See `baseline-audit.md` for original provenance.
 
-Actual guest inspection confirms the preserved layout: read-only squashfs guest
-base, tmpfs guest overlay upper, and separate ext4 container roots on host-backed
+Historical worker guest inspection confirmed the preserved layout: read-only
+squashfs guest base, tmpfs guest overlay upper, and separate ext4 container roots on host-backed
 devmapper thin devices. Host backing files reside on `/dev/sda3` (ext3), not tmpfs.
 The persistent guest overlay redesign belongs to Step 4. The default devmapper container path already
 has a disk-backed writable layer. The optional guest stargz service instead mounts
@@ -101,7 +87,113 @@ The shim drains control replies on shutdown, publishes the VM stop event before
 exit, and reserves stdout for the containerd bootstrap and delete protocols.
 Both crash tests check that containerd removes the task bundle as well as the VM.
 
-## Reproduction procedure
+## Current reproduction and acceptance procedure
+
+Select the exact committed migrated Step 1 revision before running this
+procedure. Do not substitute a historical receipt revision for the new candidate.
+The commands below describe the required gate; they have not yet established
+acceptance of this candidate.
+
+Full stack builds and VM acceptance run on `nehalem@amd218.utah.cloudlab.us`.
+The default workspace is `/users/nehalem/fc-ctrd-mod`. The scripts support
+`STACK_DIR` for a separate workspace. Use a fresh SSH connection after provisioning
+if it adds the Docker group.
+
+```bash
+set -euo pipefail
+export STACK_DIR="$HOME/fc-ctrd-mod"
+mkdir -p "$STACK_DIR/evidence"
+checkout=$(mktemp -d "$STACK_DIR/step1-repro.XXXXXXXX")
+git clone --branch firecracker-v1.18-containerdv2 --recurse-submodules \
+  https://github.com/vhive-serverless/firecracker-containerd.git "$checkout"
+cd "$checkout"
+: "${RUNTIME_REVISION:?Set the exact committed migrated Step 1 revision under review}"
+git checkout --detach "$RUNTIME_REVISION"
+git submodule sync --recursive
+git submodule update --init --recursive
+tools/modernize/prepare-worker.sh
+# If provisioning added the Docker group, reconnect and return to this checkout.
+revision=$(git rev-parse --short=12 HEAD)
+run_name="fcmod-repro-$revision-$(date +%s)"
+work_dir="$STACK_DIR/$run_name"
+logs="$STACK_DIR/evidence/$run_name"
+mkdir -p "$logs"
+tools/modernize/build-stack.sh 2>&1 | tee "$logs/build-stack.log"
+tools/modernize/install-stack.sh 2>&1 | tee "$logs/install-stack.log"
+INSTALL_DIR="$STACK_DIR/install/$revision" RUN_NAME="$run_name" WORK_DIR="$work_dir" \
+  tools/modernize/run-worker.sh 2>&1 | tee "$logs/lifecycle.log"
+sudo -n env RUNTIME_SRC="$PWD" WORK_DIR="$work_dir" \
+  RUN_NAME="$run_name" RESTART_CONTROLLER=1 \
+  python3 tools/modernize/test-crash-recovery.py \
+  2>&1 | tee "$logs/controller-recovery.log"
+tools/modernize/test-stack.sh 2>&1 | tee "$logs/acceptance.log"
+```
+
+`test-stack.sh` rebuilds the test image with the checkout's revision tag, runs
+unprivileged and root unit checks, lint, tracked-module tidy, forced protobuf
+regeneration, the complete runtime and snapshotter integration suites, thin-pool
+ownership/cleanup tests, and the exact pinned SDK suite from its own clean clone.
+The crash recovery test kills the dedicated controller, reconnects to the existing
+VM, checks its filesystem state, and then kills its shim and verifies VM cleanup.
+Test networking is isolated; the SDK's native jailer test uses the host cgroup
+namespace for cgroup v2 and removes its specifically owned test cgroup afterward.
+`ALLOW_DIRTY=1` exists for development only; it is not valid milestone evidence.
+`bin/receipts/` records revisions, Go module graph, binary hashes and build metadata.
+The install script uses a dedicated prefix and does not replace the worker's Docker
+runtime binaries. Dedicated systemd units, sockets, state and thin pools isolate
+these tests from the distro containerd and baseline runtime.
+
+## Historical Step 1 records
+
+The remaining sections preserve earlier acceptance, source pins and reproduction
+commands. They describe their named historical revisions; old branch names and
+personal SDK URLs here are provenance, not current build instructions. Original
+receipts and the historical `modules.txt` inventory are preserved unchanged.
+
+### Historical acceptance status
+
+The functional acceptance revision for this milestone is
+`06bd2058ba7938ad31eec9e17ac4d2e4c33a958f`. This is the tested runtime revision,
+not a claim that every later documentation or maintenance commit reran the full
+suite. Its clean worker checkout passed build, private installation, 36 runtime,
+five snapshotter and 79 SDK tests (one existing SDK metrics skip), plus three
+targeted jailer race tests. The [acceptance receipt](evidence/06bd205-telemetry-acceptance-receipt.log)
+records the tested source, artifacts, Docker image and raw log hashes.
+
+Commits after that acceptance contain bounded maintenance checks, not another
+full runtime run: install failure propagation at `1adbcfc`, task-test
+synchronization at `8797ff8`, and cache eviction test synchronization at
+`1a56f6a`. The [install receipt](evidence/1adbcfc-install-guard-receipt.log),
+[task-test receipt](evidence/8797ff8-task-wait-sync-receipt.log), and shared
+[cache-test receipt](evidence/step4-cache-test/verification.json) document
+their scope and results. These checks do not change the acceptance revision or
+dependency pins.
+
+### Historical functional validation history
+
+The initial committed milestone acceptance is recorded at `e666612819bc`; later
+full acceptance runs covered the task-create cleanup fix (`6585eba`), metrics
+and I/O corrections (`3adc9f6`), and the cross-filesystem telemetry correction
+(`06bd205`). Each result remains tied to its own source revision and receipt.
+That functional run prepares telemetry links or bind mounts before runc starts,
+preserving log and metrics FIFO readers across filesystems. Its real-VM
+cross-filesystem regression and all eight jailed/unjailed
+`TestCreateVM_Isolated` cases passed. Earlier detailed results and receipts
+remain below. The initial acceptance also demonstrated an OCI image writing
+and reading a file on its ext4 container root, plus native task survival across
+a controller restart and cleanup after shim termination.
+
+### Historical SDK selection
+
+`versions.json`, `go.mod`, `go.sum`, the child module manifests, and the gitlinks
+pin the complete source graph. The selected VMM is upstream Firecracker v1.18.0,
+commit `eaf83bb718a559d324613d566eaf776b31a62340`. No VMM source modification is
+needed for this step. The SDK `modernize-runtime` branch preserves the earlier
+`feat/update-firecracker-1.14` work and adds Swagger v1.18 generation with
+`go-swagger v0.33.1`; its pushed commit is
+`0d7a093c9b0cee5b93d0b9551888a571bb478154`.
+
+### Historical reproduction procedure
 
 All compilation and execution must run on `nehalem@amd218.utah.cloudlab.us`.
 The default workspace is `/users/nehalem/fc-ctrd-mod`. The scripts support
@@ -149,7 +241,7 @@ The install script uses a dedicated prefix and does not replace the worker's Doc
 runtime binaries. Dedicated systemd units, sockets, state and thin pools isolate
 these tests from the distro containerd and baseline runtime.
 
-## Initial worker results and subsequent corrections
+### Historical Initial worker results and subsequent corrections
 
 The worker ran Ubuntu 24.04.5 LTS and Linux 6.8.0-147-generic on an AMD EPYC 7302P
 with 32 logical CPUs, about 125 GiB RAM, and KVM. The tested installation is
@@ -234,7 +326,7 @@ The Firecracker gitlink uses the existing upstream release tag and needs no VMM
 fork change. The enclosing workspace has three independent repositories and no
 root submodule references to update.
 
-## Limits of this milestone
+### Historical Limits of this milestone
 
 This procedure was tested on the designated x86-64 worker. It reconstructs the
 pinned stack and records artifact hashes; it does not require byte-identical
@@ -245,7 +337,7 @@ checkpoint/restore, and the memory experiments belong to subsequent milestones.
 The original baseline and its actual Linux 4.14.174 kernel are documented in
 `baseline-audit.md` with a separate storage trace.
 
-## Cache eviction test maintenance
+### Historical Cache eviction test maintenance
 
 Commit `1a56f6a` fixes the timing-dependent eviction error test
 observed in [CI run 43079780458](https://github.com/vhive-serverless/firecracker-containerd/actions/runs/43079780458).
@@ -258,7 +350,7 @@ validated milestone backports, exact commands and raw hashes. The old failure
 was not reproduced in 30 baseline repetitions; these checks are test maintenance,
 not new full-stack acceptance. Step 3 CRI and Kubernetes restore remain WIP.
 
-## Socket path and SIGPIPE maintenance
+### Historical Socket path and SIGPIPE maintenance
 
 After the last full Step 1 acceptance at `06bd205`, the runtime received two
 focused production corrections. `93d594c` resolves jailed VM socket paths from
