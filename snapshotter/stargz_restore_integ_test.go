@@ -31,11 +31,13 @@ import (
 	"time"
 
 	taskAPI "github.com/containerd/containerd/api/runtime/task/v3"
+	tasktypes "github.com/containerd/containerd/api/types/task"
 	containerd "github.com/containerd/containerd/v2/client"
 	"github.com/containerd/containerd/v2/pkg/cio"
 	"github.com/containerd/containerd/v2/pkg/namespaces"
 	"github.com/containerd/containerd/v2/pkg/oci"
 	"github.com/containerd/containerd/v2/pkg/ttrpcutil"
+	"github.com/containerd/errdefs"
 	"github.com/containerd/typeurl/v2"
 	"github.com/firecracker-microvm/firecracker-containerd/internal/integtest"
 	"github.com/firecracker-microvm/firecracker-containerd/internal/vm"
@@ -77,12 +79,27 @@ type stargzRestoreDrive struct {
 	File     stargzRestoreFile
 }
 
+type stargzRestoreProcess struct {
+	TaskID, ExecID string
+	State          *taskAPI.StateResponse
+}
+
+type stargzRestoreTransportCut struct {
+	Version     int
+	Processes   []vm.TransportProcessIO
+	EventCursor uint64
+	ResumeTasks []string
+}
+
 type stargzRestoreManifest struct {
-	Version   int
-	VMID      string
-	Namespace string
-	Drives    []stargzRestoreDrive
-	Networks  []json.RawMessage
+	Version     int
+	VMID        string
+	Namespace   string
+	Drives      []stargzRestoreDrive
+	Networks    []json.RawMessage
+	Processes   []stargzRestoreProcess
+	ResumeTasks []string
+	Transport   *stargzRestoreTransportCut
 }
 
 // TestStargzNativeRestore_Isolated exercises a retained stargz workload over
@@ -239,6 +256,20 @@ func stargzRestoreCase(t *testing.T, profileIndex, jailerIndex int, profile star
 	})
 	task, err := container.NewTask(ctx, cio.NewCreator(cio.WithStreams(nil, io.Discard, io.Discard)))
 	require.NoError(t, err)
+	sourceVMStopped := false
+	// LIFO cleanup must stop/delete a live source task before the container
+	// removes its snapshot. A fatal manifest assertion used to leave that
+	// container cleanup racing a still-running task until the later VM stop.
+	t.Cleanup(func() {
+		if sourceVMStopped {
+			return
+		}
+		cleanup, stop := context.WithTimeout(context.WithoutCancel(ctx), 45*time.Second)
+		defer stop()
+		if _, deleteErr := task.Delete(cleanup, containerd.WithProcessKill); deleteErr != nil && !errdefs.IsNotFound(deleteErr) {
+			t.Errorf("delete source stargz task: %v", deleteErr)
+		}
+	})
 	require.NoError(t, task.Start(ctx))
 	const probe = "rm -f /response; touch /request; while ! test -f /response; do sleep .01; done; cat /response"
 	initial := stargzRestoreExec(ctx, t, task, probe)
@@ -275,7 +306,36 @@ cat /stargz-persist
 	require.NoError(t, err)
 	var manifest stargzRestoreManifest
 	require.NoError(t, json.Unmarshal(manifestBytes, &manifest))
-	require.Equal(t, 1, manifest.Version)
+	require.Equal(t, 2, manifest.Version, "native artifacts require the upstream sealed-transport format")
+	require.NotNil(t, manifest.Transport, "native v2 must include its sealed transport cut")
+	require.Equal(t, 1, manifest.Transport.Version)
+	require.Greater(t, manifest.Transport.EventCursor, uint64(0), "the cut must acknowledge this started task's lifecycle events")
+	require.Equal(t, []string{containerID}, manifest.ResumeTasks)
+	require.Equal(t, manifest.ResumeTasks, manifest.Transport.ResumeTasks, "the artifact and transport cut must thaw the same captured running task")
+	require.Len(t, manifest.Processes, 1, "completed probe execs must not remain in the captured process registry")
+	capturedProcess := manifest.Processes[0]
+	require.Equal(t, containerID, capturedProcess.TaskID)
+	require.Empty(t, capturedProcess.ExecID)
+	require.NotNil(t, capturedProcess.State)
+	require.Equal(t, containerID, capturedProcess.State.ID)
+	require.Equal(t, task.Pid(), capturedProcess.State.Pid)
+	require.Equal(t, tasktypes.Status_RUNNING, capturedProcess.State.Status, "the manifest retains the pre-freeze task state")
+	require.Len(t, manifest.Transport.Processes, 1)
+	transportProcess := manifest.Transport.Processes[0]
+	require.Equal(t, capturedProcess.TaskID, transportProcess.TaskID)
+	require.Equal(t, capturedProcess.ExecID, transportProcess.ExecID)
+	require.Len(t, transportProcess.Streams, 2, "this task has no stdin and two open output FIFOs")
+	streamNames := make([]string, 0, len(transportProcess.Streams))
+	for _, stream := range transportProcess.Streams {
+		streamNames = append(streamNames, stream.Name)
+		require.True(t, stream.Sender, "captured output directions are guest-relative")
+		require.Equal(t, containerID+"//"+stream.Name, stream.Cursor.StreamID)
+		require.NotEmpty(t, stream.Cursor.SessionID)
+		require.Zero(t, stream.Cursor.Offset, "the persistent counter communicates through files and has emitted no stdio payload")
+		require.False(t, stream.Cursor.FIN, "the retained running task must not acquire output EOF at capture")
+	}
+	require.ElementsMatch(t, []string{"stdout", "stderr"}, streamNames)
+	t.Logf("stargz_native_transport manifest_version=%d cut_version=%d task=%s pid=%d event_cursor=%d outputs_open=true", manifest.Version, manifest.Transport.Version, containerID, capturedProcess.State.Pid, manifest.Transport.EventCursor)
 	require.Equal(t, id, manifest.VMID)
 	require.Equal(t, id, manifest.Namespace)
 	require.Len(t, manifest.Networks, 1)
@@ -304,6 +364,7 @@ cat /stargz-persist
 	_, err = control.StopVM(ctx, &proto.StopVMRequest{VMID: id})
 	require.NoError(t, err)
 	vmStopped = true
+	sourceVMStopped = true
 	_, err = os.Stat(fmt.Sprintf("/proc/%d", old.VMM.PID))
 	require.True(t, os.IsNotExist(err), "the source VMM must be gone before restore")
 	_, err = os.Stat(sourceDir.RootPath())
