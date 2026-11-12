@@ -71,6 +71,7 @@ type IOConnectorResult struct {
 type IOConnectorPair struct {
 	ReadConnector  IOConnector
 	WriteConnector IOConnector
+	transport      *transportPair
 }
 
 func (connectorPair *IOConnectorPair) proxy(
@@ -187,6 +188,12 @@ type ioConnectorSet struct {
 // those streams does not need to be proxied, the corresponding arg should
 // be nil.
 func NewIOConnectorProxy(stdin, stdout, stderr *IOConnectorPair) IOProxy {
+	if (stdin != nil && stdin.transport != nil) || (stdout != nil && stdout.transport != nil) || (stderr != nil && stderr.transport != nil) {
+		return newTransportProxy(stdin, stdout, stderr)
+	}
+	if stdin == nil && stdout == nil && stderr == nil {
+		return NewNullIOProxy()
+	}
 	return &ioConnectorSet{
 		stdin:  stdin,
 		stdout: stdout,
@@ -299,6 +306,7 @@ func InputPair(src uint32, dest string) *IOConnectorPair {
 	return &IOConnectorPair{
 		ReadConnector:  VSockAcceptConnector(src),
 		WriteConnector: WriteFIFOConnector(dest),
+		transport:      &transportPair{path: dest, connect: VSockTransportAcceptConnector(src)},
 	}
 }
 
@@ -312,5 +320,6 @@ func OutputPair(src string, dest uint32) *IOConnectorPair {
 	return &IOConnectorPair{
 		ReadConnector:  ReadFIFOConnector(src),
 		WriteConnector: VSockAcceptConnector(dest),
+		transport:      &transportPair{path: src, sender: true, connect: VSockTransportAcceptConnector(dest)},
 	}
 }

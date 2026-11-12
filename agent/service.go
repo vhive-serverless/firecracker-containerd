@@ -283,28 +283,19 @@ func (ts *TaskService) Create(requestCtx context.Context, req *taskAPI.CreateTas
 		var stdinConnectorPair *vm.IOConnectorPair
 		if req.Stdin != "" {
 			req.Stdin = fifoSet.Stdin
-			stdinConnectorPair = &vm.IOConnectorPair{
-				ReadConnector:  vm.VSockAcceptConnector(extraData.StdinPort),
-				WriteConnector: vm.WriteFIFOConnector(fifoSet.Stdin),
-			}
+			stdinConnectorPair = vm.InputPair(extraData.StdinPort, fifoSet.Stdin)
 		}
 
 		var stdoutConnectorPair *vm.IOConnectorPair
 		if req.Stdout != "" {
 			req.Stdout = fifoSet.Stdout
-			stdoutConnectorPair = &vm.IOConnectorPair{
-				ReadConnector:  vm.ReadFIFOConnector(fifoSet.Stdout),
-				WriteConnector: vm.VSockAcceptConnector(extraData.StdoutPort),
-			}
+			stdoutConnectorPair = vm.OutputPair(fifoSet.Stdout, extraData.StdoutPort)
 		}
 
 		var stderrConnectorPair *vm.IOConnectorPair
 		if req.Stderr != "" {
 			req.Stderr = fifoSet.Stderr
-			stderrConnectorPair = &vm.IOConnectorPair{
-				ReadConnector:  vm.ReadFIFOConnector(fifoSet.Stderr),
-				WriteConnector: vm.VSockAcceptConnector(extraData.StderrPort),
-			}
+			stderrConnectorPair = vm.OutputPair(fifoSet.Stderr, extraData.StderrPort)
 		}
 
 		ioConnectorSet = vm.NewIOConnectorProxy(stdinConnectorPair, stdoutConnectorPair, stderrConnectorPair)
@@ -573,28 +564,19 @@ func (ts *TaskService) Exec(requestCtx context.Context, req *taskAPI.ExecProcess
 		var stdinConnectorPair *vm.IOConnectorPair
 		if req.Stdin != "" {
 			req.Stdin = fifoSet.Stdin
-			stdinConnectorPair = &vm.IOConnectorPair{
-				ReadConnector:  vm.VSockAcceptConnector(extraData.StdinPort),
-				WriteConnector: vm.WriteFIFOConnector(fifoSet.Stdin),
-			}
+			stdinConnectorPair = vm.InputPair(extraData.StdinPort, fifoSet.Stdin)
 		}
 
 		var stdoutConnectorPair *vm.IOConnectorPair
 		if req.Stdout != "" {
 			req.Stdout = fifoSet.Stdout
-			stdoutConnectorPair = &vm.IOConnectorPair{
-				ReadConnector:  vm.ReadFIFOConnector(fifoSet.Stdout),
-				WriteConnector: vm.VSockAcceptConnector(extraData.StdoutPort),
-			}
+			stdoutConnectorPair = vm.OutputPair(fifoSet.Stdout, extraData.StdoutPort)
 		}
 
 		var stderrConnectorPair *vm.IOConnectorPair
 		if req.Stderr != "" {
 			req.Stderr = fifoSet.Stderr
-			stderrConnectorPair = &vm.IOConnectorPair{
-				ReadConnector:  vm.ReadFIFOConnector(fifoSet.Stderr),
-				WriteConnector: vm.VSockAcceptConnector(extraData.StderrPort),
-			}
+			stderrConnectorPair = vm.OutputPair(fifoSet.Stderr, extraData.StderrPort)
 		}
 
 		ioConnectorSet = vm.NewIOConnectorProxy(stdinConnectorPair, stdoutConnectorPair, stderrConnectorPair)
