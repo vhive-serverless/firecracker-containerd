@@ -128,7 +128,7 @@ func (s *service) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotR
 	if err := s.waitVMReady(); err != nil {
 		return nil, err
 	}
-	if _, ok := s.jailer.(*noopJailer); !ok || len(s.machineConfig.Drives) != 2 || !s.machineConfig.Drives[0].IsReadOnly {
+	if _, ok := s.jailer.(*noopJailer); !ok || len(s.machineConfig.PmemDevices) != 0 || len(s.machineConfig.Drives) != 2 || !s.machineConfig.Drives[0].IsReadOnly {
 		return nil, status.Error(codes.FailedPrecondition, "snapshot requires an unjailed VM with a read-only root and one workload drive")
 	}
 	if s.pendingPause == nil || s.pendingPause.Cut == nil || !s.pendingPause.VMPaused {

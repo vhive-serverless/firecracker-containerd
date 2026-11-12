@@ -152,23 +152,45 @@ func (s *service) prepareSnapshotMounts(request *proto.CreateVMRequest) error {
 	if s.nativeRestore == nil && !request.LoadSnapshot {
 		return nil
 	}
+	_, jailed := s.jailer.(*runcJailer)
 	var mounts []restoreMount
 	var inputs []string
 	if restore := s.nativeRestore; restore != nil {
 		if restore.manifest == nil || restore.manifest.VMConfig == nil {
 			return fmt.Errorf("missing captured VM configuration")
 		}
-		_, jailed := s.jailer.(*runcJailer)
 		metadata, err := snapshotDrivePaths(restore.manifest.VMConfig, jailed)
-		if err != nil {
+		// A pmem-only guest can have no block devices.
+		if err != nil && (len(restore.manifest.VMConfig.Drives) != 0 || len(restore.manifest.Pmem) == 0) {
 			return err
 		}
-		for index, drive := range metadata.Drives {
-			saved := restore.manifest.Drives[index]
-			if drive.ID != saved.ID || drive.ReadOnly != saved.ReadOnly {
-				return fmt.Errorf("captured drive identity mismatch")
+		if metadata != nil {
+			for index, drive := range metadata.Drives {
+				saved := restore.manifest.Drives[index]
+				if drive.ID != saved.ID || drive.ReadOnly != saved.ReadOnly {
+					return fmt.Errorf("captured drive identity mismatch")
+				}
+				mounts = append(mounts, restoreMount{Source: restore.files[saved.File.Path], Target: drive.Path, ReadOnly: drive.ReadOnly})
 			}
-			mounts = append(mounts, restoreMount{Source: restore.files[saved.File.Path], Target: drive.Path, ReadOnly: drive.ReadOnly})
+		}
+		for index, saved := range restore.manifest.Pmem {
+			device := restore.manifest.VMConfig.Pmem[index]
+			if device == nil || device.PathOnHost == nil || !device.ReadOnly {
+				return fmt.Errorf("invalid captured pmem backing")
+			}
+			target, err := capturedDevicePath(*device.PathOnHost, jailed)
+			if err != nil {
+				return err
+			}
+			source := restore.files[saved.File.Path]
+			if s.machineConfig != nil {
+				for _, configured := range s.machineConfig.PmemDevices {
+					if configured.ID != nil && *configured.ID == saved.ID && configured.PathOnHost != nil && configured.ReadOnly {
+						source = *configured.PathOnHost
+					}
+				}
+			}
+			mounts = append(mounts, restoreMount{Source: source, Target: target, ReadOnly: true})
 		}
 		inputs = append(inputs, restore.files["memory"], restore.files["state"])
 	} else {
