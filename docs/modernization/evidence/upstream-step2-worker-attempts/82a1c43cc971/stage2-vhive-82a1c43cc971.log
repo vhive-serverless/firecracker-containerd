@@ -1,0 +1,150 @@
+VHIVE_LOGS=/users/nehalem/fc-ctrd-mod/evidence/vhive-82a1c43cc971.iDUM5rch
+From /users/nehalem/fc-ctrd-mod/upstream-migration/vhive-source
+ * branch            89593103ac667cc096f89770c94a77b2b93c3a7d -> FETCH_HEAD
+HEAD is now at 8959310 Track guest and container PIDs separately in snapshot continuity test
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 726B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for localhost/firecracker-containerd-test:82a1c43cc971
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/5] FROM localhost/firecracker-containerd-test:82a1c43cc971@sha256:dc3cffd6e5a15f3c80fa89b69bdc7995fb9026af851d8b483d59ceba2e5ab813
+#4 resolve localhost/firecracker-containerd-test:82a1c43cc971@sha256:dc3cffd6e5a15f3c80fa89b69bdc7995fb9026af851d8b483d59ceba2e5ab813 0.0s done
+#4 DONE 0.2s
+
+#5 [internal] load build context
+#5 transferring context: 32.29MB 0.2s done
+#5 DONE 0.2s
+
+#6 [2/5] RUN apt-get update && apt-get install --yes --no-install-recommends net-tools &&     command -v route >/dev/null && rm -rf /var/lib/apt/lists/*
+#6 0.328 Hit:1 http://deb.debian.org/debian bookworm InRelease
+#6 0.331 Get:2 http://deb.debian.org/debian bookworm-updates InRelease [55.4 kB]
+#6 0.359 Get:3 http://deb.debian.org/debian-security bookworm-security InRelease [34.8 kB]
+#6 0.554 Get:4 http://deb.debian.org/debian-security bookworm-security/main amd64 Packages [368 kB]
+#6 0.631 Fetched 459 kB in 0s (1146 kB/s)
+#6 0.631 Reading package lists...
+#6 1.139 Reading package lists...
+#6 1.636 Building dependency tree...
+#6 1.749 Reading state information...
+#6 1.893 The following NEW packages will be installed:
+#6 1.893   net-tools
+#6 1.939 0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+#6 1.939 Need to get 243 kB of archives.
+#6 1.939 After this operation, 1001 kB of additional disk space will be used.
+#6 1.939 Get:1 http://deb.debian.org/debian bookworm/main amd64 net-tools amd64 2.10-0.1+deb12u2 [243 kB]
+#6 2.114 debconf: delaying package configuration, since apt-utils is not installed
+#6 2.143 Fetched 243 kB in 0s (2979 kB/s)
+#6 2.160 Selecting previously unselected package net-tools.
+#6 2.160 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 17549 files and directories currently installed.)
+#6 2.211 Preparing to unpack .../net-tools_2.10-0.1+deb12u2_amd64.deb ...
+#6 2.211 Unpacking net-tools (2.10-0.1+deb12u2) ...
+#6 2.257 Setting up net-tools (2.10-0.1+deb12u2) ...
+#6 DONE 2.3s
+
+#7 [3/5] RUN sed -i '/^{/a\\  "log_levels": ["firecracker:output", "firecracker-containerd:debug"],' /etc/containerd/firecracker-runtime.json
+#7 DONE 0.3s
+
+#8 [4/5] COPY vhive-acceptance.test /usr/local/bin/
+#8 DONE 0.1s
+
+#9 [5/5] COPY run-in-container.sh /usr/local/bin/run-vhive-acceptance
+#9 DONE 0.0s
+
+#10 exporting to image
+#10 exporting layers
+#10 exporting layers 1.3s done
+#10 exporting manifest sha256:e11270f618b5596f3b070175fe1a42780d07d867e31854ab22732a6b081fb720 done
+#10 exporting config sha256:0b6dc803fda264bbc7ab69f32d07454ac245abec450e80b41fd077590ca27366 done
+#10 exporting attestation manifest sha256:305922d3253b162e586a3173a267c53f4e18cffbe6ae06a78f50ffc16c75464c done
+#10 exporting manifest list sha256:76b11b2a6e542a382e98f24c363240762ac6a8f9e107735054030595f9bd1865 done
+#10 naming to localhost/fcmod-vhive-test:82a1c43cc971 done
+#10 unpacking to localhost/fcmod-vhive-test:82a1c43cc971
+#10 unpacking to localhost/fcmod-vhive-test:82a1c43cc971 0.4s done
+#10 DONE 1.7s
+Client:
+  Version:  2.3.7+unknown
+  Revision: 82a1c43cc971a8e0e4100709a9e4e4d12c11a1b3
+  Go version: go1.26.11
+
+Server:
+  Version:  2.3.7+unknown
+  Revision: 82a1c43cc971a8e0e4100709a9e4e4d12c11a1b3
+  UUID: 62896ef0-208d-4bbd-951d-41cbb0e72d70
+=== RUN   TestPauseSnapResume
+time="2026-11-12T20:49:33.503627150Z" level=warning msg="Failed to Fetch k8s dns clusterIP exec: \"kubectl\": executable file not found in $PATH\n\n"
+time="2026-11-12T20:49:33.503706710Z" level=warning msg="Using google dns 8.8.8.8\n"
+time="2026-11-12T20:49:33.639756436Z" level=info msg="Creating containerd client"
+time="2026-11-12T20:49:33.639866303Z" level=info msg="Created containerd client"
+time="2026-11-12T20:49:33.639873807Z" level=info msg="Creating firecracker client"
+time="2026-11-12T20:49:33.639978655Z" level=info msg="Created firecracker client"
+time="2026-11-12T20:49:33.639999985Z" level=info msg="Creating image manager"
+time="2026-11-12T20:49:49.006622714Z" level=info msg="Cleaning up network manager"
+--- PASS: TestPauseSnapResume (15.73s)
+=== RUN   TestSnapshotConcurrentClones
+time="2026-11-12T20:49:49.229088628Z" level=warning msg="Failed to Fetch k8s dns clusterIP exec: \"kubectl\": executable file not found in $PATH\n\n"
+time="2026-11-12T20:49:49.229108365Z" level=warning msg="Using google dns 8.8.8.8\n"
+time="2026-11-12T20:49:50.100966844Z" level=info msg="Creating containerd client"
+time="2026-11-12T20:49:50.101091519Z" level=info msg="Created containerd client"
+time="2026-11-12T20:49:50.101105675Z" level=info msg="Creating firecracker client"
+time="2026-11-12T20:49:50.101224549Z" level=info msg="Created firecracker client"
+time="2026-11-12T20:49:50.101238616Z" level=info msg="Creating image manager"
+    snapshot_clones_test.go:80: 
+        	Error Trace:	github.com/vhive-serverless/vhive/ctriface/snapshot_clones_test.go:80
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Internal desc = forcefully terminated VM concurrent-clone-one
+        	            	stop function VM
+        	            	github.com/vhive-serverless/vhive/ctriface.(*Orchestrator).StopSingleVM
+        	            		github.com/vhive-serverless/vhive/ctriface/iface.go:292
+        	            	github.com/vhive-serverless/vhive/ctriface.TestSnapshotConcurrentClones
+        	            		github.com/vhive-serverless/vhive/ctriface/snapshot_clones_test.go:80
+        	            	testing.tRunner
+        	            		testing/testing.go:2036
+        	            	runtime.goexit
+        	            		runtime/asm_amd64.s:1771
+        	Test:       	TestSnapshotConcurrentClones
+time="2026-11-12T20:50:33.084099558Z" level=info msg="waiting for goroutines"
+time="2026-11-12T20:50:38.085502798Z" level=warning msg="stop function VM: rpc error: code = Unknown desc = failed to connect: dial unix:///run/containerd/s/ac55bd31fa5b56283b2d9069497654d22b30e4233a1069b48b7589844e408a74-fccontrol: timeout" vmID=concurrent-clone-one
+time="2026-11-12T20:50:53.134049770Z" level=warning msg="stop function VM: rpc error: code = Internal desc = forcefully terminated VM concurrent-clone-two" vmID=concurrent-clone-two
+time="2026-11-12T20:50:53.134079506Z" level=info msg="waiting done"
+time="2026-11-12T20:50:53.134084476Z" level=info msg="Closing fcClient"
+time="2026-11-12T20:50:53.134088393Z" level=info msg="Closing containerd client"
+time="2026-11-12T20:50:53.134319368Z" level=info msg="Cleaning up network manager"
+--- FAIL: TestSnapshotConcurrentClones (64.37s)
+=== RUN   TestSnapshotSourceMemoryAndDiskIsolation
+time="2026-11-12T20:50:53.597714605Z" level=warning msg="Failed to Fetch k8s dns clusterIP exec: \"kubectl\": executable file not found in $PATH\n\n"
+time="2026-11-12T20:50:53.597733301Z" level=warning msg="Using google dns 8.8.8.8\n"
+time="2026-11-12T20:50:53.731652946Z" level=info msg="Creating containerd client"
+time="2026-11-12T20:50:53.731752483Z" level=info msg="Created containerd client"
+time="2026-11-12T20:50:53.731760789Z" level=info msg="Creating firecracker client"
+time="2026-11-12T20:50:53.731845138Z" level=info msg="Created firecracker client"
+time="2026-11-12T20:50:53.731856769Z" level=info msg="Creating image manager"
+    snapshot_continuity_test.go:77: function_image=ghcr.io/ease-lab/helloworld@sha256:12dc6715ed1a8306f246ceaf7742c09e38a52a79d17421e4a50d7e0e09fdbc25 digest=sha256:12dc6715ed1a8306f246ceaf7742c09e38a52a79d17421e4a50d7e0e09fdbc25
+    snapshot_continuity_test.go:157: 
+        	Error Trace:	github.com/vhive-serverless/vhive/ctriface/snapshot_continuity_test.go:157
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Internal desc = forcefully terminated VM continuity-clone
+        	            	stop function VM
+        	            	github.com/vhive-serverless/vhive/ctriface.(*Orchestrator).StopSingleVM
+        	            		github.com/vhive-serverless/vhive/ctriface/iface.go:292
+        	            	github.com/vhive-serverless/vhive/ctriface.TestSnapshotSourceMemoryAndDiskIsolation
+        	            		github.com/vhive-serverless/vhive/ctriface/snapshot_continuity_test.go:157
+        	            	testing.tRunner
+        	            		testing/testing.go:2036
+        	            	runtime.goexit
+        	            		runtime/asm_amd64.s:1771
+        	Test:       	TestSnapshotSourceMemoryAndDiskIsolation
+time="2026-11-12T20:51:35.039059204Z" level=info msg="waiting for goroutines"
+time="2026-11-12T20:51:40.039641865Z" level=warning msg="stop function VM: rpc error: code = Unknown desc = failed to connect: dial unix:///run/containerd/s/afbe04bdb1ef35612fd40a6ed270a44465ff3bf6e87b3c0395d0f72ad185578a-fccontrol: timeout" vmID=continuity-clone
+time="2026-11-12T20:51:40.039690637Z" level=info msg="waiting done"
+time="2026-11-12T20:51:40.039700405Z" level=info msg="Closing fcClient"
+time="2026-11-12T20:51:40.039706306Z" level=info msg="Closing containerd client"
+time="2026-11-12T20:51:40.039940948Z" level=info msg="Cleaning up network manager"
+--- FAIL: TestSnapshotSourceMemoryAndDiskIsolation (46.89s)
+FAIL

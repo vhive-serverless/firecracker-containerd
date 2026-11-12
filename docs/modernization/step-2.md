@@ -1,11 +1,47 @@
 # Step 2: vHive compatibility
 
-## Migrated upstream candidate
+> PROVISIONAL HISTORY DRAFT: Step 2 code and inputs match `2e03843816cf95d184ad4ad429adf6ea2ccc1412`. New acceptance and final documentation/results integration are pending. Earlier receipts retain their exact named source scope.
 
-This candidate inherits the official Firecracker v1.18.0 and published SDK pins
-from Step 1. The exact input lock is [versions.json](versions.json). Historical
-acceptance below remains tied to the original custom VMM revisions and does not
-validate this candidate.
+## Current exact-source acceptance
+
+The maintained branch is `firecracker-v1.18-containerdv2-vhive-integration`.
+Clean source `7386ab5c5e8c3519ad1698c27f548803e714e304`, tree
+`45c82884ea40ff22e5407da36911cf344d6f9e6c`, passed build/private installation,
+full-stack regression and all three unchanged provisional vHive VM cases.
+The [source acceptance receipt](evidence/upstream-step2-worker-attempts/README.md)
+preserves commands, raw logs, artifacts, selected module graphs and failed
+earlier attempts. These results belong to that exact source, not this later
+documentation tip or a future assembled/published commit automatically.
+
+The stack uses official unmodified Firecracker/jailer v1.18.0 release binaries
+and published vHive SDK `dd9db322432989b96cff7a38a64703d60b6cabf9`.
+[versions.json](versions.json) is the exact input lock. The full-stack run ended
+with `COMMITTED_STACK_ACCEPTANCE_OK` and exit 0: 36 runtime, five snapshotter
+and 86 SDK top-level passes. SDK `TestLogAndMetrics` remains skipped; eight
+existing StopVM subtests also skip (`SIGKILLFirecracker`, `ErrorExit`, `PauseStop`
+and `Suspend`, each ordinary/jailed). Counts exclude nested cases and the
+separate vHive tests. Dedicated test pools were removed and the checkout stayed
+clean; unrelated/shared worker resources were preserved.
+
+The three provisional cases passed independently:
+`TestPauseSnapResume` (15.50 s), `TestSnapshotConcurrentClones` (28.12 s), and
+`TestSnapshotSourceMemoryAndDiskIsolation` (21.73 s). They validate continued
+source execution, independent live clones, captured task/exec state and private
+disk continuity, and successful graceful stops. Managed tasks now stop before
+final agent cancellation. The preceding `9000` dependency-cleanliness failure
+is preserved; `7386` changes only the existing dependency's direct/indirect
+classification and passes the clean full-stack rerun without changing tests or
+acceptance timeouts. The rejected speculative drain and diagnostic code remain
+outside corrective implementation ancestry.
+
+**Final published-runtime-module and installed-vHive consumer acceptance remain
+pending.** The provisional harness uses an explicitly recorded local runtime
+replacement. Freeze/publish the functional Step 2 commit before finalizing the
+consumer module/ready installation manifest, avoiding a circular SHA pin. Native
+restore and CRI have later milestone gates; Kubernetes Pod checkpoint/restore
+remains deferred to the 1.38 interface work.
+
+## Migrated legacy profile
 
 The legacy wire fields retain numbers 15–21. CreateVMResponse adds generic
 restored FIFO endpoints at field 6. PauseVM freezes running workload tasks,
@@ -23,18 +59,45 @@ vHive test-source revision in the input lock. Its disposable build binds this
 clean runtime archive as a local Go module and records that substitution; this
 is provisional candidate coverage, not published-consumer acceptance. The
 selected tests exercise source control/stdio after capture, independent live
-clones, guest process memory continuity and disk isolation. The test source
-revision is currently unpublished. Set `VHIVE_SOURCE_REPOSITORY` to a local Git
+clones, guest process memory continuity and disk isolation. The recorded worker
+test source is `89593103ac667cc096f89770c94a77b2b93c3a7d`, supplied through a local Git
 repository or bundle containing that exact commit; the harness still verifies
 the pinned revision and records the source repository. The default organization
-URL requires that source revision to be published first. They must run on a
-separate privileged KVM worker after the exact runtime stack is built. No new VM
-acceptance is claimed by construction or compilation. The final vHive runtime
+URL requires that exact source revision to be available there. Run on a separate
+privileged KVM worker after building the exact runtime stack. Compilation alone
+does not establish this acceptance. The final vHive runtime
 module pin and ready installation manifest follow publication of the accepted
 Step 2 commit, avoiding a circular pin.
 
 The old `modern-stack.patch` and probe are retained as historical reproduction
 artifacts; the migrated harness does not apply that obsolete client patch.
+
+## Current reproduction and artifact boundaries
+
+Use an exact clean checkout of the tested source, with the pinned tools,
+passwordless sudo, Docker and KVM described in the Step 1 worker setup. Keep new
+logs and receipts rather than overwriting the archived originals.
+
+```sh
+test "$(git rev-parse HEAD)" = 7386ab5c5e8c3519ad1698c27f548803e714e304
+test -z "$(git status --porcelain)"
+export STACK_DIR=/users/nehalem/fc-ctrd-mod
+export PATH="$STACK_DIR/toolchains/go1.26.11/bin:$PATH"
+: "${VHIVE_SOURCE_REPOSITORY:?Set the local Git repository or bundle containing the pinned vHive test source}"
+export VHIVE_SOURCE_REPOSITORY
+tools/modernize/build-stack.sh
+tools/modernize/install-stack.sh
+tools/modernize/test-stack.sh
+tools/vhive/test-vhive.sh
+```
+
+`bin/receipts/acceptance` records the final test binaries, agent build metadata,
+module graph and test-image identity. The full-stack log records clean tidy and
+protobuf generation. `VHIVE_LOGS` records the separate provisional run's source,
+local substitution, binary hashes, selected image and daemon/test output. See the
+combined receipt for the distinct installed rootfs and rebuilt test-rootfs
+hashes; their byte identity is not asserted. Final installed-consumer validation
+must use the finalized published dependency and verified installation receipt.
 
 ## Historical accepted custom stack
 

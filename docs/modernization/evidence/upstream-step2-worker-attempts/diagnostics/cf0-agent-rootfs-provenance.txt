@@ -1,0 +1,12 @@
+d4693c4811a178cfd3865c8ef8e8a1db3e9427a048bdff0c8d653955b20a29f9  agent/agent
+d4693c4811a178cfd3865c8ef8e8a1db3e9427a048bdff0c8d653955b20a29f9  tools/image-builder/files_ephemeral/usr/local/bin/agent
+d4693c4811a178cfd3865c8ef8e8a1db3e9427a048bdff0c8d653955b20a29f9  -
+	build	CGO_ENABLED=0
+	build	GOARCH=amd64
+	build	GOOS=linux
+	build	GOAMD64=v1
+	build	vcs=git
+	build	vcs.revision=cf0d9708bb3412507ddcc5110fccb1b4545f6b75
+	build	vcs.time=2026-11-12T20:29:25Z
+	build	vcs.modified=false
+rootfs_mtime=2026-11-12 13:34:18.894518558 -0700 rootfs_size=71921664

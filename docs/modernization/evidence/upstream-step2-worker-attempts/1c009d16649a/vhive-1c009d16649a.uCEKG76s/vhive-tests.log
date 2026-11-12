@@ -1,0 +1,71 @@
+=== RUN   TestPauseSnapResume
+time="2026-11-12T20:21:12.233828898Z" level=warning msg="Failed to Fetch k8s dns clusterIP exec: \"kubectl\": executable file not found in $PATH\n\n"
+time="2026-11-12T20:21:12.233905452Z" level=warning msg="Using google dns 8.8.8.8\n"
+time="2026-11-12T20:21:12.397760754Z" level=info msg="Creating containerd client"
+time="2026-11-12T20:21:12.397902320Z" level=info msg="Created containerd client"
+time="2026-11-12T20:21:12.397923179Z" level=info msg="Creating firecracker client"
+time="2026-11-12T20:21:12.398018889Z" level=info msg="Created firecracker client"
+time="2026-11-12T20:21:12.398032305Z" level=info msg="Creating image manager"
+time="2026-11-12T20:21:28.270063330Z" level=info msg="Cleaning up network manager"
+--- PASS: TestPauseSnapResume (16.20s)
+=== RUN   TestSnapshotConcurrentClones
+time="2026-11-12T20:21:28.429000340Z" level=warning msg="Failed to Fetch k8s dns clusterIP exec: \"kubectl\": executable file not found in $PATH\n\n"
+time="2026-11-12T20:21:28.429018865Z" level=warning msg="Using google dns 8.8.8.8\n"
+time="2026-11-12T20:21:28.935651068Z" level=info msg="Creating containerd client"
+time="2026-11-12T20:21:28.935752669Z" level=info msg="Created containerd client"
+time="2026-11-12T20:21:28.935774020Z" level=info msg="Creating firecracker client"
+time="2026-11-12T20:21:28.935860793Z" level=info msg="Created firecracker client"
+time="2026-11-12T20:21:28.935868978Z" level=info msg="Creating image manager"
+    snapshot_clones_test.go:80: 
+        	Error Trace:	github.com/vhive-serverless/vhive/ctriface/snapshot_clones_test.go:80
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Internal desc = forcefully terminated VM concurrent-clone-one
+        	            	stop function VM
+        	            	github.com/vhive-serverless/vhive/ctriface.(*Orchestrator).StopSingleVM
+        	            		github.com/vhive-serverless/vhive/ctriface/iface.go:292
+        	            	github.com/vhive-serverless/vhive/ctriface.TestSnapshotConcurrentClones
+        	            		github.com/vhive-serverless/vhive/ctriface/snapshot_clones_test.go:80
+        	            	testing.tRunner
+        	            		testing/testing.go:2036
+        	            	runtime.goexit
+        	            		runtime/asm_amd64.s:1771
+        	Test:       	TestSnapshotConcurrentClones
+time="2026-11-12T20:22:12.270856800Z" level=info msg="waiting for goroutines"
+time="2026-11-12T20:22:17.271374605Z" level=warning msg="stop function VM: rpc error: code = Unknown desc = failed to connect: dial unix:///run/containerd/s/ac55bd31fa5b56283b2d9069497654d22b30e4233a1069b48b7589844e408a74-fccontrol: timeout" vmID=concurrent-clone-one
+time="2026-11-12T20:22:32.322003802Z" level=warning msg="stop function VM: rpc error: code = Internal desc = forcefully terminated VM concurrent-clone-two" vmID=concurrent-clone-two
+time="2026-11-12T20:22:32.322038367Z" level=info msg="waiting done"
+time="2026-11-12T20:22:32.322044398Z" level=info msg="Closing fcClient"
+time="2026-11-12T20:22:32.322048466Z" level=info msg="Closing containerd client"
+time="2026-11-12T20:22:32.322376433Z" level=info msg="Cleaning up network manager"
+--- FAIL: TestSnapshotConcurrentClones (64.39s)
+=== RUN   TestSnapshotSourceMemoryAndDiskIsolation
+time="2026-11-12T20:22:32.821192566Z" level=warning msg="Failed to Fetch k8s dns clusterIP exec: \"kubectl\": executable file not found in $PATH\n\n"
+time="2026-11-12T20:22:32.821209067Z" level=warning msg="Using google dns 8.8.8.8\n"
+time="2026-11-12T20:22:33.009665019Z" level=info msg="Creating containerd client"
+time="2026-11-12T20:22:33.009775076Z" level=info msg="Created containerd client"
+time="2026-11-12T20:22:33.009781929Z" level=info msg="Creating firecracker client"
+time="2026-11-12T20:22:33.009855888Z" level=info msg="Created firecracker client"
+time="2026-11-12T20:22:33.009863562Z" level=info msg="Creating image manager"
+    snapshot_continuity_test.go:77: function_image=ghcr.io/ease-lab/helloworld@sha256:12dc6715ed1a8306f246ceaf7742c09e38a52a79d17421e4a50d7e0e09fdbc25 digest=sha256:12dc6715ed1a8306f246ceaf7742c09e38a52a79d17421e4a50d7e0e09fdbc25
+    snapshot_continuity_test.go:157: 
+        	Error Trace:	github.com/vhive-serverless/vhive/ctriface/snapshot_continuity_test.go:157
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Internal desc = forcefully terminated VM continuity-clone
+        	            	stop function VM
+        	            	github.com/vhive-serverless/vhive/ctriface.(*Orchestrator).StopSingleVM
+        	            		github.com/vhive-serverless/vhive/ctriface/iface.go:292
+        	            	github.com/vhive-serverless/vhive/ctriface.TestSnapshotSourceMemoryAndDiskIsolation
+        	            		github.com/vhive-serverless/vhive/ctriface/snapshot_continuity_test.go:157
+        	            	testing.tRunner
+        	            		testing/testing.go:2036
+        	            	runtime.goexit
+        	            		runtime/asm_amd64.s:1771
+        	Test:       	TestSnapshotSourceMemoryAndDiskIsolation
+time="2026-11-12T20:23:14.056361968Z" level=info msg="waiting for goroutines"
+time="2026-11-12T20:23:19.057087816Z" level=warning msg="stop function VM: rpc error: code = Unknown desc = failed to connect: dial unix:///run/containerd/s/afbe04bdb1ef35612fd40a6ed270a44465ff3bf6e87b3c0395d0f72ad185578a-fccontrol: timeout" vmID=continuity-clone
+time="2026-11-12T20:23:19.057122962Z" level=info msg="waiting done"
+time="2026-11-12T20:23:19.057130286Z" level=info msg="Closing fcClient"
+time="2026-11-12T20:23:19.057134524Z" level=info msg="Closing containerd client"
+time="2026-11-12T20:23:19.057308471Z" level=info msg="Cleaning up network manager"
+--- FAIL: TestSnapshotSourceMemoryAndDiskIsolation (46.65s)
+FAIL

@@ -1,0 +1,112 @@
+firecracker: eaf83bb718a559d324613d566eaf776b31a62340
+runc: c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e
+stargz-snapshotter: 3070538befb5a6c09f93e99164762b3a76310357
+github.com/containerd/containerd/v2: v2.3.7
+github.com/opencontainers/runc: v1.4.2
+SDK: github.com/vhive-serverless/firecracker-go-sdk@v0.0.0-20261112180021-dd9db3224329
+VMM/SDK schema sha256: 3693a55005be2b9c81bf14e9908bd894e361adedff4abcf8c1ac24a8c40adb0c
+go version go1.26.11 linux/amd64
+set -e; for d in agent runtime examples firecracker-control/cmd/containerd snapshotter docker-credential-mmds volume; do make -C $d install; done
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/agent'
+make[1]: Nothing to be done for 'install'.
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/agent'
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/runtime'
+install -D -o root -g root -m755 -t /users/nehalem/fc-ctrd-mod/install/cf0d9708bb34/bin containerd-shim-aws-firecracker
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/runtime'
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/examples'
+make[1]: Nothing to be done for 'install'.
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/examples'
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/firecracker-control/cmd/containerd'
+install -D -o root -g root -m755 -t /users/nehalem/fc-ctrd-mod/install/cf0d9708bb34/bin firecracker-containerd
+install -D -o root -g root -m755 -t /users/nehalem/fc-ctrd-mod/install/cf0d9708bb34/bin firecracker-ctr
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/firecracker-control/cmd/containerd'
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/snapshotter'
+install -D -o root -g root -m755 -t /users/nehalem/fc-ctrd-mod/install/cf0d9708bb34/bin demux-snapshotter http-address-resolver
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/snapshotter'
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/docker-credential-mmds'
+make[1]: Nothing to be done for 'install'.
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/docker-credential-mmds'
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/volume'
+make[1]: Nothing to be done for 'install'.
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/volume'
+tools/modernize/fetch-firecracker.sh
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100 7427k  100 7427k    0     0  23.5M      0 --:--:-- --:--:-- --:--:-- 23.5M
+/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/bin/.firecracker-release.DpKmjLHS/release.tgz: OK
+url=https://github.com/firecracker-microvm/firecracker/releases/download/v1.18.0/firecracker-v1.18.0-x86_64.tgz
+archive_sha256=1ac8eec866dd5eea14efecf6323e22b23eea24054545338a5b34bc5bca6623cd
+Firecracker v1.18.0
+
+2026-11-12T13:33:18.311218978 [anonymous-instance:main] Firecracker exiting successfully. exit_code=0
+Jailer v1.18.0
+
+b33f46cd6d88834cf6a4f8d184f08f219809c636236bffd286d233a60602a2ba  /users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/bin/firecracker
+ddadbaa15b5c942271a83b7040ca7259c8ccf92a9e08d44cce0b86fa407ba460  /users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/bin/jailer
+install -D -o root -g root -m755 -t /users/nehalem/fc-ctrd-mod/install/cf0d9708bb34/bin bin/firecracker bin/jailer
+docker build \
+	-t localhost/runc-builder:cf0d9708bb34 \
+	-f tools/docker/Dockerfile.runc-builder \
+	tools/
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.runc-builder
+#1 transferring dockerfile: 856B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/2] FROM public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0
+#4 resolve public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 0.0s done
+#4 DONE 0.0s
+
+#5 [2/2] RUN apt-get update &&     DEBIAN_FRONTEND=noninteractive apt-get -y install libseccomp-dev pkg-config e2fsprogs
+#5 CACHED
+
+#6 exporting to image
+#6 exporting layers done
+#6 exporting manifest sha256:b972e2a1456dfd15247e53032e6032051bb9806dd75da0d10356385beda5f933 done
+#6 exporting config sha256:1346aaa3e9e8a2a793eedcb73f05d1b2b2c9faccae043986afa85b22e8084bc9 done
+#6 exporting attestation manifest sha256:4222b3253d170d7d9b14bcebf542c7d4b0ec4a252dd5ceae7ae414c2fe5c5700 done
+#6 exporting manifest list sha256:31940df22e66c83e444cb35c309bd6e98de7ef4ba7784d70bee31531b224afcd done
+#6 naming to localhost/runc-builder:cf0d9708bb34 done
+#6 unpacking to localhost/runc-builder:cf0d9708bb34 done
+#6 DONE 0.0s
+touch tools/runc-builder-cf0d9708bb34-stamp
+runc_revision=$(git -C _submodules/runc rev-parse --verify HEAD) && \
+docker run --rm --user 0 \
+	--volume /users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/_submodules/runc:/gopath/src/github.com/opencontainers/runc \
+	--volume /users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/deps:/target \
+	-e HOME=/tmp \
+	-e GOPATH=/gopath \
+	--workdir /gopath/src/github.com/opencontainers/runc \
+	localhost/runc-builder:cf0d9708bb34 \
+	make static COMMIT="$runc_revision"
+fatal: not a git repository: /gopath/src/github.com/opencontainers/runc/../../.git/modules/runc
+go build -trimpath -buildmode=pie  -tags "seccomp urfave_cli_no_docs netgo osusergo" -ldflags "-X main.gitCommit=c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e  -linkmode external -extldflags -static-pie " -o runc .
+install -D -o root -g root -m755 -t /users/nehalem/fc-ctrd-mod/install/cf0d9708bb34/bin _submodules/runc/runc
+install -D -o root -g root -m400 bin/vmlinux-6.18.56-fcmod /users/nehalem/fc-ctrd-mod/install/cf0d9708bb34/share/runtime/default-vmlinux.bin
+install -D -o root -g root -m400 tools/image-builder/rootfs.img /users/nehalem/fc-ctrd-mod/install/cf0d9708bb34/share/runtime/default-rootfs.img
+mkdir --mode 0700 --parents /users/nehalem/fc-ctrd-mod/install/cf0d9708bb34/etc
+install -D -o root -g root -m400 runtime/firecracker-runc-config.json.example /users/nehalem/fc-ctrd-mod/install/cf0d9708bb34/etc/firecracker-runc-config.json
+mkdir --mode 0755 --parents /users/nehalem/fc-ctrd-mod/install/cf0d9708bb34/lib/cni
+install -D -o root -g root -m755 -t /users/nehalem/fc-ctrd-mod/install/cf0d9708bb34/lib/cni /users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/bin/bridge
+install -D -o root -g root -m755 -t /users/nehalem/fc-ctrd-mod/install/cf0d9708bb34/lib/cni /users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/bin/ptp
+install -D -o root -g root -m755 -t /users/nehalem/fc-ctrd-mod/install/cf0d9708bb34/lib/cni /users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/bin/host-local
+install -D -o root -g root -m755 -t /users/nehalem/fc-ctrd-mod/install/cf0d9708bb34/lib/cni /users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/bin/firewall
+install -D -o root -g root -m755 -t /users/nehalem/fc-ctrd-mod/install/cf0d9708bb34/lib/cni /users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/bin/tc-redirect-tap
+install -D -o root -g root -m755 -t /users/nehalem/fc-ctrd-mod/install/cf0d9708bb34/lib/cni /users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/bin/loopback
+ef0fef00ef6bb3823c5f8b16f7db6fc5830ccca0e2d60111ec99c56acac73178  /users/nehalem/fc-ctrd-mod/install/cf0d9708bb34/bin/firecracker-containerd
+6d9c2df4508ac495e619ba50bd4e85536471bd560636c550c12d263fcd6fd49a  /users/nehalem/fc-ctrd-mod/install/cf0d9708bb34/bin/containerd-shim-aws-firecracker
+b33f46cd6d88834cf6a4f8d184f08f219809c636236bffd286d233a60602a2ba  /users/nehalem/fc-ctrd-mod/install/cf0d9708bb34/bin/firecracker
+ddadbaa15b5c942271a83b7040ca7259c8ccf92a9e08d44cce0b86fa407ba460  /users/nehalem/fc-ctrd-mod/install/cf0d9708bb34/bin/jailer
+9cd4a021610365032b0e13fa37e67b751ccc8205c5b14d313af28cbe6e219220  /users/nehalem/fc-ctrd-mod/install/cf0d9708bb34/bin/runc
+04907cab23ef65513c76deb5d805bf8df21b844542d04be0dcb852c0a4305a59  /users/nehalem/fc-ctrd-mod/install/cf0d9708bb34/share/runtime/default-vmlinux.bin
+b3134d913094e55af588a35c226bc5b4380e118dd21c528324e6fbfc09ddf9ed  /users/nehalem/fc-ctrd-mod/install/cf0d9708bb34/share/runtime/default-rootfs.img
+INSTALL_DIR=/users/nehalem/fc-ctrd-mod/install/cf0d9708bb34

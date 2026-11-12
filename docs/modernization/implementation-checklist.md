@@ -1,23 +1,33 @@
 # Modernization acceptance ledger
 
-## Current migrated Step 1 status
+> PROVISIONAL HISTORY DRAFT: Step 2 code and inputs match `2e03843816cf95d184ad4ad429adf6ea2ccc1412`. New acceptance and final documentation/results integration are pending. Earlier receipts retain their exact named source scope.
+
+## Current migrated Step 2 status
 
 The maintained base is `firecracker-v1.18-containerdv2`; its vHive successor is
 `firecracker-v1.18-containerdv2-vhive-integration`. Official Firecracker/jailer
 1.18.0 binaries and the published vHive SDK dd9db32 are selected in the current
-lock and module manifests. The four-command lint/build/install/test-stack worker
-pipeline passed at exact clean source `1074bdc8f2b6`; see the
-[receipt and limitations](evidence/upstream-step1-1074bdc8f2b6/README.md).
-The documentation tip was not rebuilt, and SDK `TestLogAndMetrics` is explicitly
-skipped. Separate installed-prefix lifecycle/controller-restart/shim-crash checks
-passed at the same source, with service and thinpool cleanup verified. Later-stage
-acceptance remains pending. Earlier local compilation checks are recorded separately in
-[the local validation note](upstream-step1-local-validation.md).
+lock and module manifests. Clean source
+`7386ab5c5e8c3519ad1698c27f548803e714e304` passed build/private installation,
+the full stack and three provisional vHive source/clone cases. The
+[current receipt](evidence/upstream-step2-worker-attempts/README.md) records
+127 full-stack top-level passes, the SDK metrics skip, eight nested StopVM
+skips, exact artifacts and failed prior attempts. This documentation tip was
+not rebuilt. Final published-module and installed-vHive consumer acceptance
+remain pending; source acceptance does not establish those consumer gates.
+
+The inherited Step 1 lint/build/install/test-stack pipeline and separate
+installed-prefix lifecycle/controller-restart/shim-crash checks passed at
+`1074bdc8f2b6`, with service and thinpool cleanup verified. Its
+[receipt and limitations](evidence/upstream-step1-1074bdc8f2b6/README.md) retain
+the SDK metrics skip and installed-versus-final-test rootfs distinction; the
+[local validation note](upstream-step1-local-validation.md) records earlier
+compilation checks. These results concern that exact Step 1 source.
 
 The checklist below preserves the original modernization ledger. Its checked
 items, former branch names, planned later steps and acceptance statements
 belong to that historical source, not the migrated candidates. See the
-[current branch guide](README.md) and [Step 1 procedure](step-1.md) for current
+[current branch guide](README.md) and [Step 2 procedure](step-2.md) for current
 inputs and validation gates. Step 3 remains WIP; Kubernetes Pod restore is
 deferred to the 1.38 interface work.
 

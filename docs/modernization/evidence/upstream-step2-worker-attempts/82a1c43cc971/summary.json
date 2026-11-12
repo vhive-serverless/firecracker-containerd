@@ -1,0 +1,76 @@
+{
+  "runtime_revision": "82a1c43cc971a8e0e4100709a9e4e4d12c11a1b3",
+  "purpose": "diagnostic only; not release candidate",
+  "pipeline_exit_code": 1,
+  "passes": [
+    "TestPauseSnapResume (15.73s)"
+  ],
+  "failures": [
+    "TestSnapshotConcurrentClones (64.37s)",
+    "TestSnapshotSourceMemoryAndDiskIsolation (46.89s)"
+  ],
+  "observations": [
+    "Clone agent drains RPC successfully, Serve returns, group.Wait is canceled, final log returns, main reaches successful exit.",
+    "Guest systemd reaches reboot target and enters global shutdown; after SIGTERM it reports Waiting for process1026(python).",
+    "vHive source path deletes task via WithProcessKill before StopVM; restored clones have no hostTask handle and skip that deletion."
+  ],
+  "decision": "Implement agent-owned final shutdown of managed guest tasks; preserve kill/wait/event/IO correctness and deadline. Do not raise acceptance timeout. Keep cf0 speculative drain and82 diagnostics out of corrective release ancestry.",
+  "files": {
+    "stage2-build-82a1c43cc971.log": {
+      "bytes": 104515,
+      "sha256": "7994bdea5d5e0248a876264768caa0e0db00c8df64fc983c9af350c450cadf02"
+    },
+    "stage2-install-82a1c43cc971.log": {
+      "bytes": 9093,
+      "sha256": "45c29dde40cb5e868b291c12af8bbcea8e5c829c8982b66f0aa6a1d81d2f6fd1"
+    },
+    "stage2-test-images-82a1c43cc971.log": {
+      "bytes": 109704,
+      "sha256": "fb8656025248535aa0e6834dd2c1ed7e144441c1814e75d885bc9b123ebf99fb"
+    },
+    "stage2-vhive-82a1c43cc971.log": {
+      "bytes": 10134,
+      "sha256": "467c8a0327c7ad8d053afeaef19ef01f221d203de10431c23958df0ed5fc0a0e"
+    },
+    "vhive-82a1c43cc971.iDUM5rch/acceptance.log": {
+      "bytes": 6057,
+      "sha256": "b592ddd6889077c4fcc15819375bbcd5e3224d79229e7c485891f42ac2dd5856"
+    },
+    "vhive-82a1c43cc971.iDUM5rch/binaries.sha256": {
+      "bytes": 506,
+      "sha256": "b7902b99e6715dfd84da32ee97b57523f4fbb0579ee7a76e770944bf85fceeae"
+    },
+    "vhive-82a1c43cc971.iDUM5rch/containerd.out": {
+      "bytes": 1205926,
+      "sha256": "16c583b272da38a01dba2001a80df3e4d4c8cbe0dbcedb53034199fb18124fb9"
+    },
+    "vhive-82a1c43cc971.iDUM5rch/demux-snapshotter.out": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "vhive-82a1c43cc971.iDUM5rch/http-address-resolver.out": {
+      "bytes": 81,
+      "sha256": "114293b780e27936664cfe2ea9151a9734cee52c98fab57dbd42bbcf2dc992cd"
+    },
+    "vhive-82a1c43cc971.iDUM5rch/inputs": {
+      "bytes": 484,
+      "sha256": "9d8c464f55acd5c60e0bfe04b08f0bf0638d8f7b3bf103dcfcaeb2a792d83476"
+    },
+    "vhive-82a1c43cc971.iDUM5rch/modules.json": {
+      "bytes": 99307,
+      "sha256": "9cb28cf73e98f301ef39b2802589e28ad9177b0283a977f0c86b18f44a9e3e23"
+    },
+    "vhive-82a1c43cc971.iDUM5rch/test-buildinfo.txt": {
+      "bytes": 289,
+      "sha256": "27e526fb97d891510e983512c1eebf3e442b8701d14ebd9529ab0c1efed1ea2f"
+    },
+    "vhive-82a1c43cc971.iDUM5rch/vhive-runtime-version": {
+      "bytes": 244,
+      "sha256": "b9c5243d2e8027fd1be89831490d6d92a9f6bd9a8653d339f3549dff2ce5aa45"
+    },
+    "vhive-82a1c43cc971.iDUM5rch/vhive-tests.log": {
+      "bytes": 5813,
+      "sha256": "7ff4535aa70a7250c5fabf4ee98a6d8654ef5c89766b4d0f19560085bf3c6eec"
+    }
+  }
+}

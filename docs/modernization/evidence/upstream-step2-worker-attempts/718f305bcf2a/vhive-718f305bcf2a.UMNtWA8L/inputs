@@ -1,0 +1,7 @@
+purpose=provisional-local-module-candidate
+runtime=718f305bcf2a481e98e854ca5960cda5880ce362
+runtime_tree=eb3fc9847735c046692dca04540999aacf5f09c8
+vhive_test_source=89593103ac667cc096f89770c94a77b2b93c3a7d
+vhive_source_repository=/users/nehalem/fc-ctrd-mod/upstream-migration/vhive-source.git
+function=ghcr.io/ease-lab/helloworld@sha256:12dc6715ed1a8306f246ceaf7742c09e38a52a79d17421e4a50d7e0e09fdbc25
+base_image=sha256:bb0cb48f97f602bfeb54fcafc43737a0c0667acd3e542e9b99f42607af735baf
