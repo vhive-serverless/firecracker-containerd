@@ -2,6 +2,10 @@
 # Provisional candidate checks against the container's exact runtime stack.
 set -euo pipefail
 export FICD_LOG_DIR=${FICD_LOG_DIR:-/var/log/firecracker-containerd-test}
+if ! command -v route >/dev/null 2>&1; then
+    echo "vHive networking requires route (net-tools) in the acceptance image" >&2
+    exit 1
+fi
 grep -q '"guest_root_mode": "ram"' /etc/containerd/firecracker-runtime.json
 cp /etc/containerd/firecracker-runtime.json "$FICD_LOG_DIR/vhive-runtime-profile.json"
 socket=/run/firecracker-containerd/containerd.sock
