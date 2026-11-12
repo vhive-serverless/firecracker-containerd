@@ -19,8 +19,9 @@ reattachment (`b526339`) and corrected existing-exec identity validation
 (`59dddca`, `19599d0`). Mixed-revision diagnostics now pass basic restore,
 live-source/two-clone transport and storage isolation, and interrupted-capture
 recovery in both jail modes. These diagnostics use guest/daemon `57b93fc` and
-newer host shims; **complete single-revision stack acceptance and separate
-legacy vHive acceptance remain pending**. See the scoped receipts below.
+newer host shims; Native runtime acceptance subsequently passed all 20 VM cases on the complete
+`fc2a8c2` build. **Rewritten milestone acceptance and separate legacy vHive
+acceptance remain pending**. See the scoped receipts below.
 
 Step 1/2 branch renames, reconstruction of clean sequential milestone histories,
 final runtime branch publication and obsolete branch cleanup are planned, not
@@ -40,7 +41,7 @@ the later runtime reattachment fix was also required.
 ## Snapshot contract
 
 The following describes the implemented contract. Diagnostic coverage is scoped
-below; final single-revision and legacy vHive acceptance remain incomplete.
+below; rewritten milestone and legacy vHive acceptance remain incomplete.
 Coordinated preparation closes host task admission, freezes running workload
 tasks, drains both directions of framed container I/O to matching acknowledged
 byte positions, and acknowledges lifecycle events only after host publication.
@@ -96,11 +97,18 @@ copies or devices described above. See
 
 ## Evidence and outstanding gates
 
+- [Single-revision native acceptance](evidence/upstream-migration/native-fc2a8c2.json)
+  passed all 20 expected VM cases at `fc2a8c2`, with no failed or skipped cases:
+  fork transport (2), interrupted capture (2), basic restore (2), six storage
+  profiles in both jail modes (12), and reporting disabled/enabled (2). The
+  [raw script log](evidence/upstream-migration/native-fc2a8c2.log) includes the
+  completion marker; receipts record exact source, binaries and test image.
+  This does not establish legacy vHive or CRI compliance acceptance.
 - [Complete stack build](evidence/upstream-migration/build-fc2a8c2.json) at
   `fc2a8c2` passed full lint and build with official Firecracker/jailer and
   correctly embedded runc/runtime revisions. The
   [binary receipt](evidence/upstream-migration/build-fc2a8c2-receipt.log) records
-  exact hashes. VM acceptance at this revision remains pending.
+  exact hashes. Native VM acceptance at this revision also passed, as below.
 - The [current SDK worker summary](evidence/upstream-migration/sdk-dd9db32-worker.json)
   and [raw log](evidence/upstream-migration/sdk-dd9db32-worker.log) record 86
   passing top-level privileged tests at SDK `dd9db32`, with one existing skip.
@@ -126,7 +134,7 @@ copies or devices described above. See
   `eventbridge`, `agent` and `runtime`; parent-module packages compiled. These
   component checks do not establish KVM behavior, disk consistency or transport
   correctness across a real upstream snapshot reset.
-- Final single-revision worker build and runtime acceptance remain open. Required VM
+- Fresh acceptance of the rewritten milestone commits remains open. Required VM
   evidence includes a continuing source, independent restored disks and VMs,
   reconnecting control, lifecycle events and stdin/stdout/stderr across capture,
   plus recovery after interrupted capture. Older tests that stop the source
