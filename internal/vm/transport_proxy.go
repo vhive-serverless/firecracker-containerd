@@ -573,7 +573,13 @@ func (p *transportProxy) PrepareIO(ctx context.Context) error {
 	p.mu.Unlock()
 	errs := make(chan error, len(streams))
 	for _, stream := range streams {
-		go func() { _, err := stream.sender.Prepare(ctx); errs <- err }()
+		go func() {
+			_, err := stream.sender.Prepare(ctx)
+			if err != nil {
+				err = fmt.Errorf("prepare stream %s: %w", stream.sender.Status().Cursor.StreamID, err)
+			}
+			errs <- err
+		}()
 	}
 	var combined error
 	for range streams {

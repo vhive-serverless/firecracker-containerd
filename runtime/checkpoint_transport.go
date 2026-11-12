@@ -152,8 +152,20 @@ func (s *service) prepareIOTransport(ctx context.Context) (*checkpointTransportC
 	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 	done := make(chan error, 2)
-	go func() { done <- s.taskManager.PrepareIO(ctx) }()
-	go func() { _, err := s.ioProxyClient.Prepare(ctx, &types.Empty{}); done <- err }()
+	go func() {
+		err := s.taskManager.PrepareIO(ctx)
+		if err != nil {
+			err = fmt.Errorf("prepare host IO: %w", err)
+		}
+		done <- err
+	}()
+	go func() {
+		_, err := s.ioProxyClient.Prepare(ctx, &types.Empty{})
+		if err != nil {
+			err = fmt.Errorf("prepare guest IO: %w", err)
+		}
+		done <- err
+	}()
 	var combined error
 	for range 2 {
 		err := <-done
