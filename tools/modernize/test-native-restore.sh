@@ -25,7 +25,7 @@ go test -mod=readonly -race -count=1 -v -run "$unit_tests" ./runtime
 make image-dax
 make test-images
 tools/thinpool.sh create "$pool"
-for name in NativeCheckpointInterrupt NativeRestore NativeRestoreStorage FreePageReporting; do
+for name in NativeForkTransport NativeCheckpointInterrupt NativeRestore NativeRestoreStorage FreePageReporting; do
     FICD_DM_POOL="$pool" make -C runtime "integ-test-Test${name}_Isolated" \
         EXTRAGOARGS='-v -count=1 -timeout=1200s'
 done
