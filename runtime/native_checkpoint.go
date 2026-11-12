@@ -45,6 +45,11 @@ type nativeDrive struct {
 	File     snapshotFile
 }
 
+type nativePmem struct {
+	ID   string
+	File snapshotFile
+}
+
 type nativeProcess struct {
 	TaskID, ExecID string
 	State          *taskAPI.StateResponse
@@ -83,6 +88,7 @@ type nativeCheckpoint struct {
 	ResumeTasks    []string
 	VsockPortCount uint32
 	Drives         []nativeDrive
+	Pmem           []nativePmem
 	Memory, State  snapshotFile
 	Transport      *checkpointTransportCut
 }
