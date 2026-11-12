@@ -29,6 +29,16 @@ Step 4 blocker, or confuse this external deferral with the 16 observed CRI
 failures. The deferred integration is not accepted or implemented merely because
 RPC definitions exist. Step 4 proceeds from a pinned WIP baseline by instruction.
 
+## Socket path and SIGPIPE maintenance while Step 3 remains WIP
+
+The current source inherits the jailed socket path correction (`93d594c`) and
+demux SIGPIPE correction (`e09cf27`) through Steps 1 and 2. On clean source
+`aacebc90f4fe7d87819bb91ad736816a2ee0300f`, both focused regression groups and
+`make lint` passed. The [maintenance receipt](evidence/step3-socket-sigpipe-maintenance.md)
+records the exact commands and results, including CRI lint. These checks do not
+establish full Step 3 runtime, CRI, restore, or Kubernetes acceptance; Step 3
+remains WIP and incomplete.
+
 This branch also carries the validated task creation cleanup correction from
 Step 1 commit `6585eba` through Step 2 commit `d959a78`. Their receipts are linked
 from [Step 1](step-1.md) and [Step 2](step-2.md). The results below identify their
