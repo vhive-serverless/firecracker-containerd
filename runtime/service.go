@@ -50,6 +50,7 @@ import (
 	"github.com/containerd/typeurl/v2"
 	"github.com/firecracker-microvm/firecracker-go-sdk"
 	"github.com/firecracker-microvm/firecracker-go-sdk/client/models"
+	ops "github.com/firecracker-microvm/firecracker-go-sdk/client/operations"
 	"github.com/gofrs/uuid"
 	"github.com/hashicorp/go-multierror"
 	"github.com/opencontainers/runtime-spec/specs-go"
@@ -629,6 +630,20 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 		return fmt.Errorf("failed to build VM configuration: %w", err)
 	}
 
+	if err := s.configureImmutableRoot(requestCtx, request); err != nil {
+		return fmt.Errorf("configure immutable root: %w", err)
+	}
+	if err := s.configureGuestRoot(requestCtx, request); err != nil {
+		return fmt.Errorf("configure guest writable root: %w", err)
+	}
+	defer func() {
+		if err != nil && s.nativeRestore == nil {
+			_ = os.Remove(filepath.Join(s.jailer.JailPath().RootPath(), guestOverlayFile))
+		}
+	}()
+	if err := s.configureGuestReclamation(request); err != nil {
+		return fmt.Errorf("configure guest reclamation: %w", err)
+	}
 	s.vmRequest, err = json.Marshal(request)
 	if err != nil {
 		return fmt.Errorf("record VM creation request: %w", err)
@@ -922,6 +937,7 @@ func (s *service) createBalloon(_ context.Context, request *proto.CreateVMReques
 
 	balloonDevice := firecracker.NewBalloonDevice(amountMiB, deflateOnOom, firecracker.WithStatsPollingIntervals(statsPollingIntervals))
 	balloon := balloonDevice.Build()
+	balloon.FreePageReporting = request.BalloonDevice.FreePageReporting
 	if balloon.AmountMib == nil || balloon.DeflateOnOom == nil {
 		return balloon, fmt.Errorf("one of balloon properties is nil, please check %+v: ", balloon)
 	}
@@ -930,7 +946,20 @@ func (s *service) createBalloon(_ context.Context, request *proto.CreateVMReques
 }
 
 func (s *service) buildBalloonDeviceOpt(balloon models.Balloon) ([]firecracker.Opt, error) {
-	handler := firecracker.NewCreateBalloonHandler(*balloon.AmountMib, *balloon.DeflateOnOom, balloon.StatsPollingIntervals)
+	if s.nativeRestore != nil {
+		// The snapshot restores the balloon, including its reporting and stats
+		// configuration. PUT /balloon would configure boot resources before
+		// LoadSnapshot, which Firecracker rejects. Control methods query the
+		// restored VMM directly and need no separate host-side initialization.
+		return nil, nil
+	}
+	handler := firecracker.Handler{
+		Name: firecracker.CreateBalloonHandlerName,
+		Fn: func(ctx context.Context, machine *firecracker.Machine) error {
+			return machine.CreateBalloon(ctx, *balloon.AmountMib, *balloon.DeflateOnOom, balloon.StatsPollingIntervals,
+				func(params *ops.PutBalloonParams) { params.Body.FreePageReporting = balloon.FreePageReporting })
+		},
+	}
 	opt := []firecracker.Opt{
 		func(m *firecracker.Machine) {
 			m.Handlers.FcInit = m.Handlers.FcInit.AppendAfter(firecracker.CreateMachineHandlerName, handler)
@@ -958,6 +987,7 @@ func (s *service) GetBalloonConfig(requestCtx context.Context, _ *proto.GetBallo
 		AmountMib:             *balloon.AmountMib,
 		DeflateOnOom:          *balloon.DeflateOnOom,
 		StatsPollingIntervals: balloon.StatsPollingIntervals,
+		FreePageReporting:     balloon.FreePageReporting,
 	}
 	return &proto.GetBalloonConfigResponse{BalloonConfig: balloonConfig}, err
 }
