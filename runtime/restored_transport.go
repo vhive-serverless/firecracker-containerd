@@ -104,6 +104,9 @@ func (s *service) adoptLegacyTransport(ctx context.Context) error {
 
 func (s *service) verifyRestoredEventCursor(ctx context.Context) error {
 	cut := s.legacyRestoreCut
+	if s.nativeRestore != nil {
+		cut = s.nativeRestore.manifest.Transport
+	}
 	if cut == nil {
 		return nil
 	}

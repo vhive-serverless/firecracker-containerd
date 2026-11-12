@@ -26,12 +26,13 @@ var File_fccontrol_proto protoreflect.FileDescriptor
 
 const file_fccontrol_proto_rawDesc = "" +
 	"\n" +
-	"\x0ffccontrol.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x11firecracker.proto2\xaf\x06\n" +
+	"\x0ffccontrol.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x11firecracker.proto2\xed\x06\n" +
 	"\vFirecracker\x12/\n" +
 	"\bCreateVM\x12\x10.CreateVMRequest\x1a\x11.CreateVMResponse\x122\n" +
 	"\aPauseVM\x12\x0f.PauseVMRequest\x1a\x16.google.protobuf.Empty\x124\n" +
 	"\bResumeVM\x12\x10.ResumeVMRequest\x1a\x16.google.protobuf.Empty\x12@\n" +
-	"\x0eCreateSnapshot\x12\x16.CreateSnapshotRequest\x1a\x16.google.protobuf.Empty\x120\n" +
+	"\x0eCreateSnapshot\x12\x16.CreateSnapshotRequest\x1a\x16.google.protobuf.Empty\x12<\n" +
+	"\fCheckpointVM\x12\x14.CheckpointVMRequest\x1a\x16.google.protobuf.Empty\x120\n" +
 	"\x06StopVM\x12\x0e.StopVMRequest\x1a\x16.google.protobuf.Empty\x122\n" +
 	"\tGetVMInfo\x12\x11.GetVMInfoRequest\x1a\x12.GetVMInfoResponse\x12>\n" +
 	"\rSetVMMetadata\x12\x15.SetVMMetadataRequest\x1a\x16.google.protobuf.Empty\x12D\n" +
@@ -47,51 +48,54 @@ var file_fccontrol_proto_goTypes = []any{
 	(*proto.PauseVMRequest)(nil),            // 1: PauseVMRequest
 	(*proto.ResumeVMRequest)(nil),           // 2: ResumeVMRequest
 	(*proto.CreateSnapshotRequest)(nil),     // 3: CreateSnapshotRequest
-	(*proto.StopVMRequest)(nil),             // 4: StopVMRequest
-	(*proto.GetVMInfoRequest)(nil),          // 5: GetVMInfoRequest
-	(*proto.SetVMMetadataRequest)(nil),      // 6: SetVMMetadataRequest
-	(*proto.UpdateVMMetadataRequest)(nil),   // 7: UpdateVMMetadataRequest
-	(*proto.GetVMMetadataRequest)(nil),      // 8: GetVMMetadataRequest
-	(*proto.GetBalloonConfigRequest)(nil),   // 9: GetBalloonConfigRequest
-	(*proto.UpdateBalloonRequest)(nil),      // 10: UpdateBalloonRequest
-	(*proto.GetBalloonStatsRequest)(nil),    // 11: GetBalloonStatsRequest
-	(*proto.UpdateBalloonStatsRequest)(nil), // 12: UpdateBalloonStatsRequest
-	(*proto.CreateVMResponse)(nil),          // 13: CreateVMResponse
-	(*emptypb.Empty)(nil),                   // 14: google.protobuf.Empty
-	(*proto.GetVMInfoResponse)(nil),         // 15: GetVMInfoResponse
-	(*proto.GetVMMetadataResponse)(nil),     // 16: GetVMMetadataResponse
-	(*proto.GetBalloonConfigResponse)(nil),  // 17: GetBalloonConfigResponse
-	(*proto.GetBalloonStatsResponse)(nil),   // 18: GetBalloonStatsResponse
+	(*proto.CheckpointVMRequest)(nil),       // 4: CheckpointVMRequest
+	(*proto.StopVMRequest)(nil),             // 5: StopVMRequest
+	(*proto.GetVMInfoRequest)(nil),          // 6: GetVMInfoRequest
+	(*proto.SetVMMetadataRequest)(nil),      // 7: SetVMMetadataRequest
+	(*proto.UpdateVMMetadataRequest)(nil),   // 8: UpdateVMMetadataRequest
+	(*proto.GetVMMetadataRequest)(nil),      // 9: GetVMMetadataRequest
+	(*proto.GetBalloonConfigRequest)(nil),   // 10: GetBalloonConfigRequest
+	(*proto.UpdateBalloonRequest)(nil),      // 11: UpdateBalloonRequest
+	(*proto.GetBalloonStatsRequest)(nil),    // 12: GetBalloonStatsRequest
+	(*proto.UpdateBalloonStatsRequest)(nil), // 13: UpdateBalloonStatsRequest
+	(*proto.CreateVMResponse)(nil),          // 14: CreateVMResponse
+	(*emptypb.Empty)(nil),                   // 15: google.protobuf.Empty
+	(*proto.GetVMInfoResponse)(nil),         // 16: GetVMInfoResponse
+	(*proto.GetVMMetadataResponse)(nil),     // 17: GetVMMetadataResponse
+	(*proto.GetBalloonConfigResponse)(nil),  // 18: GetBalloonConfigResponse
+	(*proto.GetBalloonStatsResponse)(nil),   // 19: GetBalloonStatsResponse
 }
 var file_fccontrol_proto_depIdxs = []int32{
 	0,  // 0: Firecracker.CreateVM:input_type -> CreateVMRequest
 	1,  // 1: Firecracker.PauseVM:input_type -> PauseVMRequest
 	2,  // 2: Firecracker.ResumeVM:input_type -> ResumeVMRequest
 	3,  // 3: Firecracker.CreateSnapshot:input_type -> CreateSnapshotRequest
-	4,  // 4: Firecracker.StopVM:input_type -> StopVMRequest
-	5,  // 5: Firecracker.GetVMInfo:input_type -> GetVMInfoRequest
-	6,  // 6: Firecracker.SetVMMetadata:input_type -> SetVMMetadataRequest
-	7,  // 7: Firecracker.UpdateVMMetadata:input_type -> UpdateVMMetadataRequest
-	8,  // 8: Firecracker.GetVMMetadata:input_type -> GetVMMetadataRequest
-	9,  // 9: Firecracker.GetBalloonConfig:input_type -> GetBalloonConfigRequest
-	10, // 10: Firecracker.UpdateBalloon:input_type -> UpdateBalloonRequest
-	11, // 11: Firecracker.GetBalloonStats:input_type -> GetBalloonStatsRequest
-	12, // 12: Firecracker.UpdateBalloonStats:input_type -> UpdateBalloonStatsRequest
-	13, // 13: Firecracker.CreateVM:output_type -> CreateVMResponse
-	14, // 14: Firecracker.PauseVM:output_type -> google.protobuf.Empty
-	14, // 15: Firecracker.ResumeVM:output_type -> google.protobuf.Empty
-	14, // 16: Firecracker.CreateSnapshot:output_type -> google.protobuf.Empty
-	14, // 17: Firecracker.StopVM:output_type -> google.protobuf.Empty
-	15, // 18: Firecracker.GetVMInfo:output_type -> GetVMInfoResponse
-	14, // 19: Firecracker.SetVMMetadata:output_type -> google.protobuf.Empty
-	14, // 20: Firecracker.UpdateVMMetadata:output_type -> google.protobuf.Empty
-	16, // 21: Firecracker.GetVMMetadata:output_type -> GetVMMetadataResponse
-	17, // 22: Firecracker.GetBalloonConfig:output_type -> GetBalloonConfigResponse
-	14, // 23: Firecracker.UpdateBalloon:output_type -> google.protobuf.Empty
-	18, // 24: Firecracker.GetBalloonStats:output_type -> GetBalloonStatsResponse
-	14, // 25: Firecracker.UpdateBalloonStats:output_type -> google.protobuf.Empty
-	13, // [13:26] is the sub-list for method output_type
-	0,  // [0:13] is the sub-list for method input_type
+	4,  // 4: Firecracker.CheckpointVM:input_type -> CheckpointVMRequest
+	5,  // 5: Firecracker.StopVM:input_type -> StopVMRequest
+	6,  // 6: Firecracker.GetVMInfo:input_type -> GetVMInfoRequest
+	7,  // 7: Firecracker.SetVMMetadata:input_type -> SetVMMetadataRequest
+	8,  // 8: Firecracker.UpdateVMMetadata:input_type -> UpdateVMMetadataRequest
+	9,  // 9: Firecracker.GetVMMetadata:input_type -> GetVMMetadataRequest
+	10, // 10: Firecracker.GetBalloonConfig:input_type -> GetBalloonConfigRequest
+	11, // 11: Firecracker.UpdateBalloon:input_type -> UpdateBalloonRequest
+	12, // 12: Firecracker.GetBalloonStats:input_type -> GetBalloonStatsRequest
+	13, // 13: Firecracker.UpdateBalloonStats:input_type -> UpdateBalloonStatsRequest
+	14, // 14: Firecracker.CreateVM:output_type -> CreateVMResponse
+	15, // 15: Firecracker.PauseVM:output_type -> google.protobuf.Empty
+	15, // 16: Firecracker.ResumeVM:output_type -> google.protobuf.Empty
+	15, // 17: Firecracker.CreateSnapshot:output_type -> google.protobuf.Empty
+	15, // 18: Firecracker.CheckpointVM:output_type -> google.protobuf.Empty
+	15, // 19: Firecracker.StopVM:output_type -> google.protobuf.Empty
+	16, // 20: Firecracker.GetVMInfo:output_type -> GetVMInfoResponse
+	15, // 21: Firecracker.SetVMMetadata:output_type -> google.protobuf.Empty
+	15, // 22: Firecracker.UpdateVMMetadata:output_type -> google.protobuf.Empty
+	17, // 23: Firecracker.GetVMMetadata:output_type -> GetVMMetadataResponse
+	18, // 24: Firecracker.GetBalloonConfig:output_type -> GetBalloonConfigResponse
+	15, // 25: Firecracker.UpdateBalloon:output_type -> google.protobuf.Empty
+	19, // 26: Firecracker.GetBalloonStats:output_type -> GetBalloonStatsResponse
+	15, // 27: Firecracker.UpdateBalloonStats:output_type -> google.protobuf.Empty
+	14, // [14:28] is the sub-list for method output_type
+	0,  // [0:14] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name
