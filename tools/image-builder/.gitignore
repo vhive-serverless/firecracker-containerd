@@ -4,3 +4,4 @@ rootfs
 *stamp
 
 rootfs-dax.img.*
+rootfs-stargz-dax.img.*

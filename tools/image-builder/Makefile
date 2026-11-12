@@ -59,6 +59,7 @@ endef
 all: rootfs.img rootfs-debug.img
 stargz: rootfs-stargz.img
 dax: rootfs-dax.img
+stargz-dax: rootfs-stargz-dax.img
 
 $(WORKDIR):
 	mkdir $(WORKDIR)
@@ -93,6 +94,9 @@ rootfs.img: files_common_stamp files_debootstrap_stamp files_ephemeral_stamp
 
 rootfs-dax.img: rootfs.img build-dax-rootfs.sh
 	./build-dax-rootfs.sh rootfs.img $@
+
+rootfs-stargz-dax.img: rootfs-stargz.img build-dax-rootfs.sh
+	./build-dax-rootfs.sh rootfs-stargz.img $@
 
 rootfs-debug.img: files_common_stamp files_debootstrap_stamp files_ephemeral_stamp
 	rm -fr tmp/$@

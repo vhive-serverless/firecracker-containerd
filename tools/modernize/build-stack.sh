@@ -29,7 +29,7 @@ make -B agent runtime examples firecracker-control/cmd/containerd snapshotter \
 # source files without changing Cargo.toml or go.mod. Their compiler caches remain
 # usable, but a binary from an earlier milestone must never be selected by mtime.
 make -B firecracker runc
-make kernel default-vmlinux image image-stargz
+make kernel default-vmlinux image image-stargz image-dax image-stargz-dax
 mkdir -p bin/receipts/build
 go list -m -json all > bin/receipts/build/go-modules.json
 (cd cri && go list -m -json all) > bin/receipts/build/cri-go-modules.json
