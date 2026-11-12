@@ -55,6 +55,31 @@ message CreateVMRequest {
 
     // Restore a native checkpoint, including its existing guest processes.
     string NativeCheckpointDirectory = 22;
+
+    // Private writable guest root. Nil uses administrator defaults.
+    GuestRootStorage GuestRoot = 23;
+
+    // Bounded guest DAMON reclamation with balloon free-page reporting.
+    GuestReclamation Reclamation = 24;
+}
+
+message GuestReclamation {
+    bool Enabled = 1;
+    // Zero selects five seconds.
+    uint32 MinAgeSeconds = 2;
+    // Zero selects 16 MiB per one-second quota window.
+    uint32 QuotaMibPerSecond = 3;
+    // Zero selects five milliseconds of action time per quota window.
+    uint32 QuotaTimeMs = 4;
+    // Absent selects order nine (2 MiB on the selected 4 KiB-page guest).
+    optional uint32 ReportingOrder = 5;
+}
+
+message GuestRootStorage {
+    // "disk" (default) or "ram" (original-layout measurement only).
+    string Mode = 1;
+    // Capacity of the per-VM ext4 upper, in MiB; zero uses the default.
+    uint32 SizeMib = 2;
 }
 
 message CreateVMResponse {
