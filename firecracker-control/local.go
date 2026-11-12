@@ -218,6 +218,13 @@ func (s *local) CreateVM(requestCtx context.Context, req *proto.CreateVMRequest)
 		return nil, err
 	}
 
+	// Control-created shims do not pass through containerd's task bootstrap.
+	// Publish the same endpoint for adopted tasks and bundle address links.
+	err = shimDir.WriteAddress(shimSocketAddress)
+	if err != nil {
+		return nil, fmt.Errorf("publish shim task address: %w", err)
+	}
+
 	s.addShim(shimSocketAddress, cmd)
 
 	return resp, nil
