@@ -31,6 +31,10 @@ import (
 const restoreNamespaceArg = "__firecracker_restore_namespace"
 const restoreNamespaceMountArg = "__firecracker_restore_mount"
 const restoreExecutable = "/.firecracker-restore-vmm"
+
+// The live host directory is visible only here. Captured disk paths, including
+// paths below a former same-ID shim directory, remain on the private tmpfs.
+const restoreSharedDirectory = "/.firecracker-restore-shared"
 const (
 	restoreKVMDevice     = "/dev/kvm"
 	restoreTunDevice     = "/dev/net/tun"
@@ -48,6 +52,7 @@ type restoreNamespacePlan struct {
 	Args            []string       `json:"args"`
 	Mounts          []restoreMount `json:"mounts"`
 	Inputs          []string       `json:"inputs"`
+	WritableInputs  []string       `json:"writable_inputs,omitempty"`
 }
 
 // The helper execs the VMM in-place: the PID and process start time observed by
@@ -72,7 +77,7 @@ func init() {
 	os.Exit(0)
 }
 
-func restoreNamespaceCommand(ctx context.Context, shared, binary string, args []string, mounts []restoreMount, inputs []string) (*exec.Cmd, error) {
+func restoreNamespaceCommand(ctx context.Context, shared, binary string, args []string, mounts []restoreMount, inputs []string, writableInputs ...string) (*exec.Cmd, error) {
 	shared, err := filepath.Abs(shared)
 	if err != nil {
 		return nil, err
@@ -85,14 +90,17 @@ func restoreNamespaceCommand(ctx context.Context, shared, binary string, args []
 	if err != nil {
 		return nil, err
 	}
-	if err := validateRestoreMounts(mounts, shared); err != nil {
+	if err := validateRestoreMounts(mounts, restoreSharedDirectory); err != nil {
+		return nil, err
+	}
+	if err := validateRestoreInputs(append(append([]string(nil), inputs...), writableInputs...), mounts); err != nil {
 		return nil, err
 	}
 	root, err := os.MkdirTemp(shared, ".restore-root-")
 	if err != nil {
 		return nil, err
 	}
-	plan := restoreNamespacePlan{Root: root, SharedDirectory: shared, Binary: binary, Args: args, Mounts: mounts, Inputs: inputs}
+	plan := restoreNamespacePlan{Root: root, SharedDirectory: shared, Binary: binary, Args: args, Mounts: mounts, Inputs: inputs, WritableInputs: writableInputs}
 	file, err := os.CreateTemp(shared, ".restore-namespace-")
 	if err != nil {
 		_ = os.Remove(root)
@@ -114,6 +122,27 @@ func restoreNamespaceCommand(ctx context.Context, shared, binary string, args []
 	cmd := exec.CommandContext(ctx, executable, restoreNamespaceArg, file.Name())
 	cmd.SysProcAttr = &syscall.SysProcAttr{Cloneflags: unix.CLONE_NEWNS}
 	return cmd, nil
+}
+
+// validateRestoreInputs keeps input file binds from hiding captured disks or
+// live control files. It runs both before writing the plan and in the helper.
+func validateRestoreInputs(inputs []string, mounts []restoreMount) error {
+	targets := make([]string, 0, len(mounts)+len(inputs))
+	for _, mount := range mounts {
+		targets = append(targets, mount.Target)
+	}
+	for _, input := range inputs {
+		if _, err := capturedDevicePath(input, false); err != nil {
+			return fmt.Errorf("invalid restore input: %w", err)
+		}
+		for _, target := range targets {
+			if pathWithin(input, target) || pathWithin(target, input) {
+				return fmt.Errorf("restore input overlaps another private target: %s", input)
+			}
+		}
+		targets = append(targets, input)
+	}
+	return nil
 }
 
 func enterRestoreNamespace(configPath string) error {
@@ -142,7 +171,10 @@ func enterRestoreNamespace(configPath string) error {
 	if !filepath.IsAbs(plan.Root) || filepath.Dir(plan.Root) != plan.SharedDirectory || filepath.Clean(plan.Root) != plan.Root {
 		return fmt.Errorf("invalid private restore root")
 	}
-	if err := validateRestoreMounts(plan.Mounts, plan.SharedDirectory); err != nil {
+	if err := validateRestoreMounts(plan.Mounts, restoreSharedDirectory); err != nil {
+		return err
+	}
+	if err := validateRestoreInputs(append(append([]string(nil), plan.Inputs...), plan.WritableInputs...), plan.Mounts); err != nil {
 		return err
 	}
 	if err := unix.Mount("", "/", "", unix.MS_REC|unix.MS_PRIVATE, ""); err != nil {
@@ -157,7 +189,7 @@ func enterRestoreNamespace(configPath string) error {
 		source, target      string
 		directory, readOnly bool
 	}
-	bindings := []binding{{restoreProcDirectory, restoreProcDirectory, true, true}, {plan.SharedDirectory, plan.SharedDirectory, true, false}, {plan.Binary, restoreExecutable, false, true}}
+	bindings := []binding{{restoreProcDirectory, restoreProcDirectory, true, true}, {plan.SharedDirectory, restoreSharedDirectory, true, false}, {plan.Binary, restoreExecutable, false, true}}
 	for _, device := range []string{restoreKVMDevice, restoreTunDevice, restoreNullDevice, restoreZeroDevice, restoreRandomDevice, restoreURandomDevice} {
 		if _, err := os.Stat(device); err == nil {
 			bindings = append(bindings, binding{device, device, false, false})
@@ -179,27 +211,13 @@ func enterRestoreNamespace(configPath string) error {
 		// between validation and mount. This helper has not changed root yet.
 		bindings = append(bindings, binding{fmt.Sprintf("/proc/self/fd/%d", backing.Fd()), mount.Target, false, mount.ReadOnly})
 	}
-	seen := map[string]bool{restoreExecutable: true}
-	for _, mount := range plan.Mounts {
-		seen[mount.Target] = true
-	}
 	for _, input := range plan.Inputs {
-		if !filepath.IsAbs(input) || filepath.Clean(input) != input {
-			return fmt.Errorf("invalid restore input path")
-		}
-		if pathWithin(input, plan.SharedDirectory) {
-			continue
-		}
-		if seen[input] {
-			return fmt.Errorf("restore input overlaps device or executable")
-		}
-		for _, reserved := range []string{restoreKVMDevice, restoreTunDevice, restoreNullDevice, restoreZeroDevice, restoreRandomDevice, restoreURandomDevice, restoreProcDirectory} {
-			if pathWithin(input, reserved) || pathWithin(reserved, input) {
-				return fmt.Errorf("restore input overlaps system mount")
-			}
-		}
-		seen[input] = true
+		// Even inputs below the host shared directory need their own binding:
+		// that directory is exposed at the alias, not at its captured path.
 		bindings = append(bindings, binding{input, input, false, true})
+	}
+	for _, input := range plan.WritableInputs {
+		bindings = append(bindings, binding{input, input, false, false})
 	}
 	root, err := os.OpenRoot(plan.Root)
 	if err != nil {
@@ -239,7 +257,7 @@ func enterRestoreNamespace(configPath string) error {
 	if err := unix.Chroot(plan.Root); err != nil {
 		return err
 	}
-	if err := unix.Chdir(plan.SharedDirectory); err != nil {
+	if err := unix.Chdir(restoreSharedDirectory); err != nil {
 		return err
 	}
 	return unix.Exec(restoreExecutable, append([]string{restoreExecutable}, plan.Args...), os.Environ())
@@ -295,7 +313,7 @@ func installRestoreMount(path string) (retErr error) {
 		return closeErr
 	}
 	mounts := []restoreMount{plan.Mount}
-	if err := validateRestoreMounts(mounts, plan.SharedDirectory); err != nil {
+	if err := validateRestoreMounts(mounts, restoreSharedDirectory); err != nil {
 		return err
 	}
 	plan.Mount = mounts[0]
