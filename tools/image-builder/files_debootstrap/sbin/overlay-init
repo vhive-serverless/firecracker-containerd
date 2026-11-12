@@ -12,6 +12,10 @@
 # express or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
+# A failed disk mount must stop boot, never silently fall back to a RAM upper.
+set -eu
+overlay_root=${overlay_root:-ram}
+
 # Parameters:
 # 1. rw_root -- path where the read/write root is mounted
 # 2. work_dir -- path to the overlay workdir (must be on same filesystem as rw_root)
@@ -31,7 +35,7 @@ pivot() {
 # "ram", which configures a tmpfs as the rw overlay layer (this is
 # the default, if the variable is unset)
 # - or -
-# A block device name, relative to /dev, in which case it is assumed
+# A filesystem UUID (UUID=...) or block device name relative to /dev, assumed
 # to contain an ext4 filesystem suitable for use as a rw overlay
 # layer. e.g. "vdb"
 do_overlay() {
@@ -40,7 +44,33 @@ do_overlay() {
            [ -z "$overlay_root" ]; then
         /bin/mount -t tmpfs -o noatime,mode=0755 tmpfs /overlay
     else
-        /bin/mount -t ext4 "/dev/$overlay_root" /overlay
+        local device=""
+        case "$overlay_root" in
+            UUID=*)
+                local attempts=0
+                while [ "$attempts" -lt 100 ]; do
+                    # /proc and udev are not running yet. Probe devtmpfs
+                    # block nodes directly instead of relying on UUID caches.
+                    local candidate
+                    for candidate in /dev/vd*; do
+                        [ -b "$candidate" ] || continue
+                        if [ "$(blkid -p -s UUID -o value "$candidate" 2>/dev/null || true)" = "${overlay_root#UUID=}" ]; then
+                            device=$candidate
+                            break
+                        fi
+                    done
+                    [ -z "$device" ] || break
+                    attempts=$((attempts + 1))
+                    sleep 0.1
+                done
+                ;;
+            *) device="/dev/$overlay_root" ;;
+        esac
+        if [ ! -b "$device" ]; then
+            echo "FATAL: overlay root $overlay_root is not an available block device" >&2
+            exit 1
+        fi
+        /bin/mount -t ext4 -o noatime "$device" /overlay
     fi
     mkdir -p /overlay/root /overlay/work
     pivot /overlay/root /overlay/work
@@ -49,6 +79,7 @@ do_overlay() {
 # If we're given an overlay, ensure that it really exists. Panic if not.
 if [ -n "$overlay_root" ] &&
        [ "$overlay_root" != ram ] &&
+       [ "${overlay_root#UUID=}" = "$overlay_root" ] &&
        [ ! -b "/dev/$overlay_root" ]; then
     echo -n "FATAL: "
     echo "Overlay root given as $overlay_root but /dev/$overlay_root does not exist"
