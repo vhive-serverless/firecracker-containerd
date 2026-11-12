@@ -30,11 +30,13 @@ import (
 	"time"
 
 	containerd "github.com/containerd/containerd/v2/client"
+	"github.com/containerd/containerd/v2/core/mount"
 	"github.com/containerd/containerd/v2/pkg/cio"
 	"github.com/containerd/containerd/v2/pkg/namespaces"
 	"github.com/containerd/containerd/v2/pkg/oci"
 	crimeta "github.com/firecracker-microvm/firecracker-containerd/internal/cri"
 	"github.com/firecracker-microvm/firecracker-containerd/internal/integtest"
+	"github.com/firecracker-microvm/firecracker-containerd/internal/vm"
 	"github.com/firecracker-microvm/firecracker-containerd/internal/volfs"
 	"github.com/firecracker-microvm/firecracker-containerd/proto"
 	"github.com/firecracker-microvm/firecracker-containerd/runtime/firecrackeroci"
@@ -45,6 +47,18 @@ import (
 )
 
 func TestNativeCheckpoint_Isolated(t *testing.T) {
+	testNativeCheckpoint(t, false, false)
+}
+
+func TestPmemNativeCheckpoint_Isolated(t *testing.T) {
+	testNativeCheckpoint(t, true, true)
+}
+
+func TestPmemBlockNativeCheckpoint_Isolated(t *testing.T) {
+	testNativeCheckpoint(t, false, true)
+}
+
+func testNativeCheckpoint(t *testing.T, pmem, ext4 bool) {
 	integtest.Prepare(t)
 	for _, jailed := range []bool{false, true} {
 		t.Run(fmt.Sprintf("jailed=%v", jailed), func(t *testing.T) {
@@ -60,6 +74,14 @@ func TestNativeCheckpoint_Isolated(t *testing.T) {
 			id := fmt.Sprintf("native-capture-%v", jailed)
 			request := &proto.CreateVMRequest{VMID: id, ContainerCount: 2,
 				MachineCfg: &proto.FirecrackerMachineConfiguration{MemSizeMib: 512}}
+			if ext4 {
+				path, err := filepath.Abs("../tools/image-builder/rootfs-dax.img")
+				require.NoError(t, err)
+				request.RootDrive = &proto.FirecrackerRootDrive{HostPath: path, UsePmem: pmem, ImageSha256: hashPmemImage(t, path)}
+			}
+			if pmem {
+				request.Reclamation = &proto.GuestReclamation{Enabled: true}
+			}
 			if jailed {
 				request.JailerConfig = &proto.JailerConfig{UID: 300001, GID: 300001}
 			}
@@ -108,6 +130,10 @@ func TestNativeCheckpoint_Isolated(t *testing.T) {
 				require.Equal(t, "before", nativeExec(ctx, t, process, "while ! test -e /state; do sleep .01; done; sync; cat /state"))
 				tasks = append(tasks, process)
 			}
+			writeGuestUpperState(ctx, t, client, id, "before")
+			if pmem {
+				probePmemCombined(ctx, t, client, id)
+			}
 			artifact := filepath.Join(t.TempDir(), "checkpoint")
 			resumeCount := 2
 			if jailed {
@@ -125,7 +151,22 @@ func TestNativeCheckpoint_Isolated(t *testing.T) {
 			require.Len(t, manifest.Tasks, 2)
 			require.Len(t, manifest.ContainerSlots, 2)
 			require.Len(t, manifest.ResumeTasks, resumeCount)
-			require.Len(t, manifest.Drives, 3)
+			if pmem {
+				require.Len(t, manifest.Drives, 3, "pmem replaces only the immutable root drive")
+				require.Len(t, manifest.Pmem, 1)
+				require.Equal(t, request.RootDrive.ImageSha256, manifest.Pmem[0].File.SHA256)
+				require.NoError(t, validateNativeRestore(&manifest), "artifact structure must include its immutable lower")
+			} else {
+				require.Len(t, manifest.Drives, 4, "capture includes the private guest upper")
+				if ext4 {
+					for index, drive := range manifest.Drives {
+						live := manifest.VMConfig.Drives[index]
+						if live.IsRootDevice != nil && *live.IsRootDevice {
+							require.Equal(t, request.RootDrive.ImageSha256, drive.File.SHA256, "block control capture must copy the backing, not the jail placeholder")
+						}
+					}
+				}
+			}
 			require.Positive(t, manifest.VsockPortCount, "restore must retain the allocator offset to allocate beyond captured listeners")
 			if jailed {
 				state, err := tasks[1].Status(ctx)
@@ -136,6 +177,7 @@ func TestNativeCheckpoint_Isolated(t *testing.T) {
 			for _, process := range tasks {
 				require.Equal(t, "after", nativeExec(ctx, t, process, "echo after >/state; echo shared-after >/shared/state; sync; cat /state"), "source must retain exec, I/O and independent writes after capture")
 			}
+			writeGuestUpperState(ctx, t, client, id, "after")
 			for _, task := range manifest.Tasks {
 				require.Len(t, task.VolumeTokens, 1)
 			}
@@ -144,6 +186,9 @@ func TestNativeCheckpoint_Isolated(t *testing.T) {
 			files = append(files, manifest.Memory, manifest.State)
 			for _, drive := range manifest.Drives {
 				files = append(files, drive.File)
+			}
+			for _, device := range manifest.Pmem {
+				files = append(files, device.File)
 			}
 			for _, saved := range files {
 				input, err := os.Open(filepath.Join(artifact, saved.Path))
@@ -159,7 +204,11 @@ func TestNativeCheckpoint_Isolated(t *testing.T) {
 				if drive.ReadOnly {
 					continue
 				}
-				output, err := exec.CommandContext(ctx, "debugfs", "-R", "cat /state", filepath.Join(artifact, drive.File.Path)).Output()
+				path := "/state"
+				if drive.ID == guestOverlayDrive {
+					path = "/root/native-upper-state"
+				}
+				output, err := exec.CommandContext(ctx, "debugfs", "-R", "cat "+path, filepath.Join(artifact, drive.File.Path)).Output()
 				require.NoError(t, err)
 				require.Equal(t, "before\n", string(output), "captured ext4 data must remain at the checkpoint even after source sync")
 			}
@@ -171,7 +220,11 @@ func TestNativeCheckpoint_Isolated(t *testing.T) {
 				if drive.ReadOnly {
 					continue
 				}
-				output, err := exec.CommandContext(ctx, "debugfs", "-R", "cat /state", filepath.Join(repeated, drive.File.Path)).Output()
+				path := "/state"
+				if drive.ID == guestOverlayDrive {
+					path = "/root/native-upper-state"
+				}
+				output, err := exec.CommandContext(ctx, "debugfs", "-R", "cat "+path, filepath.Join(repeated, drive.File.Path)).Output()
 				require.NoError(t, err)
 				require.Equal(t, "after\n", string(output), "a fresh capture must reflect the advanced source")
 			}
@@ -189,6 +242,37 @@ func TestNativeCheckpoint_Isolated(t *testing.T) {
 			}
 		})
 	}
+}
+
+func probePmemCombined(ctx context.Context, t *testing.T, client *containerd.Client, id string) {
+	t.Helper()
+	container, err := client.NewContainer(ctx, id+"-combined-probe", containerd.WithNewSpec(
+		firecrackeroci.WithVMID(id), oci.WithDefaultPathEnv,
+		oci.WithMounts([]specs.Mount{{Destination: "/rom", Type: "bind", Source: "/rom", Options: []string{"bind", "ro"}}}),
+		oci.WithProcessArgs("/bin/sh", "-ec", `
+            test "$(cat /sys/module/damon_reclaim/parameters/enabled)" = Y
+            test "$(cat /sys/module/damon_reclaim/parameters/skip_anon)" = Y
+            /usr/local/bin/fc-memory-probe -file /rom/usr/local/bin/agent -stat-only
+            /usr/local/bin/fc-memory-probe -file /rom/usr/local/bin/agent -file-bytes 8388608 -anon-mib 32 -idle 8s
+        `)))
+	require.NoError(t, err)
+	defer func() { require.NoError(t, container.Delete(ctx)) }()
+	output := runStorageAudit(ctx, t, container, containerd.WithRootFS([]mount.Mount{
+		vm.AddLocalMountIdentifier(mount.Mount{Type: "bind", Source: "/", Options: []string{"bind"}})}))
+	t.Logf("Combined pmem/reclamation probe: %s", output)
+	require.Contains(t, output, `"statx_dax":true`)
+	require.Contains(t, output, `"phase":"complete"`)
+}
+
+func writeGuestUpperState(ctx context.Context, t *testing.T, client *containerd.Client, vmID, value string) {
+	t.Helper()
+	container, err := client.NewContainer(ctx, vmID+"-upper-"+value,
+		containerd.WithNewSpec(firecrackeroci.WithVMID(vmID), oci.WithDefaultPathEnv,
+			oci.WithProcessArgs("/bin/sh", "-ec", "printf '%s\\n' \"$1\" >/native-upper-state; sync", "--", value)))
+	require.NoError(t, err)
+	defer func() { require.NoError(t, container.Delete(ctx)) }()
+	runStorageAudit(ctx, t, container, containerd.WithRootFS([]mount.Mount{
+		vm.AddLocalMountIdentifier(mount.Mount{Type: "bind", Source: "/", Options: []string{"bind"}})}))
 }
 
 func checkNativeVolumes(ctx context.Context, t *testing.T, artifact, expected string) {
