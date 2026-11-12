@@ -254,6 +254,9 @@ func (s *local) StopVM(requestCtx context.Context, req *proto.StopVMRequest) (*t
 	defer client.Close()
 
 	resp, shimErr := client.StopVM(requestCtx, req)
+	// Closing acknowledges that the stop reply has been consumed. The shim
+	// drains controller connections before it exits.
+	_ = client.Close()
 	waitErr := s.waitForShimToExit(requestCtx, req.VMID)
 
 	// Assuming the shim is returning containerd's error code, return the error as is if possible.
@@ -309,7 +312,9 @@ func (s *local) waitForShimToExit(ctx context.Context, vmID string) error {
 	pid, ok := s.processes[socketAddr]
 	s.processesMu.Unlock()
 	if ok {
-		return internal.WaitForPidToExit(ctx, stopVMInterval, pid)
+		if err := internal.WaitForPidToExit(ctx, stopVMInterval, pid); err != nil {
+			return err
+		}
 	}
 	// The monitor may already have reaped the shim and removed its map entry.
 	namespace, err := namespaces.NamespaceRequired(ctx)
@@ -321,14 +326,31 @@ func (s *local) waitForShimToExit(ctx context.Context, vmID string) error {
 		return err
 	}
 	state, err := vm.ReadRecoveryState(dir)
-	if os.IsNotExist(err) {
-		return nil
-	}
-	if err != nil {
+	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
-	return waitOwnedShim(ctx, state.Shim)
-
+	if err == nil {
+		if err := vm.WaitProcessExit(ctx, state.Shim); err != nil {
+			return err
+		}
+	}
+	// Process exit precedes CNI, jail and directory cleanup by the monitor.
+	cleanupCtx, cancel := context.WithTimeout(ctx, 20*time.Second)
+	defer cancel()
+	ticker := time.NewTicker(stopVMInterval)
+	defer ticker.Stop()
+	for {
+		if _, err := os.Stat(dir.RootPath()); os.IsNotExist(err) {
+			return nil
+		} else if err != nil {
+			return err
+		}
+		select {
+		case <-cleanupCtx.Done():
+			return fmt.Errorf("wait for VM cleanup: %w", cleanupCtx.Err())
+		case <-ticker.C:
+		}
+	}
 }
 
 // GetVMInfo returns metadata for the VM with the given VMID.

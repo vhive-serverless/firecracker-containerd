@@ -32,7 +32,8 @@ func init() {
 		FullTimestamp:   true,
 	})
 
-	logrus.SetOutput(os.Stdout)
+	// Shim bootstrap and delete responses use stdout as a binary protocol.
+	logrus.SetOutput(os.Stderr)
 }
 
 func main() {

@@ -15,11 +15,15 @@ package vm
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"syscall"
 	"testing"
 
+	runc "github.com/containerd/go-runc"
 	"github.com/stretchr/testify/require"
 )
 
@@ -45,7 +49,7 @@ func TestRecoveryRefusesReusedPID(t *testing.T) {
 	_, identity := recoveryProcess(t)
 	stale := identity
 	stale.StartTicks += "0"
-	require.ErrorContains(t, killOwnedProcess(stale), "reused PID")
+	require.ErrorContains(t, StopProcess(stale, syscall.SIGKILL), "reused PID")
 	alive, err := IsProcessAlive(identity)
 	require.NoError(t, err)
 	require.True(t, alive, "unrelated process must survive stale metadata")
@@ -80,4 +84,38 @@ func TestRecoveryRejectsWrongVM(t *testing.T) {
 	require.NoError(t, WriteRecoveryState(dir, state))
 	require.ErrorContains(t, RecoverVM(context.Background(), dir), "does not match")
 	require.FileExists(t, filepath.Join(dir.RootPath(), RecoveryFileName))
+}
+
+func TestDeleteRuncBundleOwnership(t *testing.T) {
+	for _, test := range []struct {
+		name, id, bundle string
+		wantDelete       bool
+		wantError        bool
+	}{
+		{name: "owned", id: "vm", bundle: "/owned", wantDelete: true},
+		{name: "foreign", id: "vm", bundle: "/another", wantError: true},
+		{name: "missing", id: "other", bundle: "/owned"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			dir := t.TempDir()
+			marker := filepath.Join(dir, "deleted")
+			binary := filepath.Join(dir, "runc")
+			listing, err := json.Marshal([]runc.Container{{ID: test.id, Bundle: test.bundle}})
+			require.NoError(t, err)
+			script := fmt.Sprintf("#!/bin/sh\nfor arg do\nif [ \"$arg\" = list ]; then\ncat <<'JSON'\n%s\nJSON\nexit 0\nfi\ndone\nprintf deleted > '%s'\n", listing, marker)
+			require.NoError(t, os.WriteFile(binary, []byte(script), 0700))
+			client := runc.Runc{Command: binary}
+			err = DeleteRuncBundle(context.Background(), &client, "vm", "/owned")
+			if test.wantError {
+				require.ErrorContains(t, err, "belongs to another bundle")
+			} else {
+				require.NoError(t, err)
+			}
+			if test.wantDelete {
+				require.FileExists(t, marker)
+			} else {
+				require.NoFileExists(t, marker)
+			}
+		})
+	}
 }

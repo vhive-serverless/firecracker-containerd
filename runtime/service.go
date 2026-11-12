@@ -43,6 +43,7 @@ import (
 	"github.com/containerd/containerd/v2/pkg/protobuf"
 	"github.com/containerd/containerd/v2/pkg/protobuf/types"
 	"github.com/containerd/containerd/v2/pkg/shim"
+	"github.com/containerd/containerd/v2/pkg/shutdown"
 	"github.com/containerd/containerd/v2/pkg/ttrpcutil"
 	"github.com/containerd/fifo"
 	"github.com/containerd/log"
@@ -107,9 +108,10 @@ var (
 
 // implements shimapi
 type service struct {
-	taskManager   vm.TaskManager
-	eventExchange *exchange.Exchange
-	namespace     string
+	taskManager     vm.TaskManager
+	eventExchange   *exchange.Exchange
+	remotePublisher shim.Publisher
+	namespace       string
 
 	logger *logrus.Entry
 
@@ -149,7 +151,7 @@ type service struct {
 	driveMountStubs          []MountableStubDrive
 	exitAfterAllTasksDeleted bool // exit the VM and shim when all tasks are deleted
 
-	blockDeviceTasks map[string]struct{}
+	blockDeviceTasks sync.Map
 
 	cleanupErr  error
 	cleanupOnce sync.Once
@@ -174,7 +176,7 @@ func shimOpts(shimCtx context.Context) (*shim.Opts, error) {
 }
 
 // NewService creates new runtime shim.
-func NewService(shimCtx context.Context, _ string, remotePublisher shim.Publisher, shimCancel func()) (*service, error) {
+func NewService(shimCtx context.Context, remotePublisher shim.Publisher, sd shutdown.Service) (*service, error) {
 	cfg, err := config.LoadConfig("")
 	if err != nil {
 		return nil, err
@@ -211,28 +213,28 @@ func NewService(shimCtx context.Context, _ string, remotePublisher shim.Publishe
 	}
 
 	s := &service{
-		taskManager:   vm.NewTaskManager(shimCtx, logger),
-		eventExchange: exchange.NewExchange(),
-		namespace:     namespace,
+		taskManager:     vm.NewTaskManager(shimCtx, logger),
+		eventExchange:   exchange.NewExchange(),
+		remotePublisher: remotePublisher,
+		namespace:       namespace,
 
 		logger:     logger,
 		shimCtx:    shimCtx,
-		shimCancel: shimCancel,
+		shimCancel: sd.Shutdown,
 
 		vmID:    vmID,
 		shimDir: shimDir,
 
 		config: cfg,
 
-		vmReady:          make(chan struct{}),
-		jailer:           newNoopJailer(shimCtx, logger, shimDir),
-		blockDeviceTasks: make(map[string]struct{}),
-		fifos:            make(map[string]map[string]cio.Config),
+		vmReady: make(chan struct{}),
+		jailer:  newNoopJailer(shimCtx, logger, shimDir),
+		fifos:   make(map[string]map[string]cio.Config),
 	}
 
 	s.startEventForwarders(remotePublisher)
 
-	err = s.serveFCControl()
+	err = s.serveFCControl(sd)
 	if err != nil {
 		err = fmt.Errorf("failed to start fccontrol server: %w", err)
 		s.logger.WithError(err).Error()
@@ -279,17 +281,12 @@ func (s *service) startEventForwarders(remotePublisher shim.Publisher) {
 // containerd does not currently expose the shim server for us to register the fccontrol service with too.
 // This is likely addressable through some relatively small upstream contributions; the following is a stop-gap
 // solution until that time.
-func (s *service) serveFCControl() error {
+func (s *service) serveFCControl(sd shutdown.Service) error {
 	// If the fccontrol socket was configured, setup the fccontrol server
 	fcSocketFDEnvVal := os.Getenv(internal.FCSocketFDEnvKey)
 	if fcSocketFDEnvVal == "" {
 		// if there's no socket, we don't need to serve the API (this must be a shim start or shim delete call)
 		return nil
-	}
-
-	fcServer, err := ttrpc.NewServer(ttrpc.WithServerHandshaker(ttrpc.UnixSocketRequireSameUser()))
-	if err != nil {
-		return err
 	}
 
 	socketFD, err := strconv.Atoi(fcSocketFDEnvVal)
@@ -299,16 +296,29 @@ func (s *service) serveFCControl() error {
 		return err
 	}
 
-	fccontrolTtrpc.RegisterFirecrackerService(fcServer, s)
 	fcListener, err := net.FileListener(os.NewFile(uintptr(socketFD), "fccontrol"))
 	if err != nil {
 		return err
 	}
 
+	drain := newFCControlDrain(fcListener)
+	fcServer, err := ttrpc.NewServer(ttrpc.WithServerHandshaker(drain))
+	if err != nil {
+		_ = fcListener.Close()
+		return err
+	}
+	fccontrolTtrpc.RegisterFirecrackerService(fcServer, s)
+
+	// The controller closes each connection after consuming its reply.
+	// Wait for that acknowledgement before RunShim can exit.
+	sd.RegisterCallback(func(ctx context.Context) error {
+		drainErr := drain.Drain(ctx)
+		return errors.Join(drainErr, fcServer.Close())
+	})
 	go func() {
-		defer fcListener.Close()
-		err := fcServer.Serve(s.shimCtx, fcListener)
-		if err != nil && !strings.Contains(err.Error(), "use of closed network connection") {
+		defer drain.Close()
+		err := fcServer.Serve(s.shimCtx, drain)
+		if err != nil && !errors.Is(err, ttrpc.ErrServerClosed) && !errors.Is(err, net.ErrClosed) {
 			s.logger.WithError(err).Error("fccontrol ttrpc server error")
 		}
 	}()
@@ -502,6 +512,10 @@ func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRe
 		}
 		return nil, fmt.Errorf("failed to create VM: %w", err)
 	}
+	socketPath, err := s.firecrackerSocketPath()
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve Firecracker API socket path: %w", err)
+	}
 
 	// creating the VM succeeded, setup monitors and publish events to celebrate
 	err = s.publishVMStart()
@@ -516,7 +530,7 @@ func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRe
 	resp.VMID = s.vmID
 	resp.MetricsFifoPath = s.machineConfig.MetricsFifo
 	resp.LogFifoPath = s.machineConfig.LogFifo
-	resp.SocketPath = s.shimDir.FirecrackerSockPath()
+	resp.SocketPath = socketPath
 	if c, ok := s.jailer.(cgroupPather); ok {
 		resp.CgroupPath = c.CgroupPath()
 	}
@@ -525,11 +539,15 @@ func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRe
 }
 
 func (s *service) publishVMStart() error {
-	return s.eventExchange.Publish(s.shimCtx, StartEventName, &proto.VMStart{VMID: s.vmID})
+	return s.remotePublisher.Publish(s.shimCtx, StartEventName, &proto.VMStart{VMID: s.vmID})
 }
 
 func (s *service) publishVMStop() error {
-	return s.eventExchange.Publish(s.shimCtx, StopEventName, &proto.VMStop{VMID: s.vmID})
+	// The VM is gone and this shim is about to exit. Deliver its final event
+	// directly so the asynchronous guest event bridge cannot lose it.
+	ctx, cancel := context.WithTimeout(context.WithoutCancel(s.shimCtx), defaultStopVMTimeout)
+	defer cancel()
+	return s.remotePublisher.Publish(ctx, StopEventName, &proto.VMStop{VMID: s.vmID})
 }
 
 func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRequest) (err error) {
@@ -727,15 +745,41 @@ func (s *service) GetVMInfo(_ context.Context, _ *proto.GetVMInfoRequest) (*prot
 	if c, ok := s.jailer.(cgroupPather); ok {
 		cgroupPath = c.CgroupPath()
 	}
+	socketPath, err := s.firecrackerSocketPath()
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve Firecracker API socket path: %w", err)
+	}
 
 	return &proto.GetVMInfoResponse{
 		VMID:            s.vmID,
-		SocketPath:      s.shimDir.FirecrackerSockPath(),
+		SocketPath:      socketPath,
 		LogFifoPath:     s.machineConfig.LogPath,
 		MetricsFifoPath: s.machineConfig.MetricsPath,
 		CgroupPath:      cgroupPath,
-		VSockPath:       s.shimDir.FirecrackerVSockPath(),
+		VSockPath:       s.jailer.JailPath().FirecrackerVSockPath(),
 	}, nil
+}
+
+// firecrackerSocketPath resolves the SDK's configured API socket to the host
+// path reported to controllers. The noop runner inherits the shim's working
+// directory, so its relative path is cwd-relative. The runc jailer instead
+// places its relative API path under the VM's shim directory (for example,
+// rootfs/api.socket). Absolute paths are already authoritative and are kept.
+func (s *service) firecrackerSocketPath() (string, error) {
+	if s.machineConfig == nil {
+		return "", errors.New("firecracker machine configuration is unavailable")
+	}
+	socketPath := s.machineConfig.SocketPath
+	if filepath.IsAbs(socketPath) {
+		return socketPath, nil
+	}
+	if s.jailer == nil {
+		return "", errors.New("firecracker jailer is unavailable")
+	}
+	if filepath.Clean(s.jailer.JailPath().RootPath()) != filepath.Clean(s.shimDir.RootPath()) {
+		return filepath.Join(s.shimDir.RootPath(), socketPath), nil
+	}
+	return filepath.Abs(socketPath)
 }
 
 // SetVMMetadata will update the VM being managed by this shim with the provided metadata. If the VM has not been created yet, this
@@ -1155,7 +1199,7 @@ func (s *service) deleteFIFOs(taskID, execID string) error {
 	return nil
 }
 
-func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTaskRequest) (*taskAPI.CreateTaskResponse, error) {
+func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTaskRequest) (_ *taskAPI.CreateTaskResponse, retErr error) {
 	logger := s.logger.WithField(logTaskID, request.ID)
 	defer logPanicAndDie(logger)
 
@@ -1181,6 +1225,33 @@ func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTask
 		logger.WithError(err).Error()
 		return nil, err
 	}
+	addressCreated, driveReserved := false, false
+	defer func() {
+		if retErr == nil {
+			return
+		}
+		// The caller may have canceled the failed Create. Roll back resources
+		// with a separate bound before another container reuses this VM.
+		cleanupCtx, cancel := context.WithTimeout(context.WithoutCancel(requestCtx), 5*time.Second)
+		defer cancel()
+		if driveReserved {
+			if err := s.containerStubHandler.Release(cleanupCtx, request.ID, s.driveMountClient, s.machine); err != nil {
+				retErr = errors.Join(retErr, fmt.Errorf("failed to release drive after create failure: %w", err))
+				return // Retain the bundle links if the drive still needs cleanup.
+			}
+			s.blockDeviceTasks.Delete(request.ID)
+		}
+		if addressCreated {
+			if err := os.Remove(hostBundleDir.AddrFilePath()); err != nil && !os.IsNotExist(err) {
+				retErr = errors.Join(retErr, fmt.Errorf("failed to remove address after create failure: %w", err))
+			}
+		}
+		if link, err := s.shimDir.BundleLink(request.ID); err == nil {
+			if err := os.Remove(link.RootPath()); err != nil && !os.IsNotExist(err) {
+				retErr = errors.Join(retErr, fmt.Errorf("failed to remove bundle link after create failure: %w", err))
+			}
+		}
+	}()
 
 	err = s.shimDir.CreateAddressLink(request.ID)
 	if err != nil {
@@ -1188,6 +1259,7 @@ func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTask
 		logger.WithError(err).Error()
 		return nil, err
 	}
+	addressCreated = true
 
 	// We don't support a rootfs with multiple mounts, only one mount can be exposed to the
 	// vm per-container
@@ -1208,7 +1280,8 @@ func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTask
 			logger.WithError(err).Error()
 			return nil, err
 		}
-		s.blockDeviceTasks[request.ID] = struct{}{}
+		s.blockDeviceTasks.Store(request.ID, struct{}{})
+		driveReserved = true
 	}
 
 	ociConfigBytes, err := hostBundleDir.OCIConfig().Bytes()
@@ -1314,10 +1387,12 @@ func (s *service) Delete(requestCtx context.Context, req *taskAPI.DeleteRequest)
 
 	var result *multierror.Error
 
-	if _, contains := s.blockDeviceTasks[req.ID]; contains {
+	if _, contains := s.blockDeviceTasks.Load(req.ID); contains {
 		// Trying to release stub drive for further reuse
 		if err := s.containerStubHandler.Release(requestCtx, req.ID, s.driveMountClient, s.machine); err != nil {
 			result = multierror.Append(fmt.Errorf("failed to release stub drive for container: %s: %w", req.ID, err))
+		} else {
+			s.blockDeviceTasks.Delete(req.ID)
 		}
 	}
 
@@ -1823,8 +1898,10 @@ func (s *service) monitorJailedFirecracker(rj *runcJailer) {
 			return
 		case <-ticker.C:
 			if !rj.IsRunning(s.shimCtx) {
-				s.logger.Warn("runc container init process died, canceling shim context")
-				s.shimCancel()
+				s.logger.Warn("runc container init process died, cleaning up VM")
+				if err := s.cleanup(); err != nil {
+					s.logger.WithError(err).Error("failed to clean up the jailed VM")
+				}
 				return
 			}
 		}

@@ -68,7 +68,7 @@ func init() {
 			if err != nil {
 				return nil, err
 			}
-			return NewService(ic.Context, "", publisher.(shim.Publisher), shutdownService.(shutdown.Service).Shutdown)
+			return NewService(ic.Context, publisher.(shim.Publisher), shutdownService.(shutdown.Service))
 		},
 	})
 }

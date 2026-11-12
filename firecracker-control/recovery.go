@@ -25,25 +25,6 @@ import (
 	"github.com/firecracker-microvm/firecracker-containerd/internal/vm"
 )
 
-func waitOwnedShim(ctx context.Context, identity vm.ProcessIdentity) error {
-	ticker := time.NewTicker(100 * time.Millisecond)
-	defer ticker.Stop()
-	for {
-		alive, err := vm.IsProcessAlive(identity)
-		if err != nil {
-			return err
-		}
-		if !alive {
-			return nil
-		}
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case <-ticker.C:
-		}
-	}
-}
-
 func (s *local) forgetShim(namespace, id string, pid int32) {
 	address, err := shim.SocketAddress(namespaces.WithNamespace(context.Background(), namespace), s.containerdAddress, id, false)
 	if err != nil {
@@ -63,14 +44,15 @@ func (s *local) cleanupExitedVM(namespace, id string, dir vm.Dir) {
 	err := vm.RecoverVM(ctx, dir)
 	if err != nil {
 		logger.WithError(err).Error("VM recovery failed; retaining recovery metadata")
+		return
 	}
+	if err := os.RemoveAll(dir.RootPath()); err != nil {
+		logger.WithError(err).Error("failed to remove VM directory")
+		return
+	}
+	// Reserve sockets until the old VM directory is completely removed.
 	if socketErr := s.removeSockets(namespace, id); socketErr != nil {
 		logger.WithError(socketErr).Error("failed to remove shim sockets")
-	}
-	if err == nil {
-		if err := os.RemoveAll(dir.RootPath()); err != nil {
-			logger.WithError(err).Error("failed to remove VM directory")
-		}
 	}
 }
 
@@ -105,7 +87,7 @@ func (s *local) reconnectShims(ctx context.Context) error {
 		s.processes[address] = int32(state.Shim.PID)
 		s.processesMu.Unlock()
 		go func() {
-			if err := waitOwnedShim(ctx, state.Shim); err != nil {
+			if err := vm.WaitProcessExit(ctx, state.Shim); err != nil {
 				if ctx.Err() == nil {
 					s.logger.WithError(err).Error("watch recovered shim")
 				}

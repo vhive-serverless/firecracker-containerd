@@ -14,12 +14,12 @@
 package main
 
 import (
+	"errors"
 	"syscall"
 )
 
 // isRetryableMountError will check to see if the error passed in is an
 // syscall.EINVAL or syscall.ENOMEM
 func isRetryableMountError(err error) bool {
-	errno, ok := err.(syscall.Errno)
-	return ok && (errno == syscall.EINVAL || errno == syscall.ENOMEM)
+	return errors.Is(err, syscall.EINVAL) || errors.Is(err, syscall.ENOMEM)
 }

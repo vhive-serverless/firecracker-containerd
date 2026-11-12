@@ -277,6 +277,79 @@ func TestBuildVMConfiguration(t *testing.T) {
 	}
 }
 
+func TestGetVMInfoSocketPaths(t *testing.T) {
+	logger := logrus.WithField("test", t.Name())
+	currentDir, err := os.Getwd()
+	require.NoError(t, err)
+
+	shimDir := vm.Dir(t.TempDir())
+	noopJailer := newNoopJailer(context.Background(), logger, shimDir)
+	jailedJailer := &runcJailer{Config: runcJailerConfig{OCIBundlePath: shimDir.RootPath()}}
+	noopRelativeSocket, err := filepath.Rel(currentDir, shimDir.FirecrackerSockPath())
+	require.NoError(t, err)
+
+	absoluteSocket := filepath.Join(t.TempDir(), "configured-api.socket")
+	jailedSocket := filepath.Join(rootfsFolder, "api.socket")
+	jailedVSockPath := jailedJailer.JailPath().FirecrackerVSockPath()
+
+	tests := []struct {
+		name       string
+		jailer     jailer
+		socketPath string
+		wantSocket string
+		wantVSock  string
+	}{
+		{
+			name:       "noop relative path is resolved from shim working directory",
+			jailer:     noopJailer,
+			socketPath: noopRelativeSocket,
+			wantSocket: shimDir.FirecrackerSockPath(),
+			wantVSock:  shimDir.FirecrackerVSockPath(),
+		},
+		{
+			name:       "runc jailed path is resolved from shim directory",
+			jailer:     jailedJailer,
+			socketPath: jailedSocket,
+			wantSocket: filepath.Join(shimDir.RootPath(), jailedSocket),
+			wantVSock:  jailedVSockPath,
+		},
+		{
+			name:       "noop absolute path is preserved",
+			jailer:     noopJailer,
+			socketPath: absoluteSocket,
+			wantSocket: absoluteSocket,
+			wantVSock:  shimDir.FirecrackerVSockPath(),
+		},
+		{
+			name:       "runc jailed absolute path is preserved",
+			jailer:     jailedJailer,
+			socketPath: absoluteSocket,
+			wantSocket: absoluteSocket,
+			wantVSock:  jailedVSockPath,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			vmReady := make(chan struct{})
+			close(vmReady)
+			svc := &service{
+				logger:        logger,
+				vmID:          "test-vm",
+				shimDir:       shimDir,
+				jailer:        tc.jailer,
+				machineConfig: &firecracker.Config{SocketPath: tc.socketPath},
+				vmReady:       vmReady,
+			}
+
+			info, err := svc.GetVMInfo(context.Background(), &proto.GetVMInfoRequest{})
+			require.NoError(t, err)
+			require.Equal(t, tc.wantSocket, info.SocketPath)
+			require.Equal(t, tc.wantVSock, info.VSockPath)
+		})
+	}
+}
+
 func TestDebugConfig(t *testing.T) {
 	emptyDebugHelper, err := debug.New()
 	require.NoError(t, err, "failed to create empty debug helper")

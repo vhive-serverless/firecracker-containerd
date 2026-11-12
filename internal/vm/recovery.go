@@ -21,6 +21,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/containerd/containerd/v2/pkg/atomicfile"
 	runc "github.com/containerd/go-runc"
@@ -154,9 +155,26 @@ func IsProcessAlive(identity ProcessIdentity) (bool, error) {
 	return n == 0, err
 }
 
-// killOwnedProcess opens a pidfd before checking identity, so even PID reuse
-// between verification and signalling cannot redirect SIGKILL to another task.
-func killOwnedProcess(identity ProcessIdentity) error {
+// WaitProcessExit waits for the recorded process identity to exit.
+func WaitProcessExit(ctx context.Context, identity ProcessIdentity) error {
+	ticker := time.NewTicker(100 * time.Millisecond)
+	defer ticker.Stop()
+	for {
+		alive, err := IsProcessAlive(identity)
+		if err != nil || !alive {
+			return err
+		}
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
+		}
+	}
+}
+
+// StopProcess signals the recorded process and waits up to five seconds for
+// exit. A pidfd prevents PID reuse from redirecting the signal.
+func StopProcess(identity ProcessIdentity, signal unix.Signal) error {
 	if identity.PID == 0 {
 		return nil
 	}
@@ -193,7 +211,7 @@ func killOwnedProcess(identity ProcessIdentity) error {
 	if actual != identity {
 		return fmt.Errorf("refusing to signal reused PID %d", identity.PID)
 	}
-	if err := unix.PidfdSendSignal(fd, unix.SIGKILL, nil, 0); err != nil && !errors.Is(err, unix.ESRCH) {
+	if err := unix.PidfdSendSignal(fd, signal, nil, 0); err != nil && !errors.Is(err, unix.ESRCH) {
 		return err
 	}
 	poll := []unix.PollFd{{Fd: int32(fd), Events: unix.POLLIN}}
@@ -232,21 +250,13 @@ func RecoverVM(ctx context.Context, dir Dir) error {
 	} else if alive {
 		return fmt.Errorf("shim %d is still alive", state.Shim.PID)
 	}
-	if err := killOwnedProcess(state.VMM); err != nil {
+	if err := StopProcess(state.VMM, unix.SIGKILL); err != nil {
 		return err
 	}
 	if state.RuncBinary != "" {
 		client := runc.Runc{Command: state.RuncBinary}
-		containers, err := client.List(ctx)
-		if err != nil {
+		if err := DeleteRuncBundle(ctx, &client, state.VMID, dir.RootPath()); err != nil {
 			return err
-		}
-		for _, container := range containers {
-			if container.ID == state.VMID {
-				if err := client.Delete(ctx, state.VMID, &runc.DeleteOpts{Force: true}); err != nil {
-					return err
-				}
-			}
 		}
 	}
 	for _, network := range state.Networks {
@@ -258,6 +268,15 @@ func RecoverVM(ctx context.Context, dir Dir) error {
 		if err := client.DelNetworkList(ctx, conf, &network.Runtime); err != nil {
 			return err
 		}
+		// Only the SDK's default cache is private to this VM. Preserve shared
+		// or custom caches and any data that remains after CNI DEL.
+		if network.CacheDir == filepath.Join("/var/lib/cni", state.VMID) {
+			for _, path := range []string{filepath.Join(network.CacheDir, "results"), network.CacheDir} {
+				if err := os.Remove(path); err != nil && !os.IsNotExist(err) && !errors.Is(err, unix.ENOTEMPTY) {
+					return err
+				}
+			}
+		}
 	}
 	if state.OwnNetNS && state.NetNS != "" {
 		if err := unix.Unmount(state.NetNS, unix.MNT_DETACH); err != nil && !errors.Is(err, unix.EINVAL) && !errors.Is(err, unix.ENOENT) {
@@ -268,6 +287,34 @@ func RecoverVM(ctx context.Context, dir Dir) error {
 		}
 	}
 	return os.Remove(filepath.Join(dir.RootPath(), RecoveryFileName))
+}
+
+// OwnedRuncContainer refuses to operate on an ID belonging to another bundle.
+// Explicit VM IDs must be globally unique, including across namespaces.
+func OwnedRuncContainer(ctx context.Context, client *runc.Runc, id, bundle string) (*runc.Container, error) {
+	containers, err := client.List(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, container := range containers {
+		if container.ID != id {
+			continue
+		}
+		if filepath.Clean(container.Bundle) != filepath.Clean(bundle) {
+			return nil, fmt.Errorf("runc ID %q belongs to another bundle %q", id, container.Bundle)
+		}
+		return container, nil
+	}
+	return nil, nil
+}
+
+// DeleteRuncBundle deletes only the jail owned by this VM directory.
+func DeleteRuncBundle(ctx context.Context, client *runc.Runc, id, bundle string) error {
+	container, err := OwnedRuncContainer(ctx, client, id, bundle)
+	if err != nil || container == nil {
+		return err
+	}
+	return client.Delete(ctx, id, &runc.DeleteOpts{Force: true})
 }
 
 // BundleVMDir reads only the VM identifier written by the bootstrap helper;

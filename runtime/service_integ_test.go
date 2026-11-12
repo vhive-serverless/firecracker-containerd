@@ -451,17 +451,37 @@ func testMultipleVMs(ctx context.Context, t *testing.T, count int) {
 				return fmt.Errorf("%q must be %q", vmInfoResp.VMID, strconv.Itoa(vmID))
 			}
 
-			nspVMid := defaultNamespace + "#" + strconv.Itoa(vmID)
+			vmIDString := strconv.Itoa(vmID)
 			cfg, err := config.LoadConfig("")
 			if err != nil {
 				return err
 			}
-			if vmInfoResp.SocketPath != filepath.Join(cfg.ShimBaseDir, nspVMid, "firecracker.sock") ||
-				vmInfoResp.VSockPath != filepath.Join(cfg.ShimBaseDir, nspVMid, "firecracker.vsock") ||
-				vmInfoResp.LogFifoPath != filepath.Join(cfg.ShimBaseDir, nspVMid, "fc-logs.fifo") ||
-				vmInfoResp.MetricsFifoPath != filepath.Join(cfg.ShimBaseDir, nspVMid, "fc-metrics.fifo") ||
+			shimDir, err := vm.ShimDir(cfg.ShimBaseDir, defaultNamespace, vmIDString)
+			if err != nil {
+				return err
+			}
+			wantSocketPath := shimDir.FirecrackerSockPath()
+			wantVSockPath := shimDir.FirecrackerVSockPath()
+			if jailerConfig != nil {
+				wantSocketPath = filepath.Join(shimDir.RootPath(), rootfsFolder, "api.socket")
+				wantVSockPath = vm.Dir(filepath.Join(shimDir.RootPath(), rootfsFolder)).FirecrackerVSockPath()
+			}
+			if resp.SocketPath != wantSocketPath ||
+				vmInfoResp.SocketPath != wantSocketPath ||
+				vmInfoResp.VSockPath != wantVSockPath ||
+				vmInfoResp.LogFifoPath != shimDir.FirecrackerLogFifoPath() ||
+				vmInfoResp.MetricsFifoPath != shimDir.FirecrackerMetricsFifoPath() ||
 				resp.CgroupPath != vmInfoResp.CgroupPath {
-				return fmt.Errorf("unexpected result from GetVMInfo: %+v", vmInfoResp)
+				return fmt.Errorf("unexpected socket paths: CreateVM=%+v GetVMInfo=%+v", resp, vmInfoResp)
+			}
+			for _, socketPath := range []string{resp.SocketPath, vmInfoResp.SocketPath, vmInfoResp.VSockPath} {
+				info, err := os.Stat(socketPath)
+				if err != nil {
+					return fmt.Errorf("reported VM socket %q does not exist: %w", socketPath, err)
+				}
+				if info.Mode()&os.ModeSocket == 0 {
+					return fmt.Errorf("reported VM socket %q is not a unix socket (mode %v)", socketPath, info.Mode())
+				}
 			}
 
 			// just verify that updating the metadata doesn't return an error, a separate test case is needed
@@ -933,6 +953,27 @@ vdf  254:80   0        512B  0 |  214 244 216 245 215 177 177 177`
 	}
 }
 
+// Drain the client-side FIFO readers before Delete cancels them. Process exit
+// and completion of the client's IO copy are separate containerd operations.
+func waitTaskOutput(ctx context.Context, t testing.TB, task containerd.Task) {
+	t.Helper()
+	io := task.IO()
+	if io == nil {
+		return
+	}
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		io.Wait()
+	}()
+	select {
+	case <-done:
+	case <-ctx.Done():
+		io.Cancel()
+		t.Fatalf("timed out draining task output: %v", ctx.Err())
+	}
+}
+
 func startAndWaitTask(ctx context.Context, t testing.TB, c containerd.Container) string {
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
@@ -954,6 +995,7 @@ func startAndWaitTask(ctx context.Context, t testing.TB, c containerd.Container)
 		assert.NoError(t, exitStatus.Error(), "failed to retrieve exitStatus")
 		assert.Equal(t, uint32(0), exitStatus.ExitCode())
 
+		waitTaskOutput(ctx, t, task)
 		status, err := task.Delete(ctx)
 		assert.NoErrorf(t, err, "failed to delete task %q after exit", c.ID())
 		if status != nil {
@@ -2258,21 +2300,56 @@ loop:
 	require.Equal(t, expected, actual)
 }
 
-func requireNonEmptyFifo(t testing.TB, path string) {
-	file, err := os.Open(path)
-	require.NoError(t, err)
-	defer file.Close()
+// Start watching before CreateVM. Startup can fail and close the VMM's
+// writer before the caller receives the error, so opening afterward can hang.
+func watchVMFifos(ctx context.Context, paths ...string) *errgroup.Group {
+	group := &errgroup.Group{}
+	for _, path := range paths {
+		group.Go(func() error {
+			if err := readVMFifo(ctx, path); err != nil {
+				return fmt.Errorf("read VM telemetry from %s: %w", path, err)
+			}
+			return nil
+		})
+	}
+	return group
+}
 
-	reader := bufio.NewReader(file)
-
-	// Since this is a FIFO, reading till EOF would block if its writer-end is still open.
-	line, err := reader.ReadString('\n')
-	require.NoError(t, err)
-	require.NotEqualf(t, "", line, "%s must not be empty", path)
-
-	info, err := os.Stat(path)
-	require.NoError(t, err)
-	require.Equal(t, os.ModeNamedPipe, info.Mode()&os.ModeType, "%s is a FIFO file", path)
+func readVMFifo(ctx context.Context, path string) error {
+	ticker := time.NewTicker(10 * time.Millisecond)
+	defer ticker.Stop()
+	for {
+		// Keeping a writer open on the test descriptor lets us read past an
+		// early writer close until the deadline, even if the VMM has exited.
+		file, err := os.OpenFile(path, os.O_RDWR|syscall.O_NONBLOCK, 0)
+		if err == nil {
+			defer file.Close()
+			info, err := file.Stat()
+			if err != nil {
+				return err
+			}
+			if info.Mode()&os.ModeNamedPipe == 0 {
+				return fmt.Errorf("expected a named pipe")
+			}
+			deadline, ok := ctx.Deadline()
+			if !ok {
+				return fmt.Errorf("missing FIFO read deadline")
+			}
+			if err := file.SetReadDeadline(deadline); err != nil {
+				return err
+			}
+			_, err = bufio.NewReader(file).ReadString('\n')
+			return err
+		}
+		if !os.IsNotExist(err) {
+			return err
+		}
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
+		}
+	}
 }
 
 func TestCreateVM_Isolated(t *testing.T) {
@@ -2378,11 +2455,9 @@ func TestCreateVM_Isolated(t *testing.T) {
 		request.LogFifoPath = logFile
 		request.MetricsFifoPath = metricsFile
 
+		telemetry := watchVMFifos(ctx, logFile, metricsFile)
 		resp, createVMErr := fcClient.CreateVM(ctx, request)
-
-		// Even CreateVM fails, the log file and the metrics file must have some data.
-		requireNonEmptyFifo(t, logFile)
-		requireNonEmptyFifo(t, metricsFile)
+		require.NoError(t, telemetry.Wait(), "expected VMM log and metrics even when startup fails")
 
 		// Some test cases are expected to have an error, some are not.
 		s.validate(t, ctx, createVMErr)
@@ -2511,11 +2586,9 @@ func TestPauseResume_Isolated(t *testing.T) {
 		request.LogFifoPath = logFile
 		request.MetricsFifoPath = metricsFile
 
+		telemetry := watchVMFifos(ctx, logFile, metricsFile)
 		resp, createVMErr := fcClient.CreateVM(ctx, request)
-
-		// Even CreateVM fails, the log file and the metrics file must have some data.
-		requireNonEmptyFifo(t, logFile)
-		requireNonEmptyFifo(t, metricsFile)
+		require.NoError(t, telemetry.Wait(), "expected VMM log and metrics even when startup fails")
 
 		// Run test case
 		state(ctx, fcClient, resp)
@@ -2554,6 +2627,22 @@ func TestPauseResume_Isolated(t *testing.T) {
 		})
 	}
 }
+
+type attachCapture struct {
+	buffer bytes.Buffer
+	ready  chan struct{}
+	want   int
+}
+
+func (w *attachCapture) Write(data []byte) (int, error) {
+	n, err := w.buffer.Write(data)
+	if w.ready != nil && w.buffer.Len() >= w.want {
+		close(w.ready)
+		w.ready = nil
+	}
+	return n, err
+}
+
 func TestAttach_Isolated(t *testing.T) {
 	integtest.Prepare(t)
 
@@ -2611,6 +2700,7 @@ func TestAttach_Isolated(t *testing.T) {
 			)
 			require.NoError(t, err)
 
+			defer c.Delete(ctx, containerd.WithSnapshotCleanup)
 			io, err := tc.newIO(ctx, name)
 			require.NoError(t, err)
 
@@ -2626,7 +2716,8 @@ func TestAttach_Isolated(t *testing.T) {
 			require.NoError(t, err)
 
 			stdin := bytes.NewBufferString("hello\n")
-			var stdout bytes.Buffer
+			received := make(chan struct{})
+			stdout := attachCapture{ready: received, want: len(tc.expected)}
 			t2, err := c.Task(
 				ctx,
 				cio.NewAttach(cio.WithStreams(stdin, &stdout, nil)),
@@ -2634,18 +2725,33 @@ func TestAttach_Isolated(t *testing.T) {
 			require.NoError(t, err)
 			assert.Equal(t, t1.ID(), t2.ID())
 
+			if tc.expected != "" {
+				// NewAttach opens its FIFO asynchronously. Keep the old
+				// writer open until the new writer has delivered input;
+				// a gap between writers makes the proxy observe EOF.
+				select {
+				case <-received:
+				case <-ctx.Done():
+					t.Fatal(ctx.Err())
+				}
+			}
 			err = io.Close()
 			assert.NoError(t, err)
-
 			err = t2.CloseIO(ctx, containerd.WithStdinCloser)
 			assert.NoError(t, err)
 
-			<-ch
+			select {
+			case exit := <-ch:
+				require.NoError(t, exit.Error())
+				require.Zero(t, exit.ExitCode())
+			case <-ctx.Done():
+				t.Fatal(ctx.Err())
+			}
 
 			_, err = t2.Delete(ctx)
 			require.NoError(t, err)
 
-			assert.Equal(t, tc.expected, stdout.String())
+			assert.Equal(t, tc.expected, stdout.buffer.String())
 		})
 	}
 }
