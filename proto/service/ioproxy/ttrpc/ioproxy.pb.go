@@ -125,6 +125,7 @@ type AttachRequest struct {
 	StdinPort     uint32                 `protobuf:"varint,3,opt,name=StdinPort,proto3" json:"StdinPort,omitempty"`
 	StdoutPort    uint32                 `protobuf:"varint,4,opt,name=StdoutPort,proto3" json:"StdoutPort,omitempty"`
 	StderrPort    uint32                 `protobuf:"varint,5,opt,name=StderrPort,proto3" json:"StderrPort,omitempty"`
+	Streams       []*TransportStream     `protobuf:"bytes,6,rep,name=Streams,proto3" json:"Streams,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -194,6 +195,245 @@ func (x *AttachRequest) GetStderrPort() uint32 {
 	return 0
 }
 
+func (x *AttachRequest) GetStreams() []*TransportStream {
+	if x != nil {
+		return x.Streams
+	}
+	return nil
+}
+
+type TransportCursor struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	StreamID      string                 `protobuf:"bytes,1,opt,name=StreamID,proto3" json:"StreamID,omitempty"`
+	SessionID     string                 `protobuf:"bytes,2,opt,name=SessionID,proto3" json:"SessionID,omitempty"`
+	Offset        uint64                 `protobuf:"varint,3,opt,name=Offset,proto3" json:"Offset,omitempty"`
+	FIN           bool                   `protobuf:"varint,4,opt,name=FIN,proto3" json:"FIN,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TransportCursor) Reset() {
+	*x = TransportCursor{}
+	mi := &file_ioproxy_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TransportCursor) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TransportCursor) ProtoMessage() {}
+
+func (x *TransportCursor) ProtoReflect() protoreflect.Message {
+	mi := &file_ioproxy_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TransportCursor.ProtoReflect.Descriptor instead.
+func (*TransportCursor) Descriptor() ([]byte, []int) {
+	return file_ioproxy_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *TransportCursor) GetStreamID() string {
+	if x != nil {
+		return x.StreamID
+	}
+	return ""
+}
+
+func (x *TransportCursor) GetSessionID() string {
+	if x != nil {
+		return x.SessionID
+	}
+	return ""
+}
+
+func (x *TransportCursor) GetOffset() uint64 {
+	if x != nil {
+		return x.Offset
+	}
+	return 0
+}
+
+func (x *TransportCursor) GetFIN() bool {
+	if x != nil {
+		return x.FIN
+	}
+	return false
+}
+
+type TransportStream struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=Name,proto3" json:"Name,omitempty"`
+	Sender        bool                   `protobuf:"varint,2,opt,name=Sender,proto3" json:"Sender,omitempty"`
+	Cursor        *TransportCursor       `protobuf:"bytes,3,opt,name=Cursor,proto3" json:"Cursor,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TransportStream) Reset() {
+	*x = TransportStream{}
+	mi := &file_ioproxy_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TransportStream) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TransportStream) ProtoMessage() {}
+
+func (x *TransportStream) ProtoReflect() protoreflect.Message {
+	mi := &file_ioproxy_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TransportStream.ProtoReflect.Descriptor instead.
+func (*TransportStream) Descriptor() ([]byte, []int) {
+	return file_ioproxy_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *TransportStream) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *TransportStream) GetSender() bool {
+	if x != nil {
+		return x.Sender
+	}
+	return false
+}
+
+func (x *TransportStream) GetCursor() *TransportCursor {
+	if x != nil {
+		return x.Cursor
+	}
+	return nil
+}
+
+type TransportProcess struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TaskID        string                 `protobuf:"bytes,1,opt,name=TaskID,proto3" json:"TaskID,omitempty"`
+	ExecID        string                 `protobuf:"bytes,2,opt,name=ExecID,proto3" json:"ExecID,omitempty"`
+	Streams       []*TransportStream     `protobuf:"bytes,3,rep,name=Streams,proto3" json:"Streams,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TransportProcess) Reset() {
+	*x = TransportProcess{}
+	mi := &file_ioproxy_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TransportProcess) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TransportProcess) ProtoMessage() {}
+
+func (x *TransportProcess) ProtoReflect() protoreflect.Message {
+	mi := &file_ioproxy_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TransportProcess.ProtoReflect.Descriptor instead.
+func (*TransportProcess) Descriptor() ([]byte, []int) {
+	return file_ioproxy_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *TransportProcess) GetTaskID() string {
+	if x != nil {
+		return x.TaskID
+	}
+	return ""
+}
+
+func (x *TransportProcess) GetExecID() string {
+	if x != nil {
+		return x.ExecID
+	}
+	return ""
+}
+
+func (x *TransportProcess) GetStreams() []*TransportStream {
+	if x != nil {
+		return x.Streams
+	}
+	return nil
+}
+
+type DescribeResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Processes     []*TransportProcess    `protobuf:"bytes,1,rep,name=Processes,proto3" json:"Processes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DescribeResponse) Reset() {
+	*x = DescribeResponse{}
+	mi := &file_ioproxy_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DescribeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DescribeResponse) ProtoMessage() {}
+
+func (x *DescribeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_ioproxy_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DescribeResponse.ProtoReflect.Descriptor instead.
+func (*DescribeResponse) Descriptor() ([]byte, []int) {
+	return file_ioproxy_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *DescribeResponse) GetProcesses() []*TransportProcess {
+	if x != nil {
+		return x.Processes
+	}
+	return nil
+}
+
 var File_ioproxy_proto protoreflect.FileDescriptor
 
 const file_ioproxy_proto_rawDesc = "" +
@@ -203,7 +443,7 @@ const file_ioproxy_proto_rawDesc = "" +
 	"\x02ID\x18\x01 \x01(\tR\x02ID\x12\x16\n" +
 	"\x06ExecID\x18\x02 \x01(\tR\x06ExecID\"'\n" +
 	"\rStateResponse\x12\x16\n" +
-	"\x06IsOpen\x18\x01 \x01(\bR\x06IsOpen\"\x95\x01\n" +
+	"\x06IsOpen\x18\x01 \x01(\bR\x06IsOpen\"\xc1\x01\n" +
 	"\rAttachRequest\x12\x0e\n" +
 	"\x02ID\x18\x01 \x01(\tR\x02ID\x12\x16\n" +
 	"\x06ExecID\x18\x02 \x01(\tR\x06ExecID\x12\x1c\n" +
@@ -213,10 +453,29 @@ const file_ioproxy_proto_rawDesc = "" +
 	"StdoutPort\x12\x1e\n" +
 	"\n" +
 	"StderrPort\x18\x05 \x01(\rR\n" +
-	"StderrPort2c\n" +
+	"StderrPort\x12*\n" +
+	"\aStreams\x18\x06 \x03(\v2\x10.TransportStreamR\aStreams\"u\n" +
+	"\x0fTransportCursor\x12\x1a\n" +
+	"\bStreamID\x18\x01 \x01(\tR\bStreamID\x12\x1c\n" +
+	"\tSessionID\x18\x02 \x01(\tR\tSessionID\x12\x16\n" +
+	"\x06Offset\x18\x03 \x01(\x04R\x06Offset\x12\x10\n" +
+	"\x03FIN\x18\x04 \x01(\bR\x03FIN\"g\n" +
+	"\x0fTransportStream\x12\x12\n" +
+	"\x04Name\x18\x01 \x01(\tR\x04Name\x12\x16\n" +
+	"\x06Sender\x18\x02 \x01(\bR\x06Sender\x12(\n" +
+	"\x06Cursor\x18\x03 \x01(\v2\x10.TransportCursorR\x06Cursor\"n\n" +
+	"\x10TransportProcess\x12\x16\n" +
+	"\x06TaskID\x18\x01 \x01(\tR\x06TaskID\x12\x16\n" +
+	"\x06ExecID\x18\x02 \x01(\tR\x06ExecID\x12*\n" +
+	"\aStreams\x18\x03 \x03(\v2\x10.TransportStreamR\aStreams\"C\n" +
+	"\x10DescribeResponse\x12/\n" +
+	"\tProcesses\x18\x01 \x03(\v2\x11.TransportProcessR\tProcesses2\x8f\x02\n" +
 	"\aIOProxy\x12&\n" +
 	"\x05State\x12\r.StateRequest\x1a\x0e.StateResponse\x120\n" +
-	"\x06Attach\x12\x0e.AttachRequest\x1a\x16.google.protobuf.EmptyB\vZ\t.;ioproxyb\x06proto3"
+	"\x06Attach\x12\x0e.AttachRequest\x1a\x16.google.protobuf.Empty\x129\n" +
+	"\aPrepare\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.Empty\x125\n" +
+	"\bDescribe\x12\x16.google.protobuf.Empty\x1a\x11.DescribeResponse\x128\n" +
+	"\x06Resume\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.EmptyB\vZ\t.;ioproxyb\x06proto3"
 
 var (
 	file_ioproxy_proto_rawDescOnce sync.Once
@@ -230,23 +489,37 @@ func file_ioproxy_proto_rawDescGZIP() []byte {
 	return file_ioproxy_proto_rawDescData
 }
 
-var file_ioproxy_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_ioproxy_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_ioproxy_proto_goTypes = []any{
-	(*StateRequest)(nil),  // 0: StateRequest
-	(*StateResponse)(nil), // 1: StateResponse
-	(*AttachRequest)(nil), // 2: AttachRequest
-	(*emptypb.Empty)(nil), // 3: google.protobuf.Empty
+	(*StateRequest)(nil),     // 0: StateRequest
+	(*StateResponse)(nil),    // 1: StateResponse
+	(*AttachRequest)(nil),    // 2: AttachRequest
+	(*TransportCursor)(nil),  // 3: TransportCursor
+	(*TransportStream)(nil),  // 4: TransportStream
+	(*TransportProcess)(nil), // 5: TransportProcess
+	(*DescribeResponse)(nil), // 6: DescribeResponse
+	(*emptypb.Empty)(nil),    // 7: google.protobuf.Empty
 }
 var file_ioproxy_proto_depIdxs = []int32{
-	0, // 0: IOProxy.State:input_type -> StateRequest
-	2, // 1: IOProxy.Attach:input_type -> AttachRequest
-	1, // 2: IOProxy.State:output_type -> StateResponse
-	3, // 3: IOProxy.Attach:output_type -> google.protobuf.Empty
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	4, // 0: AttachRequest.Streams:type_name -> TransportStream
+	3, // 1: TransportStream.Cursor:type_name -> TransportCursor
+	4, // 2: TransportProcess.Streams:type_name -> TransportStream
+	5, // 3: DescribeResponse.Processes:type_name -> TransportProcess
+	0, // 4: IOProxy.State:input_type -> StateRequest
+	2, // 5: IOProxy.Attach:input_type -> AttachRequest
+	7, // 6: IOProxy.Prepare:input_type -> google.protobuf.Empty
+	7, // 7: IOProxy.Describe:input_type -> google.protobuf.Empty
+	7, // 8: IOProxy.Resume:input_type -> google.protobuf.Empty
+	1, // 9: IOProxy.State:output_type -> StateResponse
+	7, // 10: IOProxy.Attach:output_type -> google.protobuf.Empty
+	7, // 11: IOProxy.Prepare:output_type -> google.protobuf.Empty
+	6, // 12: IOProxy.Describe:output_type -> DescribeResponse
+	7, // 13: IOProxy.Resume:output_type -> google.protobuf.Empty
+	9, // [9:14] is the sub-list for method output_type
+	4, // [4:9] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_ioproxy_proto_init() }
@@ -260,7 +533,7 @@ func file_ioproxy_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_ioproxy_proto_rawDesc), len(file_ioproxy_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

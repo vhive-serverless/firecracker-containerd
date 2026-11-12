@@ -37,7 +37,6 @@ import (
 	bootapi "github.com/containerd/containerd/api/runtime/bootstrap/v1"
 	taskAPI "github.com/containerd/containerd/api/runtime/task/v3"
 	"github.com/containerd/containerd/api/types/task"
-	"github.com/containerd/containerd/v2/core/events/exchange"
 	"github.com/containerd/containerd/v2/pkg/cio"
 	"github.com/containerd/containerd/v2/pkg/namespaces"
 	"github.com/containerd/containerd/v2/pkg/protobuf"
@@ -51,7 +50,6 @@ import (
 	"github.com/containerd/typeurl/v2"
 	"github.com/firecracker-microvm/firecracker-go-sdk"
 	"github.com/firecracker-microvm/firecracker-go-sdk/client/models"
-	"github.com/firecracker-microvm/firecracker-go-sdk/vsock"
 	"github.com/gofrs/uuid"
 	"github.com/hashicorp/go-multierror"
 	"github.com/sirupsen/logrus"
@@ -109,7 +107,6 @@ var (
 // implements shimapi
 type service struct {
 	taskManager     vm.TaskManager
-	eventExchange   *exchange.Exchange
 	remotePublisher shim.Publisher
 	namespace       string
 
@@ -143,7 +140,12 @@ type service struct {
 	vmReady                  chan struct{}
 	vmStartOnce              sync.Once
 	agentClient              taskAPI.TTRPCTaskService
-	eventBridgeClient        eventbridge.Getter
+	agentRPCMu               sync.RWMutex
+	agentRPC                 *ttrpc.Client
+	eventMu                  sync.Mutex
+	eventForwarder           *eventbridge.JournalForwarder
+	eventCancel              context.CancelFunc
+	eventDone                chan struct{}
 	driveMountClient         drivemount.DriveMounterService
 	ioProxyClient            ioproxy.IOProxyService
 	jailer                   jailer
@@ -214,7 +216,6 @@ func NewService(shimCtx context.Context, remotePublisher shim.Publisher, sd shut
 
 	s := &service{
 		taskManager:     vm.NewTaskManager(shimCtx, logger),
-		eventExchange:   exchange.NewExchange(),
 		remotePublisher: remotePublisher,
 		namespace:       namespace,
 
@@ -232,7 +233,7 @@ func NewService(shimCtx context.Context, remotePublisher shim.Publisher, sd shut
 		fifos:   make(map[string]map[string]cio.Config),
 	}
 
-	s.startEventForwarders(remotePublisher)
+	go s.closeAgentOnShutdown()
 
 	err = s.serveFCControl(sd)
 	if err != nil {
@@ -242,39 +243,6 @@ func NewService(shimCtx context.Context, remotePublisher shim.Publisher, sd shut
 	}
 
 	return s, nil
-}
-
-func (s *service) startEventForwarders(remotePublisher shim.Publisher) {
-	ns, ok := namespaces.Namespace(s.shimCtx)
-	if !ok {
-		s.logger.Error("failed to fetch the namespace from the context")
-	}
-	ctx := namespaces.WithNamespace(context.Background(), ns)
-
-	// Republish each event received on our exchange to the provided remote publisher.
-	// TODO ideally we would be forwarding events instead of re-publishing them, which would
-	// preserve the events' original timestamps and namespaces. However, as of this writing,
-	// the containerd v2 runtime model only provides a shim with a publisher, not a forwarder.
-	republishCh := eventbridge.Republish(ctx, s.eventExchange, remotePublisher)
-
-	go func() {
-		<-s.vmReady
-
-		// Once the VM is ready, also start forwarding events from it to our exchange
-		attachCh := eventbridge.Attach(ctx, s.eventBridgeClient, s.eventExchange)
-
-		err := <-attachCh
-		if err != nil && err != context.Canceled {
-			s.logger.WithError(err).Error("error while forwarding events from VM agent")
-		}
-
-		err = <-republishCh
-		if err != nil && err != context.Canceled {
-			s.logger.WithError(err).Error("error while republishing events")
-		}
-
-		remotePublisher.Close()
-	}()
 }
 
 // TODO we have to create separate listeners for the fccontrol service and shim service because
@@ -595,10 +563,6 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 		logger.Logger.SetLevel(v)
 		opts = append(opts, firecracker.WithLogger(logger))
 	}
-	relVSockPath, err := s.jailer.JailPath().FirecrackerVSockRelPath()
-	if err != nil {
-		return fmt.Errorf("failed to get relative path to firecracker vsock: %w", err)
-	}
 
 	jailedOpts, err := s.jailer.BuildJailedMachine(s.config, s.machineConfig, s.vmID)
 	if err != nil {
@@ -638,19 +602,9 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 		return fmt.Errorf("failed to start the VM: %w", err)
 	}
 
-	s.logger.Info("calling agent")
-	conn, err := vsock.DialContext(requestCtx, relVSockPath, defaultVsockPort,
-		vsock.WithLogger(s.logger),
-		vsock.WithRetryTimeout(defaultCreateVMTimeout))
-	if err != nil {
-		return fmt.Errorf("failed to dial the VM over vsock: %w", err)
+	if err := s.connectAgent(requestCtx); err != nil {
+		return err
 	}
-
-	rpcClient := ttrpc.NewClient(conn, ttrpc.WithOnClose(func() { _ = conn.Close() }))
-	s.agentClient = taskAPI.NewTTRPCTaskClient(rpcClient)
-	s.eventBridgeClient = eventbridge.NewGetterClient(rpcClient)
-	s.driveMountClient = drivemount.NewDriveMounterClient(rpcClient)
-	s.ioProxyClient = ioproxy.NewIOProxyClient(rpcClient)
 	s.exitAfterAllTasksDeleted = request.ExitAfterAllTasksDeleted
 
 	err = s.mountDrives(requestCtx)
@@ -658,6 +612,9 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 		return err
 	}
 
+	if err := s.resumeEventForwarding(requestCtx); err != nil {
+		return fmt.Errorf("start acknowledged agent events: %w", err)
+	}
 	s.logger.Info("successfully started the VM")
 	return nil
 }
@@ -1127,43 +1084,20 @@ func (s *service) buildRootDrive(req *proto.CreateVMRequest) []models.Drive {
 }
 
 func (s *service) newIOProxy(logger *logrus.Entry, stdin, stdout, stderr string, extraData *proto.ExtraData) (vm.IOProxy, error) {
-	var ioConnectorSet vm.IOProxy
+	return s.newIOProxyWithCut(logger, stdin, stdout, stderr, extraData, nil)
+}
 
-	relVSockPath, err := s.jailer.JailPath().FirecrackerVSockRelPath()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get relative path to firecracker vsock: %w", err)
-	}
-
+func (s *service) newIOProxyWithCut(logger *logrus.Entry, stdin, stdout, stderr string, extraData *proto.ExtraData, streams []vm.TransportStreamIO) (vm.IOProxy, error) {
 	if vm.IsAgentOnlyIO(stdout, logger) {
-		ioConnectorSet = vm.NewNullIOProxy()
-	} else {
-		var stdinConnectorPair *vm.IOConnectorPair
-		if stdin != "" {
-			stdinConnectorPair = &vm.IOConnectorPair{
-				ReadConnector:  vm.ReadFIFOConnector(stdin),
-				WriteConnector: vm.VSockDialConnector(defaultVSockConnectTimeout, relVSockPath, extraData.StdinPort),
-			}
-		}
-
-		var stdoutConnectorPair *vm.IOConnectorPair
-		if stdout != "" {
-			stdoutConnectorPair = &vm.IOConnectorPair{
-				ReadConnector:  vm.VSockDialConnector(defaultVSockConnectTimeout, relVSockPath, extraData.StdoutPort),
-				WriteConnector: vm.WriteFIFOConnector(stdout),
-			}
-		}
-
-		var stderrConnectorPair *vm.IOConnectorPair
-		if stderr != "" {
-			stderrConnectorPair = &vm.IOConnectorPair{
-				ReadConnector:  vm.VSockDialConnector(defaultVSockConnectTimeout, relVSockPath, extraData.StderrPort),
-				WriteConnector: vm.WriteFIFOConnector(stderr),
-			}
-		}
-
-		ioConnectorSet = vm.NewIOConnectorProxy(stdinConnectorPair, stdoutConnectorPair, stderrConnectorPair)
+		return vm.NewNullIOProxy(), nil
 	}
-	return ioConnectorSet, nil
+	path, err := s.jailer.JailPath().FirecrackerVSockRelPath()
+	if err != nil {
+		return nil, fmt.Errorf("resolve IO vsock path: %w", err)
+	}
+	return vm.NewTransportHostIOProxy(defaultVSockConnectTimeout, path,
+		vm.TransportPorts{Stdin: extraData.StdinPort, Stdout: extraData.StdoutPort, Stderr: extraData.StderrPort},
+		stdin, stdout, stderr, streams), nil
 }
 
 func (s *service) addFIFOs(taskID, execID string, config cio.Config) error {
