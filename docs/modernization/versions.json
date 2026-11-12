@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "Migrated Step 2 candidate; historical receipts validate their original revisions only. Fresh committed VM/vHive and published-consumer acceptance pending.",
+  "status": "Migrated Step 3 candidate; CRI/native restore WIP, Kubernetes Pod checkpoint endpoint deferred to 1.38. Historical receipts validate their original custom VMM revisions; fresh exact-candidate VM/CRI acceptance pending.",
   "step_1_validation": {
     "runtime_branch": "modernize-runtime",
     "completion_commit": "06bd2058ba7938ad31eec9e17ac4d2e4c33a958f",
@@ -167,6 +167,60 @@
       "snapshotter": "devmapper",
       "memory_backend": "File",
       "purpose": "Provisional exact test source; test-vhive.sh binds the clean committed runtime locally. Final published consumer pin and installation acceptance remain pending."
+    },
+    "kubernetes_runtimeclass_profile": {
+      "k3s": "v1.37.2+k3s1",
+      "k3s_sha256": "265b3ee6a3198ef14033c63ef46cbb32370d83795199fb6d1b01f21575eddbda",
+      "coredns_image": "docker.io/rancher/mirrored-coredns-coredns@sha256:7efd3c635b03efd68c4e8398fc45f0d993d0e9ab016f72c1cefb0fd6d01aa286",
+      "workload_image": "registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf",
+      "runtime_handler": "firecracker",
+      "default_runtime_handler": "runc",
+      "cluster_cidr": "198.20.0.0/16",
+      "node_subnet": "198.20.0.0/24",
+      "service_cidr": "10.43.0.0/16"
+    },
+    "cri_integration": {
+      "binary": "cri/firecracker-cri",
+      "source": "cri/ module in the same committed runtime checkout; parent replacement => ..",
+      "backend_cri_api": "v0.36.3",
+      "frontend_cri_api": "v0.37.2",
+      "frontend_cri_streaming": "v0.37.2",
+      "module_manifest": "cri-modules.txt",
+      "port_forward_vsock_port": 10900,
+      "checkpoint_restore_status": "RPC definitions present; native whole-Pod implementation pending",
+      "initial_vm_resources": {
+        "source": "containerd 2.3.7 standard sandbox CPU/memory OCI annotations",
+        "default_memory_mib": 512,
+        "guest_memory_overhead_mib": 128,
+        "kvm_max_vcpus": 32,
+        "validation": "optional CRI_INTEGRATION_TESTS=1 worker driver; initial sizing only, host Pod cgroup accounting and live changes pending"
+      }
+    },
+    "kubernetes_one_node": {
+      "kind_version": "v0.33.0",
+      "kind_sha256": "aee6151561422756b764a4ae28e7f44cda5af5a9eead3cc9985112b1de8d8e0d",
+      "kubernetes_version": "v1.37.2",
+      "server_archive_sha256": "38e16f4ef1a3bf1406efa58f177b170b941e9aa6dedd0b8f1e27c2a52f1bdf38",
+      "base_image": "docker.io/kindest/base@sha256:8098fa3cae05bc15d9c4b93a566d19e1f8e65a25e26ebeb993b6cb41142cf791",
+      "smoke_image": "docker.io/library/alpine:3.23.0@sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375",
+      "runtime": "kind base containerd v2.3.4; stock runtime baseline only; Firecracker acceptance pending",
+      "script": "tools/kubernetes/one-node-baseline.sh"
+    },
+    "guest_volume_fs": {
+      "module": "github.com/hanwen/go-fuse/v2",
+      "version": "v2.10.1",
+      "commit": "1d16325e0693e4aeb40b3c899938e028cc8e538e",
+      "module_sum": "h1:QAqZuc9+aBtTou+OPruU/hkYQYCkgPtQd2QaepHkTTs=",
+      "go_mod_sum": "h1:aU7NkGYZUmuJrZapoI3mEcNve7PZTySUOLBuch/vR6U=",
+      "vsock_port": 10901,
+      "protocol_version": 1,
+      "status": "Shim/agent bind mount wiring implemented and tested in worker development VMMs; committed runtime validation and native restore metadata pending"
+    },
+    "cri_conformance": {
+      "version": "v1.37.0",
+      "default_test_image": "registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf",
+      "source": "https://github.com/kubernetes-sigs/cri-tools/blob/v1.37.0/pkg/framework/util.go",
+      "sandbox_image": "registry.k8s.io/pause:3.10.2@sha256:f548e0e8e3dc1896ca956272154dde3314e8cc4fde0a57577ee9fa1c63f5baf4"
     }
   },
   "step_1_previous_validation": {
