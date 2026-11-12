@@ -89,3 +89,47 @@ details can be found in its FAQ](https://issihosts.com/haveged/faq.html).
 Users of the image created by this utility are encouraged to evaluate 
 `haveged` against their security requirements before running any
 cryptographically-sensitive workloads inside their microVMs and containers.
+
+## Optional ext4 image for DAX experiments
+
+`make image-dax` at the repository root produces `tools/image-builder/rootfs-dax.img`
+without changing the SquashFS default. Build only on the designated Cloudlab
+worker. The target extracts the exact `rootfs.img` tree, including its pinned
+Debian guest packages, agent, runc, ownership and permissions, into a fixed
+512 MiB ext4 image with 4 KiB blocks, no journal and a clean superblock. The
+output file has mode `0444`. Attach it read-only and mount the guest filesystem
+read-only. Use the same image bytes for the virtio-blk control and virtio-pmem
+arm; the original compressed SquashFS remains a separate baseline.
+
+The builder pins its Debian tool packages to the same distribution snapshot.
+Conversion fixes the ext4 UUID, directory hash seed and formatter time
+(`SOURCE_DATE_EPOCH`, default `1794268800`). The conversion is reproducible from
+an identical SquashFS input with these tools; a fresh Debian tree can contain
+generated timestamps or log contents, so record the source-image hash too.
+The generated `.source.sha256`, `.sha256`, `.superblock` and `.tree.sha256`
+sidecars record provenance, image layout and a normalized tar digest covering
+file contents, modes, numeric owners, links and special devices. Compare that
+tree digest with a read-only mount using:
+
+```bash
+sudo tar -C "$mount_dir" --sort=name --numeric-owner --format=gnu \
+  --mtime=@0 -cf - . | sha256sum
+```
+
+The image is exactly `536870912` bytes, a multiple of the VMM's 2 MiB region
+alignment. At 64 bytes per guest `struct page` and 4 KiB pages, nominal pmem
+page metadata is `8388608` bytes (8 MiB), before other guest/VMM overhead.
+This is a capacity-based estimate, not a measured saving. Record allocated disk
+space separately with `stat -c '%s %b %B' rootfs-dax.img`.
+
+Image construction and a host ext4 mount do not prove guest DAX activation.
+The runtime must select the pmem root, pass `rootfstype=ext4 rootflags=dax`,
+use an independent disk-backed writable upper/work pair, and verify guest
+`STATX_ATTR_DAX`. Writable state must never share this immutable image.
+
+The [worker receipt](evidence/e76967b-dax-image-receipt.log) records validation
+of source `e76967bf13111a4818b4e57868fe2d1cc38de9ba` on Cloudlab: two conversions
+of the same SquashFS produced identical ext4 bytes; the mounted image matched
+the source tree digest and rejected writes. Image SHA256:
+`fddd6a51d06feeaf41f65d879b52f81062e5b92f027f7f5e0e197d78d2882b3c`.
+This run allocated 214065152 host disk bytes for the 536870912-byte sparse image.
