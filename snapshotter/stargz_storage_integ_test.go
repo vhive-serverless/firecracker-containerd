@@ -49,6 +49,7 @@ const (
 	stargzStorageGuestSource      = "/rom/overlay/stargz"
 	stargzStorageGuestOverlaySize = uint32(128)
 	stargzStorageBridgeName       = "fc-sgs0"
+	stargzStorageBridgeMAC        = "02:fc:43:ff:ff:01"
 	stargzStorageHostIP           = "198.18.43.1"
 	stargzStorageSubnet           = "198.18.43.0/24"
 )
@@ -479,8 +480,10 @@ func stargzStorageCreateBridge(t *testing.T) []string {
 	t.Helper()
 	previousForward, err := os.ReadFile("/proc/sys/net/ipv4/ip_forward")
 	require.NoError(t, err)
-	output, err := exec.Command("ip", "link", "add", stargzStorageBridgeName, "type", "bridge").CombinedOutput()
+	// Keep the gateway MAC stable as VM TAPs are added and removed.
+	output, err := exec.Command("ip", "link", "add", stargzStorageBridgeName, "address", stargzStorageBridgeMAC, "type", "bridge").CombinedOutput()
 	require.NoError(t, err, "create storage test bridge: %s", output)
+	require.Equal(t, stargzStorageBridgeMAC, stargzStorageBridgeMACAddress(t))
 	uplink := ""
 	t.Cleanup(func() {
 		if uplink != "" {
@@ -582,6 +585,15 @@ func stargzStorageCreateTap(t *testing.T, tap string, jailed bool) {
 		output, err := exec.Command("ip", args...).CombinedOutput()
 		require.NoError(t, err, "ip %v: %s", args, output)
 	}
+	require.Equal(t, stargzStorageBridgeMAC, stargzStorageBridgeMACAddress(t), "attaching a TAP must not change the other guest's gateway MAC")
+	t.Logf("storage TAP %s attached; bridge %s MAC=%s", tap, stargzStorageBridgeName, stargzStorageBridgeMACAddress(t))
+}
+
+func stargzStorageBridgeMACAddress(t *testing.T) string {
+	t.Helper()
+	address, err := os.ReadFile(filepath.Join("/sys/class/net", stargzStorageBridgeName, "address"))
+	require.NoError(t, err, "read storage test bridge MAC")
+	return strings.TrimSpace(string(address))
 }
 
 func stargzStorageProfileIndex(mode stargzStorageMode) int {

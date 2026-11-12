@@ -38,8 +38,7 @@ make -C cri generate
 git diff --exit-code
 # The storage restore matrix alone takes about eight minutes on the worker.
 FICD_DM_POOL="$runtime_pool" make -k -C runtime integ-test EXTRAGOARGS='-v -count=1 -timeout=1200s'
-# The stargz restore matrix has twelve serial cases bounded at 420s each.
-FICD_DM_POOL="$snapshotter_pool" make -k -C snapshotter integ-test EXTRAGOARGS='-v -count=1 -timeout=5400s'
+FICD_DM_POOL="$snapshotter_pool" make -k -C snapshotter integ-test EXTRAGOARGS='-v -count=1 -timeout=1200s'
 tools/modernize/test-thinpool.sh
 tools/modernize/test-sdk.sh
 cleanup

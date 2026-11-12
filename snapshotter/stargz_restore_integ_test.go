@@ -52,6 +52,7 @@ const (
 	stargzRestoreGuestOverlay     = "/rom/overlay/stargz"
 	stargzRestoreGuestDiskSizeMiB = uint32(128)
 	stargzRestoreBridgeName       = "fc-sgz0"
+	stargzRestoreBridgeMAC        = "02:fc:42:ff:ff:01"
 	stargzRestoreHostIP           = "198.18.42.1"
 	stargzRestoreGuestIP          = "198.18.42.2/24"
 	stargzRestoreSubnet           = "198.18.42.0/24"
@@ -140,6 +141,9 @@ func stargzRestoreCase(t *testing.T, profileIndex, jailerIndex int, profile star
 	tap := fmt.Sprintf("sgr%02d%d", profileIndex, jailerIndex)
 	mac := fmt.Sprintf("02:fc:42:00:%02x:%02x", profileIndex, jailerIndex)
 	stargzRestoreCreateTap(t, tap)
+	bridgeMAC := stargzRestoreBridgeMACAddress(t)
+	require.Equal(t, stargzRestoreBridgeMAC, bridgeMAC, "isolated gateway must use the fixed bridge MAC")
+	t.Logf("isolated guest gateway MAC before checkpoint: %s", bridgeMAC)
 	staticNetwork := &proto.FirecrackerNetworkInterface{
 		AllowMMDS: true,
 		StaticConfig: &proto.StaticNetworkConfiguration{
@@ -245,8 +249,11 @@ echo 'guest route:'
 cat /proc/net/route
 echo 'guest resolv.conf:'
 cat /etc/resolv.conf
+echo 'guest ARP cache:'
+cat /proc/net/arp
 echo 'guest ghcr.io DNS:'
 getent ahostsv4 ghcr.io | head -n 1
+/usr/bin/timeout 2 /bin/bash -c 'true'
 `)
 	t.Logf("guest routing and DNS configuration:\n%s", guestNetwork)
 	upperBefore := stargzRestoreExec(ctx, t, task, `
@@ -303,8 +310,14 @@ cat /stargz-persist
 	require.True(t, os.IsNotExist(err), "native restore must not use source VM directories")
 
 	stargzRestoreDeleteTap(t, tap)
+	bridgeMACAfterSourceTap := stargzRestoreBridgeMACAddress(t)
+	t.Logf("isolated guest gateway MAC after source TAP removal: %s", bridgeMACAfterSourceTap)
+	require.Equal(t, bridgeMAC, bridgeMACAfterSourceTap, "removing the source TAP must preserve the guest gateway MAC")
 	restoredTap := fmt.Sprintf("sgrR%02d%d", profileIndex, jailerIndex)
 	stargzRestoreCreateTap(t, restoredTap)
+	bridgeMACAfterRestoreTap := stargzRestoreBridgeMACAddress(t)
+	t.Logf("isolated guest gateway MAC after restored TAP creation: %s", bridgeMACAfterRestoreTap)
+	require.Equal(t, bridgeMAC, bridgeMACAfterRestoreTap, "replacing the TAP must preserve the guest gateway MAC")
 	restoredNetwork := &proto.FirecrackerNetworkInterface{
 		AllowMMDS: true,
 		StaticConfig: &proto.StaticNetworkConfiguration{
@@ -358,16 +371,18 @@ cat /stargz-persist
 	state, err := restored.State(ctx, &taskAPI.StateRequest{ID: containerID})
 	require.NoError(t, err)
 	require.Equal(t, task.Pid(), state.Pid)
+	guestARP := stargzRestoreExecTaskAPI(ctx, t, restored, containerID, "cat /proc/net/arp")
+	t.Logf("post-restore guest ARP cache:\n%s", guestARP)
 
 	resumed := stargzRestoreExecTaskAPI(ctx, t, restored, containerID, probe)
 	require.Equal(t, strings.TrimSuffix(initial, "41")+"42", resumed, "guest memory must resume at its checkpoint state")
 	require.Equal(t, "checkpoint-upper", stargzRestoreExecTaskAPI(ctx, t, restored, containerID, "cat /stargz-persist"), "restored guest upper must contain its capture cutoff")
+	stargzRestoreCheckTCP(ctx, t, restored, containerID)
 	require.NotEmpty(t, stargzRestoreExecTaskAPI(ctx, t, restored, containerID, `test -s /etc/system-release; cat /etc/system-release`), "restored task must be able to read a lower image file")
 	require.Eventually(t, func() bool {
 		_, err := client.SnapshotService(snapshotterName).Stat(ctx, snapshotKey)
 		return err == nil
 	}, 90*time.Second, time.Second, "cached host demux snapshotter RPC must reconnect to the restored VM")
-	stargzRestoreCheckTCP(ctx, t, restored, containerID)
 	stargzRestoreExecTaskAPI(ctx, t, restored, containerID, `echo clone-write >/stargz-persist; sync; test "$(cat /stargz-persist)" = clone-write`)
 	require.Equal(t, artifactUpperHash, stargzRestoreHash(t, artifactUpper), "writes in restored stargz upper must not mutate the checkpoint")
 	require.NotEqual(t, cloneUpperBefore, stargzRestoreHash(t, cloneUpper), "restored guest upper must receive the clone's stargz writes")
@@ -404,6 +419,8 @@ func stargzRestoreCreateBridge(t *testing.T) []string {
 	})
 	output, err := exec.Command("ip", "link", "add", stargzRestoreBridgeName, "type", "bridge").CombinedOutput()
 	require.NoError(t, err, "create isolated test bridge: %s", output)
+	output, err = exec.Command("ip", "link", "set", "dev", stargzRestoreBridgeName, "address", stargzRestoreBridgeMAC).CombinedOutput()
+	require.NoError(t, err, "set stable isolated test bridge MAC: %s", output)
 	uplink := ""
 	t.Cleanup(func() {
 		if uplink != "" {
@@ -439,6 +456,20 @@ func stargzRestoreCreateBridge(t *testing.T) []string {
 	nameservers := stargzRestoreNameservers(t)
 	t.Logf("isolated stargz network bridge=%s subnet=%s uplink=%s nameservers=%v", stargzRestoreBridgeName, stargzRestoreSubnet, uplink, nameservers)
 	return nameservers
+}
+
+func stargzRestoreBridgeMACAddress(t *testing.T) string {
+	t.Helper()
+	output, err := exec.Command("ip", "-o", "link", "show", "dev", stargzRestoreBridgeName).CombinedOutput()
+	require.NoError(t, err, "read isolated test bridge MAC: %s", output)
+	fields := strings.Fields(string(output))
+	for index, field := range fields[:len(fields)-1] {
+		if field == "link/ether" {
+			return fields[index+1]
+		}
+	}
+	t.Fatalf("isolated test bridge has no Ethernet address: %s", output)
+	return ""
 }
 
 func stargzRestoreParseUplink(t *testing.T, route string) string {

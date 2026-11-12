@@ -30,12 +30,8 @@ make test-images image-stargz-dax
 tools/modernize/test-stargz-storage-init.sh "$FIRECRACKER_CONTAINERD_TEST_IMAGE:$DOCKER_IMAGE_TAG"
 tools/thinpool.sh create "$pool"
 for name in StargzGuestDiskStorage StargzNativeRestore; do
-    timeout=1200s
-    # Twelve serial restore cases retain their individual 420-second bounds.
-    # Restored stargz HTTP connections can need minutes to time out and retry.
-    if [ "$name" = StargzNativeRestore ]; then timeout=5400s; fi
     FICD_DM_POOL="$pool" make -C snapshotter "integ-test-Test${name}_Isolated" \
-        EXTRAGOARGS="-v -count=1 -failfast -timeout=$timeout"
+        EXTRAGOARGS='-v -count=1 -failfast -timeout=1200s'
 done
 cleanup
 test -z "$(git status --porcelain)"
