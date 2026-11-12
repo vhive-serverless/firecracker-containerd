@@ -1,75 +1,52 @@
 # Step 2: vHive compatibility
 
-Task-test synchronization maintenance at
-`b2df9bc08aa38bc6a2072dc59f50cbae35a7a20b` passed 200 targeted worker
-repetitions across root/nonroot, single/default concurrency and plain/race modes.
-The [maintenance receipt](evidence/b2df9bc-task-wait-sync-receipt.log) records
-the commands and hashes. The scope was host unit tests; the runtime/vHive acceptance
-results below retain their original source revisions, dependency pins and receipts.
+## Current status
 
-Install-loop maintenance at `46b2fa204da23508271e921fd14ad2dc03eb1dbe` passed the
-worker fixture: a failing first component stops installation before the second,
-and a successful component still installs. The [maintenance receipt](evidence/46b2fa2-install-guard-receipt.log)
-records source and log hashes. This one-line build-system check did not rerun
-runtime acceptance; the prior functional results below retain their original
-source revisions and dependency pins.
+The functional acceptance revision for this milestone is
+`4e0033b81a17d9a32c2861263c2792ebcfe37ebd`. This is the tested runtime revision,
+not a claim that every later documentation or maintenance commit reran the full
+suite. Its clean worker checkout passed build, private installation,
+36 runtime, five snapshotter and 79 SDK tests (one existing SDK metrics skip),
+plus two independent standalone vHive deploy/invoke/snapshot/source-stop/
+restore/cleanup runs. The [acceptance receipt](evidence/4e0033b-fifo-acceptance-receipt.log)
+records the tested source, artifacts, process identities and cleanup. It also
+preserves two failed harness attempts caused by lint-lock contention and an
+overlong temporary path; the successful full rerun used a short private temp
+directory without source changes.
 
-Latest committed revalidation: `4e0033b81a17d9a32c2861263c2792ebcfe37ebd`.
-The clean worker checkout `/users/nehalem/fc-ctrd-mod/vhive-io-committed`
-passed build, private installation, 36 runtime, five snapshotter and 79 SDK
-cases (one existing SDK metrics skip). Two independent vHive
-deploy/invoke/snapshot/source-stop/restore/cleanup runs also passed.
-The [FIFO correction receipt](evidence/4e0033b-fifo-acceptance-receipt.log)
-records exact binary, image and log hashes, process identities, cleanup, and
-two retained unsuccessful harness attempts: shared lint-lock contention and
-an overlong temporary path. The successful full acceptance rerun used a short
-private temporary directory; no source change was needed for those retries.
+The accepted correction prepares telemetry hard links or cross-filesystem bind
+mounts before runc starts. Its real-VM regression verified delivery to both
+external FIFO readers, and all eight jailed/unjailed `TestCreateVM_Isolated`
+cases passed. This runtime coverage accompanies a standalone, unjailed vHive
+deployment. It does not validate Kubernetes or Pod checkpoint/restore.
 
-This backports the shared jailer FIFO ordering correction from
-`c7d73c703d18d33e07b39c2785dbcb1f77af039f`. Telemetry hard links or
-cross-filesystem bind mounts are prepared before runc starts. The new real-VM
-`TestJailerTelemetryCrossFilesystem_Isolated` verified delivery to both
-external FIFO readers, and the full `TestCreateVM_Isolated` matrix passed.
-Dependency pins and earlier acceptance receipts remain unchanged. The vHive
-profile below remains the standalone unjailed deployment.
+Commits after that full acceptance contain bounded maintenance checks, not a
+new runtime or vHive run: install failure propagation at `46b2fa2`, task-test
+synchronization at `b2df9bc`, and cache eviction test synchronization at
+`be200ad`. The [install receipt](evidence/46b2fa2-install-guard-receipt.log),
+[task-test receipt](evidence/b2df9bc-task-wait-sync-receipt.log), and shared
+[cache-test receipt](evidence/step4-cache-test/verification.json) document
+their scope and results. These checks do not change the functional acceptance
+revision or dependency pins.
 
-Earlier metrics revalidation: `2780f2e92d8a376e6514d1e099b2c03b0e1847ed`. The clean worker checkout
-`/users/nehalem/fc-ctrd-mod/vhive-io-committed` passed build, private installation,
-35 runtime, five snapshotter and 79 SDK tests (one existing metrics skip).
-Two independent vHive deploy/invoke/snapshot/source-stop/restore/cleanup runs also passed.
-The [metrics receipt](evidence/2780f2e-metrics-acceptance-receipt.log) records exact artifact and log
-hashes. This includes the I/O replacement correction and a metrics teardown
-correction that returns ports under a mutex and makes shutdown idempotent.
-Earlier acceptance records below retain their original tested revisions.
+## Functional validation history
 
-The earlier validated runtime is `d959a78de45faf1d8d13fea282b7fb980b629789`
-on `vhive-compatible`. Its clean worker checkout
-`/users/nehalem/fc-ctrd-mod/vhive-failed-create-committed` passed build,
-installation, 35 runtime and 5 snapshotter isolated tests, and 79 SDK tests
-with the existing SDK log/metrics skip. Two independent vHive deployment,
-invocation, snapshot, source-stop, new-VMM restore and cleanup runs also passed.
-The [earlier receipt](evidence/d959a78-acceptance-receipt.log) records inputs,
-process identities, artifact hashes, log hashes and cleanup.
+Earlier full acceptance runs covered the failed-create correction (`d959a78`) and
+metrics/I/O corrections (`2780f2e`). This branch started from Step 1 completion
+commit `207899bf3c45ad83d07b06d161b4dcec4a0c338b`, and carries the validated
+Step 1 task-create cleanup fix at `6585eba`. That fix releases a reserved drive
+and owned bundle links after a failed guest create; its [Step 1 receipt](evidence/6585eba-acceptance-receipt.log)
+records full acceptance. The earlier vHive integration checkpoint `122d7084043a`
+is retained in its [receipt](evidence/122d7084043a-acceptance-receipt.log).
+Each result remains tied to its own source revision and receipt.
 
-The supported deployment is the pinned vHive standalone orchestrator with
-devmapper, a single function container per unjailed VM, an immutable guest root,
-and Firecracker's File memory backend. The acceptance test runs vHive's
-orchestrator and function gRPC services, containerd, the shim, the guest agent,
-runc, and KVM on the worker in `worker.txt`. The stock containerd instance that
-vHive's legacy CRI proxy expects runs in the test container with separate state
-and socket paths. This is the vHive milestone; Kubernetes and Pod checkpoint
-integration are separate.
-
-This branch started from Step 1 completion commit
-`207899bf3c45ad83d07b06d161b4dcec4a0c338b` and includes the later validated
-shutdown correction `e7395acb2c88cfe8c5d32ba61ff65c17e031858c` and task
-creation cleanup correction `6585eba92db4f8c55f6567cf8d2c8d695adcba05`.
-The [Step 1 receipt](evidence/6585eba-acceptance-receipt.log) records its full
-acceptance. The latter correction releases a reserved drive and owned bundle
-links after a failed guest create, allowing a healthy container to reuse the
-same one-slot VMM. The previous vHive completion at `122d7084043a` remains
-documented in its [receipt](evidence/122d7084043a-acceptance-receipt.log).
-The VMM, SDK and vHive source pins below are unchanged by this correction.
+The supported profile is the pinned standalone vHive orchestrator with
+devmapper, one function container per unjailed VM, an immutable guest root, and
+Firecracker's File memory backend. The worker test runs vHive's orchestrator
+and function gRPC services, containerd, the shim, guest agent, runc, and KVM.
+The stock containerd expected by vHive's legacy CRI proxy runs in the test
+container with separate state and socket paths. This acceptance does not cover
+Kubernetes or Pod checkpoint/restore.
 
 ## Port and inputs
 
@@ -118,7 +95,8 @@ stops the VMM before removing the device and returning its network to the pool.
 ## Reproduce on the worker
 
 In a fresh clone from the project's configured remote, check out the
-`vhive-compatible` completion commit. Use the [Step 1 worker setup](step-1.md)
+Step 2 functional acceptance revision `4e0033b81a17d9a32c2861263c2792ebcfe37ebd`.
+Use the [Step 1 worker setup](step-1.md)
 for the pinned tools, sudo, KVM, and Docker. Then run:
 
 ```sh
