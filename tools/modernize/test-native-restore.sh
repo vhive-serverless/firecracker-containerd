@@ -20,7 +20,7 @@ cleanup() {
 trap cleanup EXIT
 python3 tools/modernize/verify-inputs.py
 make lint
-unit_tests='^Test(NativeRestore(ExecStateIdentity|CopyFailureCleanup|CopiesPrivateArtifacts|MountPlan)|CheckpointTransportRejectsInvalidVersionAndThawSet|SealTransportPersistsAcknowledgedEventCursor)'
+unit_tests='^Test(NativeRestore(ExecStateIdentity|CopyFailureCleanup|CopiesPrivateArtifacts|MountPlan|CreateVM(SelectsArtifact|DeadlinePreservesRequestIdentity))|CheckpointTransportRejectsInvalidVersionAndThawSet|SealTransportPersistsAcknowledgedEventCursor)'
 go test -mod=readonly -race -count=1 -v -run "$unit_tests" ./runtime
 make test-images
 tools/thinpool.sh create "$pool"

@@ -520,8 +520,16 @@ func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRe
 	)
 
 	s.vmStartOnce.Do(func() {
-		err = s.createVM(ctxWithTimeout, request)
 		createRan = true
+		if request.NativeCheckpointDirectory != "" {
+			restored, restoreErr := s.prepareNativeRestore(ctxWithTimeout, request)
+			if restoreErr != nil {
+				err = restoreErr
+				return
+			}
+			request = restored
+		}
+		err = s.createVM(ctxWithTimeout, request)
 	})
 	if !createRan {
 		return nil, status.Error(codes.AlreadyExists, "shim cannot create VM more than once")

@@ -23,6 +23,7 @@ import (
 	"path/filepath"
 	"syscall"
 	"testing"
+	"time"
 
 	taskAPI "github.com/containerd/containerd/api/runtime/task/v3"
 	"github.com/firecracker-microvm/firecracker-containerd/config"
@@ -32,6 +33,8 @@ import (
 	"github.com/firecracker-microvm/firecracker-go-sdk/client/models"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func TestNativeRestoreExecStateIdentity(t *testing.T) {
@@ -155,4 +158,27 @@ func TestNativeRestoreCopiesPrivateArtifacts(t *testing.T) {
 		require.NoError(t, err)
 		require.False(t, os.SameFile(before, after))
 	}
+}
+
+func TestNativeRestoreCreateVMSelectsArtifact(t *testing.T) {
+	// A restore request must fail at artifact validation before cold-boot
+	// configuration is consulted. This fixture deliberately has no boot config.
+	svc := &service{logger: logrus.NewEntry(logrus.New())}
+	_, err := svc.CreateVM(context.Background(), &proto.CreateVMRequest{VMID: "restore", NativeCheckpointDirectory: "relative"})
+	require.Equal(t, codes.InvalidArgument, status.Code(err))
+	require.ErrorContains(t, err, "native restore requires an absolute artifact directory")
+}
+
+func TestNativeRestoreCreateVMDeadlinePreservesRequestIdentity(t *testing.T) {
+	fixture, _ := nativeCloneFixture(t, t.TempDir())
+	manifest, err := json.Marshal(fixture.nativeRestore.manifest)
+	require.NoError(t, err)
+	artifact := fixture.nativeRestore.artifact
+	require.NoError(t, os.WriteFile(filepath.Join(artifact, "manifest.json"), manifest, 0600))
+	svc := &service{logger: logrus.NewEntry(logrus.New())}
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(-time.Second))
+	defer cancel()
+	_, err = svc.CreateVM(ctx, &proto.CreateVMRequest{VMID: "restore-deadline", NativeCheckpointDirectory: artifact})
+	require.Equal(t, codes.DeadlineExceeded, status.Code(err))
+	require.ErrorContains(t, err, `VM "restore-deadline" didn't start`)
 }
