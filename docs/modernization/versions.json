@@ -315,7 +315,7 @@
     "test_state_directory": "FICD_VM_STORAGE; defaults to ../.ficd-test-vms/<checkout-name>, outside source/build contexts"
   },
   "step_4_memory": {
-    "status": "Incomplete across retained modes: default devmapper storage/mechanisms/evaluation/direct runtime restore accepted; guest stargz writable store remains tmpfs; inherited Step 3 Kubernetes/CRI gates remain WIP",
+    "status": "Incomplete across retained modes: default devmapper storage/mechanisms/evaluation/direct runtime restore accepted; guest stargz disk migration implemented at de2e471, VM acceptance pending; inherited Step 3 CRI remains WIP and Kubernetes Pod restore is deferred to 1.38 interface work",
     "free_page_reporting": "FirecrackerBalloonDevice.FreePageReporting; independent of target amount",
     "damon": "Bounded non-anonymous reclamation and reporting passed clean committed worker acceptance at 9706231",
     "pmem_dax": "Clean committed pmem/DAX, both jailers, shared immutable backing, private writes, combined DAMON capture and matching block capture passed at 438c2cb",
@@ -550,7 +550,7 @@
     "audited_revision": "8340f724c8e0b5bdd81a1fed984183b95c7ab67b",
     "report": "step-4-completeness.md",
     "result": "Incomplete",
-    "open_storage_path": "Optional guest stargz image mounts /var/lib/containerd-stargz-grpc on tmpfs; default devmapper acceptance does not cover disk backing of this store.",
+    "open_storage_path": "Guest stargz now binds /var/lib/containerd-stargz-grpc to /rom/overlay/stargz on the private guest-upper filesystem (de2e471); VM disk-backing and native restore acceptance are pending. The existing memory evaluation did not test stargz.",
     "inherited_gates": "Observed CRI conformance failures remain open; Kubernetes Pod checkpoint/restore is deferred by the user to 1.38 interface availability, separately from current Step4 storage requirements.",
     "scope": "Source and recorded-evidence audit; no new runtime tests."
   },

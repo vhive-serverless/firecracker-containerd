@@ -23,7 +23,10 @@ cleanup() {
 trap cleanup EXIT
 python3 tools/modernize/verify-inputs.py
 make lint
-make test-images
+# test-images regenerates the SquashFS inputs; derive DAX images afterwards so
+# their source receipts refer to the current inputs used by the restore matrix.
+make test-images image-dax image-stargz-dax
+tools/modernize/test-stargz-storage-init.sh "${FIRECRACKER_CONTAINERD_TEST_IMAGE:-localhost/firecracker-containerd-test}:$DOCKER_IMAGE_TAG"
 env -u ENABLE_ISOLATED_TESTS DISABLE_ROOT_TESTS=1 go test -short -timeout=180s ./...
 (cd cri && go test -mod=readonly -race -count=1 -timeout=180s ./...)
 sudo -n env -u ENABLE_ISOLATED_TESTS PATH="$PATH" GOMODCACHE="$(go env GOMODCACHE)" \

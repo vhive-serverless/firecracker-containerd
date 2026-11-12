@@ -54,6 +54,11 @@ upper; default devmapper container writable roots are already separate ext4
 block devices backed by host storage. The guest-root overlay, container writable
 root, exported host volumes and temporary mounts are separate storage layers.
 The optional guest stargz path has its own storage and must be assessed separately.
+On Step 4, its store and container overlay upper/work directories bind directly
+to the private guest-upper filesystem at `/rom/overlay/stargz`; they share that
+disk's capacity and snapshot lifetime. This migration's VM acceptance is pending
+in the [Step 4 report](modernization/step-4.md). Stargz workload lower layers
+remain FUSE-backed; optional pmem/DAX applies to the immutable guest base.
 
 Step 2 adds vHive-managed snapshot/restore for its documented standalone profile.
 Step 3 adds a CRI frontend, ordinary Kubernetes RuntimeClass support and native

@@ -1,6 +1,13 @@
 # Step 4 implementation completeness audit
 
-Audited current `damon-virtio-pmem` HEAD `8340f72` against `goal.md:148-226`, implementation, tests, and recorded worker evidence. This source/evidence audit did not rerun worker tests. The original requirement source is the workspace `goal.md`; its relevant requirements are restated below.
+Historical audit of `damon-virtio-pmem` at `8340f72` against `goal.md:148-226`, implementation, tests, and recorded worker evidence. This source/evidence audit did not rerun worker tests. The original requirement source is the workspace `goal.md`; its relevant requirements are restated below.
+
+Implementation update (`de2e471`): the retained stargz service now binds its
+store to `/rom/overlay/stargz` on the private guest-upper filesystem. The
+tmpfs findings below describe the audited revision, not the updated source.
+The replacement still needs VM storage and native restore acceptance, so this
+audit's completion decision remains open. The 21-trial memory evaluation uses
+the standard guest image and does not measure this stargz change.
 
 User clarification on 2026-11-12: the Kubernetes Pod checkpoint/restore portion
 of the original specification is deferred to 1.38 interface availability. The

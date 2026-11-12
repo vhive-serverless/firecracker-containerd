@@ -18,10 +18,19 @@ remaining Kubernetes/CRI acceptance gates.
 **Step 4 is not complete across all retained storage modes.** The default
 devmapper path has accepted disk-backed guest-upper storage, memory mechanisms,
 ordinary Pod profiles and direct runtime restore. The optional guest stargz
-image still mounts `/var/lib/containerd-stargz-grpc` on tmpfs; its container
-writable overlay state therefore has not been migrated and validated on host disk.
-The image remains built and exercised by snapshotter tests. Those test passes
-do not establish disk backing for this guest store.
+image now binds `/var/lib/containerd-stargz-grpc` to `/rom/overlay/stargz`, on
+the private guest-upper filesystem (`de2e471`). This replaces its former tmpfs
+store, including the container overlay upper/work directories. The initializer
+rejects missing or unsupported backing and permits tmpfs only for an explicit
+`overlay_root=ram` baseline. VM storage and native restore acceptance for this
+change is still pending; earlier snapshotter passes do not validate it.
+
+The [initializer development receipt](evidence/de2e471-stargz-init.log) records
+passing rejection, explicit RAM, ext4 device/inode, write-through, idempotence
+and cleanup checks against the newly built `de2e471` test image. Read-only
+inspection also verifies that the guest image contains the executable helper
+and service configuration matching source. The test script was transferred
+separately at its recorded hash; this is not full committed-stack acceptance.
 
 See the [implementation audit](step-4-completeness.md) for the requirement
 matrix and the concrete follow-up. CRI conformance retains its observed failures.
@@ -66,7 +75,8 @@ Implementation order is a bounded private ext4 guest upper, independently
 configurable pmem/DAX and DAMON/reporting, then five controlled evaluation arms.
 Default devmapper container writable roots already use disk, so the controlled
 storage comparison applies to the guest upper. It does not cover the optional
-guest stargz store, which still uses tmpfs. Writable files must be private to each VM and allocated on
+guest stargz store. That path's subsequent disk migration requires separate
+functional acceptance and does not establish new memory savings. Writable files must be private to each VM and allocated on
 verified disk storage; immutable sharing must be explicit.
 
 The committed evaluation at `0a268c5589c37832e1c3dc89a7b60ed2701e0b9e`

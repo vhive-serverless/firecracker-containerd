@@ -138,7 +138,7 @@ builder_$(DOCKER_IMAGE_TAG)_stamp: Dockerfile.debian-image
 clean:
 	-rm -f *stamp
 	if [ $(UID) -eq 0 ]; then \
-	  rm -f rootfs.img rootfs-debug.img rootfs-stargz.img rootfs-dax.img rootfs-dax.img.*;\
+	  rm -f rootfs.img rootfs-debug.img rootfs-stargz.img rootfs-dax.img rootfs-dax.img.* rootfs-stargz-dax.img rootfs-stargz-dax.img.*;\
 	else \
 	  $(MAKE) clean-in-docker ;\
 	fi
@@ -147,4 +147,4 @@ distclean: clean
 	rm -rf files_ephemeral
 	- docker rmi fc-image-builder:$(DOCKER_IMAGE_TAG)
 
-.PHONY: debootstrap clean distclean builder dax %-in-docker
+.PHONY: debootstrap clean distclean builder dax stargz-dax %-in-docker
