@@ -17,6 +17,7 @@ import (
 	"bytes"
 	"context"
 	"debug/elf"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net"
@@ -49,24 +50,34 @@ func TestRestoreNamespaceIsolation(t *testing.T) {
 	}
 	formerSource := filepath.Join(t.TempDir(), "deleted-source")
 	writableTarget, readonlyTarget := filepath.Join(formerSource, "disk"), filepath.Join(formerSource, "root")
-	dynamicTarget := filepath.Join(formerSource, "new-directory", "future-disk")
 	type instance struct {
-		shared, clone, root, dynamic, content string
-		cmd                                   *exec.Cmd
-		output                                *bytes.Buffer
+		shared, clone, root, dynamic, content, target string
+		cmd                                           *exec.Cmd
+		output                                        *bytes.Buffer
 	}
 	instances := make([]instance, 0, 2)
 	for index := 0; index < 2; index++ {
 		shared := t.TempDir()
 		clone, root := filepath.Join(shared, "clone"), filepath.Join(shared, "readonly")
-		future := filepath.Join(t.TempDir(), "future-backing")
+		future := filepath.Join(shared, "new-directory", "future-disk")
+		require.NoError(t, os.MkdirAll(filepath.Dir(future), 0700))
+		target := writableTarget
+		if index == 0 {
+			target = filepath.Join(shared, "ctrstub0")
+			require.NoError(t, os.WriteFile(target, []byte("host-placeholder"), 0600))
+		}
+		input := filepath.Join(shared, "state-input")
+		require.NoError(t, os.WriteFile(input, []byte("state-input"), 0600))
+		log := filepath.Join(shared, "log-output")
+		require.NoError(t, os.WriteFile(log, nil, 0600))
+		require.NoError(t, os.Mkdir(filepath.Join(shared, "snapshot-output"), 0700))
 		require.NoError(t, os.WriteFile(clone, []byte("captured"), 0600))
 		require.NoError(t, os.WriteFile(root, []byte("immutable-root"), 0600))
 		require.NoError(t, os.WriteFile(future, []byte("future-content"), 0600))
-		cmd, err := restoreNamespaceCommand(context.Background(), shared, executable, []string{"-test.run=^TestRestoreNamespaceProbe$", "-test.v"}, []restoreMount{{Source: clone, Target: writableTarget}, {Source: root, Target: readonlyTarget, ReadOnly: true}}, nil)
+		cmd, err := restoreNamespaceCommand(context.Background(), shared, executable, []string{"-test.run=^TestRestoreNamespaceProbe$", "-test.v"}, []restoreMount{{Source: clone, Target: target}, {Source: root, Target: readonlyTarget, ReadOnly: true}}, []string{input}, log)
 		require.NoError(t, err)
 		content := fmt.Sprintf("restore-%d", index)
-		cmd.Env = append(os.Environ(), "FC_RESTORE_NAMESPACE_PROBE=1", "FC_RESTORE_PROBE_SHARED="+shared, "FC_RESTORE_PROBE_WRITABLE="+writableTarget, "FC_RESTORE_PROBE_READONLY="+readonlyTarget, "FC_RESTORE_PROBE_DYNAMIC="+dynamicTarget, "FC_RESTORE_PROBE_CONTENT="+content)
+		cmd.Env = append(os.Environ(), "FC_RESTORE_NAMESPACE_PROBE=1", "FC_RESTORE_PROBE_SHARED="+restoreSharedDirectory, "FC_RESTORE_PROBE_WRITABLE="+target, "FC_RESTORE_PROBE_READONLY="+readonlyTarget, "FC_RESTORE_PROBE_DYNAMIC="+future, "FC_RESTORE_PROBE_CONTENT="+content, "FC_RESTORE_PROBE_INPUT="+input, "FC_RESTORE_PROBE_LOG="+log)
 		output := &bytes.Buffer{}
 		cmd.Stdout, cmd.Stderr = output, output
 		require.NoError(t, cmd.Start())
@@ -76,13 +87,15 @@ func TestRestoreNamespaceIsolation(t *testing.T) {
 				_ = cmd.Wait()
 			}
 		})
-		instances = append(instances, instance{shared, clone, root, future, content, cmd, output})
+		instances = append(instances, instance{shared, clone, root, future, content, target, cmd, output})
 	}
 	for _, instance := range instances {
 		require.Eventually(t, func() bool { _, err := os.Stat(filepath.Join(instance.shared, "probe.sock")); return err == nil }, 10*time.Second, 10*time.Millisecond)
 		process, err := vm.ReadProcessIdentity(instance.cmd.Process.Pid)
 		require.NoError(t, err)
-		require.NoError(t, addRestoreMount(context.Background(), process, instance.shared, restoreMount{Source: instance.dynamic, Target: dynamicTarget}))
+		jail := &noopJailer{ctx: context.Background(), shimDir: vm.Dir(instance.shared), process: process,
+			restoreMounts: []restoreMount{{Source: instance.clone, Target: instance.target}, {Source: instance.root, Target: readonlyTarget, ReadOnly: true}}}
+		require.NoError(t, jail.ExposeFileToJail(instance.dynamic), "host-shared disks must be explicitly exposed below their original absolute path")
 		conn, err := net.DialTimeout("unix", filepath.Join(instance.shared, "probe.sock"), time.Second)
 		require.NoError(t, err, "API sockets in the shared directory must be reachable from the host")
 		_, err = conn.Write([]byte("continue"))
@@ -97,6 +110,16 @@ func TestRestoreNamespaceIsolation(t *testing.T) {
 		data, err = os.ReadFile(instance.root)
 		require.NoError(t, err)
 		require.Equal(t, "immutable-root", string(data))
+		if instance.target != writableTarget {
+			host, err := os.ReadFile(instance.target)
+			require.NoError(t, err)
+			require.Equal(t, "host-placeholder", string(host), "same-ID private disk must not modify the live host leaf")
+		}
+		for _, output := range []string{"log-output", "snapshot-output/state"} {
+			data, err := os.ReadFile(filepath.Join(instance.shared, output))
+			require.NoError(t, err)
+			require.Equal(t, instance.content, string(data))
+		}
 		data, err = os.ReadFile(instance.dynamic)
 		require.NoError(t, err)
 		require.Equal(t, "updated-"+instance.content, string(data))
@@ -121,7 +144,11 @@ func TestRestoreNamespaceProbe(t *testing.T) {
 	}
 	require.Error(t, err, "read-only bind must reject writes even as root")
 	shared := os.Getenv("FC_RESTORE_PROBE_SHARED")
-	listener, err := net.Listen("unix", filepath.Join(shared, "probe.sock"))
+	// #nosec G703 -- The parent supplies this private-namespace fixture input.
+	data, err = os.ReadFile(os.Getenv("FC_RESTORE_PROBE_INPUT"))
+	require.NoError(t, err)
+	require.Equal(t, "state-input", string(data), "load input below the old shared path must remain visible")
+	listener, err := net.Listen("unix", "probe.sock")
 	require.NoError(t, err)
 	defer listener.Close()
 	require.NoError(t, listener.(*net.UnixListener).SetDeadline(time.Now().Add(20*time.Second)))
@@ -137,6 +164,10 @@ func TestRestoreNamespaceProbe(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "future-content", string(data))
 	content := os.Getenv("FC_RESTORE_PROBE_CONTENT")
+	for _, output := range []string{os.Getenv("FC_RESTORE_PROBE_LOG"), filepath.Join(shared, "snapshot-output", "state")} {
+		// #nosec G703 -- The parent supplies private-namespace fixture output paths.
+		require.NoError(t, os.WriteFile(output, []byte(content), 0600), "logger writes and alias-translated snapshot outputs must remain writable")
+	}
 	// #nosec G703 -- The parent test supplies this fixture path to the private namespace probe.
 	require.NoError(t, os.WriteFile(writable, []byte(content), 0600))
 	// #nosec G703 -- The parent test supplies this fixture path to the private namespace probe.
@@ -182,4 +213,21 @@ func TestRestoreNamespaceReleaseAPI(t *testing.T) {
 	require.NoError(t, err, "official VMM must open the cloned file at its original private pathname")
 	_, err = os.Stat(target)
 	require.True(t, os.IsNotExist(err), "official VMM device path must remain absent on host")
+}
+
+func TestRestoreNamespaceSharedInputs(t *testing.T) {
+	shared := t.TempDir()
+	backing := filepath.Join(shared, "clone")
+	require.NoError(t, os.WriteFile(backing, []byte("clone"), 0600))
+	inputs := []string{filepath.Join(shared, "state"), filepath.Join(shared, "memory")}
+	outputs := []string{filepath.Join(shared, "log"), filepath.Join(shared, "metrics")}
+	cmd, err := restoreNamespaceCommand(context.Background(), shared, os.Args[0], nil, []restoreMount{{Source: backing, Target: filepath.Join(shared, "ctrstub0")}}, inputs, outputs...)
+	require.NoError(t, err)
+	data, err := os.ReadFile(cmd.Args[2])
+	require.NoError(t, err)
+	var plan restoreNamespacePlan
+	require.NoError(t, json.Unmarshal(data, &plan))
+	require.Equal(t, inputs, plan.Inputs, "shared input paths must get explicit readonly binds")
+	require.Equal(t, outputs, plan.WritableInputs, "logging output must retain writable bind semantics")
+	require.Error(t, validateRestoreInputs([]string{inputs[0], inputs[1], outputs[0], outputs[0]}, nil))
 }

@@ -61,7 +61,7 @@ func capturedDevicePath(path string, jailed bool) (string, error) {
 		}
 		path = "/" + path
 	}
-	for _, reserved := range []string{restoreKVMDevice, restoreTunDevice, restoreNullDevice, restoreZeroDevice, restoreRandomDevice, restoreURandomDevice, restoreProcDirectory, "/sys", restoreExecutable, "/firecracker", "/api.socket", "/fc-vsock.sock"} {
+	for _, reserved := range []string{restoreKVMDevice, restoreTunDevice, restoreNullDevice, restoreZeroDevice, restoreRandomDevice, restoreURandomDevice, restoreProcDirectory, "/sys", restoreExecutable, restoreSharedDirectory, "/firecracker", "/api.socket", "/fc-vsock.sock"} {
 		if pathWithin(path, reserved) || pathWithin(reserved, path) {
 			return "", fmt.Errorf("captured device path overlaps reserved VMM path %q", path)
 		}
@@ -219,7 +219,11 @@ func (s *service) prepareSnapshotMounts(request *proto.CreateVMRequest) error {
 			inputs = append(inputs, request.MemFilePath)
 		}
 	}
-	if err := validateRestoreMounts(mounts, s.jailer.JailPath().RootPath()); err != nil {
+	protected := s.jailer.JailPath().RootPath()
+	if _, unjailed := s.jailer.(*noopJailer); unjailed {
+		protected = restoreSharedDirectory
+	}
+	if err := validateRestoreMounts(mounts, protected); err != nil {
 		return err
 	}
 	switch jailer := s.jailer.(type) {
@@ -328,6 +332,30 @@ func openRestoreBacking(source string) (*os.File, string, error) {
 
 func pathWithin(path, parent string) bool {
 	return path == parent || strings.HasPrefix(path, parent+"/")
+}
+
+// restoreAPIPath translates host-created output paths to the live directory
+// exposed inside an unjailed restored VMM. Captured disk targets never use this
+// translation: their original paths identify private backing mounts.
+func restoreAPIPath(jail jailer, path string) string {
+	j, ok := jail.(*noopJailer)
+	if !ok || !filepath.IsAbs(path) || filepath.Clean(path) != path {
+		return path
+	}
+	j.restoreMu.RLock()
+	defer j.restoreMu.RUnlock()
+	if len(j.restoreMounts) == 0 {
+		return path
+	}
+	shared := j.shimDir.RootPath()
+	if !pathWithin(path, shared) {
+		return path
+	}
+	relative, err := filepath.Rel(shared, path)
+	if err != nil {
+		return path
+	}
+	return filepath.Join(restoreSharedDirectory, relative)
 }
 
 // restoreBackingPath resolves exported VMM paths to their actual host clone for

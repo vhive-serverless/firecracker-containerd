@@ -155,7 +155,7 @@ func (s *service) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotR
 	}
 	defer os.RemoveAll(stage)
 	s.pendingPause.MayReset = true
-	if err := s.machine.CreateSnapshot(ctx, filepath.Join(stage, "memory"), filepath.Join(stage, "state")); err != nil {
+	if err := s.machine.CreateSnapshot(ctx, restoreAPIPath(s.jailer, filepath.Join(stage, "memory")), restoreAPIPath(s.jailer, filepath.Join(stage, "state"))); err != nil {
 		return nil, err
 	}
 	// Invalidate any old publication marker before replacing either payload.
