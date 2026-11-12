@@ -1,5 +1,9 @@
 # Getting started with Firecracker and containerd
 
+> Historical upstream guide: version requirements and command examples below
+> are not the tested setup for the maintained Step 1–4 branches. Follow the
+> [modernization branch guide](modernization/README.md) and its pinned worker procedures.
+
 Thanks for your interest in using containerd and Firecracker together!  This
 project is currently in a very early state, and things are not yet as
 plug-and-play as we'd like.  This guide contains general instructions for
