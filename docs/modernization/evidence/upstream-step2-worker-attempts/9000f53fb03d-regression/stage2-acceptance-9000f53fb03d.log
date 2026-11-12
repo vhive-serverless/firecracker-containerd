@@ -1,0 +1,2956 @@
+firecracker: eaf83bb718a559d324613d566eaf776b31a62340
+runc: c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e
+stargz-snapshotter: 3070538befb5a6c09f93e99164762b3a76310357
+github.com/containerd/containerd/v2: v2.3.7
+github.com/opencontainers/runc: v1.4.2
+SDK: github.com/vhive-serverless/firecracker-go-sdk@v0.0.0-20261112180021-dd9db3224329
+VMM/SDK schema sha256: 3693a55005be2b9c81bf14e9908bd894e361adedff4abcf8c1ac24a8c40adb0c
+go version go1.26.11 linux/amd64
+/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/bin/ltag -t ./.headers -excludes "tools _submodules tmp bin" -check -v
+No template file for Dockerfile, shall skip all Dockerfile
+No template file for bash scripts, shall skip all bash scripts
+/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/bin/git-validation -run DCO,short-subject -range HEAD~1..HEAD
+ * 9000f53f "Stop managed guest tasks before final VM agent shutdown" ... PASS
+/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/bin/golangci-lint run
+0 issues.
+docker build \
+	-t localhost/runc-builder:9000f53fb03d \
+	-f tools/docker/Dockerfile.runc-builder \
+	tools/
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.runc-builder
+#1 transferring dockerfile: 856B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/2] FROM public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0
+#4 resolve public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 done
+#4 DONE 0.0s
+
+#5 [2/2] RUN apt-get update &&     DEBIAN_FRONTEND=noninteractive apt-get -y install libseccomp-dev pkg-config e2fsprogs
+#5 CACHED
+
+#6 exporting to image
+#6 exporting layers done
+#6 exporting manifest sha256:b972e2a1456dfd15247e53032e6032051bb9806dd75da0d10356385beda5f933 done
+#6 exporting config sha256:1346aaa3e9e8a2a793eedcb73f05d1b2b2c9faccae043986afa85b22e8084bc9 done
+#6 exporting attestation manifest sha256:2ccd0575dc33ced16c36ec945339c973c3110b7703c98b2c4e6e442bd735e416 done
+#6 exporting manifest list sha256:41472f536956bcaa3b37e90c62176e081880834dd56d74a0174f30caaee3fbd6 done
+#6 naming to localhost/runc-builder:9000f53fb03d done
+#6 unpacking to localhost/runc-builder:9000f53fb03d 0.0s done
+#6 DONE 0.1s
+touch tools/runc-builder-9000f53fb03d-stamp
+runc_revision=$(git -C _submodules/runc rev-parse --verify HEAD) && \
+docker run --rm --user 20005 \
+	--volume /users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/_submodules/runc:/gopath/src/github.com/opencontainers/runc \
+	--volume /users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/deps:/target \
+	-e HOME=/tmp \
+	-e GOPATH=/gopath \
+	--workdir /gopath/src/github.com/opencontainers/runc \
+	localhost/runc-builder:9000f53fb03d \
+	make static COMMIT="$runc_revision"
+fatal: not a git repository: /gopath/src/github.com/opencontainers/runc/../../.git/modules/runc
+go build -trimpath -buildmode=pie  -tags "seccomp urfave_cli_no_docs netgo osusergo" -ldflags "-X main.gitCommit=c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e  -linkmode external -extldflags -static-pie " -o runc .
+docker run --rm \
+	--user 20005:3763 \
+	--volume /users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime:/src \
+	--volume gocache:/go \
+	--env HOME=/tmp \
+	--env GOPATH=/go \
+	--env GO111MODULES=on \
+	--env STATIC_AGENT=on \
+	--env STATIC_DOCKER_CREDENTIAL_MMDS=on \
+	--env GOPROXY=https://proxy.golang.org,direct \
+	--workdir /src \
+	public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 \
+	make agent
+make -C agent EXTRAGOARGS=
+make[1]: Entering directory '/src/agent'
+make[1]: Nothing to be done for 'all'.
+make[1]: Leaving directory '/src/agent'
+mkdir -p tools/image-builder/files_ephemeral/usr/local/bin
+mkdir -p tools/image-builder/files_ephemeral/var/firecracker-containerd-test/scripts
+for f in tools/docker/scripts/*; do test -f $f && install -m 755 $f tools/image-builder/files_ephemeral/var/firecracker-containerd-test/scripts; done
+cp _submodules/runc/runc tools/image-builder/files_ephemeral/usr/local/bin
+cp agent/agent tools/image-builder/files_ephemeral/usr/local/bin
+touch tools/image-builder/files_ephemeral
+make -C tools/image-builder all-in-docker
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/tools/image-builder'
+docker build -t fc-image-builder:9000f53fb03d -f Dockerfile.debian-image .
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.debian-image
+#1 transferring dockerfile: 983B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for public.ecr.aws/docker/library/debian:trixie-slim@sha256:a72b4433de1cf7d6bae0c4cee74d0547f58601a643b3375f070c51600d63b6b2
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 47B done
+#3 DONE 0.0s
+
+#4 [1/3] FROM public.ecr.aws/docker/library/debian:trixie-slim@sha256:a72b4433de1cf7d6bae0c4cee74d0547f58601a643b3375f070c51600d63b6b2
+#4 resolve public.ecr.aws/docker/library/debian:trixie-slim@sha256:a72b4433de1cf7d6bae0c4cee74d0547f58601a643b3375f070c51600d63b6b2 done
+#4 DONE 0.0s
+
+#5 [2/3] RUN apt-get update &&     DEBIAN_FRONTEND=noninteractive apt-get -y install       --no-install-recommends       make squashfs-tools debootstrap ca-certificates debian-archive-keyring
+#5 CACHED
+
+#6 [3/3] WORKDIR /src
+#6 CACHED
+
+#7 exporting to image
+#7 exporting layers done
+#7 exporting manifest sha256:ebbcac0893721643d348c16d591e4adda33e04db04004decba97f221d1b338b8 done
+#7 exporting config sha256:bb903e8bee84649fe40827599032ab98eacfdafb9f8b61ec3b4f5b03fd7e7ad0 done
+#7 exporting attestation manifest sha256:87b1233ac5290d6c34c02632dea110eecb3262f186e6a67805ad550c4caa282a done
+#7 exporting manifest list sha256:d80dddeca8099aa743ac610e74006e4004c5f5effa4fbbeaf7827a920aae322d done
+#7 naming to docker.io/library/fc-image-builder:9000f53fb03d done
+#7 unpacking to docker.io/library/fc-image-builder:9000f53fb03d done
+#7 DONE 0.0s
+touch builder_9000f53fb03d_stamp
+docker run --rm \
+	--security-opt=apparmor=unconfined \
+	--volume /users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/tools/image-builder:/src \
+	--volume /src/tmp \
+	--cap-add=sys_admin \
+	--cap-add=sys_chroot \
+	--env=DEBMIRROR \
+	fc-image-builder:9000f53fb03d all
+mkdir tmp/rootfs
+debootstrap --variant=minbase --include=udev,systemd,systemd-sysv,procps,libseccomp2,haveged trixie "tmp/rootfs" https://snapshot.debian.org/archive/debian/20261110T000000Z/
+I: Retrieving InRelease 
+I: Checking Release signature
+I: Valid Release signature
+I: Retrieving Packages 
+I: Validating Packages 
+I: Resolving dependencies of required packages...
+I: Resolving dependencies of base packages...
+I: Checking component main on https://snapshot.debian.org/archive/debian/20261110T000000Z...
+I: Retrieving apt 3.0.3
+I: Validating apt 3.0.3
+I: Retrieving base-files 13.8+deb13u7
+I: Validating base-files 13.8+deb13u7
+I: Retrieving base-passwd 3.6.7
+I: Validating base-passwd 3.6.7
+I: Retrieving bash 5.2.37-2+b10
+I: Validating bash 5.2.37-2+b10
+I: Retrieving bsdutils 1:2.41.5-0+deb13u1
+I: Validating bsdutils 1:2.41.5-0+deb13u1
+I: Retrieving ca-certificates 20250419
+I: Validating ca-certificates 20250419
+I: Retrieving coreutils 9.7-3
+I: Validating coreutils 9.7-3
+I: Retrieving dash 0.5.12-12
+I: Validating dash 0.5.12-12
+I: Retrieving debconf 1.5.91
+I: Validating debconf 1.5.91
+I: Retrieving debian-archive-keyring 2025.1
+I: Validating debian-archive-keyring 2025.1
+I: Retrieving debianutils 5.23.2
+I: Validating debianutils 5.23.2
+I: Retrieving diffutils 1:3.10-4
+I: Validating diffutils 1:3.10-4
+I: Retrieving dpkg 1.22.22
+I: Validating dpkg 1.22.22
+I: Retrieving findutils 4.10.0-3
+I: Validating findutils 4.10.0-3
+I: Retrieving gcc-14-base 14.2.0-19
+I: Validating gcc-14-base 14.2.0-19
+I: Retrieving grep 3.11-4
+I: Validating grep 3.11-4
+I: Retrieving gzip 1.13-1+deb13u1
+I: Validating gzip 1.13-1+deb13u1
+I: Retrieving haveged 1.9.19-12+deb13u1
+I: Validating haveged 1.9.19-12+deb13u1
+I: Retrieving hostname 3.25
+I: Validating hostname 3.25
+I: Retrieving init-system-helpers 1.69~deb13u1
+I: Validating init-system-helpers 1.69~deb13u1
+I: Retrieving libacl1 2.3.2-2+b1
+I: Validating libacl1 2.3.2-2+b1
+I: Retrieving libapparmor1 4.1.0-1
+I: Validating libapparmor1 4.1.0-1
+I: Retrieving libapt-pkg7.0 3.0.3
+I: Validating libapt-pkg7.0 3.0.3
+I: Retrieving libattr1 1:2.5.2-3
+I: Validating libattr1 1:2.5.2-3
+I: Retrieving libaudit-common 1:4.0.2-2+deb13u1
+I: Validating libaudit-common 1:4.0.2-2+deb13u1
+I: Retrieving libaudit1 1:4.0.2-2+deb13u1
+I: Validating libaudit1 1:4.0.2-2+deb13u1
+I: Retrieving libblkid1 2.41.5-0+deb13u1
+I: Validating libblkid1 2.41.5-0+deb13u1
+I: Retrieving libbsd0 0.12.2-2
+I: Validating libbsd0 0.12.2-2
+I: Retrieving libbz2-1.0 1.0.8-6
+I: Validating libbz2-1.0 1.0.8-6
+I: Retrieving libc-bin 2.41-12+deb13u4
+I: Validating libc-bin 2.41-12+deb13u4
+I: Retrieving libc6 2.41-12+deb13u4
+I: Validating libc6 2.41-12+deb13u4
+I: Retrieving libcap-ng0 0.8.5-4+b1
+I: Validating libcap-ng0 0.8.5-4+b1
+I: Retrieving libcap2 1:2.75-10+deb13u1+b3
+I: Validating libcap2 1:2.75-10+deb13u1+b3
+I: Retrieving libcrypt1 1:4.4.38-1
+I: Validating libcrypt1 1:4.4.38-1
+I: Retrieving libdb5.3t64 5.3.28+dfsg2-9
+I: Validating libdb5.3t64 5.3.28+dfsg2-9
+I: Retrieving libdebconfclient0 0.280
+I: Validating libdebconfclient0 0.280
+I: Retrieving libgcc-s1 14.2.0-19
+I: Validating libgcc-s1 14.2.0-19
+I: Retrieving libgmp10 2:6.3.0+dfsg-3
+I: Validating libgmp10 2:6.3.0+dfsg-3
+I: Retrieving libhavege2 1.9.19-12+deb13u1
+I: Validating libhavege2 1.9.19-12+deb13u1
+I: Retrieving libhogweed6t64 3.10.1-1
+I: Validating libhogweed6t64 3.10.1-1
+I: Retrieving libkmod2 34.2-2
+I: Validating libkmod2 34.2-2
+I: Retrieving liblastlog2-2 2.41.5-0+deb13u1
+I: Validating liblastlog2-2 2.41.5-0+deb13u1
+I: Retrieving liblz4-1 1.10.0-4
+I: Validating liblz4-1 1.10.0-4
+I: Retrieving liblzma5 5.8.1-1+deb13u1
+I: Validating liblzma5 5.8.1-1+deb13u1
+I: Retrieving libmd0 1.1.0-2+b1
+I: Validating libmd0 1.1.0-2+b1
+I: Retrieving libmount1 2.41.5-0+deb13u1
+I: Validating libmount1 2.41.5-0+deb13u1
+I: Retrieving libncursesw6 6.5+20250216-2
+I: Validating libncursesw6 6.5+20250216-2
+I: Retrieving libnettle8t64 3.10.1-1
+I: Validating libnettle8t64 3.10.1-1
+I: Retrieving libpam-modules 1.7.0-5
+I: Validating libpam-modules 1.7.0-5
+I: Retrieving libpam-modules-bin 1.7.0-5
+I: Validating libpam-modules-bin 1.7.0-5
+I: Retrieving libpam-runtime 1.7.0-5
+I: Validating libpam-runtime 1.7.0-5
+I: Retrieving libpam0g 1.7.0-5
+I: Validating libpam0g 1.7.0-5
+I: Retrieving libpcre2-8-0 10.46-1~deb13u2
+I: Validating libpcre2-8-0 10.46-1~deb13u2
+I: Retrieving libproc2-0 2:4.0.4-9
+I: Validating libproc2-0 2:4.0.4-9
+I: Retrieving libseccomp2 2.6.0-2
+I: Validating libseccomp2 2.6.0-2
+I: Retrieving libselinux1 3.8.1-1
+I: Validating libselinux1 3.8.1-1
+I: Retrieving libsemanage-common 3.8.1-1
+I: Validating libsemanage-common 3.8.1-1
+I: Retrieving libsemanage2 3.8.1-1
+I: Validating libsemanage2 3.8.1-1
+I: Retrieving libsepol2 3.8.1-1
+I: Validating libsepol2 3.8.1-1
+I: Retrieving libsmartcols1 2.41.5-0+deb13u1
+I: Validating libsmartcols1 2.41.5-0+deb13u1
+I: Retrieving libsqlite3-0 3.46.1-7+deb13u2
+I: Validating libsqlite3-0 3.46.1-7+deb13u2
+I: Retrieving libssl3t64 3.5.7-1~deb13u2
+I: Validating libssl3t64 3.5.7-1~deb13u2
+I: Retrieving libstdc++6 14.2.0-19
+I: Validating libstdc++6 14.2.0-19
+I: Retrieving libsystemd-shared 257.13-1~deb13u1
+I: Validating libsystemd-shared 257.13-1~deb13u1
+I: Retrieving libsystemd0 257.13-1~deb13u1
+I: Validating libsystemd0 257.13-1~deb13u1
+I: Retrieving libtinfo6 6.5+20250216-2
+I: Validating libtinfo6 6.5+20250216-2
+I: Retrieving libudev1 257.13-1~deb13u1
+I: Validating libudev1 257.13-1~deb13u1
+I: Retrieving libuuid1 2.41.5-0+deb13u1
+I: Validating libuuid1 2.41.5-0+deb13u1
+I: Retrieving libxxhash0 0.8.3-2
+I: Validating libxxhash0 0.8.3-2
+I: Retrieving libzstd1 1.5.7+dfsg-1
+I: Validating libzstd1 1.5.7+dfsg-1
+I: Retrieving login 1:4.16.0-2+really2.41.5-0+deb13u1
+I: Validating login 1:4.16.0-2+really2.41.5-0+deb13u1
+I: Retrieving login.defs 1:4.17.4-2
+I: Validating login.defs 1:4.17.4-2
+I: Retrieving mawk 1.3.4.20250131-1
+I: Validating mawk 1.3.4.20250131-1
+I: Retrieving mount 2.41.5-0+deb13u1
+I: Validating mount 2.41.5-0+deb13u1
+I: Retrieving ncurses-base 6.5+20250216-2
+I: Validating ncurses-base 6.5+20250216-2
+I: Retrieving ncurses-bin 6.5+20250216-2
+I: Validating ncurses-bin 6.5+20250216-2
+I: Retrieving openssl 3.5.7-1~deb13u2
+I: Validating openssl 3.5.7-1~deb13u2
+I: Retrieving openssl-provider-legacy 3.5.7-1~deb13u2
+I: Validating openssl-provider-legacy 3.5.7-1~deb13u2
+I: Retrieving passwd 1:4.17.4-2
+I: Validating passwd 1:4.17.4-2
+I: Retrieving perl-base 5.40.1-6+deb13u1
+I: Validating perl-base 5.40.1-6+deb13u1
+I: Retrieving procps 2:4.0.4-9
+I: Validating procps 2:4.0.4-9
+I: Retrieving sed 4.9-2+deb13u1
+I: Validating sed 4.9-2+deb13u1
+I: Retrieving sqv 1.3.0-3+b2
+I: Validating sqv 1.3.0-3+b2
+I: Retrieving systemd 257.13-1~deb13u1
+I: Validating systemd 257.13-1~deb13u1
+I: Retrieving systemd-sysv 257.13-1~deb13u1
+I: Validating systemd-sysv 257.13-1~deb13u1
+I: Retrieving sysvinit-utils 3.14-4
+I: Validating sysvinit-utils 3.14-4
+I: Retrieving tar 1.35+dfsg-3.1
+I: Validating tar 1.35+dfsg-3.1
+I: Retrieving tzdata 2026c-0+deb13u1
+I: Validating tzdata 2026c-0+deb13u1
+I: Retrieving udev 257.13-1~deb13u1
+I: Validating udev 257.13-1~deb13u1
+I: Retrieving util-linux 2.41.5-0+deb13u1
+I: Validating util-linux 2.41.5-0+deb13u1
+I: Retrieving zlib1g 1:1.3.dfsg+really1.3.1-1+b1
+I: Validating zlib1g 1:1.3.dfsg+really1.3.1-1+b1
+I: Chosen extractor for .deb packages: dpkg-deb
+I: Extracting apt...
+I: Extracting base-files...
+I: Extracting base-passwd...
+I: Extracting bash...
+I: Extracting bsdutils...
+I: Extracting coreutils...
+I: Extracting dash...
+I: Extracting debconf...
+I: Extracting debian-archive-keyring...
+I: Extracting debianutils...
+I: Extracting diffutils...
+I: Extracting dpkg...
+I: Extracting findutils...
+I: Extracting gcc-14-base...
+I: Extracting grep...
+I: Extracting gzip...
+I: Extracting hostname...
+I: Extracting init-system-helpers...
+I: Extracting libacl1...
+I: Extracting libapt-pkg7.0...
+I: Extracting libattr1...
+I: Extracting libaudit-common...
+I: Extracting libaudit1...
+I: Extracting libblkid1...
+I: Extracting libbsd0...
+I: Extracting libbz2-1.0...
+I: Extracting libc-bin...
+I: Extracting libc6...
+I: Extracting libcap-ng0...
+I: Extracting libcap2...
+I: Extracting libcrypt1...
+I: Extracting libdb5.3t64...
+I: Extracting libdebconfclient0...
+I: Extracting libgcc-s1...
+I: Extracting libgmp10...
+I: Extracting libhogweed6t64...
+I: Extracting liblastlog2-2...
+I: Extracting liblz4-1...
+I: Extracting liblzma5...
+I: Extracting libmd0...
+I: Extracting libmount1...
+I: Extracting libnettle8t64...
+I: Extracting libpam-modules...
+I: Extracting libpam-modules-bin...
+I: Extracting libpam-runtime...
+I: Extracting libpam0g...
+I: Extracting libpcre2-8-0...
+I: Extracting libseccomp2...
+I: Extracting libselinux1...
+I: Extracting libsemanage-common...
+I: Extracting libsemanage2...
+I: Extracting libsepol2...
+I: Extracting libsmartcols1...
+I: Extracting libsqlite3-0...
+I: Extracting libssl3t64...
+I: Extracting libstdc++6...
+I: Extracting libsystemd0...
+I: Extracting libtinfo6...
+I: Extracting libudev1...
+I: Extracting libuuid1...
+I: Extracting libxxhash0...
+I: Extracting libzstd1...
+I: Extracting login...
+I: Extracting login.defs...
+I: Extracting mawk...
+I: Extracting mount...
+I: Extracting ncurses-base...
+I: Extracting ncurses-bin...
+I: Extracting openssl-provider-legacy...
+I: Extracting passwd...
+I: Extracting perl-base...
+I: Extracting sed...
+I: Extracting sqv...
+I: Extracting sysvinit-utils...
+I: Extracting tar...
+I: Extracting tzdata...
+I: Extracting util-linux...
+I: Extracting zlib1g...
+I: Installing core packages...
+I: Unpacking required packages...
+I: Unpacking apt...
+I: Unpacking base-files...
+I: Unpacking base-passwd...
+I: Unpacking bash...
+I: Unpacking bsdutils...
+I: Unpacking coreutils...
+I: Unpacking dash...
+I: Unpacking debconf...
+I: Unpacking debian-archive-keyring...
+I: Unpacking debianutils...
+I: Unpacking diffutils...
+I: Unpacking dpkg...
+I: Unpacking findutils...
+I: Unpacking gcc-14-base:amd64...
+I: Unpacking grep...
+I: Unpacking gzip...
+I: Unpacking hostname...
+I: Unpacking init-system-helpers...
+I: Unpacking libacl1:amd64...
+I: Unpacking libapt-pkg7.0:amd64...
+I: Unpacking libattr1:amd64...
+I: Unpacking libaudit-common...
+I: Unpacking libaudit1:amd64...
+I: Unpacking libblkid1:amd64...
+I: Unpacking libbsd0:amd64...
+I: Unpacking libbz2-1.0:amd64...
+I: Unpacking libc-bin...
+I: Unpacking libc6:amd64...
+I: Unpacking libcap-ng0:amd64...
+I: Unpacking libcap2:amd64...
+I: Unpacking libcrypt1:amd64...
+I: Unpacking libdb5.3t64:amd64...
+I: Unpacking libdebconfclient0:amd64...
+I: Unpacking libgcc-s1:amd64...
+I: Unpacking libgmp10:amd64...
+I: Unpacking libhogweed6t64:amd64...
+I: Unpacking liblastlog2-2:amd64...
+I: Unpacking liblz4-1:amd64...
+I: Unpacking liblzma5:amd64...
+I: Unpacking libmd0:amd64...
+I: Unpacking libmount1:amd64...
+I: Unpacking libnettle8t64:amd64...
+I: Unpacking libpam-modules:amd64...
+I: Unpacking libpam-modules-bin...
+I: Unpacking libpam-runtime...
+I: Unpacking libpam0g:amd64...
+I: Unpacking libpcre2-8-0:amd64...
+I: Unpacking libseccomp2:amd64...
+I: Unpacking libselinux1:amd64...
+I: Unpacking libsemanage-common...
+I: Unpacking libsemanage2:amd64...
+I: Unpacking libsepol2:amd64...
+I: Unpacking libsmartcols1:amd64...
+I: Unpacking libsqlite3-0:amd64...
+I: Unpacking libssl3t64:amd64...
+I: Unpacking libstdc++6:amd64...
+I: Unpacking libsystemd0:amd64...
+I: Unpacking libtinfo6:amd64...
+I: Unpacking libudev1:amd64...
+I: Unpacking libuuid1:amd64...
+I: Unpacking libxxhash0:amd64...
+I: Unpacking libzstd1:amd64...
+I: Unpacking login...
+I: Unpacking login.defs...
+I: Unpacking mawk...
+I: Unpacking mount...
+I: Unpacking ncurses-base...
+I: Unpacking ncurses-bin...
+I: Unpacking openssl-provider-legacy...
+I: Unpacking passwd...
+I: Unpacking perl-base...
+I: Unpacking sed...
+I: Unpacking sqv...
+I: Unpacking sysvinit-utils...
+I: Unpacking tar...
+I: Unpacking tzdata...
+I: Unpacking util-linux...
+I: Unpacking zlib1g:amd64...
+I: Configuring required packages...
+I: Configuring gcc-14-base:amd64...
+I: Configuring login.defs...
+I: Configuring debian-archive-keyring...
+I: Configuring libaudit-common...
+I: Configuring libsemanage-common...
+I: Configuring debconf...
+I: Configuring tzdata...
+I: Configuring ncurses-base...
+I: Configuring init-system-helpers...
+I: Configuring libgcc-s1:amd64...
+I: Configuring libc6:amd64...
+I: Configuring libdb5.3t64:amd64...
+I: Configuring libmd0:amd64...
+I: Configuring libxxhash0:amd64...
+I: Configuring libattr1:amd64...
+I: Configuring sysvinit-utils...
+I: Configuring debianutils...
+I: Configuring mawk...
+I: Configuring libdebconfclient0:amd64...
+I: Configuring base-files...
+I: Configuring libbz2-1.0:amd64...
+I: Configuring libbsd0:amd64...
+I: Configuring libblkid1:amd64...
+I: Configuring libstdc++6:amd64...
+I: Configuring dash...
+I: Configuring libtinfo6:amd64...
+I: Configuring bash...
+I: Configuring libzstd1:amd64...
+I: Configuring liblzma5:amd64...
+I: Configuring liblz4-1:amd64...
+I: Configuring libc-bin...
+I: Configuring libsqlite3-0:amd64...
+I: Configuring ncurses-bin...
+I: Configuring libacl1:amd64...
+I: Configuring libsmartcols1:amd64...
+I: Configuring zlib1g:amd64...
+I: Configuring libcrypt1:amd64...
+I: Configuring diffutils...
+I: Configuring libseccomp2:amd64...
+I: Configuring libcap2:amd64...
+I: Configuring perl-base...
+I: Configuring openssl-provider-legacy...
+I: Configuring hostname...
+I: Configuring libcap-ng0:amd64...
+I: Configuring libnettle8t64:amd64...
+I: Configuring libgmp10:amd64...
+I: Configuring libaudit1:amd64...
+I: Configuring gzip...
+I: Configuring libuuid1:amd64...
+I: Configuring libsepol2:amd64...
+I: Configuring libpcre2-8-0:amd64...
+I: Configuring libudev1:amd64...
+I: Configuring libhogweed6t64:amd64...
+I: Configuring sqv...
+I: Configuring grep...
+I: Configuring libssl3t64:amd64...
+I: Configuring liblastlog2-2:amd64...
+I: Configuring libsystemd0:amd64...
+I: Configuring libselinux1:amd64...
+I: Configuring libpam0g:amd64...
+I: Configuring sed...
+I: Configuring findutils...
+I: Configuring libmount1:amd64...
+I: Configuring libsemanage2:amd64...
+I: Configuring libapt-pkg7.0:amd64...
+I: Configuring base-passwd...
+I: Configuring apt...
+I: Configuring bsdutils...
+I: Configuring tar...
+I: Configuring libpam-modules-bin...
+I: Configuring coreutils...
+I: Configuring dpkg...
+I: Configuring mount...
+I: Configuring libpam-modules:amd64...
+I: Configuring passwd...
+I: Configuring libpam-runtime...
+I: Configuring login...
+I: Configuring util-linux...
+I: Configuring libc-bin...
+I: Unpacking the base system...
+I: Unpacking ca-certificates...
+I: Unpacking haveged...
+I: Unpacking libhavege2:amd64...
+I: Unpacking libkmod2:amd64...
+I: Unpacking libncursesw6:amd64...
+I: Unpacking libproc2-0:amd64...
+I: Unpacking openssl...
+I: Unpacking procps...
+I: Unpacking systemd-sysv...
+I: Unpacking udev...
+I: Configuring the base system...
+I: Configuring systemd-sysv...
+I: Configuring libhavege2:amd64...
+I: Configuring libproc2-0:amd64...
+I: Configuring libncursesw6:amd64...
+I: Configuring procps...
+I: Configuring openssl...
+I: Configuring libkmod2:amd64...
+I: Configuring haveged...
+I: Configuring ca-certificates...
+I: Configuring udev...
+I: Configuring libc-bin...
+I: Configuring ca-certificates...
+I: Base system installed successfully.
+rm -rf "tmp/rootfs/var/cache/apt/archives" "tmp/rootfs/usr/share/doc" "tmp/rootfs/var/lib/apt/lists"
+mkdir -p "tmp/rootfs/dev" "tmp/rootfs/bin" "tmp/rootfs/etc" "tmp/rootfs/etc/init.d" "tmp/rootfs/tmp" "tmp/rootfs/var" "tmp/rootfs/run" "tmp/rootfs/proc" "tmp/rootfs/sys" "tmp/rootfs/container/rootfs" "tmp/rootfs/agent" "tmp/rootfs/rom" "tmp/rootfs/overlay"
+touch debootstrap_stamp
+if [ -d files_common ]; then cd files_common && tar --owner=0 --group=0 -cf - . | (cd "/src/tmp/rootfs" && tar --keep-directory-symlink -xvf -); fi
+# Reset the timestamp on tmp/rootfs, which may have been modified by the
+# creation of files in it:
+touch --reference=debootstrap_stamp --no-create "tmp/rootfs"
+touch files_common_stamp
+if [ -d files_debootstrap ]; then cd files_debootstrap && tar --owner=0 --group=0 -cf - . | (cd "/src/tmp/rootfs" && tar --keep-directory-symlink -xvf -); fi
+./
+./sbin/
+./sbin/overlay-init
+./etc/
+./etc/systemd/
+./etc/systemd/system/
+./etc/systemd/system/haveged.service
+./etc/systemd/system/firecracker.target
+./etc/systemd/system/apt-daily-upgrade.timer
+./etc/systemd/system/systemd-timesyncd.service
+./etc/systemd/system/rom.mount
+./etc/systemd/system/firecracker-agent.service
+./etc/systemd/system/firecracker.target.wants/
+./etc/systemd/system/firecracker.target.wants/haveged.service
+./etc/systemd/system/firecracker.target.wants/getty.target
+./etc/systemd/system/firecracker.target.wants/firecracker-agent.service
+./etc/systemd/system/apt-daily.timer
+./etc/systemd/system/rom-overlay.mount
+./etc/systemd/system/getty-static.service
+./etc/systemd/system/rom-dev.mount
+./etc/resolv.conf
+./etc/hostname
+./etc/hosts
+# Reset the timestamp on tmp/rootfs, which may have been modified by the
+# creation of files in it:
+touch --reference=debootstrap_stamp --no-create "tmp/rootfs"
+touch files_debootstrap_stamp
+if [ -d files_ephemeral ]; then cd files_ephemeral && tar --owner=0 --group=0 -cf - . | (cd "/src/tmp/rootfs" && tar --keep-directory-symlink -xvf -); fi
+./
+./var/
+./var/firecracker-containerd-test/
+./var/firecracker-containerd-test/scripts/
+./var/firecracker-containerd-test/scripts/lsblk.sh
+./usr/
+./usr/local/
+./usr/local/bin/
+./usr/local/bin/agent
+./usr/local/bin/runc
+# Reset the timestamp on tmp/rootfs, which may have been modified by the
+# creation of files in it:
+touch --reference=debootstrap_stamp --no-create "tmp/rootfs"
+touch files_ephemeral_stamp
+mksquashfs "tmp/rootfs" rootfs.img -noappend
+Unrecognised xattr prefix system.posix_acl_access
+Unrecognised xattr prefix system.posix_acl_default
+Parallel mksquashfs: Using 32 processors
+Creating 4.0 filesystem on rootfs.img, block size 131072.
+
+[=============================================================-] 6401/6401 100%
+
+Exportable Squashfs 4.0 filesystem, gzip compressed, data block size 131072
+	compressed data, compressed metadata, compressed fragments,
+	compressed xattrs, compressed ids
+	duplicates are removed
+Filesystem size 70249.82 Kbytes (68.60 Mbytes)
+	36.92% of uncompressed filesystem size (190281.31 Kbytes)
+Inode table size 75903 bytes (74.12 Kbytes)
+	29.63% of uncompressed inode table size (256210 bytes)
+Directory table size 70492 bytes (68.84 Kbytes)
+	43.51% of uncompressed directory table size (162002 bytes)
+Number of duplicate files found 78
+Number of inodes 7212
+Number of files 5444
+Number of fragments 524
+Number of symbolic links 969
+Number of device nodes 8
+Number of fifo nodes 0
+Number of socket nodes 0
+Number of directories 791
+Number of hard-links 1
+Number of ids (unique uids + gids) 6
+Number of uids 2
+	root (0)
+	unknown (998)
+Number of gids 6
+	root (0)
+	shadow (42)
+	unknown (998)
+	utmp (43)
+	unknown (999)
+	mail (8)
+rm -fr tmp/rootfs-debug.img
+cp -a "tmp/rootfs" tmp/rootfs-debug.img
+mv tmp/rootfs-debug.img/usr/local/bin/agent tmp/rootfs-debug.img/usr/local/bin/agent.real
+cp agent.sh tmp/rootfs-debug.img/usr/local/bin/agent
+ls -l tmp/rootfs-debug.img/usr/local/bin
+total 34568
+-rwxr-xr-x 1 root root      488 Nov 12 21:13 agent
+-rwxr-xr-x 1 root root 18337954 Nov 12 21:12 agent.real
+-rwxr-xr-x 1 root root 17001128 Nov 12 21:12 runc
+mksquashfs tmp/rootfs-debug.img rootfs-debug.img -noappend
+Unrecognised xattr prefix system.posix_acl_access
+Unrecognised xattr prefix system.posix_acl_default
+Parallel mksquashfs: Using 32 processors
+Creating 4.0 filesystem on rootfs-debug.img, block size 131072.
+
+[=============================================================-] 6402/6402 100%
+
+Exportable Squashfs 4.0 filesystem, gzip compressed, data block size 131072
+	compressed data, compressed metadata, compressed fragments,
+	compressed xattrs, compressed ids
+	duplicates are removed
+Filesystem size 70250.05 Kbytes (68.60 Mbytes)
+	36.92% of uncompressed filesystem size (190281.84 Kbytes)
+Inode table size 75910 bytes (74.13 Kbytes)
+	29.62% of uncompressed inode table size (256242 bytes)
+Directory table size 70498 bytes (68.85 Kbytes)
+	43.51% of uncompressed directory table size (162020 bytes)
+Number of duplicate files found 78
+Number of inodes 7213
+Number of files 5445
+Number of fragments 524
+Number of symbolic links 969
+Number of device nodes 8
+Number of fifo nodes 0
+Number of socket nodes 0
+Number of directories 791
+Number of hard-links 1
+Number of ids (unique uids + gids) 6
+Number of uids 2
+	root (0)
+	unknown (998)
+Number of gids 6
+	root (0)
+	shadow (42)
+	unknown (998)
+	utmp (43)
+	unknown (999)
+	mail (8)
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/tools/image-builder'
+docker build \
+	-t localhost/stargz-builder:9000f53fb03d \
+	-f tools/docker/Dockerfile.stargz-builder \
+	tools/
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.stargz-builder
+#1 transferring dockerfile: 743B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/1] FROM public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0
+#4 resolve public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 done
+#4 CACHED
+
+#5 exporting to image
+#5 exporting layers done
+#5 exporting manifest sha256:4e45386887bf7752b757b0d2e2ea025a25fb723f34bbb4a76bc6f910a18cfea7 done
+#5 exporting config sha256:b615f501b0b5e98b39dd3bb331d0262df650e223d8564b66019b3a7aac011cc3 done
+#5 exporting attestation manifest sha256:1654e3f5473f2ef8072334b6141dc6b34b8fd9adfde89e976d905b85291fad2e done
+#5 exporting manifest list sha256:bd10c64db1c2391511c312d6321dda407b3a3ae5b8f8eece897245e7f9ac0d78 done
+#5 naming to localhost/stargz-builder:9000f53fb03d done
+#5 unpacking to localhost/stargz-builder:9000f53fb03d 0.0s done
+#5 DONE 0.0s
+touch tools/stargz-builder-9000f53fb03d-stamp
+docker run --rm \
+--user 20005:3763 \
+--volume gocache:/go \
+--volume /users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime:/src \
+-e HOME=/tmp \
+-e GOPATH=/go \
+-e GOPROXY=https://proxy.golang.org,direct \
+--workdir /src/_submodules/stargz-snapshotter \
+localhost/stargz-builder:9000f53fb03d \
+make
+cd cmd/ ; GO111MODULE=auto go build -o /src/_submodules/stargz-snapshotter/out/containerd-stargz-grpc  -ldflags '-s -w -X github.com/containerd/stargz-snapshotter/version.Version=v0.18.2 -X github.com/containerd/stargz-snapshotter/version.Revision=3070538befb5a6c09f93e99164762b3a76310357 ' -v ./containerd-stargz-grpc
+internal/goarch
+internal/coverage/rtcov
+internal/unsafeheader
+internal/byteorder
+internal/godebugs
+internal/profilerecord
+internal/goos
+internal/runtime/pprof/label
+math/bits
+internal/asan
+internal/trace/tracev2
+log/internal
+cmp
+unicode/utf8
+container/list
+unicode/utf16
+internal/goexperiment
+internal/msan
+encoding
+crypto/internal/fips140/alias
+unicode
+crypto/internal/constanttime
+vendor/golang.org/x/crypto/cryptobyte/asn1
+google.golang.org/grpc/serviceconfig
+google.golang.org/grpc/encoding/internal
+github.com/google/go-cmp/cmp/internal/flags
+internal/nettrace
+vendor/golang.org/x/crypto/internal/alias
+internal/cpu
+crypto/internal/boring/sig
+sync/atomic
+github.com/klauspost/compress/internal/cpuinfo
+github.com/klauspost/compress/internal/le
+internal/runtime/syscall/linux
+internal/runtime/atomic
+internal/abi
+internal/runtime/gc
+internal/runtime/math
+google.golang.org/protobuf/internal/flags
+internal/runtime/sys
+log/slog/internal
+crypto/internal/fips140deps/byteorder
+go.opentelemetry.io/otel/trace/embedded
+go.opentelemetry.io/otel/metric/embedded
+github.com/containerd/stargz-snapshotter/fs/config
+github.com/containerd/containerd/v2/defaults
+github.com/golang/groupcache/lru
+github.com/containerd/containerd/v2/plugins/services
+github.com/opencontainers/runtime-spec/specs-go/features
+github.com/cyphar/filepath-securejoin/internal/consts
+google.golang.org/protobuf/internal/set
+internal/strconv
+golang.org/x/exp/constraints
+github.com/hanwen/go-fuse/v2/internal/ioctl
+github.com/containerd/stargz-snapshotter/version
+github.com/docker/cli/cli/config/types
+k8s.io/apimachinery/pkg/api/validate/constraints
+github.com/pelletier/go-toml/v2/internal/characters
+k8s.io/apimachinery/pkg/selection
+k8s.io/apimachinery/pkg/types
+k8s.io/apimachinery/pkg/api/safe
+k8s.io/utils/buffer
+crypto/internal/fips140/subtle
+golang.org/x/exp/slices
+crypto/subtle
+internal/runtime/exithook
+crypto/internal/fips140deps/cpu
+internal/chacha8rand
+internal/bytealg
+internal/runtime/gc/scan
+math
+internal/stringslite
+internal/runtime/cgroup
+internal/synctest
+internal/race
+internal/sync
+internal/runtime/maps
+github.com/klauspost/compress
+runtime
+internal/reflectlite
+weak
+k8s.io/klog/v2/internal/dbg
+iter
+github.com/containerd/containerd/v2/version
+sync
+runtime/metrics
+maps
+slices
+k8s.io/apimachinery/pkg/util/sets
+errors
+sort
+internal/bisect
+google.golang.org/protobuf/internal/pragma
+github.com/josharian/intern
+internal/singleflight
+github.com/containerd/stargz-snapshotter/util/ioutils
+log/slog/internal/buffer
+unique
+crypto/internal/fips140cache
+github.com/containerd/stargz-snapshotter/util/namedmutex
+internal/testlog
+internal/oserror
+io
+internal/godebug
+strconv
+path
+math/rand/v2
+vendor/golang.org/x/net/dns/dnsmessage
+google.golang.org/grpc/internal/buffer
+go.etcd.io/bbolt/errors
+github.com/moby/locker
+syscall
+github.com/beorn7/perks/quantile
+container/heap
+reflect
+net/netip
+github.com/x448/float16
+encoding/base64
+bytes
+crypto/internal/randutil
+hash
+strings
+internal/saferio
+encoding/base32
+github.com/multiformats/go-base32
+github.com/prometheus/client_golang/prometheus/promhttp/internal
+k8s.io/client-go/tools/cache/synctrack
+hash/fnv
+crypto
+hash/crc32
+hash/adler32
+github.com/spaolacci/murmur3
+crypto/internal/fips140deps/godebug
+math/rand
+runtime/cgo
+vendor/golang.org/x/text/transform
+golang.org/x/text/transform
+crypto/internal/impl
+encoding/pem
+bufio
+k8s.io/apimachinery/pkg/api/operation
+go/build/constraint
+net/http/internal/ascii
+crypto/internal/fips140
+github.com/munnerz/goautoneg
+k8s.io/klog/v2/internal/severity
+regexp/syntax
+html
+crypto/internal/fips140/sha256
+crypto/internal/fips140/sha512
+crypto/internal/fips140/sha3
+crypto/sha3
+crypto/internal/fips140/hmac
+crypto/internal/fips140/check
+crypto/internal/fips140hash
+internal/syscall/execenv
+time
+internal/syscall/unix
+crypto/fips140
+crypto/internal/fips140/tls12
+crypto/internal/fips140/aes
+crypto/internal/fips140/edwards25519/field
+crypto/internal/fips140/bigmod
+crypto/internal/fips140/hkdf
+crypto/internal/fips140/nistec/fiat
+crypto/tls/internal/fips140tls
+crypto/internal/fips140/tls13
+regexp
+crypto/internal/fips140/edwards25519
+k8s.io/apimachinery/pkg/version
+context
+crypto/internal/fips140deps/time
+google.golang.org/grpc/balancer/pickfirst/internal
+google.golang.org/grpc/backoff
+google.golang.org/grpc/internal/idle
+google.golang.org/grpc/keepalive
+github.com/google/go-cmp/cmp/internal/diff
+github.com/containerd/stargz-snapshotter/util/cacheutil
+k8s.io/utils/clock
+k8s.io/klog/v2/internal/clock
+io/fs
+internal/poll
+crypto/internal/entropy/v1.0.0
+k8s.io/apimachinery/pkg/util/cache
+google.golang.org/grpc/internal/backoff
+github.com/containerd/errdefs
+golang.org/x/sync/semaphore
+google.golang.org/grpc/internal/grpcsync
+go.opentelemetry.io/otel/internal/baggage
+github.com/containerd/containerd/v2/internal/cleanup
+embed
+internal/filepathlite
+github.com/containerd/stargz-snapshotter/task
+crypto/internal/fips140/nistec
+google.golang.org/protobuf/internal/editiondefaults
+internal/fmtsort
+github.com/google/go-cmp/cmp/internal/function
+encoding/binary
+github.com/goccy/go-json/internal/runtime
+k8s.io/kube-openapi/pkg/util
+go.opentelemetry.io/otel/attribute/internal
+github.com/modern-go/reflect2
+sigs.k8s.io/structured-merge-diff/v6/schema
+os
+vendor/golang.org/x/crypto/internal/poly1305
+github.com/multiformats/go-varint
+sigs.k8s.io/randfill/bytesource
+github.com/klauspost/compress/zstd/internal/xxhash
+github.com/cespare/xxhash/v2
+github.com/klauspost/compress/internal/snapref
+golang.org/x/sys/unix
+crypto/internal/sysrand
+google.golang.org/protobuf/internal/detrand
+io/ioutil
+github.com/containerd/containerd/v2/internal/lazyregexp
+os/signal
+github.com/prometheus/procfs/internal/util
+google.golang.org/grpc/internal/envconfig
+fmt
+vendor/golang.org/x/sys/cpu
+internal/lazyregexp
+k8s.io/klog/v2/internal/buffer
+golang.org/x/sys/cpu
+path/filepath
+crypto/internal/fips140/drbg
+golang.org/x/crypto/blake2s
+golang.org/x/crypto/sha3
+golang.org/x/crypto/blake2b
+crypto/internal/fips140only
+crypto/internal/fips140/ecdh
+crypto/internal/fips140/ed25519
+crypto/internal/fips140/ecdsa
+crypto/internal/fips140/aes/gcm
+crypto/internal/fips140/rsa
+crypto/internal/fips140/mlkem
+k8s.io/client-go/util/homedir
+os/exec
+crypto/hkdf
+crypto/md5
+crypto/rc4
+crypto/cipher
+crypto/mlkem
+github.com/mitchellh/go-homedir
+crypto/internal/boring
+crypto/des
+vendor/golang.org/x/crypto/chacha20
+crypto/aes
+crypto/internal/rand
+crypto/hmac
+crypto/sha256
+crypto/sha512
+crypto/sha1
+log
+encoding/hex
+compress/flate
+math/big
+vendor/golang.org/x/text/unicode/norm
+mime/quotedprintable
+encoding/json
+vendor/golang.org/x/net/http2/hpack
+google.golang.org/protobuf/internal/errors
+mime
+text/template/parse
+net/url
+text/tabwriter
+go/token
+google.golang.org/grpc/attributes
+google.golang.org/protobuf/internal/version
+net/http/internal
+github.com/opencontainers/go-digest
+github.com/opencontainers/image-spec/specs-go
+golang.org/x/text/unicode/norm
+flag
+golang.org/x/net/http2/hpack
+github.com/moby/sys/userns
+golang.org/x/sync/errgroup
+google.golang.org/protobuf/encoding/protowire
+github.com/google/go-cmp/cmp/internal/value
+github.com/containerd/errdefs/pkg/internal/cause
+github.com/containerd/errdefs/pkg/internal/types
+crypto/ecdh
+github.com/containerd/stargz-snapshotter/estargz/errorutil
+github.com/klauspost/compress/fse
+vendor/golang.org/x/crypto/chacha20poly1305
+runtime/debug
+github.com/goccy/go-json/internal/errors
+database/sql/driver
+go.etcd.io/bbolt/internal/common
+github.com/containerd/containerd/v2/pkg/labels
+go.yaml.in/yaml/v2
+github.com/prometheus/procfs/internal/fs
+vendor/golang.org/x/text/unicode/bidi
+google.golang.org/protobuf/reflect/protoreflect
+github.com/opencontainers/image-spec/specs-go/v1
+golang.org/x/net/internal/timeseries
+golang.org/x/text/unicode/bidi
+github.com/containerd/containerd/v2/pkg/epoch
+github.com/containerd/containerd/v2/pkg/cap
+github.com/containerd/containerd/v2/pkg/identifiers
+github.com/google/go-cmp/cmp
+github.com/opencontainers/runtime-spec/specs-go
+github.com/distribution/reference
+github.com/containerd/containerd/v2/internal/kmutex
+github.com/opencontainers/image-spec/identity
+github.com/containerd/plugin
+go.etcd.io/bbolt/internal/freelist
+github.com/cyphar/filepath-securejoin/pathrs-lite/internal/gocompat
+github.com/cyphar/filepath-securejoin/pathrs-lite/internal/assert
+golang.org/x/sync/singleflight
+github.com/opencontainers/selinux/pkg/pwalkdir
+github.com/multiformats/go-base36
+github.com/multiformats/go-multihash/core
+github.com/multiformats/go-multiaddr/x/meg
+github.com/hanwen/go-fuse/v2/splice
+go.opentelemetry.io/otel/baggage
+golang.org/x/sys/execabs
+github.com/klauspost/compress/huff0
+github.com/pelletier/go-toml/v2/internal/danger
+github.com/containerd/containerd/v2/pkg/reference
+crypto/hpke
+net
+github.com/containerd/containerd/v2/internal/userns
+compress/gzip
+github.com/klauspost/cpuid/v2
+github.com/containerd/containerd/v2/plugins
+k8s.io/apimachinery/pkg/api/validate/content
+k8s.io/apimachinery/third_party/forked/golang/reflect
+k8s.io/apimachinery/pkg/fields
+k8s.io/apimachinery/pkg/util/errors
+go/internal/scannerhooks
+go/doc/comment
+github.com/multiformats/go-multihash/register/blake2
+github.com/multiformats/go-multihash/register/murmur3
+github.com/multiformats/go-multihash/register/sha3
+github.com/multiformats/go-multihash/register/sha256
+github.com/pelletier/go-toml/v2/unstable
+go/scanner
+k8s.io/apimachinery/pkg/conversion/queryparams
+k8s.io/apimachinery/pkg/runtime/schema
+github.com/multiformats/go-multihash/register/miniosha256
+k8s.io/apimachinery/pkg/util/naming
+github.com/modern-go/concurrent
+sigs.k8s.io/randfill
+k8s.io/utils/ptr
+vendor/golang.org/x/text/secure/bidirule
+go.yaml.in/yaml/v3
+github.com/go-openapi/jsonreference/internal
+k8s.io/apimachinery/pkg/util/version
+gopkg.in/yaml.v3
+k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json
+k8s.io/client-go/pkg/version
+k8s.io/client-go/tools/metrics
+github.com/davecgh/go-spew/spew
+text/template
+k8s.io/apimachinery/pkg/conversion
+golang.org/x/time/rate
+k8s.io/kube-openapi/pkg/cached
+compress/zlib
+encoding/xml
+github.com/emicklei/go-restful/v3/log
+k8s.io/apimachinery/third_party/forked/golang/json
+github.com/containerd/containerd/v2/pkg/kernelversion
+golang.org/x/text/secure/bidirule
+github.com/containerd/continuity/devices
+github.com/containerd/continuity/sysx
+github.com/moby/sys/mountinfo
+go.etcd.io/bbolt
+github.com/containerd/stargz-snapshotter/cache
+github.com/moby/sys/user
+github.com/containerd/fifo
+github.com/moby/sys/signal
+github.com/cyphar/filepath-securejoin/pathrs-lite/internal
+github.com/cyphar/filepath-securejoin/pathrs-lite/internal/kernelversion
+github.com/containerd/containerd/v2/internal/fsverity
+github.com/hanwen/go-fuse/v2/internal/fallocate
+github.com/hanwen/go-fuse/v2/internal/openat
+github.com/hanwen/go-fuse/v2/internal/renameat
+github.com/hanwen/go-fuse/v2/internal/xattr
+google.golang.org/protobuf/internal/descfmt
+google.golang.org/protobuf/internal/descopts
+vendor/golang.org/x/net/idna
+google.golang.org/protobuf/internal/strs
+google.golang.org/protobuf/internal/encoding/messageset
+google.golang.org/protobuf/internal/genid
+google.golang.org/protobuf/internal/order
+google.golang.org/protobuf/runtime/protoiface
+github.com/cyphar/filepath-securejoin/pathrs-lite/internal/fd
+golang.org/x/net/idna
+github.com/pelletier/go-toml/v2/internal/tracker
+go/ast
+lukechampine.com/blake3
+golang.org/x/term
+google.golang.org/protobuf/internal/encoding/text
+google.golang.org/protobuf/internal/encoding/json
+github.com/containerd/containerd/v2/pkg/cio
+github.com/cyphar/filepath-securejoin/pathrs-lite/internal/linux
+google.golang.org/protobuf/internal/protolazy
+google.golang.org/grpc/grpclog/internal
+github.com/sirupsen/logrus
+github.com/goccy/go-json/internal/decoder
+google.golang.org/protobuf/reflect/protoregistry
+github.com/gogo/protobuf/proto
+os/user
+github.com/goccy/go-json/internal/encoder
+go.opentelemetry.io/otel/attribute
+go.opentelemetry.io/otel/codes
+log/slog
+go.opentelemetry.io/auto/sdk/internal/telemetry
+go.opentelemetry.io/otel/trace/internal/telemetry
+google.golang.org/grpc/grpclog
+github.com/pelletier/go-toml/v2
+github.com/docker/docker-credential-helpers/credentials
+github.com/cyphar/filepath-securejoin/pathrs-lite/internal/procfs
+google.golang.org/protobuf/internal/encoding/defval
+sigs.k8s.io/json/internal/golang/encoding/json
+k8s.io/apimachinery/pkg/util/validation/field
+k8s.io/apimachinery/pkg/util/framer
+github.com/multiformats/go-multihash/register/blake3
+google.golang.org/protobuf/proto
+github.com/mailru/easyjson/jlexer
+google.golang.org/grpc/connectivity
+google.golang.org/grpc/internal/grpclog
+github.com/multiformats/go-multihash/register/all
+github.com/docker/docker-credential-helpers/client
+sigs.k8s.io/yaml
+k8s.io/apimachinery/pkg/util/dump
+k8s.io/client-go/util/flowcontrol
+gopkg.in/evanphx/json-patch.v4
+github.com/pmezard/go-difflib/difflib
+encoding/csv
+go.opentelemetry.io/otel/semconv/v1.20.0
+crypto/rand
+crypto/elliptic
+crypto/internal/boring/bbig
+crypto/dsa
+encoding/asn1
+archive/tar
+github.com/vbatts/tar-split/archive/tar
+go.opentelemetry.io/otel/semconv/v1.37.0
+go.opentelemetry.io/otel/metric
+go.opentelemetry.io/otel/semconv/v1.26.0
+go.opentelemetry.io/otel/semconv/v1.21.0
+github.com/mr-tron/base58/base58
+github.com/hanwen/go-fuse/v2/internal
+gopkg.in/inf.v0
+crypto/ed25519
+crypto/rsa
+github.com/containerd/containerd/v2/internal/randutil
+github.com/klauspost/compress/zstd
+html/template
+github.com/rs/xid
+github.com/go-logr/logr
+github.com/multiformats/go-multibase
+github.com/multiformats/go-multihash
+github.com/cyphar/filepath-securejoin/pathrs-lite/procfs
+github.com/fxamacker/cbor/v2
+k8s.io/klog/v2/internal/sloghandler
+github.com/containerd/log
+go/doc
+go/parser
+github.com/cyphar/filepath-securejoin/pathrs-lite/internal/gopathrs
+github.com/json-iterator/go
+k8s.io/apimachinery/pkg/util/mergepatch
+go.opentelemetry.io/otel/metric/noop
+k8s.io/apimachinery/pkg/util/diff
+github.com/go-logr/logr/funcr
+github.com/ipfs/go-cid
+google.golang.org/protobuf/encoding/prototext
+google.golang.org/protobuf/internal/filedesc
+github.com/containerd/continuity/fs
+github.com/containerd/containerd/v2/pkg/filters
+github.com/containerd/platforms
+google.golang.org/protobuf/encoding/protodelim
+github.com/containerd/containerd/v2/pkg/protobuf/proto
+k8s.io/klog/v2/internal/serialize
+github.com/pelletier/go-toml
+github.com/google/gnostic-models/jsonschema
+internal/profile
+github.com/cyphar/filepath-securejoin/pathrs-lite
+runtime/pprof
+k8s.io/klog/v2
+runtime/trace
+github.com/containerd/containerd/v2/core/content
+vendor/golang.org/x/crypto/cryptobyte
+crypto/x509/pkix
+github.com/goccy/go-json/internal/encoder/vm_color_indent
+github.com/go-logr/stdr
+github.com/opencontainers/selinux/go-selinux
+github.com/containerd/containerd/v2/plugins/content/local
+go.opentelemetry.io/otel/trace
+crypto/ecdsa
+sigs.k8s.io/json
+github.com/containerd/containerd/v2/pkg/archive/tarheader
+k8s.io/apimachinery/pkg/util/json
+github.com/opencontainers/selinux/go-selinux/label
+k8s.io/utils/trace
+k8s.io/apimachinery/pkg/util/yaml
+github.com/containerd/containerd/v2/pkg/archive
+go.opentelemetry.io/otel/trace/noop
+google.golang.org/protobuf/encoding/protojson
+google.golang.org/protobuf/internal/encoding/tag
+go.opentelemetry.io/auto/sdk
+google.golang.org/protobuf/internal/impl
+vendor/golang.org/x/net/http/httpproxy
+github.com/containerd/containerd/v2/pkg/dialer
+github.com/containerd/containerd/v2/pkg/sys
+google.golang.org/grpc/internal/resolver/dns/internal
+google.golang.org/grpc/internal/syscall
+github.com/mailru/easyjson/buffer
+google.golang.org/grpc/internal
+github.com/multiformats/go-multiaddr
+k8s.io/client-go/util/connrotation
+net/textproto
+github.com/docker/cli/cli/config/credentials
+github.com/hanwen/go-fuse/v2/fuse
+k8s.io/utils/internal/third_party/forked/golang/net
+github.com/prometheus/procfs
+github.com/coreos/go-systemd/v22/daemon
+github.com/google/uuid
+github.com/spf13/pflag
+github.com/mailru/easyjson/jwriter
+k8s.io/utils/net
+github.com/docker/cli/cli/config/memorystore
+k8s.io/apimachinery/pkg/runtime/serializer/cbor/internal/modes
+google.golang.org/grpc/codes
+google.golang.org/grpc/metadata
+google.golang.org/grpc/mem
+github.com/containerd/containerd/v2/pkg/archive/compression
+github.com/containerd/stargz-snapshotter/estargz
+sigs.k8s.io/structured-merge-diff/v6/value
+crypto/x509
+github.com/docker/cli/cli/config/configfile
+vendor/golang.org/x/net/http/httpguts
+golang.org/x/net/http/httpguts
+mime/multipart
+google.golang.org/grpc/tap
+google.golang.org/grpc/stats
+google.golang.org/grpc/internal/grpcutil
+google.golang.org/grpc/internal/balancerload
+github.com/containerd/containerd/v2/core/leases
+google.golang.org/grpc/encoding
+github.com/containerd/containerd/v2/core/images
+google.golang.org/grpc/experimental/stats
+k8s.io/apimachinery/pkg/util/validation
+k8s.io/apimachinery/pkg/runtime/serializer/cbor/direct
+github.com/docker/cli/cli/config
+google.golang.org/grpc/internal/stats
+k8s.io/apimachinery/pkg/api/resource
+k8s.io/apimachinery/pkg/util/intstr
+k8s.io/apimachinery/pkg/labels
+github.com/multiformats/go-multiaddr/net
+github.com/containerd/containerd/v2/core/transfer
+github.com/containerd/containerd/v2/core/images/archive
+github.com/containerd/containerd/v2/core/images/converter
+github.com/containerd/containerd/v2/core/remotes
+github.com/containerd/containerd/v2/core/images/converter/uncompress
+github.com/containerd/stargz-snapshotter/util/containerdutil
+github.com/hanwen/go-fuse/v2/fs
+sigs.k8s.io/structured-merge-diff/v6/fieldpath
+k8s.io/client-go/util/keyutil
+crypto/tls
+sigs.k8s.io/structured-merge-diff/v6/typed
+github.com/containerd/stargz-snapshotter/metadata
+github.com/containerd/stargz-snapshotter/estargz/zstdchunked
+github.com/containerd/stargz-snapshotter/nativeconverter/estargz
+github.com/containerd/stargz-snapshotter/estargz/externaltoc
+github.com/containerd/stargz-snapshotter/metadata/memory
+sigs.k8s.io/structured-merge-diff/v6/merge
+k8s.io/client-go/applyconfigurations/internal
+google.golang.org/protobuf/internal/filetype
+google.golang.org/protobuf/runtime/protoimpl
+google.golang.org/protobuf/protoadapt
+google.golang.org/protobuf/types/known/anypb
+google.golang.org/protobuf/types/descriptorpb
+google.golang.org/protobuf/types/known/emptypb
+google.golang.org/protobuf/types/known/timestamppb
+github.com/containerd/containerd/api/types/runc/options
+google.golang.org/protobuf/types/known/durationpb
+google.golang.org/protobuf/types/known/fieldmaskpb
+google.golang.org/grpc/internal/pretty
+google.golang.org/grpc/encoding/proto
+github.com/containerd/containerd/v2/pkg/protobuf
+github.com/prometheus/client_model/go
+google.golang.org/genproto/googleapis/rpc/status
+github.com/containerd/containerd/api/types/task
+github.com/containerd/typeurl/v2
+github.com/google/gnostic-models/extensions
+google.golang.org/grpc/binarylog/grpc_binarylog_v1
+github.com/containerd/containerd/v2/pkg/protobuf/types
+google.golang.org/grpc/internal/status
+github.com/containerd/containerd/v2/core/containers
+github.com/containerd/containerd/v2/core/events
+github.com/containerd/containerd/v2/core/streaming
+github.com/containerd/containerd/v2/core/metadata/boltutil
+github.com/prometheus/common/model
+google.golang.org/grpc/status
+google.golang.org/grpc/internal/binarylog
+github.com/containerd/errdefs/pkg/errgrpc
+github.com/containerd/ttrpc
+github.com/containerd/containerd/api/types
+github.com/containerd/containerd/api/types/transfer
+github.com/containerd/containerd/v2/core/mount
+github.com/prometheus/client_golang/prometheus/internal
+github.com/containerd/containerd/v2/core/transfer/streaming
+github.com/containerd/containerd/v2/pkg/namespaces
+net/http/httptrace
+google.golang.org/grpc/internal/credentials
+k8s.io/client-go/util/cert
+github.com/containerd/containerd/v2/core/snapshots
+github.com/containerd/containerd/v2/plugins/snapshots/overlay/overlayutils
+github.com/containerd/containerd/v2/core/diff
+google.golang.org/grpc/credentials
+net/http/internal/httpcommon
+golang.org/x/net/internal/httpcommon
+github.com/goccy/go-json/internal/encoder/vm_color
+github.com/containerd/containerd/v2/core/images/usage
+github.com/containerd/containerd/v2/core/snapshots/storage
+github.com/containerd/containerd/v2/pkg/oci
+github.com/containerd/containerd/v2/pkg/rootfs
+google.golang.org/grpc/peer
+google.golang.org/grpc/credentials/insecure
+google.golang.org/grpc/internal/channelz
+google.golang.org/grpc/resolver
+net/http
+github.com/containerd/stargz-snapshotter/snapshot
+google.golang.org/grpc/internal/metadata
+google.golang.org/grpc/internal/transport/networktype
+google.golang.org/grpc/internal/proxyattributes
+google.golang.org/grpc/internal/resolver/passthrough
+google.golang.org/grpc/balancer/grpclb/state
+google.golang.org/grpc/internal/resolver/unix
+google.golang.org/grpc/internal/resolver/dns
+google.golang.org/grpc/resolver/dns
+google.golang.org/grpc/channelz
+google.golang.org/grpc/balancer
+google.golang.org/grpc/balancer/base
+google.golang.org/grpc/balancer/pickfirst
+google.golang.org/grpc/internal/serviceconfig
+google.golang.org/grpc/internal/resolver
+google.golang.org/grpc/balancer/endpointsharding
+google.golang.org/grpc/internal/balancer/gracefulswitch
+google.golang.org/grpc/balancer/roundrobin
+expvar
+github.com/containerd/containerd/v2/core/remotes/errors
+go.opentelemetry.io/otel/propagation
+github.com/prometheus/client_golang/internal/github.com/golang/gddo/httputil/header
+net/http/httputil
+go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp/internal/semconvutil
+github.com/felixge/httpsnoop
+go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp/internal/request
+net/http/pprof
+github.com/google/gnostic-models/compiler
+golang.org/x/net/trace
+github.com/hashicorp/go-cleanhttp
+k8s.io/apimachinery/pkg/util/runtime
+github.com/containerd/stargz-snapshotter/ipfs/client
+golang.org/x/oauth2/internal
+github.com/containerd/stargz-snapshotter/util/testutil
+github.com/prometheus/common/expfmt
+golang.org/x/net/http2
+github.com/go-openapi/swag
+github.com/emicklei/go-restful/v3
+github.com/prometheus/client_golang/internal/github.com/golang/gddo/httputil
+k8s.io/apimachinery/pkg/runtime
+k8s.io/apimachinery/pkg/util/wait
+k8s.io/client-go/features
+k8s.io/client-go/util/workqueue
+github.com/hashicorp/go-retryablehttp
+go.opentelemetry.io/otel/internal/global
+golang.org/x/oauth2
+github.com/google/gnostic-models/openapiv2
+github.com/google/gnostic-models/openapiv3
+go.opentelemetry.io/otel
+github.com/prometheus/client_golang/prometheus
+go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp/internal/semconv
+github.com/go-openapi/jsonpointer
+github.com/go-openapi/jsonreference
+github.com/goccy/go-json/internal/encoder/vm_indent
+k8s.io/kube-openapi/pkg/internal
+go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp
+k8s.io/apimachinery/pkg/runtime/serializer/recognizer
+k8s.io/apimachinery/pkg/runtime/serializer/streaming
+k8s.io/client-go/tools/clientcmd/api
+github.com/containerd/containerd/v2/pkg/tracing
+k8s.io/client-go/tools/clientcmd/api/v1
+github.com/containerd/containerd/v2/core/remotes/docker/auth
+github.com/containerd/containerd/v2/core/unpack
+github.com/containerd/containerd/v2/core/remotes/docker
+github.com/containerd/stargz-snapshotter/fs/metrics/common
+github.com/prometheus/client_golang/prometheus/promhttp
+google.golang.org/grpc/internal/transport
+k8s.io/apimachinery/pkg/util/net
+github.com/containerd/stargz-snapshotter/fs/reader
+k8s.io/apimachinery/pkg/watch
+k8s.io/client-go/transport
+github.com/docker/go-metrics
+k8s.io/apimachinery/pkg/apis/meta/v1
+github.com/containerd/containerd/v2/core/remotes/docker/config
+github.com/containerd/stargz-snapshotter/fs/source
+k8s.io/kube-openapi/pkg/validation/spec
+github.com/containerd/stargz-snapshotter/nativeconverter/estargz/externaltoc
+github.com/containerd/stargz-snapshotter/fs/remote
+k8s.io/kube-openapi/pkg/util/proto
+github.com/containerd/stargz-snapshotter/fs/layer
+google.golang.org/grpc/internal/resolver/delegatingresolver
+google.golang.org/grpc
+k8s.io/kube-openapi/pkg/schemaconv
+k8s.io/kube-openapi/pkg/spec3
+github.com/containerd/stargz-snapshotter/fs/metrics/layer
+github.com/containerd/stargz-snapshotter/fs
+k8s.io/kube-openapi/pkg/common
+k8s.io/apimachinery/pkg/api/equality
+k8s.io/api/apidiscovery/v2
+k8s.io/apimachinery/pkg/apis/meta/v1/unstructured
+k8s.io/api/apiserverinternal/v1alpha1
+k8s.io/api/apidiscovery/v2beta1
+k8s.io/api/coordination/v1
+k8s.io/api/rbac/v1alpha1
+k8s.io/api/authorization/v1
+k8s.io/apimachinery/pkg/api/errors
+k8s.io/api/flowcontrol/v1beta2
+k8s.io/api/policy/v1beta1
+k8s.io/api/policy/v1
+k8s.io/client-go/pkg/apis/clientauthentication
+k8s.io/api/flowcontrol/v1beta1
+k8s.io/api/storagemigration/v1beta1
+k8s.io/apimachinery/pkg/apis/meta/v1/validation
+k8s.io/api/rbac/v1beta1
+k8s.io/api/flowcontrol/v1beta3
+k8s.io/apimachinery/pkg/api/meta
+k8s.io/api/certificates/v1alpha1
+k8s.io/api/resource/v1alpha3
+k8s.io/client-go/rest/watch
+k8s.io/apimachinery/pkg/apis/meta/v1beta1
+k8s.io/api/authentication/v1
+k8s.io/api/rbac/v1
+k8s.io/api/admissionregistration/v1
+k8s.io/api/flowcontrol/v1
+k8s.io/api/core/v1
+k8s.io/apimachinery/pkg/api/validate
+k8s.io/client-go/pkg/apis/clientauthentication/v1beta1
+k8s.io/client-go/pkg/apis/clientauthentication/v1
+github.com/containerd/containerd/api/services/snapshots/v1
+github.com/containerd/containerd/api/services/containers/v1
+github.com/containerd/containerd/api/services/diff/v1
+github.com/containerd/containerd/api/services/events/v1
+github.com/containerd/containerd/api/services/images/v1
+github.com/containerd/containerd/api/services/leases/v1
+github.com/containerd/containerd/api/services/namespaces/v1
+github.com/containerd/containerd/api/services/sandbox/v1
+github.com/containerd/containerd/api/services/tasks/v1
+github.com/containerd/containerd/api/services/transfer/v1
+github.com/containerd/containerd/api/services/version/v1
+github.com/containerd/containerd/api/services/content/v1
+github.com/containerd/containerd/api/services/introspection/v1
+github.com/containerd/containerd/api/services/mounts/v1
+github.com/containerd/containerd/api/runtime/sandbox/v1
+github.com/containerd/containerd/api/services/streaming/v1
+google.golang.org/grpc/health/grpc_health_v1
+github.com/containerd/stargz-snapshotter/fusemanager/api
+github.com/containerd/containerd/v2/core/events/proxy
+k8s.io/cri-api/pkg/apis/runtime/v1
+k8s.io/apimachinery/pkg/runtime/serializer/versioning
+k8s.io/api/authentication/v1alpha1
+github.com/containerd/containerd/v2/core/diff/proxy
+k8s.io/api/authentication/v1beta1
+k8s.io/api/coordination/v1alpha2
+github.com/containerd/containerd/v2/core/transfer/proxy
+k8s.io/api/coordination/v1beta1
+github.com/containerd/containerd/v2/core/leases/proxy
+k8s.io/apimachinery/pkg/runtime/serializer/json
+k8s.io/apimachinery/pkg/runtime/serializer/protobuf
+github.com/containerd/containerd/v2/core/introspection
+k8s.io/apimachinery/pkg/api/validation
+github.com/containerd/containerd/v2/core/streaming/proxy
+k8s.io/apimachinery/pkg/runtime/serializer/cbor
+k8s.io/client-go/pkg/apis/clientauthentication/install
+k8s.io/kube-openapi/pkg/handler3
+github.com/containerd/containerd/v2/core/introspection/proxy
+github.com/containerd/containerd/v2/core/mount/proxy
+k8s.io/apimachinery/pkg/api/meta/testrestmapper
+github.com/containerd/containerd/v2/core/snapshots/proxy
+k8s.io/apimachinery/pkg/util/strategicpatch
+k8s.io/api/authorization/v1beta1
+k8s.io/apimachinery/pkg/apis/meta/internalversion
+k8s.io/client-go/util/consistencydetector
+github.com/containerd/containerd/v2/core/sandbox
+k8s.io/client-go/tools/clientcmd/api/latest
+k8s.io/apimachinery/pkg/util/managedfields/internal
+k8s.io/apimachinery/pkg/runtime/serializer
+github.com/containerd/containerd/v2/contrib/snapshotservice
+github.com/containerd/containerd/v2/core/content/proxy
+k8s.io/client-go/tools/pager
+k8s.io/apimachinery/pkg/apis/meta/internalversion/validation
+k8s.io/client-go/plugin/pkg/client/auth/exec
+k8s.io/client-go/util/watchlist
+github.com/containerd/containerd/v2/core/sandbox/proxy
+k8s.io/api/admissionregistration/v1beta1
+k8s.io/api/admissionregistration/v1alpha1
+github.com/containerd/containerd/v2/client
+k8s.io/client-go/rest
+k8s.io/apimachinery/pkg/util/managedfields
+k8s.io/client-go/openapi
+k8s.io/client-go/util/apply
+k8s.io/client-go/testing
+k8s.io/client-go/tools/auth
+k8s.io/client-go/tools/cache
+k8s.io/client-go/tools/clientcmd
+github.com/containerd/stargz-snapshotter/service/resolver
+github.com/containerd/stargz-snapshotter/ipfs
+github.com/containerd/stargz-snapshotter/service/keychain/dockerconfig
+github.com/containerd/stargz-snapshotter/service/keychain/cri
+github.com/containerd/stargz-snapshotter/service
+k8s.io/client-go/gentype
+github.com/containerd/stargz-snapshotter/fusemanager
+github.com/containerd/stargz-snapshotter/cmd/containerd-stargz-grpc/ipfs
+github.com/goccy/go-json/internal/encoder/vm
+k8s.io/api/certificates/v1
+k8s.io/api/autoscaling/v1
+k8s.io/api/autoscaling/v2
+k8s.io/api/autoscaling/v2beta2
+k8s.io/api/autoscaling/v2beta1
+k8s.io/api/apps/v1beta1
+k8s.io/api/apps/v1beta2
+k8s.io/api/resource/v1
+k8s.io/api/scheduling/v1
+k8s.io/api/apps/v1
+k8s.io/client-go/tools/reference
+k8s.io/api/networking/v1beta1
+k8s.io/api/storage/v1beta1
+k8s.io/api/storage/v1alpha1
+k8s.io/api/discovery/v1
+k8s.io/api/events/v1
+k8s.io/api/discovery/v1beta1
+k8s.io/api/node/v1
+k8s.io/api/batch/v1
+k8s.io/api/certificates/v1beta1
+k8s.io/api/networking/v1
+k8s.io/api/node/v1alpha1
+k8s.io/api/resource/v1beta1
+k8s.io/api/node/v1beta1
+k8s.io/api/scheduling/v1beta1
+k8s.io/api/storage/v1
+k8s.io/api/scheduling/v1alpha1
+k8s.io/api/resource/v1beta2
+k8s.io/api/events/v1beta1
+k8s.io/api/batch/v1beta1
+k8s.io/api/extensions/v1beta1
+k8s.io/client-go/kubernetes/scheme
+k8s.io/client-go/discovery
+k8s.io/client-go/kubernetes/typed/authorization/v1
+k8s.io/client-go/kubernetes/typed/authentication/v1beta1
+k8s.io/client-go/kubernetes/typed/authentication/v1
+k8s.io/client-go/kubernetes/typed/authentication/v1alpha1
+k8s.io/client-go/kubernetes/typed/authorization/v1beta1
+k8s.io/client-go/applyconfigurations/meta/v1
+k8s.io/client-go/applyconfigurations/certificates/v1alpha1
+k8s.io/client-go/applyconfigurations/autoscaling/v1
+k8s.io/client-go/applyconfigurations/coordination/v1
+k8s.io/client-go/applyconfigurations/certificates/v1
+k8s.io/client-go/applyconfigurations/resource/v1alpha3
+k8s.io/client-go/applyconfigurations/storagemigration/v1beta1
+k8s.io/client-go/applyconfigurations/scheduling/v1alpha1
+k8s.io/client-go/applyconfigurations/policy/v1
+k8s.io/client-go/applyconfigurations/rbac/v1
+k8s.io/client-go/applyconfigurations/scheduling/v1
+k8s.io/client-go/applyconfigurations/coordination/v1alpha2
+k8s.io/client-go/applyconfigurations/coordination/v1beta1
+k8s.io/client-go/applyconfigurations/rbac/v1alpha1
+k8s.io/client-go/applyconfigurations/scheduling/v1beta1
+k8s.io/client-go/applyconfigurations/autoscaling/v2
+k8s.io/client-go/applyconfigurations/policy/v1beta1
+k8s.io/client-go/applyconfigurations/certificates/v1beta1
+k8s.io/client-go/applyconfigurations/rbac/v1beta1
+k8s.io/client-go/applyconfigurations/autoscaling/v2beta1
+k8s.io/client-go/applyconfigurations/apiserverinternal/v1alpha1
+k8s.io/client-go/applyconfigurations/flowcontrol/v1beta1
+k8s.io/client-go/applyconfigurations/flowcontrol/v1
+k8s.io/client-go/applyconfigurations/admissionregistration/v1
+k8s.io/client-go/applyconfigurations/autoscaling/v2beta2
+k8s.io/client-go/applyconfigurations/flowcontrol/v1beta2
+k8s.io/client-go/applyconfigurations/flowcontrol/v1beta3
+k8s.io/client-go/applyconfigurations/core/v1
+k8s.io/client-go/kubernetes/typed/coordination/v1alpha2
+k8s.io/client-go/kubernetes/typed/scheduling/v1beta1
+k8s.io/client-go/kubernetes/typed/coordination/v1
+k8s.io/client-go/kubernetes/typed/storagemigration/v1beta1
+k8s.io/client-go/kubernetes/typed/autoscaling/v1
+k8s.io/client-go/kubernetes/typed/scheduling/v1
+k8s.io/client-go/kubernetes/typed/certificates/v1alpha1
+k8s.io/client-go/kubernetes/typed/apiserverinternal/v1alpha1
+k8s.io/client-go/kubernetes/typed/rbac/v1
+k8s.io/client-go/kubernetes/typed/certificates/v1
+k8s.io/client-go/kubernetes/typed/scheduling/v1alpha1
+k8s.io/client-go/kubernetes/typed/flowcontrol/v1beta1
+k8s.io/client-go/kubernetes/typed/rbac/v1beta1
+k8s.io/client-go/kubernetes/typed/rbac/v1alpha1
+k8s.io/client-go/kubernetes/typed/coordination/v1beta1
+k8s.io/client-go/kubernetes/typed/autoscaling/v2
+k8s.io/client-go/kubernetes/typed/resource/v1alpha3
+k8s.io/client-go/kubernetes/typed/policy/v1beta1
+k8s.io/client-go/kubernetes/typed/autoscaling/v2beta1
+k8s.io/client-go/kubernetes/typed/flowcontrol/v1
+k8s.io/client-go/kubernetes/typed/policy/v1
+k8s.io/client-go/kubernetes/typed/flowcontrol/v1beta2
+k8s.io/client-go/kubernetes/typed/flowcontrol/v1beta3
+k8s.io/client-go/kubernetes/typed/autoscaling/v2beta2
+k8s.io/client-go/kubernetes/typed/certificates/v1beta1
+k8s.io/client-go/kubernetes/typed/admissionregistration/v1
+k8s.io/client-go/applyconfigurations/admissionregistration/v1alpha1
+k8s.io/client-go/applyconfigurations/admissionregistration/v1beta1
+k8s.io/client-go/kubernetes/typed/admissionregistration/v1alpha1
+k8s.io/client-go/kubernetes/typed/admissionregistration/v1beta1
+k8s.io/client-go/applyconfigurations/events/v1
+k8s.io/client-go/applyconfigurations/events/v1beta1
+k8s.io/client-go/applyconfigurations/node/v1
+k8s.io/client-go/applyconfigurations/discovery/v1beta1
+k8s.io/client-go/applyconfigurations/apps/v1beta1
+k8s.io/client-go/applyconfigurations/batch/v1
+k8s.io/client-go/applyconfigurations/storage/v1alpha1
+k8s.io/client-go/applyconfigurations/node/v1alpha1
+k8s.io/client-go/applyconfigurations/node/v1beta1
+k8s.io/client-go/kubernetes/typed/core/v1
+k8s.io/client-go/applyconfigurations/discovery/v1
+k8s.io/client-go/applyconfigurations/networking/v1
+k8s.io/client-go/applyconfigurations/storage/v1beta1
+k8s.io/client-go/applyconfigurations/storage/v1
+k8s.io/client-go/applyconfigurations/networking/v1beta1
+k8s.io/client-go/applyconfigurations/apps/v1
+k8s.io/client-go/applyconfigurations/resource/v1beta2
+k8s.io/client-go/applyconfigurations/resource/v1beta1
+k8s.io/client-go/applyconfigurations/extensions/v1beta1
+k8s.io/client-go/applyconfigurations/resource/v1
+k8s.io/client-go/applyconfigurations/apps/v1beta2
+k8s.io/client-go/kubernetes/typed/events/v1beta1
+k8s.io/client-go/kubernetes/typed/discovery/v1
+k8s.io/client-go/kubernetes/typed/events/v1
+k8s.io/client-go/kubernetes/typed/node/v1
+k8s.io/client-go/kubernetes/typed/node/v1beta1
+k8s.io/client-go/kubernetes/typed/node/v1alpha1
+k8s.io/client-go/kubernetes/typed/discovery/v1beta1
+k8s.io/client-go/kubernetes/typed/storage/v1alpha1
+k8s.io/client-go/kubernetes/typed/apps/v1beta1
+k8s.io/client-go/kubernetes/typed/networking/v1beta1
+k8s.io/client-go/kubernetes/typed/storage/v1
+k8s.io/client-go/kubernetes/typed/resource/v1beta2
+k8s.io/client-go/kubernetes/typed/apps/v1beta2
+k8s.io/client-go/kubernetes/typed/storage/v1beta1
+k8s.io/client-go/applyconfigurations/batch/v1beta1
+k8s.io/client-go/kubernetes/typed/batch/v1
+k8s.io/client-go/kubernetes/typed/resource/v1beta1
+k8s.io/client-go/kubernetes/typed/extensions/v1beta1
+k8s.io/client-go/kubernetes/typed/networking/v1
+k8s.io/client-go/kubernetes/typed/resource/v1
+k8s.io/client-go/kubernetes/typed/apps/v1
+k8s.io/client-go/kubernetes/typed/batch/v1beta1
+k8s.io/client-go/kubernetes
+github.com/containerd/stargz-snapshotter/service/keychain/kubeconfig
+github.com/goccy/go-json
+github.com/containerd/stargz-snapshotter/cmd/containerd-stargz-grpc/db
+github.com/containerd/stargz-snapshotter/service/keychain/keychainconfig
+github.com/containerd/stargz-snapshotter/cmd/containerd-stargz-grpc/fsopts
+cd cmd/ ; GO111MODULE=auto go build -o /src/_submodules/stargz-snapshotter/out/ctr-remote  -ldflags '-s -w -X github.com/containerd/stargz-snapshotter/version.Version=v0.18.2 -X github.com/containerd/stargz-snapshotter/version.Revision=3070538befb5a6c09f93e99164762b3a76310357 ' -v ./ctr-remote
+github.com/intel/goresctrl/pkg/kubernetes
+golang.org/x/mod/semver
+github.com/cilium/ebpf/internal/unix
+github.com/cilium/ebpf/internal/kallsyms
+internal/sysinfo
+github.com/containerd/console
+github.com/russross/blackfriday/v2
+github.com/xrash/smetrics
+github.com/fsnotify/fsnotify/internal
+github.com/moby/sys/capability
+github.com/containerd/containerd/v2/pkg/atomicfile
+github.com/opencontainers/runtime-tools/generate/seccomp
+tags.cncf.io/container-device-interface/internal/validation/k8s
+github.com/intel/goresctrl/pkg/path
+tags.cncf.io/container-device-interface/pkg/parser
+github.com/containernetworking/cni/pkg/types
+github.com/docker/go-units
+github.com/containerd/cgroups/v3
+debug/dwarf
+internal/zstd
+github.com/containerd/containerd/v2/pkg/shutdown
+github.com/containerd/plugin/registry
+golang.org/x/net/bpf
+github.com/bmatcuk/doublestar/v4
+github.com/godbus/dbus/v5
+github.com/containernetworking/plugins/pkg/ns
+go/printer
+testing
+github.com/moby/sys/symlink
+github.com/containerd/containerd/v2/pkg/snapshotters
+github.com/containerd/stargz-snapshotter/analyzer/fanotify/conn
+github.com/containerd/containerd/v2/core/transfer/plugins
+github.com/containerd/containerd/v2/pkg/httpdbg
+github.com/containerd/containerd/api/types/runtimeoptions/v1
+github.com/containerd/cgroups/v3/cgroup2/stats
+github.com/containerd/cgroups/v3/cgroup1/stats
+github.com/intel/goresctrl/pkg/blockio
+github.com/containerd/containerd/v2/contrib/apparmor
+github.com/containerd/containerd/v2/contrib/nvidia
+github.com/containerd/containerd/v2/contrib/seccomp
+tags.cncf.io/container-device-interface/specs-go
+tags.cncf.io/container-device-interface/internal/validation
+github.com/containerd/containerd/api/events
+github.com/containerd/containerd/v2/pkg/display
+github.com/cilium/ebpf/internal/sys
+github.com/containerd/containerd/api/runtime/task/v2
+github.com/fsnotify/fsnotify
+github.com/containerd/containerd/api/runtime/task/v3
+github.com/containernetworking/cni/pkg/types/internal
+github.com/containernetworking/cni/pkg/utils
+github.com/containerd/containerd/v2/pkg/progress
+github.com/containerd/containerd/api/services/ttrpc/events/v1
+github.com/containerd/go-runc
+github.com/containerd/containerd/v2/core/transfer/archive
+github.com/opencontainers/runtime-tools/validate/capabilities
+github.com/containerd/containerd/v2/core/transfer/image
+github.com/containerd/stargz-snapshotter/analyzer/fanotify
+github.com/containerd/stargz-snapshotter/analyzer/fanotify/service
+github.com/containerd/stargz-snapshotter/recorder
+github.com/containerd/containerd/v2/core/transfer/registry
+github.com/containerd/containerd/v2/pkg/netns
+github.com/containernetworking/cni/pkg/types/020
+github.com/containerd/stargz-snapshotter/analyzer/recorder
+github.com/containerd/stargz-snapshotter/nativeconverter/zstdchunked
+github.com/containerd/stargz-snapshotter/util/decompressutil
+github.com/mdlayher/socket
+github.com/opencontainers/runtime-tools/generate
+github.com/containernetworking/cni/pkg/types/040
+github.com/containerd/containerd/v2/pkg/ttrpcutil
+github.com/Microsoft/hcsshim/cmd/containerd-shim-runhcs-v1/stats
+github.com/containernetworking/cni/pkg/types/100
+github.com/containerd/containerd/v2/pkg/sys/reaper
+github.com/cilium/ebpf/asm
+github.com/containernetworking/cni/pkg/types/create
+go/format
+github.com/containernetworking/cni/pkg/version
+github.com/mdlayher/vsock
+github.com/containernetworking/cni/pkg/invoke
+tags.cncf.io/container-device-interface/pkg/cdi
+debug/elf
+github.com/cpuguy83/go-md2man/v2/md2man
+github.com/containernetworking/cni/libcni
+github.com/containerd/containerd/v2/pkg/shim
+github.com/urfave/cli/v2
+github.com/containerd/go-cni
+github.com/containerd/containerd/v2/pkg/cdi
+github.com/cilium/ebpf/internal
+github.com/coreos/go-systemd/v22/dbus
+github.com/cilium/ebpf/internal/sysenc
+github.com/cilium/ebpf/internal/tracefs
+github.com/cilium/ebpf/btf
+github.com/containerd/cgroups/v3/cgroup1
+github.com/containerd/containerd/v2/cmd/ctr/commands
+github.com/containerd/containerd/v2/cmd/ctr/commands/pprof
+github.com/containerd/containerd/v2/cmd/ctr/commands/oci
+github.com/containerd/containerd/v2/cmd/ctr/commands/events
+github.com/containerd/containerd/v2/cmd/ctr/commands/install
+github.com/containerd/containerd/v2/cmd/ctr/commands/info
+github.com/containerd/containerd/v2/cmd/ctr/commands/plugins
+github.com/containerd/containerd/v2/cmd/ctr/commands/version
+github.com/containerd/containerd/v2/cmd/ctr/commands/sandboxes
+github.com/containerd/containerd/v2/cmd/ctr/commands/content
+github.com/containerd/containerd/v2/cmd/ctr/commands/shim
+github.com/containerd/containerd/v2/cmd/ctr/commands/leases
+github.com/containerd/containerd/v2/cmd/ctr/commands/snapshots
+github.com/containerd/containerd/v2/cmd/ctr/commands/tasks
+github.com/containerd/containerd/v2/cmd/ctr/commands/deprecations
+github.com/cilium/ebpf/internal/kconfig
+github.com/containerd/containerd/v2/cmd/ctr/commands/images
+github.com/containerd/containerd/v2/cmd/ctr/commands/run
+github.com/containerd/stargz-snapshotter/analyzer
+github.com/cilium/ebpf
+github.com/containerd/stargz-snapshotter/cmd/ctr-remote/commands
+github.com/containerd/containerd/v2/cmd/ctr/commands/containers
+github.com/cilium/ebpf/link
+github.com/containerd/cgroups/v3/cgroup2
+github.com/containerd/containerd/v2/core/runtime/opts
+github.com/containerd/containerd/v2/cmd/ctr/commands/namespaces
+github.com/containerd/containerd/v2/cmd/ctr/app
+cd cmd/ ; GO111MODULE=auto go build -o /src/_submodules/stargz-snapshotter/out/stargz-store  -ldflags '-s -w -X github.com/containerd/stargz-snapshotter/version.Version=v0.18.2 -X github.com/containerd/stargz-snapshotter/version.Revision=3070538befb5a6c09f93e99164762b3a76310357 ' -v ./stargz-store
+github.com/containerd/stargz-snapshotter/store/pb
+github.com/containerd/stargz-snapshotter/store
+cd cmd/ ; GO111MODULE=auto go build -o /src/_submodules/stargz-snapshotter/out/stargz-fuse-manager  -ldflags '-s -w -X github.com/containerd/stargz-snapshotter/version.Version=v0.18.2 -X github.com/containerd/stargz-snapshotter/version.Revision=3070538befb5a6c09f93e99164762b3a76310357 ' -v ./stargz-fuse-manager
+docker run --rm \
+	--user 20005:3763 \
+	--volume /users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime:/src \
+	--volume gocache:/go \
+	--env HOME=/tmp \
+	--env GOPATH=/go \
+	--env GO111MODULES=on \
+	--env STATIC_AGENT=on \
+	--env STATIC_DOCKER_CREDENTIAL_MMDS=on \
+	--env GOPROXY=https://proxy.golang.org,direct \
+	--workdir /src \
+	public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 \
+	make docker-credential-mmds
+make -C docker-credential-mmds EXTRAGOARGS=
+make[1]: Entering directory '/src/docker-credential-mmds'
+make[1]: Nothing to be done for 'all'.
+make[1]: Leaving directory '/src/docker-credential-mmds'
+docker run --rm \
+	--user 20005:3763 \
+	--volume /users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime:/src \
+	--volume gocache:/go \
+	--env HOME=/tmp \
+	--env GOPATH=/go \
+	--env GO111MODULES=on \
+	--env STATIC_AGENT=on \
+	--env STATIC_DOCKER_CREDENTIAL_MMDS=on \
+	--env GOPROXY=https://proxy.golang.org,direct \
+	--workdir /src \
+	public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 \
+	make volume
+make -C volume EXTRAGOARGS=
+make[1]: Entering directory '/src/volume'
+make[1]: 'volume-init' is up to date.
+make[1]: Leaving directory '/src/volume'
+mkdir -p tools/image-builder/files_ephemeral_stargz/usr/local/bin
+cp docker-credential-mmds/docker-credential-mmds tools/image-builder/files_ephemeral_stargz/usr/local/bin
+cp volume/volume-init tools/image-builder/files_ephemeral_stargz/usr/local/bin
+cp _submodules/stargz-snapshotter/out/containerd-stargz-grpc tools/image-builder/files_ephemeral_stargz/usr/local/bin
+make -C tools/image-builder stargz-in-docker
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/tools/image-builder'
+docker build -t fc-image-builder:9000f53fb03d -f Dockerfile.debian-image .
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.debian-image
+#1 transferring dockerfile: 983B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for public.ecr.aws/docker/library/debian:trixie-slim@sha256:a72b4433de1cf7d6bae0c4cee74d0547f58601a643b3375f070c51600d63b6b2
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 47B done
+#3 DONE 0.0s
+
+#4 [1/3] FROM public.ecr.aws/docker/library/debian:trixie-slim@sha256:a72b4433de1cf7d6bae0c4cee74d0547f58601a643b3375f070c51600d63b6b2
+#4 resolve public.ecr.aws/docker/library/debian:trixie-slim@sha256:a72b4433de1cf7d6bae0c4cee74d0547f58601a643b3375f070c51600d63b6b2 done
+#4 DONE 0.0s
+
+#5 [2/3] RUN apt-get update &&     DEBIAN_FRONTEND=noninteractive apt-get -y install       --no-install-recommends       make squashfs-tools debootstrap ca-certificates debian-archive-keyring
+#5 CACHED
+
+#6 [3/3] WORKDIR /src
+#6 CACHED
+
+#7 exporting to image
+#7 exporting layers done
+#7 exporting manifest sha256:ebbcac0893721643d348c16d591e4adda33e04db04004decba97f221d1b338b8 done
+#7 exporting config sha256:bb903e8bee84649fe40827599032ab98eacfdafb9f8b61ec3b4f5b03fd7e7ad0 done
+#7 exporting attestation manifest sha256:280d06476a3b508c96b6ad91ab7df077258b510e3d9e8a00ccb08b36b8d40cd1 done
+#7 exporting manifest list sha256:5d3bc283da9208af0ddf8a8df26662f9fdaf8ab38b471103360dc376d83d3179 done
+#7 naming to docker.io/library/fc-image-builder:9000f53fb03d done
+#7 unpacking to docker.io/library/fc-image-builder:9000f53fb03d done
+#7 DONE 0.0s
+touch builder_9000f53fb03d_stamp
+docker run --rm \
+	--security-opt=apparmor=unconfined \
+	--volume /users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/tools/image-builder:/src \
+	--volume /src/tmp \
+	--cap-add=sys_admin \
+	--cap-add=sys_chroot \
+	--env=DEBMIRROR \
+	fc-image-builder:9000f53fb03d stargz
+mkdir tmp/rootfs-stargz
+debootstrap --variant=minbase --include=udev,systemd,systemd-sysv,procps,libseccomp2,haveged,fuse,ca-certificates,socat trixie "tmp/rootfs-stargz" https://snapshot.debian.org/archive/debian/20261110T000000Z/
+I: Retrieving InRelease 
+I: Checking Release signature
+I: Valid Release signature
+I: Retrieving Packages 
+I: Validating Packages 
+I: Resolving dependencies of required packages...
+I: Resolving dependencies of base packages...
+I: Checking component main on https://snapshot.debian.org/archive/debian/20261110T000000Z...
+I: Retrieving adduser 3.152
+I: Validating adduser 3.152
+I: Retrieving apt 3.0.3
+I: Validating apt 3.0.3
+I: Retrieving base-files 13.8+deb13u7
+I: Validating base-files 13.8+deb13u7
+I: Retrieving base-passwd 3.6.7
+I: Validating base-passwd 3.6.7
+I: Retrieving bash 5.2.37-2+b10
+I: Validating bash 5.2.37-2+b10
+I: Retrieving bsdutils 1:2.41.5-0+deb13u1
+I: Validating bsdutils 1:2.41.5-0+deb13u1
+I: Retrieving ca-certificates 20250419
+I: Validating ca-certificates 20250419
+I: Retrieving coreutils 9.7-3
+I: Validating coreutils 9.7-3
+I: Retrieving dash 0.5.12-12
+I: Validating dash 0.5.12-12
+I: Retrieving debconf 1.5.91
+I: Validating debconf 1.5.91
+I: Retrieving debian-archive-keyring 2025.1
+I: Validating debian-archive-keyring 2025.1
+I: Retrieving debianutils 5.23.2
+I: Validating debianutils 5.23.2
+I: Retrieving diffutils 1:3.10-4
+I: Validating diffutils 1:3.10-4
+I: Retrieving dpkg 1.22.22
+I: Validating dpkg 1.22.22
+I: Retrieving findutils 4.10.0-3
+I: Validating findutils 4.10.0-3
+I: Retrieving fuse 3.17.2-3
+I: Validating fuse 3.17.2-3
+I: Retrieving fuse3 3.17.2-3
+I: Validating fuse3 3.17.2-3
+I: Retrieving gcc-14-base 14.2.0-19
+I: Validating gcc-14-base 14.2.0-19
+I: Retrieving grep 3.11-4
+I: Validating grep 3.11-4
+I: Retrieving gzip 1.13-1+deb13u1
+I: Validating gzip 1.13-1+deb13u1
+I: Retrieving haveged 1.9.19-12+deb13u1
+I: Validating haveged 1.9.19-12+deb13u1
+I: Retrieving hostname 3.25
+I: Validating hostname 3.25
+I: Retrieving init-system-helpers 1.69~deb13u1
+I: Validating init-system-helpers 1.69~deb13u1
+I: Retrieving libacl1 2.3.2-2+b1
+I: Validating libacl1 2.3.2-2+b1
+I: Retrieving libapparmor1 4.1.0-1
+I: Validating libapparmor1 4.1.0-1
+I: Retrieving libapt-pkg7.0 3.0.3
+I: Validating libapt-pkg7.0 3.0.3
+I: Retrieving libattr1 1:2.5.2-3
+I: Validating libattr1 1:2.5.2-3
+I: Retrieving libaudit-common 1:4.0.2-2+deb13u1
+I: Validating libaudit-common 1:4.0.2-2+deb13u1
+I: Retrieving libaudit1 1:4.0.2-2+deb13u1
+I: Validating libaudit1 1:4.0.2-2+deb13u1
+I: Retrieving libblkid1 2.41.5-0+deb13u1
+I: Validating libblkid1 2.41.5-0+deb13u1
+I: Retrieving libbsd0 0.12.2-2
+I: Validating libbsd0 0.12.2-2
+I: Retrieving libbz2-1.0 1.0.8-6
+I: Validating libbz2-1.0 1.0.8-6
+I: Retrieving libc-bin 2.41-12+deb13u4
+I: Validating libc-bin 2.41-12+deb13u4
+I: Retrieving libc6 2.41-12+deb13u4
+I: Validating libc6 2.41-12+deb13u4
+I: Retrieving libcap-ng0 0.8.5-4+b1
+I: Validating libcap-ng0 0.8.5-4+b1
+I: Retrieving libcap2 1:2.75-10+deb13u1+b3
+I: Validating libcap2 1:2.75-10+deb13u1+b3
+I: Retrieving libcrypt1 1:4.4.38-1
+I: Validating libcrypt1 1:4.4.38-1
+I: Retrieving libdb5.3t64 5.3.28+dfsg2-9
+I: Validating libdb5.3t64 5.3.28+dfsg2-9
+I: Retrieving libdebconfclient0 0.280
+I: Validating libdebconfclient0 0.280
+I: Retrieving libfuse3-4 3.17.2-3
+I: Validating libfuse3-4 3.17.2-3
+I: Retrieving libgcc-s1 14.2.0-19
+I: Validating libgcc-s1 14.2.0-19
+I: Retrieving libgmp10 2:6.3.0+dfsg-3
+I: Validating libgmp10 2:6.3.0+dfsg-3
+I: Retrieving libhavege2 1.9.19-12+deb13u1
+I: Validating libhavege2 1.9.19-12+deb13u1
+I: Retrieving libhogweed6t64 3.10.1-1
+I: Validating libhogweed6t64 3.10.1-1
+I: Retrieving libkmod2 34.2-2
+I: Validating libkmod2 34.2-2
+I: Retrieving liblastlog2-2 2.41.5-0+deb13u1
+I: Validating liblastlog2-2 2.41.5-0+deb13u1
+I: Retrieving liblz4-1 1.10.0-4
+I: Validating liblz4-1 1.10.0-4
+I: Retrieving liblzma5 5.8.1-1+deb13u1
+I: Validating liblzma5 5.8.1-1+deb13u1
+I: Retrieving libmd0 1.1.0-2+b1
+I: Validating libmd0 1.1.0-2+b1
+I: Retrieving libmount1 2.41.5-0+deb13u1
+I: Validating libmount1 2.41.5-0+deb13u1
+I: Retrieving libncursesw6 6.5+20250216-2
+I: Validating libncursesw6 6.5+20250216-2
+I: Retrieving libnettle8t64 3.10.1-1
+I: Validating libnettle8t64 3.10.1-1
+I: Retrieving libpam-modules 1.7.0-5
+I: Validating libpam-modules 1.7.0-5
+I: Retrieving libpam-modules-bin 1.7.0-5
+I: Validating libpam-modules-bin 1.7.0-5
+I: Retrieving libpam-runtime 1.7.0-5
+I: Validating libpam-runtime 1.7.0-5
+I: Retrieving libpam0g 1.7.0-5
+I: Validating libpam0g 1.7.0-5
+I: Retrieving libpcre2-8-0 10.46-1~deb13u2
+I: Validating libpcre2-8-0 10.46-1~deb13u2
+I: Retrieving libproc2-0 2:4.0.4-9
+I: Validating libproc2-0 2:4.0.4-9
+I: Retrieving libseccomp2 2.6.0-2
+I: Validating libseccomp2 2.6.0-2
+I: Retrieving libselinux1 3.8.1-1
+I: Validating libselinux1 3.8.1-1
+I: Retrieving libsemanage-common 3.8.1-1
+I: Validating libsemanage-common 3.8.1-1
+I: Retrieving libsemanage2 3.8.1-1
+I: Validating libsemanage2 3.8.1-1
+I: Retrieving libsepol2 3.8.1-1
+I: Validating libsepol2 3.8.1-1
+I: Retrieving libsmartcols1 2.41.5-0+deb13u1
+I: Validating libsmartcols1 2.41.5-0+deb13u1
+I: Retrieving libsqlite3-0 3.46.1-7+deb13u2
+I: Validating libsqlite3-0 3.46.1-7+deb13u2
+I: Retrieving libssl3t64 3.5.7-1~deb13u2
+I: Validating libssl3t64 3.5.7-1~deb13u2
+I: Retrieving libstdc++6 14.2.0-19
+I: Validating libstdc++6 14.2.0-19
+I: Retrieving libsystemd-shared 257.13-1~deb13u1
+I: Validating libsystemd-shared 257.13-1~deb13u1
+I: Retrieving libsystemd0 257.13-1~deb13u1
+I: Validating libsystemd0 257.13-1~deb13u1
+I: Retrieving libtinfo6 6.5+20250216-2
+I: Validating libtinfo6 6.5+20250216-2
+I: Retrieving libudev1 257.13-1~deb13u1
+I: Validating libudev1 257.13-1~deb13u1
+I: Retrieving libuuid1 2.41.5-0+deb13u1
+I: Validating libuuid1 2.41.5-0+deb13u1
+I: Retrieving libwrap0 7.6.q-36
+I: Validating libwrap0 7.6.q-36
+I: Retrieving libxxhash0 0.8.3-2
+I: Validating libxxhash0 0.8.3-2
+I: Retrieving libzstd1 1.5.7+dfsg-1
+I: Validating libzstd1 1.5.7+dfsg-1
+I: Retrieving login 1:4.16.0-2+really2.41.5-0+deb13u1
+I: Validating login 1:4.16.0-2+really2.41.5-0+deb13u1
+I: Retrieving login.defs 1:4.17.4-2
+I: Validating login.defs 1:4.17.4-2
+I: Retrieving mawk 1.3.4.20250131-1
+I: Validating mawk 1.3.4.20250131-1
+I: Retrieving mount 2.41.5-0+deb13u1
+I: Validating mount 2.41.5-0+deb13u1
+I: Retrieving ncurses-base 6.5+20250216-2
+I: Validating ncurses-base 6.5+20250216-2
+I: Retrieving ncurses-bin 6.5+20250216-2
+I: Validating ncurses-bin 6.5+20250216-2
+I: Retrieving openssl 3.5.7-1~deb13u2
+I: Validating openssl 3.5.7-1~deb13u2
+I: Retrieving openssl-provider-legacy 3.5.7-1~deb13u2
+I: Validating openssl-provider-legacy 3.5.7-1~deb13u2
+I: Retrieving passwd 1:4.17.4-2
+I: Validating passwd 1:4.17.4-2
+I: Retrieving perl-base 5.40.1-6+deb13u1
+I: Validating perl-base 5.40.1-6+deb13u1
+I: Retrieving procps 2:4.0.4-9
+I: Validating procps 2:4.0.4-9
+I: Retrieving sed 4.9-2+deb13u1
+I: Validating sed 4.9-2+deb13u1
+I: Retrieving socat 1.8.0.3-1+deb13u1
+I: Validating socat 1.8.0.3-1+deb13u1
+I: Retrieving sqv 1.3.0-3+b2
+I: Validating sqv 1.3.0-3+b2
+I: Retrieving systemd 257.13-1~deb13u1
+I: Validating systemd 257.13-1~deb13u1
+I: Retrieving systemd-sysv 257.13-1~deb13u1
+I: Validating systemd-sysv 257.13-1~deb13u1
+I: Retrieving sysvinit-utils 3.14-4
+I: Validating sysvinit-utils 3.14-4
+I: Retrieving tar 1.35+dfsg-3.1
+I: Validating tar 1.35+dfsg-3.1
+I: Retrieving tzdata 2026c-0+deb13u1
+I: Validating tzdata 2026c-0+deb13u1
+I: Retrieving udev 257.13-1~deb13u1
+I: Validating udev 257.13-1~deb13u1
+I: Retrieving util-linux 2.41.5-0+deb13u1
+I: Validating util-linux 2.41.5-0+deb13u1
+I: Retrieving zlib1g 1:1.3.dfsg+really1.3.1-1+b1
+I: Validating zlib1g 1:1.3.dfsg+really1.3.1-1+b1
+I: Chosen extractor for .deb packages: dpkg-deb
+I: Extracting apt...
+I: Extracting base-files...
+I: Extracting base-passwd...
+I: Extracting bash...
+I: Extracting bsdutils...
+I: Extracting coreutils...
+I: Extracting dash...
+I: Extracting debconf...
+I: Extracting debian-archive-keyring...
+I: Extracting debianutils...
+I: Extracting diffutils...
+I: Extracting dpkg...
+I: Extracting findutils...
+I: Extracting gcc-14-base...
+I: Extracting grep...
+I: Extracting gzip...
+I: Extracting hostname...
+I: Extracting init-system-helpers...
+I: Extracting libacl1...
+I: Extracting libapt-pkg7.0...
+I: Extracting libattr1...
+I: Extracting libaudit-common...
+I: Extracting libaudit1...
+I: Extracting libblkid1...
+I: Extracting libbsd0...
+I: Extracting libbz2-1.0...
+I: Extracting libc-bin...
+I: Extracting libc6...
+I: Extracting libcap-ng0...
+I: Extracting libcap2...
+I: Extracting libcrypt1...
+I: Extracting libdb5.3t64...
+I: Extracting libdebconfclient0...
+I: Extracting libgcc-s1...
+I: Extracting libgmp10...
+I: Extracting libhogweed6t64...
+I: Extracting liblastlog2-2...
+I: Extracting liblz4-1...
+I: Extracting liblzma5...
+I: Extracting libmd0...
+I: Extracting libmount1...
+I: Extracting libnettle8t64...
+I: Extracting libpam-modules...
+I: Extracting libpam-modules-bin...
+I: Extracting libpam-runtime...
+I: Extracting libpam0g...
+I: Extracting libpcre2-8-0...
+I: Extracting libseccomp2...
+I: Extracting libselinux1...
+I: Extracting libsemanage-common...
+I: Extracting libsemanage2...
+I: Extracting libsepol2...
+I: Extracting libsmartcols1...
+I: Extracting libsqlite3-0...
+I: Extracting libssl3t64...
+I: Extracting libstdc++6...
+I: Extracting libsystemd0...
+I: Extracting libtinfo6...
+I: Extracting libudev1...
+I: Extracting libuuid1...
+I: Extracting libxxhash0...
+I: Extracting libzstd1...
+I: Extracting login...
+I: Extracting login.defs...
+I: Extracting mawk...
+I: Extracting mount...
+I: Extracting ncurses-base...
+I: Extracting ncurses-bin...
+I: Extracting openssl-provider-legacy...
+I: Extracting passwd...
+I: Extracting perl-base...
+I: Extracting sed...
+I: Extracting sqv...
+I: Extracting sysvinit-utils...
+I: Extracting tar...
+I: Extracting tzdata...
+I: Extracting util-linux...
+I: Extracting zlib1g...
+I: Installing core packages...
+I: Unpacking required packages...
+I: Unpacking apt...
+I: Unpacking base-files...
+I: Unpacking base-passwd...
+I: Unpacking bash...
+I: Unpacking bsdutils...
+I: Unpacking coreutils...
+I: Unpacking dash...
+I: Unpacking debconf...
+I: Unpacking debian-archive-keyring...
+I: Unpacking debianutils...
+I: Unpacking diffutils...
+I: Unpacking dpkg...
+I: Unpacking findutils...
+I: Unpacking gcc-14-base:amd64...
+I: Unpacking grep...
+I: Unpacking gzip...
+I: Unpacking hostname...
+I: Unpacking init-system-helpers...
+I: Unpacking libacl1:amd64...
+I: Unpacking libapt-pkg7.0:amd64...
+I: Unpacking libattr1:amd64...
+I: Unpacking libaudit-common...
+I: Unpacking libaudit1:amd64...
+I: Unpacking libblkid1:amd64...
+I: Unpacking libbsd0:amd64...
+I: Unpacking libbz2-1.0:amd64...
+I: Unpacking libc-bin...
+I: Unpacking libc6:amd64...
+I: Unpacking libcap-ng0:amd64...
+I: Unpacking libcap2:amd64...
+I: Unpacking libcrypt1:amd64...
+I: Unpacking libdb5.3t64:amd64...
+I: Unpacking libdebconfclient0:amd64...
+I: Unpacking libgcc-s1:amd64...
+I: Unpacking libgmp10:amd64...
+I: Unpacking libhogweed6t64:amd64...
+I: Unpacking liblastlog2-2:amd64...
+I: Unpacking liblz4-1:amd64...
+I: Unpacking liblzma5:amd64...
+I: Unpacking libmd0:amd64...
+I: Unpacking libmount1:amd64...
+I: Unpacking libnettle8t64:amd64...
+I: Unpacking libpam-modules:amd64...
+I: Unpacking libpam-modules-bin...
+I: Unpacking libpam-runtime...
+I: Unpacking libpam0g:amd64...
+I: Unpacking libpcre2-8-0:amd64...
+I: Unpacking libseccomp2:amd64...
+I: Unpacking libselinux1:amd64...
+I: Unpacking libsemanage-common...
+I: Unpacking libsemanage2:amd64...
+I: Unpacking libsepol2:amd64...
+I: Unpacking libsmartcols1:amd64...
+I: Unpacking libsqlite3-0:amd64...
+I: Unpacking libssl3t64:amd64...
+I: Unpacking libstdc++6:amd64...
+I: Unpacking libsystemd0:amd64...
+I: Unpacking libtinfo6:amd64...
+I: Unpacking libudev1:amd64...
+I: Unpacking libuuid1:amd64...
+I: Unpacking libxxhash0:amd64...
+I: Unpacking libzstd1:amd64...
+I: Unpacking login...
+I: Unpacking login.defs...
+I: Unpacking mawk...
+I: Unpacking mount...
+I: Unpacking ncurses-base...
+I: Unpacking ncurses-bin...
+I: Unpacking openssl-provider-legacy...
+I: Unpacking passwd...
+I: Unpacking perl-base...
+I: Unpacking sed...
+I: Unpacking sqv...
+I: Unpacking sysvinit-utils...
+I: Unpacking tar...
+I: Unpacking tzdata...
+I: Unpacking util-linux...
+I: Unpacking zlib1g:amd64...
+I: Configuring required packages...
+I: Configuring gcc-14-base:amd64...
+I: Configuring login.defs...
+I: Configuring debian-archive-keyring...
+I: Configuring libaudit-common...
+I: Configuring libsemanage-common...
+I: Configuring debconf...
+I: Configuring tzdata...
+I: Configuring ncurses-base...
+I: Configuring init-system-helpers...
+I: Configuring libgcc-s1:amd64...
+I: Configuring libc6:amd64...
+I: Configuring libdb5.3t64:amd64...
+I: Configuring libmd0:amd64...
+I: Configuring libxxhash0:amd64...
+I: Configuring libattr1:amd64...
+I: Configuring sysvinit-utils...
+I: Configuring debianutils...
+I: Configuring mawk...
+I: Configuring libdebconfclient0:amd64...
+I: Configuring base-files...
+I: Configuring libbz2-1.0:amd64...
+I: Configuring libbsd0:amd64...
+I: Configuring libblkid1:amd64...
+I: Configuring libstdc++6:amd64...
+I: Configuring dash...
+I: Configuring libtinfo6:amd64...
+I: Configuring bash...
+I: Configuring libzstd1:amd64...
+I: Configuring liblzma5:amd64...
+I: Configuring liblz4-1:amd64...
+I: Configuring libc-bin...
+I: Configuring libsqlite3-0:amd64...
+I: Configuring ncurses-bin...
+I: Configuring libacl1:amd64...
+I: Configuring libsmartcols1:amd64...
+I: Configuring zlib1g:amd64...
+I: Configuring libcrypt1:amd64...
+I: Configuring diffutils...
+I: Configuring libseccomp2:amd64...
+I: Configuring libcap2:amd64...
+I: Configuring perl-base...
+I: Configuring openssl-provider-legacy...
+I: Configuring hostname...
+I: Configuring libcap-ng0:amd64...
+I: Configuring libnettle8t64:amd64...
+I: Configuring libgmp10:amd64...
+I: Configuring libaudit1:amd64...
+I: Configuring gzip...
+I: Configuring libuuid1:amd64...
+I: Configuring libsepol2:amd64...
+I: Configuring libpcre2-8-0:amd64...
+I: Configuring libudev1:amd64...
+I: Configuring libhogweed6t64:amd64...
+I: Configuring sqv...
+I: Configuring grep...
+I: Configuring libssl3t64:amd64...
+I: Configuring liblastlog2-2:amd64...
+I: Configuring libsystemd0:amd64...
+I: Configuring libselinux1:amd64...
+I: Configuring libpam0g:amd64...
+I: Configuring sed...
+I: Configuring findutils...
+I: Configuring libmount1:amd64...
+I: Configuring libsemanage2:amd64...
+I: Configuring libapt-pkg7.0:amd64...
+I: Configuring base-passwd...
+I: Configuring apt...
+I: Configuring bsdutils...
+I: Configuring tar...
+I: Configuring libpam-modules-bin...
+I: Configuring coreutils...
+I: Configuring dpkg...
+I: Configuring mount...
+I: Configuring libpam-modules:amd64...
+I: Configuring passwd...
+I: Configuring libpam-runtime...
+I: Configuring login...
+I: Configuring util-linux...
+I: Configuring libc-bin...
+I: Unpacking the base system...
+I: Unpacking adduser...
+I: Unpacking ca-certificates...
+I: Unpacking fuse...
+I: Unpacking fuse3...
+I: Unpacking haveged...
+I: Unpacking libfuse3-4:amd64...
+I: Unpacking libhavege2:amd64...
+I: Unpacking libkmod2:amd64...
+I: Unpacking libncursesw6:amd64...
+I: Unpacking libproc2-0:amd64...
+I: Unpacking libwrap0:amd64...
+I: Unpacking openssl...
+I: Unpacking procps...
+I: Unpacking socat...
+I: Unpacking systemd-sysv...
+I: Unpacking udev...
+I: Configuring the base system...
+I: Configuring systemd-sysv...
+I: Configuring adduser...
+I: Configuring libhavege2:amd64...
+I: Configuring libwrap0:amd64...
+I: Configuring socat...
+I: Configuring libproc2-0:amd64...
+I: Configuring libncursesw6:amd64...
+I: Configuring procps...
+I: Configuring libfuse3-4:amd64...
+I: Configuring openssl...
+I: Configuring libkmod2:amd64...
+I: Configuring haveged...
+I: Configuring fuse3...
+I: Configuring ca-certificates...
+I: Configuring udev...
+I: Configuring fuse...
+I: Configuring libc-bin...
+I: Configuring ca-certificates...
+I: Base system installed successfully.
+rm -rf "tmp/rootfs-stargz/var/cache/apt/archives" "tmp/rootfs-stargz/usr/share/doc" "tmp/rootfs-stargz/var/lib/apt/lists"
+mkdir -p "tmp/rootfs-stargz/dev" "tmp/rootfs-stargz/bin" "tmp/rootfs-stargz/etc" "tmp/rootfs-stargz/etc/init.d" "tmp/rootfs-stargz/tmp" "tmp/rootfs-stargz/var" "tmp/rootfs-stargz/run" "tmp/rootfs-stargz/proc" "tmp/rootfs-stargz/sys" "tmp/rootfs-stargz/container/rootfs" "tmp/rootfs-stargz/agent" "tmp/rootfs-stargz/rom" "tmp/rootfs-stargz/overlay"
+touch debootstrap_sgzstamp
+if [ -d files_common ]; then cd files_common && tar --owner=0 --group=0 -cf - . | (cd "/src/tmp/rootfs-stargz" && tar --keep-directory-symlink -xvf -); fi
+# Reset the timestamp on tmp/rootfs-stargz, which may have been modified by the
+# creation of files in it:
+touch --reference=debootstrap_sgzstamp --no-create "tmp/rootfs-stargz"
+touch files_common_sgzstamp
+if [ -d files_debootstrap ]; then cd files_debootstrap && tar --owner=0 --group=0 -cf - . | (cd "/src/tmp/rootfs-stargz" && tar --keep-directory-symlink -xvf -); fi
+./
+./sbin/
+./sbin/overlay-init
+./etc/
+./etc/systemd/
+./etc/systemd/system/
+./etc/systemd/system/haveged.service
+./etc/systemd/system/firecracker.target
+./etc/systemd/system/apt-daily-upgrade.timer
+./etc/systemd/system/systemd-timesyncd.service
+./etc/systemd/system/rom.mount
+./etc/systemd/system/firecracker-agent.service
+./etc/systemd/system/firecracker.target.wants/
+./etc/systemd/system/firecracker.target.wants/haveged.service
+./etc/systemd/system/firecracker.target.wants/getty.target
+./etc/systemd/system/firecracker.target.wants/firecracker-agent.service
+./etc/systemd/system/apt-daily.timer
+./etc/systemd/system/rom-overlay.mount
+./etc/systemd/system/getty-static.service
+./etc/systemd/system/rom-dev.mount
+./etc/resolv.conf
+./etc/hostname
+./etc/hosts
+# Reset the timestamp on tmp/rootfs-stargz, which may have been modified by the
+# creation of files in it:
+touch --reference=debootstrap_sgzstamp --no-create "tmp/rootfs-stargz"
+touch files_debootstrap_sgzstamp
+if [ -d files_ephemeral ]; then cd files_ephemeral && tar --owner=0 --group=0 -cf - . | (cd "/src/tmp/rootfs-stargz" && tar --keep-directory-symlink -xvf -); fi
+./
+./var/
+./var/firecracker-containerd-test/
+./var/firecracker-containerd-test/scripts/
+./var/firecracker-containerd-test/scripts/lsblk.sh
+./usr/
+./usr/local/
+./usr/local/bin/
+./usr/local/bin/agent
+./usr/local/bin/runc
+# Reset the timestamp on tmp/rootfs-stargz, which may have been modified by the
+# creation of files in it:
+touch --reference=debootstrap_sgzstamp --no-create "tmp/rootfs-stargz"
+touch files_ephemeral_sgzstamp
+if [ -d files_stargz ]; then cd files_stargz && tar --owner=0 --group=0 -cf - . | (cd "/src/tmp/rootfs-stargz" && tar --keep-directory-symlink -xvf -); fi
+./
+./root/
+./root/.docker/
+./root/.docker/config.json
+./etc/
+./etc/systemd/
+./etc/systemd/system/
+./etc/systemd/system/stargz-snapshotter.service
+./etc/systemd/system/metrics-socat.service
+./etc/systemd/system/socat.service
+./etc/systemd/system/firecracker.target.wants/
+./etc/systemd/system/firecracker.target.wants/stargz-snapshotter.service
+./etc/systemd/system/firecracker.target.wants/metrics-socat.service
+./etc/systemd/system/firecracker.target.wants/socat.service
+./etc/containerd-stargz-grpc/
+./etc/containerd-stargz-grpc/config.toml
+# Reset the timestamp on tmp/rootfs-stargz, which may have been modified by the
+# creation of files in it:
+touch --reference=debootstrap_sgzstamp --no-create "tmp/rootfs-stargz"
+touch files_stargz_sgzstamp
+if [ -d files_ephemeral_stargz ]; then cd files_ephemeral_stargz && tar --owner=0 --group=0 -cf - . | (cd "/src/tmp/rootfs-stargz" && tar --keep-directory-symlink -xvf -); fi
+./
+./usr/
+./usr/local/
+./usr/local/bin/
+./usr/local/bin/containerd-stargz-grpc
+./usr/local/bin/volume-init
+./usr/local/bin/docker-credential-mmds
+# Reset the timestamp on tmp/rootfs-stargz, which may have been modified by the
+# creation of files in it:
+touch --reference=debootstrap_sgzstamp --no-create "tmp/rootfs-stargz"
+touch files_ephemeral_stargz_sgzstamp
+mksquashfs "tmp/rootfs-stargz" rootfs-stargz.img -noappend
+Unrecognised xattr prefix system.posix_acl_access
+Unrecognised xattr prefix system.posix_acl_default
+Parallel mksquashfs: Using 32 processors
+Creating 4.0 filesystem on rootfs-stargz.img, block size 131072.
+
+[=============================================================-] 7148/7148 100%
+
+Exportable Squashfs 4.0 filesystem, gzip compressed, data block size 131072
+	compressed data, compressed metadata, compressed fragments,
+	compressed xattrs, compressed ids
+	duplicates are removed
+Filesystem size 101520.55 Kbytes (99.14 Mbytes)
+	37.03% of uncompressed filesystem size (274172.49 Kbytes)
+Inode table size 79440 bytes (77.58 Kbytes)
+	30.16% of uncompressed inode table size (263431 bytes)
+Directory table size 72021 bytes (70.33 Kbytes)
+	43.63% of uncompressed directory table size (165077 bytes)
+Number of duplicate files found 80
+Number of inodes 7348
+Number of files 5543
+Number of fragments 529
+Number of symbolic links 1003
+Number of device nodes 8
+Number of fifo nodes 0
+Number of socket nodes 0
+Number of directories 794
+Number of hard-links 1
+Number of ids (unique uids + gids) 6
+Number of uids 2
+	root (0)
+	unknown (998)
+Number of gids 6
+	root (0)
+	shadow (42)
+	unknown (998)
+	utmp (43)
+	unknown (999)
+	mail (8)
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/tools/image-builder'
+docker run --rm \
+	--user 20005:3763 \
+	--volume /users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime:/src \
+	--volume gocache:/go \
+	--env HOME=/tmp \
+	--env GOPATH=/go \
+	--env GO111MODULES=on \
+	--env STATIC_AGENT=on \
+	--env STATIC_DOCKER_CREDENTIAL_MMDS=on \
+	--env GOPROXY=https://proxy.golang.org,direct \
+	--workdir /src \
+	public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 \
+	make all
+make -C agent EXTRAGOARGS=
+make[1]: Entering directory '/src/agent'
+make[1]: Nothing to be done for 'all'.
+make[1]: Leaving directory '/src/agent'
+make -C runtime EXTRAGOARGS=
+make[1]: Entering directory '/src/runtime'
+make[1]: Nothing to be done for 'all'.
+make[1]: Leaving directory '/src/runtime'
+make -C examples EXTRAGOARGS=
+make[1]: Entering directory '/src/examples'
+make -C cmd/remote-snapshotter remote-snapshotter
+make[2]: Entering directory '/src/examples/cmd/remote-snapshotter'
+make[2]: 'remote-snapshotter' is up to date.
+make[2]: Leaving directory '/src/examples/cmd/remote-snapshotter'
+make[1]: Leaving directory '/src/examples'
+make -C firecracker-control/cmd/containerd EXTRAGOARGS=
+make[1]: Entering directory '/src/firecracker-control/cmd/containerd'
+make[1]: Nothing to be done for 'all'.
+make[1]: Leaving directory '/src/firecracker-control/cmd/containerd'
+make -C snapshotter EXTRAGOARGS=
+make[1]: Entering directory '/src/snapshotter'
+make[1]: Nothing to be done for 'all'.
+make[1]: Leaving directory '/src/snapshotter'
+make -C docker-credential-mmds EXTRAGOARGS=
+make[1]: Entering directory '/src/docker-credential-mmds'
+make[1]: Nothing to be done for 'all'.
+make[1]: Leaving directory '/src/docker-credential-mmds'
+make -C volume EXTRAGOARGS=
+make[1]: Entering directory '/src/volume'
+make[1]: 'volume-init' is up to date.
+make[1]: Leaving directory '/src/volume'
+tools/modernize/fetch-firecracker.sh
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100 7427k  100 7427k    0     0  21.9M      0 --:--:-- --:--:-- --:--:-- 21.9M
+/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/bin/.firecracker-release.SqRntQpf/release.tgz: OK
+url=https://github.com/firecracker-microvm/firecracker/releases/download/v1.18.0/firecracker-v1.18.0-x86_64.tgz
+archive_sha256=1ac8eec866dd5eea14efecf6323e22b23eea24054545338a5b34bc5bca6623cd
+Firecracker v1.18.0
+
+2026-11-12T14:14:45.539181038 [anonymous-instance:main] Firecracker exiting successfully. exit_code=0
+Jailer v1.18.0
+
+b33f46cd6d88834cf6a4f8d184f08f219809c636236bffd286d233a60602a2ba  /users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/bin/firecracker
+ddadbaa15b5c942271a83b7040ca7259c8ccf92a9e08d44cce0b86fa407ba460  /users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/bin/jailer
+DOCKER_BUILDKIT=1 docker build \
+	--progress=plain \
+	--file tools/docker/Dockerfile.integ-test \
+	--build-arg FIRECRACKER_TARGET=x86_64-unknown-linux-musl \
+	--tag localhost/firecracker-containerd-test:9000f53fb03d .
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.integ-test
+#1 transferring dockerfile: 4.85kB done
+#1 DONE 0.0s
+
+#2 resolve image config for docker-image://docker.io/docker/dockerfile:experimental
+#2 DONE 0.3s
+
+#1 [internal] load build definition from Dockerfile.integ-test
+#1 transferring dockerfile: 4.85kB done
+#1 DONE 0.0s
+
+#3 docker-image://docker.io/docker/dockerfile:experimental@sha256:600e5c62eedff338b3f7a0850beb7c05866e0ef27b2d2e8c02aa468e78496ff5
+#3 resolve docker.io/docker/dockerfile:experimental@sha256:600e5c62eedff338b3f7a0850beb7c05866e0ef27b2d2e8c02aa468e78496ff5 0.0s done
+#3 CACHED
+
+#4 [internal] load build definition from Dockerfile.integ-test
+#4 DONE 0.0s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 34B done
+#5 DONE 0.0s
+
+#6 [internal] load metadata for public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0
+#6 DONE 0.0s
+
+#7 [ 1/14] FROM public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0
+#7 resolve public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 0.0s done
+#7 DONE 0.0s
+
+#8 [internal] load build context
+#8 transferring context: 578.41MB 2.9s done
+#8 DONE 2.9s
+
+#9 [ 6/14] COPY tools/docker/config.toml /etc/containerd/config.toml
+#9 CACHED
+
+#10 [ 7/14] COPY tools/docker/do_not_edit_for_firecracker-control.config.json /etc/containerd/firecracker-runtime.json
+#10 CACHED
+
+#11 [ 3/14] RUN mkdir -p   /var/run/firecracker-containerd   /src   /srv/firecracker_containerd_tests   /var/log/firecracker-containerd-test   /etc/cni/net.d
+#11 CACHED
+
+#12 [ 4/14] RUN ARCH=`go env GOARCH` &&   test "$ARCH" = amd64 &&   wget --quiet -O /tmp/containerd.tar.gz https://github.com/containerd/containerd/releases/download/v2.3.7/containerd-2.3.7-linux-${ARCH}.tar.gz &&   echo '09a1b669ac6d21e7e24c3c33a9805b48987ba5845e8d88f039c47013a0c0025c  /tmp/containerd.tar.gz' | sha256sum -c - &&   tar zxf /tmp/containerd.tar.gz -C /tmp/ &&   install -D -o root -g root -m755 -t /usr/local/bin /tmp/bin/containerd-shim-runc-v2 &&   rm -rf /tmp/bin
+#12 CACHED
+
+#13 [ 2/14] RUN apt-get update && apt-get install --yes --no-install-recommends   build-essential   ca-certificates   curl   git   iptables   iperf3   libdevmapper-dev   libseccomp-dev   tcpdump   iproute2   rng-tools   e2fsprogs
+#13 CACHED
+
+#14 [ 5/14] RUN ARCH=`go env GOARCH` &&   test "$ARCH" = amd64 &&   wget --quiet -O /tmp/critest.tar.gz https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.37.0/critest-v1.37.0-linux-${ARCH}.tar.gz &&   echo 'e39780b83deac72e3d70599a6641f4db7661b63ebe15aa6d9f6d46dde06a4c05  /tmp/critest.tar.gz' | sha256sum -c - &&   tar zxf /tmp/critest.tar.gz -C /tmp/ &&   install -D -o root -g root -m755 -t /usr/local/bin /tmp/critest &&   rm -f /tmp/critest
+#14 CACHED
+
+#15 [ 8/14] COPY tools/demo/fcnet.conflist /etc/cni/net.d/10-fcnet.conflist
+#15 CACHED
+
+#16 [ 9/14] RUN --mount=type=bind,target=/src   make -C /src install &&   ln -sv /usr/local/bin/firecracker-containerd /usr/local/bin/containerd &&   ln -sv /usr/local/bin/firecracker-ctr /usr/local/bin/ctr
+#16 0.953 make: Entering directory '/src'
+#16 0.969 set -e; for d in agent runtime examples firecracker-control/cmd/containerd snapshotter docker-credential-mmds volume; do make -C $d install; done
+#16 0.971 make[1]: Entering directory '/src/agent'
+#16 0.979 make[1]: Nothing to be done for 'install'.
+#16 0.979 make[1]: Leaving directory '/src/agent'
+#16 0.980 make[1]: Entering directory '/src/runtime'
+#16 1.009 install -D -o root -g root -m755 -t /usr/local/bin containerd-shim-aws-firecracker
+#16 1.079 make[1]: Leaving directory '/src/runtime'
+#16 1.080 make[1]: Entering directory '/src/examples'
+#16 1.087 make[1]: Nothing to be done for 'install'.
+#16 1.087 make[1]: Leaving directory '/src/examples'
+#16 1.088 make[1]: Entering directory '/src/firecracker-control/cmd/containerd'
+#16 1.106 install -D -o root -g root -m755 -t /usr/local/bin firecracker-containerd
+#16 1.232 install -D -o root -g root -m755 -t /usr/local/bin firecracker-ctr
+#16 1.303 make[1]: Leaving directory '/src/firecracker-control/cmd/containerd'
+#16 1.304 make[1]: Entering directory '/src/snapshotter'
+#16 1.317 install -D -o root -g root -m755 -t /usr/local/bin demux-snapshotter http-address-resolver
+#16 1.395 make[1]: Leaving directory '/src/snapshotter'
+#16 1.397 make[1]: Entering directory '/src/docker-credential-mmds'
+#16 1.403 make[1]: Nothing to be done for 'install'.
+#16 1.403 make[1]: Leaving directory '/src/docker-credential-mmds'
+#16 1.404 make[1]: Entering directory '/src/volume'
+#16 1.406 make[1]: Nothing to be done for 'install'.
+#16 1.406 make[1]: Leaving directory '/src/volume'
+#16 1.407 make: Leaving directory '/src'
+#16 1.407 '/usr/local/bin/containerd' -> '/usr/local/bin/firecracker-containerd'
+#16 1.408 '/usr/local/bin/ctr' -> '/usr/local/bin/firecracker-ctr'
+#16 DONE 1.7s
+
+#17 [10/14] RUN set -eu; containerd >/tmp/containerd-preload.log 2>&1 & daemon=$!;   trap 'kill "$daemon"; wait "$daemon" || true' EXIT;   ready=0;   for attempt in $(seq 1 60); do     if ctr --address /run/firecracker-containerd/containerd.sock version >/dev/null 2>&1; then ready=1; break; fi;     if ! kill -0 "$daemon" 2>/dev/null; then cat /tmp/containerd-preload.log; exit 1; fi;     sleep 1;   done;   if [ "$ready" != 1 ]; then cat /tmp/containerd-preload.log; exit 1; fi;   for pair in     'docker.io/library/alpine:3.10.1@sha256:6a92cd1fcdc8d8cdec60f33dda4db2cb1fcdcacf3410a8e05b3741f44a9b5998'     'docker.io/mlabbe/iperf3:3.6-r0@sha256:1ae7855531c64f83144c3a4ba68f02b17d1588f3470a183688e877e8eb3cceac'     'docker.io/library/postgres:14.3@sha256:2d1e636f07781d4799b3f2edbff78a0a5494f24c4512cb56a83ebfd0e04ec074'; do     ctr --address /run/firecracker-containerd/containerd.sock content fetch "$pair" >/dev/null;     ctr --address /run/firecracker-containerd/containerd.sock images tag "$pair" "${pair%@*}";   done
+#17 2.616 docker.io/library/alpine:3.10.1
+#17 3.747 docker.io/mlabbe/iperf3:3.6-r0
+#17 5.882 docker.io/library/postgres:14.3
+#17 DONE 5.9s
+
+#18 [11/14] ADD bin/firecracker /usr/local/bin
+#18 DONE 0.0s
+
+#19 [12/14] RUN --mount=type=bind,target=/src make -C /src -o _submodules/runc/runc   install   install-runc   install-kernel   install-default-rootfs   install-default-runc-jailer-config   install-test-cni-bins   install-test-rootfs   install-stargz-rootfs   demo-network
+#19 0.212 make: Entering directory '/src'
+#19 0.228 set -e; for d in agent runtime examples firecracker-control/cmd/containerd snapshotter docker-credential-mmds volume; do make -C $d install; done
+#19 0.230 make[1]: Entering directory '/src/agent'
+#19 0.239 make[1]: Nothing to be done for 'install'.
+#19 0.239 make[1]: Leaving directory '/src/agent'
+#19 0.240 make[1]: Entering directory '/src/runtime'
+#19 0.268 install -D -o root -g root -m755 -t /usr/local/bin containerd-shim-aws-firecracker
+#19 0.337 make[1]: Leaving directory '/src/runtime'
+#19 0.338 make[1]: Entering directory '/src/examples'
+#19 0.344 make[1]: Nothing to be done for 'install'.
+#19 0.344 make[1]: Leaving directory '/src/examples'
+#19 0.345 make[1]: Entering directory '/src/firecracker-control/cmd/containerd'
+#19 0.365 install -D -o root -g root -m755 -t /usr/local/bin firecracker-containerd
+#19 0.489 install -D -o root -g root -m755 -t /usr/local/bin firecracker-ctr
+#19 0.560 make[1]: Leaving directory '/src/firecracker-control/cmd/containerd'
+#19 0.561 make[1]: Entering directory '/src/snapshotter'
+#19 0.574 install -D -o root -g root -m755 -t /usr/local/bin demux-snapshotter http-address-resolver
+#19 0.653 make[1]: Leaving directory '/src/snapshotter'
+#19 0.655 make[1]: Entering directory '/src/docker-credential-mmds'
+#19 0.662 make[1]: Nothing to be done for 'install'.
+#19 0.662 make[1]: Leaving directory '/src/docker-credential-mmds'
+#19 0.663 make[1]: Entering directory '/src/volume'
+#19 0.665 make[1]: Nothing to be done for 'install'.
+#19 0.665 make[1]: Leaving directory '/src/volume'
+#19 0.666 install -D -o root -g root -m755 -t /usr/local/bin _submodules/runc/runc
+#19 0.702 install -D -o root -g root -m400 bin/vmlinux-6.18.56-fcmod /var/lib/firecracker-containerd/runtime/default-vmlinux.bin
+#19 0.761 install -D -o root -g root -m400 tools/image-builder/rootfs.img /var/lib/firecracker-containerd/runtime/default-rootfs.img
+#19 0.911 install -D -o root -g root -m400 runtime/firecracker-runc-config.json.example /etc/containerd/firecracker-runc-config.json
+#19 0.913 mkdir --mode 0755 --parents /opt/cni/bin
+#19 0.915 install -D -o root -g root -m755 -t /opt/cni/bin /src/bin/test-bridged-tap
+#19 0.926 install -D -o root -g root -m400 tools/image-builder/rootfs-debug.img /var/lib/firecracker-containerd/runtime/rootfs-debug.img
+#19 1.076 install -D -o root -g root -m400 tools/image-builder/rootfs-stargz.img /var/lib/firecracker-containerd/runtime/rootfs-stargz.img
+#19 1.290 install -D -o root -g root -m755 -t /opt/cni/bin /src/bin/bridge
+#19 1.303 install -D -o root -g root -m755 -t /opt/cni/bin /src/bin/ptp
+#19 1.316 install -D -o root -g root -m755 -t /opt/cni/bin /src/bin/host-local
+#19 1.327 install -D -o root -g root -m755 -t /opt/cni/bin /src/bin/firewall
+#19 1.341 install -D -o root -g root -m755 -t /opt/cni/bin /src/bin/tc-redirect-tap
+#19 1.352 install -D -o root -g root -m755 -t /opt/cni/bin /src/bin/loopback
+#19 1.363 mkdir -p /etc/cni/conf.d/
+#19 1.365 install -o root -g root -m644 tools/demo/fcnet.conflist /etc/cni/conf.d/fcnet.conflist
+#19 1.366 make: Leaving directory '/src'
+#19 DONE 2.4s
+
+#20 [13/14] RUN --mount=type=bind,target=/src make -C /src/snapshotter install
+#20 0.148 make: Entering directory '/src/snapshotter'
+#20 0.162 install -D -o root -g root -m755 -t /usr/local/bin demux-snapshotter http-address-resolver
+#20 0.243 make: Leaving directory '/src/snapshotter'
+#20 DONE 0.3s
+
+#21 [14/14] COPY tools/docker/entrypoint.sh /entrypoint
+#21 DONE 0.0s
+
+#22 exporting to image
+#22 exporting layers
+#22 exporting layers 17.0s done
+#22 exporting manifest sha256:ad0a41f390c8952572837f26b499fdfd5099fe88778c98a5e9b36b002ab6246b done
+#22 exporting config sha256:acc1d3739a5fd74093d62b00c7584a99214114d7a0a498e49e7b52667aee7b4f done
+#22 exporting attestation manifest sha256:ebd94469d8b34ba81c7933aada1e44efaf9aa89cef3b2935ed8c91cad3b7397f done
+#22 exporting manifest list sha256:9b98d0c7acc33a2fed99adcad7784329934aea1a3aab75cd5954eab729bc8dc7 done
+#22 naming to localhost/firecracker-containerd-test:9000f53fb03d done
+#22 unpacking to localhost/firecracker-containerd-test:9000f53fb03d
+#22 unpacking to localhost/firecracker-containerd-test:9000f53fb03d 6.5s done
+#22 DONE 23.5s
+docker run --rm \
+	--volume /users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime:/src \
+	--volume gocache:/go \
+	--workdir /src \
+	public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 go mod download
+ok  	github.com/firecracker-microvm/firecracker-containerd/agent	0.042s
+?   	github.com/firecracker-microvm/firecracker-containerd/client	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-containerd/config	(cached)
+ok  	github.com/firecracker-microvm/firecracker-containerd/eventbridge	(cached)
+?   	github.com/firecracker-microvm/firecracker-containerd/examples	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/firecracker-control	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/firecracker-control/client	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-containerd/firecracker-control/cmd/containerd	0.024s [no tests to run]
+ok  	github.com/firecracker-microvm/firecracker-containerd/internal	(cached)
+?   	github.com/firecracker-microvm/firecracker-containerd/internal/bundle	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/internal/cmd/test-bridged-tap	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-containerd/internal/debug	(cached)
+?   	github.com/firecracker-microvm/firecracker-containerd/internal/event	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/internal/integtest	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/internal/shim	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-containerd/internal/vm	1.478s
+?   	github.com/firecracker-microvm/firecracker-containerd/proto	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/proto/service/drivemount/ttrpc	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/proto/service/fccontrol/ttrpc	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/proto/service/ioproxy/ttrpc	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	0.623s
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime/cpuset	(cached)
+?   	github.com/firecracker-microvm/firecracker-containerd/runtime/firecrackeroci	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/runtime/vm	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter	(cached)
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/app	(cached)
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/config	(cached)
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux	0.011s
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/cache	(cached)
+?   	github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/internal	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/metrics	(cached)
+?   	github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/metrics/discovery	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/proxy	(cached)
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/proxy/address	(cached)
+?   	github.com/firecracker-microvm/firecracker-containerd/snapshotter/internal	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/snapshotter/internal/integtest/stargz/fs/config	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/snapshotter/internal/integtest/stargz/fs/source	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/internal/mount	(cached)
+ok  	github.com/firecracker-microvm/firecracker-containerd/volume	(cached)
+ok  	github.com/firecracker-microvm/firecracker-containerd/volume/cmd/volume-init	(cached)
+ok  	github.com/firecracker-microvm/firecracker-containerd/agent	0.041s
+?   	github.com/firecracker-microvm/firecracker-containerd/client	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-containerd/config	(cached)
+ok  	github.com/firecracker-microvm/firecracker-containerd/eventbridge	(cached)
+?   	github.com/firecracker-microvm/firecracker-containerd/examples	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/firecracker-control	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/firecracker-control/client	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-containerd/firecracker-control/cmd/containerd	0.022s [no tests to run]
+ok  	github.com/firecracker-microvm/firecracker-containerd/internal	(cached)
+?   	github.com/firecracker-microvm/firecracker-containerd/internal/bundle	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/internal/cmd/test-bridged-tap	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-containerd/internal/debug	(cached)
+?   	github.com/firecracker-microvm/firecracker-containerd/internal/event	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/internal/integtest	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/internal/shim	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-containerd/internal/vm	1.464s
+?   	github.com/firecracker-microvm/firecracker-containerd/proto	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/proto/service/drivemount/ttrpc	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/proto/service/fccontrol/ttrpc	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/proto/service/ioproxy/ttrpc	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	0.651s
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime/cpuset	(cached)
+?   	github.com/firecracker-microvm/firecracker-containerd/runtime/firecrackeroci	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/runtime/vm	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter	(cached)
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/app	(cached)
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/config	(cached)
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux	0.011s
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/cache	(cached)
+?   	github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/internal	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/metrics	(cached)
+?   	github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/metrics/discovery	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/proxy	(cached)
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/proxy/address	(cached)
+?   	github.com/firecracker-microvm/firecracker-containerd/snapshotter/internal	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/snapshotter/internal/integtest/stargz/fs/config	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/snapshotter/internal/integtest/stargz/fs/source	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/internal/mount	(cached)
+ok  	github.com/firecracker-microvm/firecracker-containerd/volume	(cached)
+ok  	github.com/firecracker-microvm/firecracker-containerd/volume/cmd/volume-init	(cached)
+./tools/tidy.sh
+/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/docker-credential-mmds
+/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/examples/cmd/remote-snapshotter
+/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime
+make: Entering directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/proto'
+rm -f events.pb.go firecracker.pb.go types.pb.go
+make -C service/fccontrol clean
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/proto/service/fccontrol'
+rm -f ttrpc/fccontrol.pb.go
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/proto/service/fccontrol'
+make -C service/drivemount clean
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/proto/service/drivemount'
+rm -f ttrpc/drivemount.pb.go
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/proto/service/drivemount'
+make -C service/ioproxy clean
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/proto/service/ioproxy'
+rm -f ttrpc/ioproxy.pb.go
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/proto/service/ioproxy'
+make: Leaving directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/proto'
+DOCKER_BUILDKIT=1 docker build \
+	--file tools/docker/Dockerfile.proto-builder \
+	--tag localhost/proto-builder:9000f53fb03d \
+	/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/tools/docker
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.proto-builder
+#1 transferring dockerfile: 1.12kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/3] FROM public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0
+#4 resolve public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 done
+#4 DONE 0.0s
+
+#5 [2/3] RUN apt-get update && apt-get install --yes --no-install-recommends 	libprotobuf-dev=3.21.12-3+deb12u1 	protobuf-compiler=3.21.12-3+deb12u1 	&& go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.10 	&& go install github.com/containerd/ttrpc/cmd/protoc-gen-go-ttrpc@v1.2.8 	&& mkdir /protobuf
+#5 CACHED
+
+#6 [3/3] WORKDIR /protobuf
+#6 CACHED
+
+#7 exporting to image
+#7 exporting layers done
+#7 exporting manifest sha256:a67f63b5e37ebe1de77e111045756ee02b2bc8424615ff60f15f723c964759f9 done
+#7 exporting config sha256:5a37d029330aaf11009410756ccce4a5c0563efbc17bfaa41b6276b08afd1625 done
+#7 exporting attestation manifest sha256:d0ff157d146c8bf7b5baabead843768a2b957855b4eb898ae0b8120b4712d6ba done
+#7 exporting manifest list sha256:584a25299311f434cc1adff3a43918504e075037e60fde07bfc2b284f8f22a54 done
+#7 naming to localhost/proto-builder:9000f53fb03d done
+#7 unpacking to localhost/proto-builder:9000f53fb03d done
+#7 DONE 0.1s
+PATH=/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/bin:/users/nehalem/fc-ctrd-mod/toolchains/go1.26.11/bin:/users/nehalem/fc-ctrd-mod/toolchains/go1.26.11/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin make -C proto/ proto-docker
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/proto'
+docker run --rm \
+	-v /users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/proto:/protobuf \
+	--user 20005:3763 \
+	localhost/proto-builder:9000f53fb03d
+protoc \
+	--go_out=:. \
+	events.proto firecracker.proto types.proto
+PROTOPATH=/protobuf /usr/bin/make -C service/fccontrol proto
+make[1]: Entering directory '/protobuf/service/fccontrol'
+protoc -I. -I/protobuf\
+	--go_out=Mfirecracker.proto=github.com/firecracker-microvm/firecracker-containerd/proto,Mtypes.proto=github.com/firecracker-microvm/firecracker-containerd/proto:ttrpc \
+	fccontrol.proto
+protoc -I. -I/protobuf\
+	--go-ttrpc_out=Mfirecracker.proto=github.com/firecracker-microvm/firecracker-containerd/proto,Mtypes.proto=github.com/firecracker-microvm/firecracker-containerd/proto:ttrpc \
+	fccontrol.proto
+make[1]: Leaving directory '/protobuf/service/fccontrol'
+PROTOPATH=/protobuf /usr/bin/make -C service/drivemount proto
+make[1]: Entering directory '/protobuf/service/drivemount'
+protoc -I. -I/protobuf\
+	--go_out=:ttrpc \
+	drivemount.proto
+protoc -I. -I/protobuf\
+	--go-ttrpc_out=:ttrpc \
+	drivemount.proto
+make[1]: Leaving directory '/protobuf/service/drivemount'
+PROTOPATH=/protobuf /usr/bin/make -C service/ioproxy proto
+make[1]: Entering directory '/protobuf/service/ioproxy'
+protoc -I. -I/protobuf\
+	--go_out=:ttrpc \
+	ioproxy.proto
+protoc -I. -I/protobuf\
+	--go-ttrpc_out=:ttrpc \
+	ioproxy.proto
+make[1]: Leaving directory '/protobuf/service/ioproxy'
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime/proto'
+diff --git a/go.mod b/go.mod
+index 8d17af9f..0e355630 100644
+--- a/go.mod
++++ b/go.mod
+@@ -9,6 +9,7 @@ require (
+ 	github.com/containerd/containerd/v2 v2.3.7
+ 	github.com/containerd/continuity v0.5.0
+ 	github.com/containerd/errdefs v1.0.0
++	github.com/containerd/errdefs/pkg v0.3.0
+ 	github.com/containerd/fifo v1.1.0
+ 	github.com/containerd/go-runc v1.1.0
+ 	github.com/containerd/log v0.1.0
+@@ -52,7 +53,6 @@ require (
+ 	github.com/cilium/ebpf v0.17.3 // indirect
+ 	github.com/containerd/btrfs/v2 v2.0.0 // indirect
+ 	github.com/containerd/console v1.0.5 // indirect
+-	github.com/containerd/errdefs/pkg v0.3.0 // indirect
+ 	github.com/containerd/go-cni v1.1.13 // indirect
+ 	github.com/containerd/go-dmverity v0.1.0 // indirect
+ 	github.com/containerd/imgcrypt/v2 v2.0.2 // indirect
