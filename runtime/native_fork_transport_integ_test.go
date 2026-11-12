@@ -83,7 +83,12 @@ type nativeForkInstance struct {
 
 // This is direct runtime acceptance, without containerd/CRI ownership adoption.
 // All three VMs coexist; original host FIFO descriptors stay open at each cut.
-func TestNativeForkTransport_Isolated(t *testing.T) {
+func TestNativeForkTransport_Isolated(t *testing.T) { testNativeForkTransport(t, false) }
+
+func TestNativeForkTransportStorage_Isolated(t *testing.T) { testNativeForkTransport(t, true) }
+
+func testNativeForkTransport(t *testing.T, diskUpper bool) {
+	t.Helper()
 	integtest.Prepare(t)
 	for _, jailed := range []bool{false, true} {
 		t.Run(fmt.Sprintf("jailed=%v", jailed), func(t *testing.T) {
@@ -95,9 +100,13 @@ func TestNativeForkTransport_Isolated(t *testing.T) {
 			control, err := integtest.NewFCControlClient(integtest.ContainerdSockPath)
 			require.NoError(t, err)
 			t.Cleanup(func() { _ = control.Close() })
-			id := fmt.Sprintf("native-fork-%v", jailed)
+			id := fmt.Sprintf("native-fork-%t-%t", diskUpper, jailed)
 			request := &proto.CreateVMRequest{VMID: id, ContainerCount: 2,
 				MachineCfg: &proto.FirecrackerMachineConfiguration{MemSizeMib: 512}}
+			request.GuestRoot = &proto.GuestRootStorage{Mode: "ram"}
+			if diskUpper {
+				request.GuestRoot = &proto.GuestRootStorage{Mode: "disk", SizeMib: 128}
+			}
 			if jailed {
 				request.JailerConfig = &proto.JailerConfig{UID: 300001, GID: 300001}
 			}
@@ -238,7 +247,11 @@ func TestNativeForkTransport_Isolated(t *testing.T) {
 					require.Equal(t, original.pid, state.Pid)
 					clone.streams = append(clone.streams, stream)
 				}
-				backingSets = append(backingSets, checkNativeRestorePrivateBackings(t, &manifest, artifact, clone.dir, clone.vmm.PID, jailed))
+				if diskUpper {
+					backingSets = append(backingSets, checkNativeRestoreStoragePrivateBackings(t, &manifest, artifact, clone.dir, clone.vmm.PID, jailed))
+				} else {
+					backingSets = append(backingSets, checkNativeRestorePrivateBackings(t, &manifest, artifact, clone.dir, clone.vmm.PID, jailed))
+				}
 				instances = append(instances, clone)
 			}
 			for driveID, path := range backingSets[0] {
