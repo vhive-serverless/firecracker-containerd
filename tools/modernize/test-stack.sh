@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Run inherited runtime and Step 3 CRI/native acceptance from a committed worker checkout after build-stack.sh.
+# Run Step 1 acceptance from a committed worker checkout after build-stack.sh.
 set -euo pipefail
 repo_dir=$(cd "$(dirname "$0")/../.." && pwd)
 stack_dir=${STACK_DIR:-"$HOME/fc-ctrd-mod"}
@@ -21,7 +21,10 @@ cleanup() {
 trap cleanup EXIT
 python3 tools/modernize/verify-inputs.py
 make lint
-make test-images
+# test-images regenerates the SquashFS inputs; derive DAX images afterwards so
+# their source receipts refer to the current inputs used by the restore matrix.
+make test-images image-dax image-stargz-dax
+tools/modernize/test-stargz-storage-init.sh "${FIRECRACKER_CONTAINERD_TEST_IMAGE:-localhost/firecracker-containerd-test}:$DOCKER_IMAGE_TAG"
 env -u ENABLE_ISOLATED_TESTS DISABLE_ROOT_TESTS=1 go test -short -timeout=180s ./...
 (cd cri && go test -mod=readonly -race -count=1 -timeout=180s ./...)
 sudo -n env -u ENABLE_ISOLATED_TESTS PATH="$PATH" GOMODCACHE="$(go env GOMODCACHE)" \
@@ -31,6 +34,7 @@ make -C proto clean
 make proto
 make -C cri generate
 git diff --exit-code
+# The storage restore matrix alone takes about eight minutes on the worker.
 FICD_DM_POOL="$runtime_pool" make -k -C runtime integ-test EXTRAGOARGS='-v -count=1 -timeout=1200s'
 FICD_DM_POOL="$snapshotter_pool" make -k -C snapshotter integ-test EXTRAGOARGS='-v -count=1 -timeout=1200s'
 tools/modernize/test-thinpool.sh
@@ -43,11 +47,12 @@ go list -m -json all > bin/receipts/acceptance/go-modules.json
 (cd cri && go list -m -json all) > bin/receipts/acceptance/cri-go-modules.json
 go version -m agent/agent > bin/receipts/acceptance/agent-build-info
 go version -m cri/firecracker-cri > bin/receipts/acceptance/cri-build-info
-sha256sum bin/firecracker bin/jailer _submodules/runc/runc agent/agent \
+sha256sum bin/firecracker _submodules/runc/runc agent/agent \
     _submodules/stargz-snapshotter/out/containerd-stargz-grpc volume/volume-init \
     runtime/containerd-shim-aws-firecracker \
     firecracker-control/cmd/containerd/firecracker-containerd \
-    firecracker-control/cmd/containerd/firecracker-ctr cri/firecracker-cri \
+    firecracker-control/cmd/containerd/firecracker-ctr \
+    cri/firecracker-cri \
     default-vmlinux.bin tools/image-builder/rootfs.img tools/image-builder/rootfs-stargz.img \
     > bin/receipts/acceptance/binaries.sha256
 docker image inspect "localhost/firecracker-containerd-test:$DOCKER_IMAGE_TAG" \

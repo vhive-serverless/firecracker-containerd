@@ -36,9 +36,25 @@ jobs:
       - run: make
       - run: make lint
       - name: make test
-        run: DISABLE_ROOT_TESTS=1 make test
+        run: |
+          set +e
+          DISABLE_ROOT_TESTS=1 make test 2>&1 | tee "$RUNNER_TEMP/go-tests-user.log"
+          status=${PIPESTATUS[0]}
+          set -e
+          if [ "$status" -ne 0 ]; then
+            python3 tools/modernize/annotate-go-test-failures.py "$RUNNER_TEMP/go-tests-user.log" || true
+          fi
+          exit "$status"
       - name: make test as root
-        run: EXTRAGOARGS='-exec sudo' make test
+        run: |
+          set +e
+          EXTRAGOARGS='-exec sudo' make test 2>&1 | tee "$RUNNER_TEMP/go-tests-root.log"
+          status=${PIPESTATUS[0]}
+          set -e
+          if [ "$status" -ne 0 ]; then
+            python3 tools/modernize/annotate-go-test-failures.py "$RUNNER_TEMP/go-tests-root.log" || true
+          fi
+          exit "$status"
       - run: |
           make tidy
           git diff --exit-code
