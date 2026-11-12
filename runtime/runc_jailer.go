@@ -22,6 +22,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
@@ -65,15 +66,18 @@ var cacheTopologyFiles = []string{
 
 // runcJailer uses runc to set up a jailed environment for the Firecracker VM.
 type runcJailer struct {
-	ctx           context.Context
-	logger        *logrus.Entry
-	Config        runcJailerConfig
-	vmID          string
-	configSpec    specs.Spec
-	runcClient    runc.Runc
-	started       bool
-	preparedFifos map[string]string
-	restoreMounts []restoreMount
+	ctx               context.Context
+	logger            *logrus.Entry
+	Config            runcJailerConfig
+	vmID              string
+	configSpec        specs.Spec
+	runcClient        runc.Runc
+	started           bool
+	preparedFifos     map[string]string
+	restoreMounts     []restoreMount
+	trackRestoreStubs bool
+	restoreStubMu     sync.Mutex
+	restoreStubs      map[string]ownedRestoreStub
 }
 
 const firecrackerFileName = "firecracker"
@@ -407,7 +411,7 @@ func (j *runcJailer) BuildLinkFifoHandler() firecracker.Handler {
 
 // StubDrivesOptions will return a set of options used to create a new stub
 // drive handler.
-func (j runcJailer) StubDrivesOptions() []FileOpt {
+func (j *runcJailer) StubDrivesOptions() []FileOpt {
 	return []FileOpt{
 		func(file *os.File) error {
 			err := unix.Fchown(int(file.Fd()), int(j.Config.UID), int(j.Config.GID))
@@ -637,7 +641,7 @@ func (j *runcJailer) overwriteConfig(machineConfig *firecracker.Config, socketPa
 	return nil
 }
 
-func (j runcJailer) CgroupPath() string {
+func (j *runcJailer) CgroupPath() string {
 	basePath := "/firecracker-containerd"
 	if j.Config.CgroupPath != "" {
 		basePath = j.Config.CgroupPath
@@ -683,7 +687,7 @@ func (j *runcJailer) Close() error {
 	// Leave recovery metadata in the bundle for the controller's exit monitor.
 	removeErr := os.RemoveAll(j.RootPath())
 
-	return multierror.Append(runcErr, removeErr).ErrorOrNil()
+	return multierror.Append(runcErr, removeErr, j.closeRestoreStubs()).ErrorOrNil()
 }
 
 func mkdirAndChown(path string, mode os.FileMode, uid, gid uint32) error {
@@ -742,7 +746,7 @@ func getNetNS(spec specs.Spec) string {
 	return ""
 }
 
-func (j runcJailer) Stop(force bool) error {
+func (j *runcJailer) Stop(force bool) error {
 	container, err := vm.OwnedRuncContainer(j.ctx, &j.runcClient, j.vmID, j.OCIBundlePath())
 	if err != nil || container == nil {
 		return err
@@ -771,7 +775,7 @@ func (j *runcJailer) IsRunning(ctx context.Context) bool {
 // setupCacheTopology will copy indexed contents from the cacheTopologyPath to
 // the jailer. This is needed for arm architecture as arm does not
 // automatically setup any cache topology
-func (j runcJailer) setupCacheTopology(path string) error {
+func (j *runcJailer) setupCacheTopology(path string) error {
 	j.logger.WithField("path", path).Debug("Creating cache topology")
 	const mode = os.FileMode(0700)
 
