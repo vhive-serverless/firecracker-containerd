@@ -72,6 +72,7 @@ type runcJailer struct {
 	configSpec    specs.Spec
 	runcClient    runc.Runc
 	started       bool
+	restoreMounts []restoreMount
 	preparedFifos map[string]string
 }
 
@@ -236,48 +237,52 @@ func (j *runcJailer) BuildJailedRootHandler(cfg *config.Config, machineConfig *f
 				return err
 			}
 
-			// copy the kernel image
-			newKernelImagePath := filepath.Join(rootPath, kernelImageFileName)
-			j.logger.WithField("newKernelImagePath", newKernelImagePath).Debug("copying kernel image")
-			if err := j.copyFileToJail(m.Cfg.KernelImagePath, newKernelImagePath, 0400); err != nil {
+			if len(j.restoreMounts) == 0 {
+				// copy the kernel image
+				newKernelImagePath := filepath.Join(rootPath, kernelImageFileName)
+				j.logger.WithField("newKernelImagePath", newKernelImagePath).Debug("copying kernel image")
+				if err := j.copyFileToJail(m.Cfg.KernelImagePath, newKernelImagePath, 0400); err != nil {
+					return err
+				}
+
+				m.Cfg.KernelImagePath = kernelImageFileName
+
+				// copy drives to new contents path
+				for i, d := range m.Cfg.Drives {
+					drivePath := d.PathOnHost
+					fileName := filepath.Base(drivePath)
+					newDrivePath := filepath.Join(rootPath, fileName)
+
+					f, err := os.Open(drivePath)
+					if err != nil {
+						return fmt.Errorf("failed to open drive file: %w", err)
+					}
+
+					// This closes the file in the event an error occurred, otherwise we
+					// call close down below.
+					defer f.Close()
+
+					if !internal.IsStubDrive(f) {
+						mode := 0600
+						if d.IsReadOnly {
+							mode = 0400
+						}
+						if err := j.exposeFileToJail(drivePath, newDrivePath, os.FileMode(mode)); err != nil {
+							return err
+						}
+					}
+
+					if err := f.Close(); err != nil {
+						j.logger.WithError(err).Debug("failed to close drive file")
+					}
+
+					j.logger.WithField("drive", newDrivePath).Debug("Adding drive")
+					m.Cfg.Drives[i].PathOnHost = fileName
+				}
+
+			} else if err := j.prepareRestoreMounts(); err != nil {
 				return err
 			}
-
-			m.Cfg.KernelImagePath = kernelImageFileName
-
-			// copy drives to new contents path
-			for i, d := range m.Cfg.Drives {
-				drivePath := d.PathOnHost
-				fileName := filepath.Base(drivePath)
-				newDrivePath := filepath.Join(rootPath, fileName)
-
-				f, err := os.Open(drivePath)
-				if err != nil {
-					return fmt.Errorf("failed to open drive file: %w", err)
-				}
-
-				// This closes the file in the event an error occurred, otherwise we
-				// call close down below.
-				defer f.Close()
-
-				if !internal.IsStubDrive(f) {
-					mode := 0600
-					if d.IsReadOnly {
-						mode = 0400
-					}
-					if err := j.exposeFileToJail(drivePath, newDrivePath, os.FileMode(mode)); err != nil {
-						return err
-					}
-				}
-
-				if err := f.Close(); err != nil {
-					j.logger.WithError(err).Debug("failed to close drive file")
-				}
-
-				j.logger.WithField("drive", newDrivePath).Debug("Adding drive")
-				m.Cfg.Drives[i].PathOnHost = fileName
-			}
-
 			// Setting the proper path to where the vsock path should be
 			for i, v := range m.Cfg.VsockDevices {
 				j.logger.WithField("vsock path", v.Path).Debug("vsock device path being set relative to jailed directory")

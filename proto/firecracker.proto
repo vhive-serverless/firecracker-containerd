@@ -41,6 +41,17 @@ message CreateVMRequest {
     string MetricsFifoPath = 13;
 
     FirecrackerBalloonDevice BalloonDevice = 14;
+
+    // Optional existing network namespace owned by the orchestrator.
+    string NetNS = 15;
+
+    bool LoadSnapshot = 16;
+    string MemFilePath = 17;
+    string SnapshotPath = 18;
+    // Independent restored backing for the function's container disk.
+    string ContainerSnapshotPath = 19;
+    MemoryBackend MemBackend = 20;
+    bool EnableDiffSnapshots = 21;
 }
 
 message CreateVMResponse {
@@ -67,6 +78,12 @@ message PauseVMRequest {
 
 message ResumeVMRequest {
     string VMID = 1;
+}
+
+message CreateSnapshotRequest {
+    string VMID = 1;
+    string MemFilePath = 2;
+    string SnapshotPath = 3;
 }
 
 message StopVMRequest {

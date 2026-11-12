@@ -146,6 +146,7 @@ type service struct {
 	eventForwarder           *eventbridge.JournalForwarder
 	eventCancel              context.CancelFunc
 	eventDone                chan struct{}
+	eventStopping            bool
 	driveMountClient         drivemount.DriveMounterService
 	ioProxyClient            ioproxy.IOProxyService
 	jailer                   jailer
@@ -153,11 +154,17 @@ type service struct {
 	driveMountStubs          []MountableStubDrive
 	exitAfterAllTasksDeleted bool // exit the VM and shim when all tasks are deleted
 
-	blockDeviceTasks sync.Map
+	blockDeviceTasks    sync.Map
+	legacyRestoredTasks sync.Map
 
 	cleanupErr  error
 	cleanupOnce sync.Once
 
+	snapshotMu       sync.RWMutex
+	pendingPause     *pendingVMPause
+	legacyRestoreCut *checkpointTransportCut
+	restoredIO       []*proto.RestoredProcessIO
+	apiSocketPath    string
 	machine          *firecracker.Machine
 	machineConfig    *firecracker.Config
 	vsockIOPortCount uint32
@@ -448,8 +455,16 @@ func (s *service) waitVMReady() error {
 // CreateVM will attempt to create the VM as specified in the provided request, but only on the first request
 // received. Any subsequent requests will be ignored and get an AlreadyExists error response.
 func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRequest) (*proto.CreateVMResponse, error) {
+	s.snapshotMu.RLock()
+	defer s.snapshotMu.RUnlock()
 	defer logPanicAndDie(s.logger)
 
+	if err := validateOrchestratorNetNS(request); err != nil {
+		return nil, err
+	}
+	if err := validateSnapshotRestore(request); err != nil {
+		return nil, err
+	}
 	timeout := defaultCreateVMTimeout
 	if request.TimeoutSeconds > 0 {
 		timeout = time.Duration(request.TimeoutSeconds) * time.Second
@@ -499,6 +514,7 @@ func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRe
 	resp.MetricsFifoPath = s.machineConfig.MetricsFifo
 	resp.LogFifoPath = s.machineConfig.LogFifo
 	resp.SocketPath = socketPath
+	resp.RestoredIO = s.restoredIO
 	if c, ok := s.jailer.(cgroupPather); ok {
 		resp.CgroupPath = c.CgroupPath()
 	}
@@ -564,11 +580,15 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 		opts = append(opts, firecracker.WithLogger(logger))
 	}
 
+	if err := s.prepareSnapshotMounts(request); err != nil {
+		return fmt.Errorf("prepare private restore disk mappings: %w", err)
+	}
 	jailedOpts, err := s.jailer.BuildJailedMachine(s.config, s.machineConfig, s.vmID)
 	if err != nil {
 		return fmt.Errorf("failed to build jailed machine options: %w", err)
 	}
 
+	s.apiSocketPath = s.machineConfig.SocketPath
 	if request.BalloonDevice == nil {
 		s.logger.Debug("No balloon device is setup")
 	} else {
@@ -585,6 +605,9 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 	}
 
 	opts = append(opts, jailedOpts...)
+	if request.LoadSnapshot {
+		opts = append(opts, snapshotRestoreOpt(s.machineConfig, request))
+	}
 
 	// In the event that a noop jailer is used, we will pass in the shim context
 	// and have the SDK construct a new machine using that context. Otherwise, a
@@ -593,6 +616,9 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 	s.machine, err = firecracker.NewMachine(s.shimCtx, *s.machineConfig, opts...)
 	if err != nil {
 		return fmt.Errorf("failed to create new machine instance: %w", err)
+	}
+	if request.LoadSnapshot {
+		s.machine.Handlers.FcInit = s.machine.Handlers.FcInit.AppendAfter(firecracker.SetupNetworkHandlerName, populateRestoreTaps)
 	}
 	if err := s.configureRecovery(); err != nil {
 		return fmt.Errorf("failed to record VM recovery state: %w", err)
@@ -607,7 +633,14 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 	}
 	s.exitAfterAllTasksDeleted = request.ExitAfterAllTasksDeleted
 
-	err = s.mountDrives(requestCtx)
+	if err := s.verifyRestoredEventCursor(requestCtx); err != nil {
+		return err
+	}
+	if request.LoadSnapshot {
+		err = s.adoptLegacyTransport(requestCtx)
+	} else {
+		err = s.mountDrives(requestCtx)
+	}
 	if err != nil {
 		return err
 	}
@@ -634,6 +667,8 @@ func (s *service) mountDrives(requestCtx context.Context) error {
 // but the shim will continue to shutdown. Similarly if we detect that the VM is in pause state, then
 // we are unable to communicate to the in-VM agent. In this case, we do a forceful shutdown.
 func (s *service) StopVM(requestCtx context.Context, request *proto.StopVMRequest) (_ *types.Empty, err error) {
+	s.snapshotMu.RLock()
+	defer s.snapshotMu.RUnlock()
 	defer logPanicAndDie(s.logger)
 	s.logger.WithFields(logrus.Fields{"timeout_seconds": request.TimeoutSeconds}).Debug("StopVM")
 
@@ -653,37 +688,31 @@ func (s *service) StopVM(requestCtx context.Context, request *proto.StopVMReques
 
 // ResumeVM resumes a VM
 func (s *service) ResumeVM(ctx context.Context, _ *proto.ResumeVMRequest) (*types.Empty, error) {
-	defer logPanicAndDie(s.logger)
-
-	err := s.waitVMReady()
-	if err != nil {
-		s.logger.WithError(err).Error()
+	if err := s.waitVMReady(); err != nil {
 		return nil, err
 	}
-
-	if err := s.machine.ResumeVM(ctx); err != nil {
-		s.logger.WithError(err).Error()
+	if err := s.lockSnapshotTransition(ctx); err != nil {
 		return nil, err
 	}
-
+	defer s.snapshotMu.Unlock()
+	if err := s.resumePreparedVM(ctx); err != nil {
+		return nil, err
+	}
 	return &types.Empty{}, nil
 }
 
 // PauseVM pauses a VM
 func (s *service) PauseVM(ctx context.Context, _ *proto.PauseVMRequest) (*types.Empty, error) {
-	defer logPanicAndDie(s.logger)
-
-	err := s.waitVMReady()
-	if err != nil {
-		s.logger.WithError(err).Error()
+	if err := s.waitVMReady(); err != nil {
 		return nil, err
 	}
-
-	if err := s.machine.PauseVM(ctx); err != nil {
-		s.logger.WithError(err).Error()
+	if err := s.lockSnapshotTransition(ctx); err != nil {
 		return nil, err
 	}
-
+	defer s.snapshotMu.Unlock()
+	if err := s.prepareLegacyPause(ctx); err != nil {
+		return nil, err
+	}
 	return &types.Empty{}, nil
 }
 
@@ -742,6 +771,8 @@ func (s *service) firecrackerSocketPath() (string, error) {
 // SetVMMetadata will update the VM being managed by this shim with the provided metadata. If the VM has not been created yet, this
 // method will wait for up to a hardcoded timeout for it to exist, returning an error if the timeout is reached.
 func (s *service) SetVMMetadata(requestCtx context.Context, request *proto.SetVMMetadataRequest) (*types.Empty, error) {
+	s.snapshotMu.RLock()
+	defer s.snapshotMu.RUnlock()
 	defer logPanicAndDie(s.logger)
 
 	err := s.waitVMReady()
@@ -765,6 +796,8 @@ func (s *service) SetVMMetadata(requestCtx context.Context, request *proto.SetVM
 // If the vm has not been created yet, this method will wait for up to the hardcoded timeout for it
 // to exist, returning an error if the timeout is reached.
 func (s *service) UpdateVMMetadata(requestCtx context.Context, request *proto.UpdateVMMetadataRequest) (*types.Empty, error) {
+	s.snapshotMu.RLock()
+	defer s.snapshotMu.RUnlock()
 
 	defer logPanicAndDie(s.logger)
 
@@ -857,6 +890,8 @@ func (s *service) GetBalloonConfig(requestCtx context.Context, _ *proto.GetBallo
 
 // UpdateBalloon will update an existing balloon device, before or after machine startup
 func (s *service) UpdateBalloon(requestCtx context.Context, req *proto.UpdateBalloonRequest) (*types.Empty, error) {
+	s.snapshotMu.RLock()
+	defer s.snapshotMu.RUnlock()
 	defer logPanicAndDie(s.logger)
 
 	err := s.waitVMReady()
@@ -924,6 +959,8 @@ func (s *service) GetBalloonStats(requestCtx context.Context, _ *proto.GetBalloo
 
 // UpdateBalloonStats will update an existing balloon device statistics interval, before or after machine startup.
 func (s *service) UpdateBalloonStats(requestCtx context.Context, req *proto.UpdateBalloonStatsRequest) (*types.Empty, error) {
+	s.snapshotMu.RLock()
+	defer s.snapshotMu.RUnlock()
 	defer logPanicAndDie(s.logger)
 
 	err := s.waitVMReady()
@@ -1003,7 +1040,8 @@ func (s *service) buildVMConfiguration(req *proto.CreateVMRequest) (*firecracker
 	cfg.LogPath = logPath
 	cfg.MetricsPath = metricsPath
 
-	if req.JailerConfig != nil {
+	cfg.NetNS = req.NetNS
+	if req.JailerConfig != nil && req.JailerConfig.NetNS != "" {
 		cfg.NetNS = req.JailerConfig.NetNS
 	}
 
@@ -1034,16 +1072,20 @@ func (s *service) buildVMConfiguration(req *proto.CreateVMRequest) (*firecracker
 		containerCount = 1
 	}
 
-	s.containerStubHandler, err = CreateContainerStubs(
-		&cfg, s.jailer, containerCount, s.logger)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create container stub drives: %w", err)
-	}
+	if req.LoadSnapshot {
+		s.containerStubHandler = &StubDriveHandler{}
+	} else {
+		s.containerStubHandler, err = CreateContainerStubs(
+			&cfg, s.jailer, containerCount, s.logger)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create container stub drives: %w", err)
+		}
 
-	s.driveMountStubs, err = CreateDriveMountStubs(
-		&cfg, s.jailer, req.DriveMounts, s.logger)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create drive mount stub drives: %w", err)
+		s.driveMountStubs, err = CreateDriveMountStubs(
+			&cfg, s.jailer, req.DriveMounts, s.logger)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create drive mount stub drives: %w", err)
+		}
 	}
 
 	// If no value for NetworkInterfaces was specified (not even an empty but non-nil list) and
@@ -1134,6 +1176,11 @@ func (s *service) deleteFIFOs(taskID, execID string) error {
 }
 
 func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTaskRequest) (_ *taskAPI.CreateTaskResponse, retErr error) {
+	s.snapshotMu.RLock()
+	defer s.snapshotMu.RUnlock()
+	if s.pendingPause != nil {
+		return nil, status.Error(codes.FailedPrecondition, "VM snapshot transition is in progress")
+	}
 	logger := s.logger.WithField(logTaskID, request.ID)
 	defer logPanicAndDie(logger)
 
@@ -1278,6 +1325,11 @@ func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTask
 }
 
 func (s *service) Start(requestCtx context.Context, req *taskAPI.StartRequest) (*taskAPI.StartResponse, error) {
+	s.snapshotMu.RLock()
+	defer s.snapshotMu.RUnlock()
+	if s.pendingPause != nil {
+		return nil, status.Error(codes.FailedPrecondition, "VM snapshot transition is in progress")
+	}
 	defer logPanicAndDie(log.G(requestCtx))
 
 	log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, logExecID: req.ExecID}).Debug("start")
@@ -1294,6 +1346,11 @@ func (s *service) Start(requestCtx context.Context, req *taskAPI.StartRequest) (
 }
 
 func (s *service) Delete(requestCtx context.Context, req *taskAPI.DeleteRequest) (*taskAPI.DeleteResponse, error) {
+	s.snapshotMu.RLock()
+	defer s.snapshotMu.RUnlock()
+	if s.pendingPause != nil {
+		return nil, status.Error(codes.FailedPrecondition, "VM snapshot transition is in progress")
+	}
 	defer logPanicAndDie(log.G(requestCtx))
 	logger := log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, logExecID: req.ExecID})
 
@@ -1319,6 +1376,9 @@ func (s *service) Delete(requestCtx context.Context, req *taskAPI.DeleteRequest)
 		return resp, nil
 	}
 
+	if _, restored := s.legacyRestoredTasks.LoadAndDelete(req.ID); restored {
+		return resp, nil
+	}
 	var result *multierror.Error
 
 	if _, contains := s.blockDeviceTasks.Load(req.ID); contains {
@@ -1350,6 +1410,11 @@ func (s *service) Delete(requestCtx context.Context, req *taskAPI.DeleteRequest)
 
 // Exec an additional process inside the container
 func (s *service) Exec(requestCtx context.Context, req *taskAPI.ExecProcessRequest) (*types.Empty, error) {
+	s.snapshotMu.RLock()
+	defer s.snapshotMu.RUnlock()
+	if s.pendingPause != nil {
+		return nil, status.Error(codes.FailedPrecondition, "VM snapshot transition is in progress")
+	}
 	defer logPanicAndDie(log.G(requestCtx))
 	logger := s.logger.WithField(logTaskID, req.ID).WithField(logExecID, req.ExecID)
 	logger.Debug("exec")
@@ -1399,6 +1464,11 @@ func (s *service) Exec(requestCtx context.Context, req *taskAPI.ExecProcessReque
 
 // ResizePty of a process
 func (s *service) ResizePty(requestCtx context.Context, req *taskAPI.ResizePtyRequest) (*types.Empty, error) {
+	s.snapshotMu.RLock()
+	defer s.snapshotMu.RUnlock()
+	if s.pendingPause != nil {
+		return nil, status.Error(codes.FailedPrecondition, "VM snapshot transition is in progress")
+	}
 	defer logPanicAndDie(log.G(requestCtx))
 
 	log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, logExecID: req.ExecID}).Debug("resize_pty")
@@ -1416,6 +1486,11 @@ func (s *service) ResizePty(requestCtx context.Context, req *taskAPI.ResizePtyRe
 
 // State returns runtime state information for a process
 func (s *service) State(requestCtx context.Context, req *taskAPI.StateRequest) (*taskAPI.StateResponse, error) {
+	s.snapshotMu.RLock()
+	defer s.snapshotMu.RUnlock()
+	if s.pendingPause != nil {
+		return nil, status.Error(codes.FailedPrecondition, "VM snapshot transition is in progress")
+	}
 	defer logPanicAndDie(log.G(requestCtx))
 
 	logger := log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, logExecID: req.ExecID})
@@ -1499,6 +1574,11 @@ func (s *service) attachNewProxy(
 
 // Pause the container
 func (s *service) Pause(requestCtx context.Context, req *taskAPI.PauseRequest) (*types.Empty, error) {
+	s.snapshotMu.RLock()
+	defer s.snapshotMu.RUnlock()
+	if s.pendingPause != nil {
+		return nil, status.Error(codes.FailedPrecondition, "VM snapshot transition is in progress")
+	}
 	defer logPanicAndDie(log.G(requestCtx))
 
 	log.G(requestCtx).WithField(logTaskID, req.ID).Debug("pause")
@@ -1516,6 +1596,11 @@ func (s *service) Pause(requestCtx context.Context, req *taskAPI.PauseRequest) (
 
 // Resume the container
 func (s *service) Resume(requestCtx context.Context, req *taskAPI.ResumeRequest) (*types.Empty, error) {
+	s.snapshotMu.RLock()
+	defer s.snapshotMu.RUnlock()
+	if s.pendingPause != nil {
+		return nil, status.Error(codes.FailedPrecondition, "VM snapshot transition is in progress")
+	}
 	defer logPanicAndDie(log.G(requestCtx))
 
 	log.G(requestCtx).WithField(logTaskID, req.ID).Debug("resume")
@@ -1533,6 +1618,11 @@ func (s *service) Resume(requestCtx context.Context, req *taskAPI.ResumeRequest)
 
 // Kill a process with the provided signal
 func (s *service) Kill(requestCtx context.Context, req *taskAPI.KillRequest) (*types.Empty, error) {
+	s.snapshotMu.RLock()
+	defer s.snapshotMu.RUnlock()
+	if s.pendingPause != nil {
+		return nil, status.Error(codes.FailedPrecondition, "VM snapshot transition is in progress")
+	}
 	defer logPanicAndDie(log.G(requestCtx))
 
 	log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, logExecID: req.ExecID}).Debug("kill")
@@ -1566,6 +1656,11 @@ func (s *service) Pids(requestCtx context.Context, req *taskAPI.PidsRequest) (*t
 
 // CloseIO of a process
 func (s *service) CloseIO(requestCtx context.Context, req *taskAPI.CloseIORequest) (*types.Empty, error) {
+	s.snapshotMu.RLock()
+	defer s.snapshotMu.RUnlock()
+	if s.pendingPause != nil {
+		return nil, status.Error(codes.FailedPrecondition, "VM snapshot transition is in progress")
+	}
 	defer logPanicAndDie(log.G(requestCtx))
 
 	log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, logExecID: req.ExecID}).Debug("close_io")
@@ -1583,6 +1678,11 @@ func (s *service) CloseIO(requestCtx context.Context, req *taskAPI.CloseIOReques
 
 // Checkpoint the container
 func (s *service) Checkpoint(requestCtx context.Context, req *taskAPI.CheckpointTaskRequest) (*types.Empty, error) {
+	s.snapshotMu.RLock()
+	defer s.snapshotMu.RUnlock()
+	if s.pendingPause != nil {
+		return nil, status.Error(codes.FailedPrecondition, "VM snapshot transition is in progress")
+	}
 	defer logPanicAndDie(log.G(requestCtx))
 
 	log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, "path": req.Path}).Info("checkpoint")
@@ -1625,6 +1725,11 @@ func (s *service) Connect(requestCtx context.Context, req *taskAPI.ConnectReques
 // * After any task is deleted via containerd's API
 // * After any task Create call returns an error
 func (s *service) Shutdown(requestCtx context.Context, req *taskAPI.ShutdownRequest) (*types.Empty, error) {
+	s.snapshotMu.RLock()
+	defer s.snapshotMu.RUnlock()
+	if s.pendingPause != nil {
+		return nil, status.Error(codes.FailedPrecondition, "VM snapshot transition is in progress")
+	}
 	defer logPanicAndDie(log.G(requestCtx))
 	s.logger.WithFields(logrus.Fields{logTaskID: req.ID, "now": req.Now}).Debug("Shutdown")
 
@@ -1734,6 +1839,11 @@ func (s *service) Stats(requestCtx context.Context, req *taskAPI.StatsRequest) (
 
 // Update a running container
 func (s *service) Update(requestCtx context.Context, req *taskAPI.UpdateTaskRequest) (*types.Empty, error) {
+	s.snapshotMu.RLock()
+	defer s.snapshotMu.RUnlock()
+	if s.pendingPause != nil {
+		return nil, status.Error(codes.FailedPrecondition, "VM snapshot transition is in progress")
+	}
 	defer logPanicAndDie(log.G(requestCtx))
 	log.G(requestCtx).WithField(logTaskID, req.ID).Debug("update")
 
