@@ -327,6 +327,13 @@ func newStubDrive(
 			return nil, err
 		}
 	}
+	// Only the creator can register this O_EXCL-created inode as an owned
+	// restore mount target. A recognizable stub filename/header is not proof.
+	if owner, ok := jail.(interface{ recordRestoreStub(*os.File, string) error }); ok {
+		if err := owner.recordRestoreStub(f, driveID); err != nil {
+			return nil, err
+		}
+	}
 
 	return &stubDrive{
 		stubPath: stubPath,
