@@ -1,0 +1,41 @@
+=== RUN   TestPauseSnapResume
+time="2026-11-13T00:34:07.212490204Z" level=warning msg="Failed to Fetch k8s dns clusterIP exec: \"kubectl\": executable file not found in $PATH\n\n"
+time="2026-11-13T00:34:07.212585874Z" level=warning msg="Using google dns 8.8.8.8\n"
+time="2026-11-13T00:34:07.350747513Z" level=info msg="Creating containerd client"
+time="2026-11-13T00:34:07.351095518Z" level=info msg="Created containerd client"
+time="2026-11-13T00:34:07.351108182Z" level=info msg="Creating firecracker client"
+time="2026-11-13T00:34:07.351693233Z" level=info msg="Created firecracker client"
+time="2026-11-13T00:34:07.351719873Z" level=info msg="Creating image manager"
+time="2026-11-13T00:34:23.259854037Z" level=info msg="Cleaning up network manager"
+--- PASS: TestPauseSnapResume (16.29s)
+=== RUN   TestSnapshotConcurrentClones
+time="2026-11-13T00:34:23.498126066Z" level=warning msg="Failed to Fetch k8s dns clusterIP exec: \"kubectl\": executable file not found in $PATH\n\n"
+time="2026-11-13T00:34:23.498143999Z" level=warning msg="Using google dns 8.8.8.8\n"
+time="2026-11-13T00:34:23.662668564Z" level=info msg="Creating containerd client"
+time="2026-11-13T00:34:23.662771488Z" level=info msg="Created containerd client"
+time="2026-11-13T00:34:23.662779333Z" level=info msg="Creating firecracker client"
+time="2026-11-13T00:34:23.662870143Z" level=info msg="Created firecracker client"
+time="2026-11-13T00:34:23.662878259Z" level=info msg="Creating image manager"
+time="2026-11-13T00:34:51.322686989Z" level=info msg="waiting for goroutines"
+time="2026-11-13T00:34:51.322707758Z" level=info msg="waiting done"
+time="2026-11-13T00:34:51.322712477Z" level=info msg="Closing fcClient"
+time="2026-11-13T00:34:51.322716054Z" level=info msg="Closing containerd client"
+time="2026-11-13T00:34:51.322855426Z" level=info msg="Cleaning up network manager"
+--- PASS: TestSnapshotConcurrentClones (28.34s)
+=== RUN   TestSnapshotSourceMemoryAndDiskIsolation
+time="2026-11-13T00:34:51.838363001Z" level=warning msg="Failed to Fetch k8s dns clusterIP exec: \"kubectl\": executable file not found in $PATH\n\n"
+time="2026-11-13T00:34:51.838385203Z" level=warning msg="Using google dns 8.8.8.8\n"
+time="2026-11-13T00:34:52.026692204Z" level=info msg="Creating containerd client"
+time="2026-11-13T00:34:52.026811198Z" level=info msg="Created containerd client"
+time="2026-11-13T00:34:52.026818752Z" level=info msg="Creating firecracker client"
+time="2026-11-13T00:34:52.026901127Z" level=info msg="Created firecracker client"
+time="2026-11-13T00:34:52.026911968Z" level=info msg="Creating image manager"
+    snapshot_continuity_test.go:77: function_image=ghcr.io/ease-lab/helloworld@sha256:12dc6715ed1a8306f246ceaf7742c09e38a52a79d17421e4a50d7e0e09fdbc25 digest=sha256:12dc6715ed1a8306f246ceaf7742c09e38a52a79d17421e4a50d7e0e09fdbc25
+    snapshot_continuity_test.go:158: legacy_snapshot_continuity source_vmm=434 guest_exec_host_pid=1071 container_exec_pid=15 initial=33e6e5243095c50f5b6eac062c83035f:15:41 source_and_clone_disk_isolation=passed source_deleted=true
+time="2026-11-13T00:35:12.703007863Z" level=info msg="waiting for goroutines"
+time="2026-11-13T00:35:12.703025786Z" level=info msg="waiting done"
+time="2026-11-13T00:35:12.703030245Z" level=info msg="Closing fcClient"
+time="2026-11-13T00:35:12.703033741Z" level=info msg="Closing containerd client"
+time="2026-11-13T00:35:12.703190607Z" level=info msg="Cleaning up network manager"
+--- PASS: TestSnapshotSourceMemoryAndDiskIsolation (21.30s)
+PASS

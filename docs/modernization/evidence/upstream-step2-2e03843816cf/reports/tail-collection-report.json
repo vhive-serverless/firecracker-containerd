@@ -1,0 +1,299 @@
+{
+  "status": "COMPLETED supplemental remaining thinpool/SDK checks; original full-run remains exit2",
+  "source": "2e03843816cf95d184ad4ad429adf6ea2ccc1412",
+  "tree": "76c862aa60162a0b510d7626d523f047709e48d9",
+  "source_clean": true,
+  "authoritative_terminal": {
+    "exec_session": 30718,
+    "exit_code": 0,
+    "stdout_marker": "STAGE2_REMAINING_THINPOOL_AND_SDK_CHECKS_OK",
+    "authority": "Lead-reported terminal chunk294fda; supplemental tail only"
+  },
+  "phase_status": {
+    "thinpool": 0,
+    "sdk": 0
+  },
+  "thinpool_marker": "THINPOOL_ISOLATION_AND_CLEANUP_OK",
+  "sdk_marker": "PINNED_SDK_PRIVILEGED_SUITE_OK",
+  "sdk_top_level_pass_count": 86,
+  "sdk_top_level_passes": [
+    "TestNewBalloonDevice (0.00s)",
+    "TestUpdateAmountMiB (0.00s)",
+    "TestUpdateStatsPollingIntervals (0.00s)",
+    "TestNewUnixSocketTransport (0.00s)",
+    "TestVMCommandBuilder (0.00s)",
+    "TestDrivesBuilder (0.00s)",
+    "TestDrivesBuilderWithRootDrive (0.00s)",
+    "TestDrivesBuilderWithCacheType (0.00s)",
+    "TestDrivesBuilderAddDrive (0.00s)",
+    "TestDrivesBuilderWithIoEngine (0.00s)",
+    "TestClient (0.01s)",
+    "TestGetFirecrackerVersion (0.01s)",
+    "TestHandlerListAppend (0.00s)",
+    "TestHandlerListPrepend (0.00s)",
+    "TestHandlerListRemove (0.00s)",
+    "TestHandlerListClear (0.00s)",
+    "TestHandlerListRun (0.00s)",
+    "TestHandlerListHas (0.00s)",
+    "TestHandlerListSwappend (0.00s)",
+    "TestHandlerListReplace (0.00s)",
+    "TestHandlerListAppendAfter (0.00s)",
+    "TestHandlers (0.00s)",
+    "TestJailerBuilder (0.00s)",
+    "TestJail (0.00s)",
+    "TestKernelArgsSerder (0.00s)",
+    "TestNewMachine (0.00s)",
+    "TestJailerMicroVMExecution (0.21s)",
+    "TestMicroVMExecution (5.07s)",
+    "TestStartVMM (0.25s)",
+    "TestStartVMMOnce (0.28s)",
+    "TestStopVMMCleanup (0.11s)",
+    "TestWaitForSocket (0.71s)",
+    "TestMicroVMExecutionWithMmdsV2 (0.03s)",
+    "TestLogFiles (0.00s)",
+    "TestCaptureFifoToFile (0.00s)",
+    "TestCaptureFifoToFile_nonblock (0.25s)",
+    "TestSocketPathSet (0.00s)",
+    "TestConfigureBuilderAddsFlags (0.00s)",
+    "TestPID (0.15s)",
+    "TestCaptureFifoToFile_leak (0.00s)",
+    "TestWait (2.18s)",
+    "TestWaitWithInvalidBinary (0.00s)",
+    "TestWaitWithNoSocket (3.00s)",
+    "TestSignalForwarding (1.01s)",
+    "TestPauseResume (0.29s)",
+    "TestCreateSnapshot (1.25s)",
+    "TestLoadSnapshot (14.78s)",
+    "TestNetworkStaticValidation (0.00s)",
+    "TestNetworkStaticValidationFails_HostDevName (0.00s)",
+    "TestNetworkStaticValidationFails_TooManyNameservers (0.00s)",
+    "TestNetworkStaticValidationFails_IPConfiguration (0.00s)",
+    "TestNetworkCNIValidation (0.00s)",
+    "TestNetworkCNIValidationFails_NetworkName (0.00s)",
+    "TestNetworkInterfacesValidation_None (0.00s)",
+    "TestNetworkInterfacesValidation_Static (0.00s)",
+    "TestNetworkInterfacesValidation_CNI (0.00s)",
+    "TestNetworkInterfacesValidation_MultipleStatic (0.00s)",
+    "TestNetworkInterfacesValidationFails_MultipleCNI (0.00s)",
+    "TestNetworkInterfacesValidationFails_IPWithMultiple (0.00s)",
+    "TestNetworkInterfacesValidationFails_IPWithKernelArg (0.00s)",
+    "TestNetworkInterfacesValidationFails_CNIWithMultiple (0.00s)",
+    "TestNetworkInterfacesValidationFails_CNIWithKernelArg (0.00s)",
+    "TestNetworkInterfacesValidationFails_NeitherSpecified (0.00s)",
+    "TestNetworkInterfacesValidationFails_BothSpecified (0.00s)",
+    "TestNetworkMachineCNIWithConfFile (4.21s)",
+    "TestNetworkMachineCNIWithParsedConfig (4.26s)",
+    "TestReleaseAPI (0.01s)",
+    "TestSnapshotRestoreOverrides (0.00s)",
+    "TestSnapshotRestoreSkipsDeviceCreation (0.00s)",
+    "TestEnvValueOrDefaultInt (0.00s)",
+    "TestRateLimiter (0.00s)",
+    "TestRateLimiter_RefillTime (0.00s)",
+    "TestInterfaceIPs (0.00s)",
+    "TestFilterBySandbox (0.00s)",
+    "TestIfacesWithName (0.00s)",
+    "TestGetVMTapPair (0.00s)",
+    "TestMTUOf (0.00s)",
+    "TestIPBootParams (0.00s)",
+    "TestLoggingPanic (0.00s)",
+    "TestFindFirstVendorID (0.00s)",
+    "TestTemporaryNetErr (0.00s)",
+    "TestTryConnReadUntilPreservesFollowingBytes (0.00s)",
+    "TestDialContextPreservesFollowingBytes (0.00s)",
+    "TestTryConnReadUntilBoundsACK (0.00s)",
+    "TestTryConnReadUntilTimeoutClearsDeadline (0.02s)",
+    "TestTryConnReadUntilIncompleteACK (0.00s)"
+  ],
+  "sdk_failures": [],
+  "sdk_skips": [
+    "TestLogAndMetrics (0.00s)"
+  ],
+  "sdk_module": {
+    "Path": "github.com/firecracker-microvm/firecracker-go-sdk",
+    "Version": "v1.0.1-0.20250818195323-ed6ff32aa924",
+    "Replace": {
+      "Path": "github.com/vhive-serverless/firecracker-go-sdk",
+      "Version": "v0.0.0-20261112180021-dd9db3224329",
+      "Time": "2026-11-12T18:00:21Z",
+      "Dir": "/users/nehalem/go/pkg/mod/github.com/vhive-serverless/firecracker-go-sdk@v0.0.0-20261112180021-dd9db3224329",
+      "GoMod": "/users/nehalem/go/pkg/mod/cache/download/github.com/vhive-serverless/firecracker-go-sdk/@v/v0.0.0-20261112180021-dd9db3224329.mod",
+      "GoVersion": "1.24.11",
+      "Sum": "h1:jaQhW3qXDgG8gqKeP0qlqAJF+GbTlAzboOO7EzaIKWE=",
+      "GoModSum": "h1:IKSxd5Gsx+H4cFowjf6q4kuzbcCWkYsYGKxf/WKKNL4="
+    },
+    "Dir": "/users/nehalem/go/pkg/mod/github.com/vhive-serverless/firecracker-go-sdk@v0.0.0-20261112180021-dd9db3224329",
+    "GoMod": "/users/nehalem/go/pkg/mod/cache/download/github.com/vhive-serverless/firecracker-go-sdk/@v/v0.0.0-20261112180021-dd9db3224329.mod",
+    "GoVersion": "1.24.11"
+  },
+  "actual_test_image_id": "sha256:97f3745973e8856190db513d2d1def3a84a603eb3337bc4ccac655e554b27117",
+  "copied_image_receipt_matches_actual_tag": true,
+  "binary_receipt_compared_to_frozen_original_source_artifacts": {
+    "bin/firecracker": {
+      "tail_sha256": "b33f46cd6d88834cf6a4f8d184f08f219809c636236bffd286d233a60602a2ba",
+      "prior_source_sha256": "b33f46cd6d88834cf6a4f8d184f08f219809c636236bffd286d233a60602a2ba",
+      "matches": true
+    },
+    "bin/jailer": {
+      "tail_sha256": "ddadbaa15b5c942271a83b7040ca7259c8ccf92a9e08d44cce0b86fa407ba460",
+      "prior_source_sha256": "ddadbaa15b5c942271a83b7040ca7259c8ccf92a9e08d44cce0b86fa407ba460",
+      "matches": true
+    },
+    "_submodules/runc/runc": {
+      "tail_sha256": "9cd4a021610365032b0e13fa37e67b751ccc8205c5b14d313af28cbe6e219220",
+      "prior_source_sha256": "9cd4a021610365032b0e13fa37e67b751ccc8205c5b14d313af28cbe6e219220",
+      "matches": true
+    },
+    "agent/agent": {
+      "tail_sha256": "ce2e7e5136c9135f25b4bf8f0c7ab671de10be81fe6ee6cdb346f2a8e199ee3a",
+      "prior_source_sha256": "ce2e7e5136c9135f25b4bf8f0c7ab671de10be81fe6ee6cdb346f2a8e199ee3a",
+      "matches": true
+    },
+    "_submodules/stargz-snapshotter/out/containerd-stargz-grpc": {
+      "tail_sha256": "6d7cf9241ccbb763a39841c0264531a164185612b476011a33c8005f556ace6f",
+      "prior_source_sha256": "6d7cf9241ccbb763a39841c0264531a164185612b476011a33c8005f556ace6f",
+      "matches": true
+    },
+    "volume/volume-init": {
+      "tail_sha256": "4b8964097bf62d4929bf950645dde8871c8fc48cd8ad33c8912045f71e8e8cc2",
+      "prior_source_sha256": "4b8964097bf62d4929bf950645dde8871c8fc48cd8ad33c8912045f71e8e8cc2",
+      "matches": true
+    },
+    "runtime/containerd-shim-aws-firecracker": {
+      "tail_sha256": "3ddbe8a651d93f312aa4c408e7745a7cb243db7397f95433dbc055f7752b92a3",
+      "prior_source_sha256": "3ddbe8a651d93f312aa4c408e7745a7cb243db7397f95433dbc055f7752b92a3",
+      "matches": true
+    },
+    "firecracker-control/cmd/containerd/firecracker-containerd": {
+      "tail_sha256": "d85a16c8b20f2c477eeaad4cff661b7fb1e3b17b234bf0e8eb2ce9d5bb5be90e",
+      "prior_source_sha256": "d85a16c8b20f2c477eeaad4cff661b7fb1e3b17b234bf0e8eb2ce9d5bb5be90e",
+      "matches": true
+    },
+    "firecracker-control/cmd/containerd/firecracker-ctr": {
+      "tail_sha256": "958a48cf4367ce2fb32ff6927006b0e86797914ebf915e3e7f0402eb7d32445d",
+      "prior_source_sha256": "958a48cf4367ce2fb32ff6927006b0e86797914ebf915e3e7f0402eb7d32445d",
+      "matches": true
+    },
+    "default-vmlinux.bin": {
+      "tail_sha256": "04907cab23ef65513c76deb5d805bf8df21b844542d04be0dcb852c0a4305a59",
+      "prior_source_sha256": "04907cab23ef65513c76deb5d805bf8df21b844542d04be0dcb852c0a4305a59",
+      "matches": true
+    },
+    "tools/image-builder/rootfs.img": {
+      "tail_sha256": "5454922651a3fd2507f15b7e079e5d34288141189cf9a43ab70c3896cfebe4d1",
+      "prior_source_sha256": "5454922651a3fd2507f15b7e079e5d34288141189cf9a43ab70c3896cfebe4d1",
+      "matches": true
+    },
+    "tools/image-builder/rootfs-stargz.img": {
+      "tail_sha256": "676fda76417049f43297281c9cabea34169d9f83dc8a9ce1afad0cee40eff770",
+      "prior_source_sha256": "676fda76417049f43297281c9cabea34169d9f83dc8a9ce1afad0cee40eff770",
+      "matches": true
+    }
+  },
+  "raw_worker_file_count": 9,
+  "raw_worker_files": {
+    "agent-build-info.txt": {
+      "bytes": 6169,
+      "sha256": "05914d64a45ee10e717a698b7808c02d13575e7c27548612bd3d985136135483"
+    },
+    "binaries.sha256": {
+      "bytes": 1168,
+      "sha256": "03ce293dced55af0f8c4dc269377dcfb2c69ab8751417e4b03b4b6c3b531eb4e"
+    },
+    "go-modules.json": {
+      "bytes": 120540,
+      "sha256": "67e373be041d72c2860dace0a3ae57ebad68fece9c38dc74bd62001c9c345ae8"
+    },
+    "launcher.sh": {
+      "bytes": 2136,
+      "sha256": "18f297306a5936b891e0c61a08e8759c33e388f180c9dda19f0523194a524ce8"
+    },
+    "runtime-source.txt": {
+      "bytes": 82,
+      "sha256": "16beffeaefc6a521370ac4b5fb9426309be7edb33cadc44c370e31d138cceccc"
+    },
+    "sdk.log": {
+      "bytes": 88262,
+      "sha256": "045fa11619426611e85967a13cc6195959eeb5a5fdbc4232fad407df73ae6c1e"
+    },
+    "status.tsv": {
+      "bytes": 32,
+      "sha256": "d385697cbfcae84dc2f25736795ab1fe30fdafa1966f2f8348f56e998b4a9fc2"
+    },
+    "test-image.json": {
+      "bytes": 3648,
+      "sha256": "caa330927f6e353fde1bd97a29485cdbb6b1c55dc43954c91c1f9f4ca25c3791"
+    },
+    "thinpool.log": {
+      "bytes": 369,
+      "sha256": "a77aaef1ff69005b2f1bf8f7f2bd1de52e7cf8056c311d7f98901d14c82fbb27"
+    }
+  },
+  "all_remote_raw_sizes_and_sha256_verified_locally": true,
+  "independent_owned_cleanup_clean": true,
+  "cleanup_observation": {
+    "pool_names_observed_in_owned_source": [
+      "fcmod-pool-audit-3095079-a",
+      "fcmod-pool-audit-3095079-b"
+    ],
+    "owned_mappings": [],
+    "owned_loops": [],
+    "owned_backings": [],
+    "owned_containers": [],
+    "sdk_cgroup_exists": false,
+    "running_containers": [
+      {
+        "Command": "\"make static COMMIT=c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e\"",
+        "CreatedAt": "2026-11-12 18:00:14 -0700 MST",
+        "ID": "048fd83684274f619fa8abc3113b7e5b76dc48f5d54c81f3a25245e7daabf8a5",
+        "Image": "localhost/runc-builder:751c03c6f9a9",
+        "Labels": "",
+        "LocalVolumes": "0",
+        "Mounts": "/users/nehalem/fc-ctrd-mod/upstream-migration/stage3-same-id-runtime-fix/deps,/users/nehalem/fc-ctrd-mod/upstream-migration/stage3-same-id-runtime-fix/_submodules/runc",
+        "Names": "determined_maxwell",
+        "Networks": "bridge",
+        "Platform": {
+          "architecture": "amd64",
+          "os": "linux"
+        },
+        "Ports": "",
+        "RunningFor": "4 seconds ago",
+        "Size": "72.8MB (virtual 1.03GB)",
+        "State": "running",
+        "Status": "Up 3 seconds"
+      },
+      {
+        "Command": "\"/usr/local/bin/entrypoint /sbin/init\"",
+        "CreatedAt": "2026-11-10 19:51:22 -0700 MST",
+        "ID": "1715f4a4061173a6eb936d419fbac8e1055a0a8042a6a9543670ee21f7f710d5",
+        "Image": "localhost/fcmod-kubernetes-node:v1.37.2",
+        "Labels": "io.x-k8s.kind.cluster=fcmod-upstream-137,io.x-k8s.kind.role=control-plane",
+        "LocalVolumes": "1",
+        "Mounts": "/lib/modules,b6eb13a16abaf3c65fa814e43c0940d7605a9c6d27e3dcb377c552423007e801",
+        "Names": "fcmod-upstream-137-control-plane",
+        "Networks": "kind",
+        "Platform": {
+          "architecture": "amd64",
+          "os": "linux"
+        },
+        "Ports": "127.0.0.1:37231->6443/tcp",
+        "RunningFor": "46 hours ago",
+        "Size": "3.93MB (virtual 962MB)",
+        "State": "running",
+        "Status": "Up 46 hours"
+      }
+    ]
+  },
+  "worker_readiness_boundary": "Initial independent read found no own resources, launcher absent, only unrelated Kubernetes. Lead subsequently started Step3; later collection observation includes its separately owned runc-builder. No resources from another pipeline touched.",
+  "collection_path": "/home/jyp/project/fc-ctrd-mod/migration-upstream/stage2-remaining-2e038-terminal-evidence",
+  "limits": [
+    "Original stage2 full-stack run remains terminal exit2 with CNI multiVM chain-creation failure.",
+    "Three unchanged targeted concurrency reruns passed separately; they do not turn original transcript into a clean run.",
+    "This supplement supplies only previously unreached thinpool/SDK checks and exact final unchanged-source artifact/module/image receipts.",
+    "Installed prefix rootfs and later rebuilt test rootfs remain distinct; no new installation or image build performed.",
+    "Final published/installed consumer acceptance remains separate."
+  ],
+  "actions": "Read-only SSH inventory/hash, SCP raw logs, local checks/report writes; no test/mutation/cleanup jobs.",
+  "agent_build_info_exact_revision_and_clean_vcs": true,
+  "go_module_graph_raw_identical_to_original_build": true,
+  "frozen_collection_manifest_sha256": "342caa7ddbb53491b6c776ecc3e6469350bdb947984199beb3112aa2871280b5"
+}

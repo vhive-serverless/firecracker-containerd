@@ -1,0 +1,9 @@
+Client:
+  Version:  2.3.7+unknown
+  Revision: cf0d9708bb3412507ddcc5110fccb1b4545f6b75
+  Go version: go1.26.11
+
+Server:
+  Version:  2.3.7+unknown
+  Revision: cf0d9708bb3412507ddcc5110fccb1b4545f6b75
+  UUID: 6e9d4a3c-31ff-4eb0-a7c4-1d60500950a3

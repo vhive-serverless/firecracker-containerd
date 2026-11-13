@@ -1,0 +1,119 @@
+VHIVE_LOGS=/users/nehalem/fc-ctrd-mod/evidence/vhive-2e03843816cf.g3Hbja9A
+From /users/nehalem/fc-ctrd-mod/upstream-migration/vhive-source
+ * branch            89593103ac667cc096f89770c94a77b2b93c3a7d -> FETCH_HEAD
+HEAD is now at 8959310 Track guest and container PIDs separately in snapshot continuity test
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 430B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for localhost/firecracker-containerd-test:2e03843816cf
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/4] FROM localhost/firecracker-containerd-test:2e03843816cf@sha256:86788dd03ee7de73b5007221124afa46bd91bdf11a9c83abb7f4685c9097f501
+#4 resolve localhost/firecracker-containerd-test:2e03843816cf@sha256:86788dd03ee7de73b5007221124afa46bd91bdf11a9c83abb7f4685c9097f501 0.0s done
+#4 DONE 0.2s
+
+#5 [internal] load build context
+#5 transferring context: 32.29MB 0.2s done
+#5 DONE 0.2s
+
+#6 [2/4] RUN apt-get update && apt-get install --yes --no-install-recommends net-tools &&     command -v route >/dev/null && rm -rf /var/lib/apt/lists/*
+#6 0.365 Hit:1 http://deb.debian.org/debian bookworm InRelease
+#6 0.369 Get:2 http://deb.debian.org/debian bookworm-updates InRelease [55.4 kB]
+#6 0.398 Get:3 http://deb.debian.org/debian-security bookworm-security InRelease [34.8 kB]
+#6 0.593 Get:4 http://deb.debian.org/debian-security bookworm-security/main amd64 Packages [368 kB]
+#6 0.671 Fetched 459 kB in 0s (1060 kB/s)
+#6 0.671 Reading package lists...
+#6 1.175 Reading package lists...
+#6 1.668 Building dependency tree...
+#6 1.780 Reading state information...
+#6 1.918 The following NEW packages will be installed:
+#6 1.918   net-tools
+#6 1.965 0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+#6 1.965 Need to get 243 kB of archives.
+#6 1.965 After this operation, 1001 kB of additional disk space will be used.
+#6 1.965 Get:1 http://deb.debian.org/debian bookworm/main amd64 net-tools amd64 2.10-0.1+deb12u2 [243 kB]
+#6 2.138 debconf: delaying package configuration, since apt-utils is not installed
+#6 2.163 Fetched 243 kB in 0s (2932 kB/s)
+#6 2.180 Selecting previously unselected package net-tools.
+#6 2.180 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 17549 files and directories currently installed.)
+#6 2.231 Preparing to unpack .../net-tools_2.10-0.1+deb12u2_amd64.deb ...
+#6 2.231 Unpacking net-tools (2.10-0.1+deb12u2) ...
+#6 2.278 Setting up net-tools (2.10-0.1+deb12u2) ...
+#6 DONE 2.3s
+
+#7 [3/4] COPY vhive-acceptance.test /usr/local/bin/
+#7 DONE 0.2s
+
+#8 [4/4] COPY run-in-container.sh /usr/local/bin/run-vhive-acceptance
+#8 DONE 0.0s
+
+#9 exporting to image
+#9 exporting layers
+#9 exporting layers 1.3s done
+#9 exporting manifest sha256:a29465069c2004038eda3d45b3e780343dbc12a5784289d759e5d175e59d4c84 done
+#9 exporting config sha256:c0cd7cbb1224f772f5665910faea315342b74075447fe483f125c3519210d5b6 done
+#9 exporting attestation manifest sha256:a1f8ba37c50db5ea788834035ad6be496205ec7120e882ebb8f2594650a2f2a0 done
+#9 exporting manifest list sha256:5314abcb909df65f704a9912383875617a89fba8d54077c3438bd689240f887b done
+#9 naming to localhost/fcmod-vhive-test:2e03843816cf done
+#9 unpacking to localhost/fcmod-vhive-test:2e03843816cf
+#9 unpacking to localhost/fcmod-vhive-test:2e03843816cf 0.3s done
+#9 DONE 1.6s
+Client:
+  Version:  2.3.7+unknown
+  Revision: 2e03843816cf95d184ad4ad429adf6ea2ccc1412
+  Go version: go1.26.11
+
+Server:
+  Version:  2.3.7+unknown
+  Revision: 2e03843816cf95d184ad4ad429adf6ea2ccc1412
+  UUID: 8fffe858-b68d-47c2-9f2a-748b4c9a190f
+=== RUN   TestPauseSnapResume
+time="2026-11-13T00:34:07.212490204Z" level=warning msg="Failed to Fetch k8s dns clusterIP exec: \"kubectl\": executable file not found in $PATH\n\n"
+time="2026-11-13T00:34:07.212585874Z" level=warning msg="Using google dns 8.8.8.8\n"
+time="2026-11-13T00:34:07.350747513Z" level=info msg="Creating containerd client"
+time="2026-11-13T00:34:07.351095518Z" level=info msg="Created containerd client"
+time="2026-11-13T00:34:07.351108182Z" level=info msg="Creating firecracker client"
+time="2026-11-13T00:34:07.351693233Z" level=info msg="Created firecracker client"
+time="2026-11-13T00:34:07.351719873Z" level=info msg="Creating image manager"
+time="2026-11-13T00:34:23.259854037Z" level=info msg="Cleaning up network manager"
+--- PASS: TestPauseSnapResume (16.29s)
+=== RUN   TestSnapshotConcurrentClones
+time="2026-11-13T00:34:23.498126066Z" level=warning msg="Failed to Fetch k8s dns clusterIP exec: \"kubectl\": executable file not found in $PATH\n\n"
+time="2026-11-13T00:34:23.498143999Z" level=warning msg="Using google dns 8.8.8.8\n"
+time="2026-11-13T00:34:23.662668564Z" level=info msg="Creating containerd client"
+time="2026-11-13T00:34:23.662771488Z" level=info msg="Created containerd client"
+time="2026-11-13T00:34:23.662779333Z" level=info msg="Creating firecracker client"
+time="2026-11-13T00:34:23.662870143Z" level=info msg="Created firecracker client"
+time="2026-11-13T00:34:23.662878259Z" level=info msg="Creating image manager"
+time="2026-11-13T00:34:51.322686989Z" level=info msg="waiting for goroutines"
+time="2026-11-13T00:34:51.322707758Z" level=info msg="waiting done"
+time="2026-11-13T00:34:51.322712477Z" level=info msg="Closing fcClient"
+time="2026-11-13T00:34:51.322716054Z" level=info msg="Closing containerd client"
+time="2026-11-13T00:34:51.322855426Z" level=info msg="Cleaning up network manager"
+--- PASS: TestSnapshotConcurrentClones (28.34s)
+=== RUN   TestSnapshotSourceMemoryAndDiskIsolation
+time="2026-11-13T00:34:51.838363001Z" level=warning msg="Failed to Fetch k8s dns clusterIP exec: \"kubectl\": executable file not found in $PATH\n\n"
+time="2026-11-13T00:34:51.838385203Z" level=warning msg="Using google dns 8.8.8.8\n"
+time="2026-11-13T00:34:52.026692204Z" level=info msg="Creating containerd client"
+time="2026-11-13T00:34:52.026811198Z" level=info msg="Created containerd client"
+time="2026-11-13T00:34:52.026818752Z" level=info msg="Creating firecracker client"
+time="2026-11-13T00:34:52.026901127Z" level=info msg="Created firecracker client"
+time="2026-11-13T00:34:52.026911968Z" level=info msg="Creating image manager"
+    snapshot_continuity_test.go:77: function_image=ghcr.io/ease-lab/helloworld@sha256:12dc6715ed1a8306f246ceaf7742c09e38a52a79d17421e4a50d7e0e09fdbc25 digest=sha256:12dc6715ed1a8306f246ceaf7742c09e38a52a79d17421e4a50d7e0e09fdbc25
+    snapshot_continuity_test.go:158: legacy_snapshot_continuity source_vmm=434 guest_exec_host_pid=1071 container_exec_pid=15 initial=33e6e5243095c50f5b6eac062c83035f:15:41 source_and_clone_disk_isolation=passed source_deleted=true
+time="2026-11-13T00:35:12.703007863Z" level=info msg="waiting for goroutines"
+time="2026-11-13T00:35:12.703025786Z" level=info msg="waiting done"
+time="2026-11-13T00:35:12.703030245Z" level=info msg="Closing fcClient"
+time="2026-11-13T00:35:12.703033741Z" level=info msg="Closing containerd client"
+time="2026-11-13T00:35:12.703190607Z" level=info msg="Cleaning up network manager"
+--- PASS: TestSnapshotSourceMemoryAndDiskIsolation (21.30s)
+PASS
+VHIVE_LEGACY_SNAPSHOT_CANDIDATE_OK
+VHIVE_WORKER_CANDIDATE_OK

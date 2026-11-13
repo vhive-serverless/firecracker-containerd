@@ -1,0 +1,3 @@
+time="2026-11-13T00:55:04Z" level=error msg="Function called without namespaced context" error="namespace is required: failed precondition" function=Walk
+time="2026-11-13T00:55:04Z" level=debug msg="no namespace found, proxying walk function to all cached snapshotters" function=Walk
+time="2026-11-13T00:55:04Z" level=error attempt=1 error="non-temporary vsock dial failure: failed to dial \"/srv/firecracker_containerd_tests/3#3/firecracker.vsock\" within 100ms: dial unix /srv/firecracker_containerd_tests/3#3/firecracker.vsock: connect: no such file or directory"

@@ -1,0 +1,77 @@
+{
+  "result": "REQUIRED_CHECK_COVERAGE_COMPLETE_WITH_DISCLOSED_UNFIXED_CNI_FLAKE",
+  "missing_required_checks": [],
+  "source": "2e03843816cf95d184ad4ad429adf6ea2ccc1412",
+  "tree": "76c862aa60162a0b510d7626d523f047709e48d9",
+  "original_fullstack_result": {
+    "exit": 2,
+    "passes": 40,
+    "failure": "TestLaunchMultipleContainersWithRemoteSnapshotter_Isolated CNI nftEEXIST4",
+    "marker_COMMITTED_STACK_ACCEPTANCE_OK": false
+  },
+  "coverage_matrix": [
+    {
+      "group": "verify-inputs/lint/test-images/short-package/root-package/tidy/proto/clean-diff",
+      "evidence": "Original -e test-stack reached all36runtime and snapshotter tests; priorcommands completed withoutfailure"
+    },
+    {
+      "group": "runtime",
+      "expected": 36,
+      "original_passes": 36,
+      "original_failures": []
+    },
+    {
+      "group": "snapshotter",
+      "expected": 5,
+      "original_passes": 4,
+      "original_failures": [
+        "TestLaunchMultipleContainersWithRemoteSnapshotter_Isolated"
+      ]
+    },
+    {
+      "group": "sole failedsnapshotter case",
+      "evidence": "3freshnetworknamespacecontainer repeats unchangeddefault5concurrentVMs PASS7.93/7.45/7.76; originalfailure unchanged"
+    },
+    {
+      "group": "thinpool isolation/cleanup",
+      "evidence": "Exactoriginaltool supplementalPASS/marker"
+    },
+    {
+      "group": "publishedpinnedSDKsuite",
+      "evidence": "86topPASS; soleTestLogAndMetrics skip"
+    },
+    {
+      "group": "post-suitecleanup/clean-source/provenanceepilogue",
+      "evidence": "Tailclean2e; independentowncleanup; exactmodulegraph/agentrevision/12binaryartifacthashes/image97f matchfrozenoriginal"
+    }
+  ],
+  "original_provisional_vhive_passes": [
+    "TestPauseSnapResume (16.29s)",
+    "TestSnapshotConcurrentClones (28.34s)",
+    "TestSnapshotSourceMemoryAndDiskIsolation (21.30s)"
+  ],
+  "image_id": "sha256:97f3745973e8856190db513d2d1def3a84a603eb3337bc4ccac655e554b27117",
+  "source_artifact_identity": {
+    "all12artifact_hashes_equal_frozenoriginal": true,
+    "module_graph_bytes_equal_originalbuild": true,
+    "agent_exactrevision_clean": true,
+    "source_clean": true
+  },
+  "normal_retained_skips": {
+    "nested_StopVM": 8,
+    "SDK_TestLogAndMetrics": 1
+  },
+  "tail_authority": {
+    "exec_session": 30718,
+    "exit_code": 0,
+    "stdout_marker": "STAGE2_REMAINING_THINPOOL_AND_SDK_CHECKS_OK",
+    "authority": "Lead-reported terminal chunk294fda; supplemental tail only"
+  },
+  "acceptance_boundary": "No original criterion was skipped, weakened or changed. All requiredcheckidentitieshavepassingcoverage across separatelyattributed receipts; this supportsclosingthecodecoveragegate withtheunfixedflakedisclosed. It is NOT an uninterruptedgreenfullstackrun, a fixedCNIrace, finalpublishedconsumeracceptance, or cleanrerunof theoriginal transcript.",
+  "remaining_risk": "PinnedCNIv1.9.1 check/create race remainsunfixed; concurrentfreshVMnetworksetup can stillfail asoriginallyobserved.",
+  "source_reports": [
+    "stage2-cni-chain-race-diagnosis.md",
+    "stage2-remaining-2e038-collection-report.json"
+  ],
+  "actions": "Localreadonlyreceipt/source/hashassessment; no tests,worker/environment/code changes."
+}
