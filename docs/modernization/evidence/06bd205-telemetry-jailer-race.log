@@ -1,0 +1,13 @@
+=== RUN   TestBuildJailedRootHandler
+time="2026-11-11T07:26:40-07:00" level=info msg="Successfully ran jailer handler" ociBundlePath=/tmp/TestBuildJailedRootHandler1379807022/001 runcBinaryPath=bin-path
+--- PASS: TestBuildJailedRootHandler (0.05s)
+=== RUN   TestBindMountToJail
+--- PASS: TestBindMountToJail (0.00s)
+=== RUN   TestFifoHandler
+=== RUN   TestFifoHandler/Different_basename
+=== RUN   TestFifoHandler/Same_basename
+--- PASS: TestFifoHandler (0.00s)
+    --- PASS: TestFifoHandler/Different_basename (0.00s)
+    --- PASS: TestFifoHandler/Same_basename (0.00s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	1.103s

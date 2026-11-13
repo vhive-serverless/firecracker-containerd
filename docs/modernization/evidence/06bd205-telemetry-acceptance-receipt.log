@@ -1,0 +1,88 @@
+2026-11-11T14:28:15.401314+00:00
+06bd2058ba7938ad31eec9e17ac4d2e4c33a958f
+Prepare cross-filesystem telemetry mounts before starting runc
+
+Signed-off-by: JooYoung Park <jooyoung.park73@gmail.com>
+
+Result: PASS; clean committed build, private installation, full base acceptance and targeted jailer race tests.
+Worker: nehalem@amd218.utah.cloudlab.us
+Checkout: /users/nehalem/fc-ctrd-mod/step1-io-committed
+STACK_DIR=/users/nehalem/fc-ctrd-mod
+Install prefix: /users/nehalem/fc-ctrd-mod/install/06bd2058ba79
+Source cherry-picked with -s from c7d73c703d18d33e07b39c2785dbcb1f77af039f; Step 1 dependency pins unchanged.
+Commands: tools/modernize/build-stack.sh; tools/modernize/install-stack.sh; tools/modernize/test-stack.sh
+Additional worker command: sudo -n env -u ENABLE_ISOLATED_TESTS PATH=<pinned-go> GOMODCACHE=<worker-cache> GOCACHE=<worker-cache> go test -race -count=1 -v -timeout=180s ./runtime -run '^(TestBuildJailedRootHandler|TestBindMountToJail|TestFifoHandler)$'
+Acceptance: 120 top-level PASS (36 runtime, 5 snapshotter, 79 SDK), 0 FAIL, 1 existing SKIP (TestLogAndMetrics).
+Targeted race: TestBuildJailedRootHandler, TestBindMountToJail, TestFifoHandler PASS.
+Cross-filesystem regression: PASS, /dev/shm external log/metric FIFOs; both original readers received telemetry.
+Full TestCreateVM_Isolated matrix: PASS; all 8 cases, jailed/unjailed, 123.07 seconds.
+Start: 2026-11-11T14:07:15Z
+End: 2026-11-11T14:26:21Z
+
+Submodules:
+eaf83bb718a559d324613d566eaf776b31a62340 _submodules/firecracker (v1.18.0)
+ c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e _submodules/runc (v1.4.2)
+ 3070538befb5a6c09f93e99164762b3a76310357 _submodules/stargz-snapshotter (cmd/v0.18.2)
+
+Acceptance source artifact hashes:
+9d6c1876564e6cafefaade17cbc3e415cf243c520613f3e388e32154ab562e89  bin/firecracker
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  _submodules/runc/runc
+c276576ae364d08c6cdf18d1b84bb66448161c83afac323929f87e1d255ef09b  agent/agent
+3dd9ea4a0c2bc1eda0aafcc751447a9ef8511281065335e0aebc569ef14dab1b  _submodules/stargz-snapshotter/out/containerd-stargz-grpc
+d95c75225530d7378a39c140953a9854d77f0ba7d6c077b2abb7e3184d610e64  volume/volume-init
+854e679cc9c46f18c76b56ea612daa693399daae932a37e4957a46380105ac0e  runtime/containerd-shim-aws-firecracker
+f90d5689b66ec18b303f59efda5dd9615e563ca181a398449186439ee2cebc88  firecracker-control/cmd/containerd/firecracker-containerd
+f18e64549b9d7f2b3669080c2f7ad4f483bb935b6fee574bb6dc766c2f892691  firecracker-control/cmd/containerd/firecracker-ctr
+ab4650aeef3188318704e55a6149c99a4ca66663630d824f3853826bcdd0954a  default-vmlinux.bin
+1042b184785f7a5988f43843361e09816f94bfd1f63ff4f8333204e2588c4af8  tools/image-builder/rootfs.img
+32201b6443874b000236081c23801a64b344eee30f936173d129e92e604926f7  tools/image-builder/rootfs-stargz.img
+
+Installed artifact hashes:
+f90d5689b66ec18b303f59efda5dd9615e563ca181a398449186439ee2cebc88  /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/bin/firecracker-containerd
+854e679cc9c46f18c76b56ea612daa693399daae932a37e4957a46380105ac0e  /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/bin/containerd-shim-aws-firecracker
+9d6c1876564e6cafefaade17cbc3e415cf243c520613f3e388e32154ab562e89  /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/bin/firecracker
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/bin/runc
+ab4650aeef3188318704e55a6149c99a4ca66663630d824f3853826bcdd0954a  /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/share/runtime/default-vmlinux.bin
+2df18f504ceefeac24f43abc0755f6ac8745b8a8472d3aa7ad48f89000ed3e20  /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/share/runtime/default-rootfs.img
+
+The acceptance script rebuilds test images after installation; installed and acceptance rootfs hashes are recorded separately.
+Docker test image: localhost/firecracker-containerd-test:06bd2058ba79
+sha256:3f1a7a90ba629790aaff2e3440021360830835b98b4bc23d1dcc28383fd761b0
+
+Cleanup: both fc-test-06bd2058ba79-runtime and fc-test-06bd2058ba79-stargz removed after acceptance; no /dev/sdb operations requested or run by this correction.
+Clean checkout verified after acceptance and race tests.
+Build logs preserve the existing non-fatal runc Git-worktree metadata diagnostic inside Docker; verify-inputs.py checked pinned runc source and build/install/acceptance succeeded.
+Receipt extraction first attempted unprivileged hashing of installed default-vmlinux.bin and received PermissionError; rerun uses sudo sha256sum without changing artifact permissions.
+
+Evidence: 06bd205-telemetry-build.log
+fd5a6b9ca0d1e01070c3a1c0667393af2d7d9f85808cff78f5e2d7b9ac602adc  /users/nehalem/fc-ctrd-mod/evidence/06bd205-telemetry/build.log
+runc version 1.4.2
+spec: 1.3.0
+go: go1.26.11
+libseccomp: 2.5.4
+containerd github.com/containerd/containerd/v2 2.3.7+unknown 06bd2058ba7938ad31eec9e17ac4d2e4c33a958f
+
+Evidence: 06bd205-telemetry-install.log
+4b00bdb6647656a49cecce8424ad3f275aeef8db300f3fa56039b7ea29264b42  /users/nehalem/fc-ctrd-mod/evidence/06bd205-telemetry/install.log
+9d6c1876564e6cafefaade17cbc3e415cf243c520613f3e388e32154ab562e89  /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/bin/firecracker
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/bin/runc
+ab4650aeef3188318704e55a6149c99a4ca66663630d824f3853826bcdd0954a  /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/share/runtime/default-vmlinux.bin
+2df18f504ceefeac24f43abc0755f6ac8745b8a8472d3aa7ad48f89000ed3e20  /users/nehalem/fc-ctrd-mod/install/06bd2058ba79/share/runtime/default-rootfs.img
+INSTALL_DIR=/users/nehalem/fc-ctrd-mod/install/06bd2058ba79
+
+Evidence: 06bd205-telemetry-acceptance.log
+e63ce1b3104d060ac516c48ac3c765dadbdf5f9d40ca36dd47ed75ed05a17cb4  /users/nehalem/fc-ctrd-mod/evidence/06bd205-telemetry/acceptance.log
+--- PASS: TestTemporaryNetErr (0.00s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-go-sdk/vsock	0.003s
+PINNED_SDK_PRIVILEGED_SUITE_OK
+COMMITTED_STACK_ACCEPTANCE_OK
+
+Evidence: 06bd205-telemetry-jailer-race.log
+d370be83d40589189779b1961d1c2cf1cb7a55fb9828178044daa723e7500291  /users/nehalem/fc-ctrd-mod/evidence/06bd205-telemetry/jailer-race.log
+--- PASS: TestFifoHandler (0.00s)
+    --- PASS: TestFifoHandler/Different_basename (0.00s)
+    --- PASS: TestFifoHandler/Same_basename (0.00s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	1.103s
+

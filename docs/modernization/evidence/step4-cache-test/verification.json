@@ -1,0 +1,168 @@
+{
+  "scope": "Committed cache eviction test-fix validation; all operations read-only except creation of the assigned evidence artifacts and isolated validation clones.",
+  "worker": {
+    "host": "amd218.utah.cloudlab.us",
+    "go_version": "go1.26.11",
+    "checkout_root": "/users/nehalem/fc-ctrd-mod/step4-cache-test-committed",
+    "evidence_root": "/users/nehalem/fc-ctrd-mod/evidence/step4-cache-test"
+  },
+  "source_check": "Each commit is detached at the exact requested SHA; parent diff contains only snapshotter/demux/cache/evict_test.go; production source unchanged; each checkout clean before and after tests.",
+  "committed_revisions": [
+    {
+      "branch": "modernize-runtime",
+      "revision": "1a56f6ade94cca1b36aa7d7170d0ee60b765473c",
+      "parent": "ee0a710c11fdf9f111a506cf7dd79a4e60967026",
+      "changed_paths": [
+        "snapshotter/demux/cache/evict_test.go"
+      ],
+      "production_changes": false,
+      "source_clean_before_and_after": true,
+      "test_file_sha256": "ac89ecd2bfe416a6b8aeeb6fe462e06925bd0651f84ca31926f48d1c1dc5ae23",
+      "results": {
+        "normal-200": {
+          "exit_code": 0,
+          "duration_ms": 1884
+        },
+        "race-target-50": {
+          "exit_code": 0,
+          "duration_ms": 2381
+        },
+        "race-package-1": {
+          "exit_code": 0,
+          "duration_ms": 1942
+        }
+      }
+    },
+    {
+      "branch": "vhive-compatible",
+      "revision": "be200ad4884a82ffa003d5adca12a470be3c188a",
+      "parent": "1397d2bbea779bc637df3a682acf1d66c3388a60",
+      "changed_paths": [
+        "snapshotter/demux/cache/evict_test.go"
+      ],
+      "production_changes": false,
+      "source_clean_before_and_after": true,
+      "test_file_sha256": "ac89ecd2bfe416a6b8aeeb6fe462e06925bd0651f84ca31926f48d1c1dc5ae23",
+      "results": {
+        "normal-200": {
+          "exit_code": 0,
+          "duration_ms": 1846
+        },
+        "race-target-50": {
+          "exit_code": 0,
+          "duration_ms": 2577
+        },
+        "race-package-1": {
+          "exit_code": 0,
+          "duration_ms": 1959
+        }
+      }
+    },
+    {
+      "branch": "cri-native-snapshot-restore",
+      "revision": "cef16a9d1f89bb18e77ff84cffef8543e30a6ed4",
+      "parent": "a5781cf2afabed0564d1862d9ddaeb6935b10f8e",
+      "changed_paths": [
+        "snapshotter/demux/cache/evict_test.go"
+      ],
+      "production_changes": false,
+      "source_clean_before_and_after": true,
+      "test_file_sha256": "ac89ecd2bfe416a6b8aeeb6fe462e06925bd0651f84ca31926f48d1c1dc5ae23",
+      "results": {
+        "normal-200": {
+          "exit_code": 0,
+          "duration_ms": 1838
+        },
+        "race-target-50": {
+          "exit_code": 0,
+          "duration_ms": 2405
+        },
+        "race-package-1": {
+          "exit_code": 0,
+          "duration_ms": 1966
+        }
+      }
+    },
+    {
+      "branch": "damon-virtio-pmem",
+      "revision": "a67e5e6c1e270b199d5b8493ef04d7f2a0fa5401",
+      "parent": "907fc268ea85f60dfcdae2b1471b5ffb28811003",
+      "changed_paths": [
+        "snapshotter/demux/cache/evict_test.go"
+      ],
+      "production_changes": false,
+      "source_clean_before_and_after": true,
+      "test_file_sha256": "ac89ecd2bfe416a6b8aeeb6fe462e06925bd0651f84ca31926f48d1c1dc5ae23",
+      "results": {
+        "normal-200": {
+          "exit_code": 0,
+          "duration_ms": 1862
+        },
+        "race-target-50": {
+          "exit_code": 0,
+          "duration_ms": 2376
+        },
+        "race-package-1": {
+          "exit_code": 0,
+          "duration_ms": 1969
+        }
+      }
+    }
+  ],
+  "step4_make_lint": {
+    "revision": "a67e5e6c1e270b199d5b8493ef04d7f2a0fa5401",
+    "command": "make lint",
+    "exit_code": 0,
+    "duration_ms": 12541,
+    "result": "golangci-lint 0 issues in root and cri; git-validation PASS; source remained clean."
+  },
+  "development_and_ci": {
+    "baseline_reproduction": {
+      "revision": "907fc268ea85f60dfcdae2b1471b5ffb28811003",
+      "command": "go test ./snapshotter/demux/cache -run ^TestLogErrorOnEvictionFailure$ -count=30 -timeout=2m",
+      "exit_code": 0,
+      "result": "Passed; original failure not reproduced in 30 runs."
+    },
+    "patched_targeted": {
+      "command": "go test ./snapshotter/demux/cache -run ^TestLogErrorOnEvictionFailure$ -count=100 -timeout=2m",
+      "exit_code": 0
+    },
+    "patched_package_race": {
+      "command": "go test -race ./snapshotter/demux/cache -count=1 -timeout=2m",
+      "exit_code": 0
+    },
+    "original_ci_failure_extract": "ci-43079780458-failure.txt",
+    "latest_evidence_only_ci": {
+      "run_id": 43083312685,
+      "revision": "907fc268ea85f60dfcdae2b1471b5ffb28811003",
+      "conclusion": "success"
+    },
+    "baseline_branches_same_original_test": {
+      "refs": [
+        "modernize-runtime",
+        "vhive-compatible",
+        "cri-native-snapshot-restore"
+      ],
+      "original_file_git_blob_sha1": "29fab7b892a53f33156ffc7ef9e61f3be64536bf"
+    }
+  },
+  "worker_sha256_manifests": [
+    "SHA256SUMS",
+    "committed/SHA256SUMS"
+  ],
+  "raw_sha256": {
+    "committed/modernize-runtime-validation.log": "80e61d7ef4c600b7f17a1e5dac65881e34a3c7a7c0973166d800b91f7ad0fb78",
+    "committed/vhive-compatible-validation.log": "959f0877984c067d79d6f45bbe4ecd393f549344d4757e3cc261a358a3047191",
+    "committed/cri-native-snapshot-restore-validation.log": "ca68cc7040ea7d14c4eab8dc64e4124d3ce451cf995d9823735ca2b4d072389d",
+    "committed/damon-virtio-pmem-validation.log": "d71055249f3cc891e495eb399a996647131d9a482c5577b6329a716f4b1b1e3b",
+    "907fc26-baseline-repeat.log": "7a280fe75d6835b11b94113cdf3a11d02c97cb9d7e00d3e41b9fa43541b8e9fc",
+    "907fc26-patched-race.log": "b6ffc46ebc81db3d23d6f40f57a685e797756732acfde3190df6fb2702064e1a",
+    "907fc26-patched-repeat.log": "85ade914d307c32703e6820f5d720e8d1bd58dadf6911080923953d8ad0d8eac",
+    "ci-43079780458-failure.txt": "6755aeb81e0863d200daafc8c6943a73b591f334d77d25c6e3e1ab6528b893e2",
+    "validation-summary.txt": "4e07ab93222a24539ad8231ba9062d687687fc0a5d7e1631c5cd68c3c20250ca",
+    "committed/damon-virtio-pmem-lint.log": "cc2516e0b39e3afd2bcc30939a95a43af1cf0df2a9c3c845eb588c7105c66342"
+  },
+  "limitations": [
+    "The old failure did not reproduce in the 30-run baseline; committed revisions each passed all assigned repeat and race checks. This is not a full repository acceptance result."
+  ]
+}

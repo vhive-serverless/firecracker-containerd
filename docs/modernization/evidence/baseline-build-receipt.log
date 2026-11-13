@@ -1,0 +1,101 @@
+Firecracker v1.1.0
+
+Supported snapshot data format versions: v0.23.0, v0.24.0, v0.25.0, v1.0.0, v1.1.0
+
+runc version 1.2.8
+spec: 1.2.0
+go: go1.25.14
+libseccomp: 2.5.4
+containerd github.com/containerd/containerd 1.7.33+unknown be68640a5d2237f5b427c37c1f5809ec154126c5
+/users/nehalem/fc-ctrd-mod/baseline/agent/agent: go1.26.11
+	path	github.com/firecracker-microvm/firecracker-containerd/agent
+	mod	github.com/firecracker-microvm/firecracker-containerd	v0.0.0-20260716213013-be68640a5d22	
+	dep	github.com/cespare/xxhash/v2	v2.3.0	h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
+	dep	github.com/cilium/ebpf	v0.16.0	h1:+BiEnHL6Z7lXnlGUsXQPPAE7+kenAd4ES8MQ5min0Ok=
+	dep	github.com/containerd/cgroups/v3	v3.0.3	h1:S5ByHZ/h9PMe5IOQoN7E+nMc2UcLEM/V48DGDJ9kip0=
+	dep	github.com/containerd/console	v1.0.5	h1:R0ymNeydRqH2DmakFNdmjR2k0t7UPuiOV/N/27/qqsc=
+	dep	github.com/containerd/containerd	v1.7.33	h1:iAkYGC/ifR/V+0eR4iXWHNGYUF0DF2PmGV5iz4Irj5M=
+	dep	github.com/containerd/containerd/api	v1.8.0	h1:hVTNJKR8fMc/2Tiw60ZRijntNMd1U+JVMyTRdsD2bS0=
+	dep	github.com/containerd/continuity	v0.4.4	h1:/fNVfTJ7wIl/YPMHjf+5H32uFhl63JucB34PlCpMKII=
+	dep	github.com/containerd/errdefs	v0.3.0	h1:FSZgGOeK4yuT/+DnF07/Olde/q4KBoMsaamhXxIMDp4=
+	dep	github.com/containerd/fifo	v1.1.0	h1:4I2mbh5stb1u6ycIABlBw9zgtlK8viPI9QkQNRQEEmY=
+	dep	github.com/containerd/go-runc	v1.0.0	h1:oU+lLv1ULm5taqgV/CJivypVODI4SUz1znWjv3nNYS0=
+	dep	github.com/containerd/log	v0.1.0	h1:TCJt7ioM2cr/tfR8GPbGf9/VRAX8D2B4PjzCpfX540I=
+	dep	github.com/containerd/platforms	v0.2.1	h1:zvwtM3rz2YHPQsF2CHYM8+KtB5dvhISiXh5ZpSBQv6A=
+	dep	github.com/containerd/ttrpc	v1.2.7	h1:qIrroQvuOL9HQ1X6KHe2ohc7p+HP/0VE6XPU7elJRqQ=
+	dep	github.com/containerd/typeurl/v2	v2.2.0	h1:6NBDbQzr7I5LHgp34xAXYF5DOTQDn05X58lsPEmzLso=
+	dep	github.com/coreos/go-systemd/v22	v22.5.0	h1:RrqgGjYQKalulkV8NGVIfkXQf6YYmOyiJKk8iXXhfZs=
+	dep	github.com/cyphar/filepath-securejoin	v0.6.0	h1:BtGB77njd6SVO6VztOHfPxKitJvd/VPT+OFBFMOi1Is=
+	dep	github.com/davecgh/go-spew	v1.1.1	h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
+	dep	github.com/distribution/reference	v0.6.0	h1:0IXCQ5g4/QMHHkarYzh5l+u8T3t73zM5QvfrDyIgxBk=
+	dep	github.com/docker/go-events	v0.0.0-20190806004212-e31b211e4f1c	h1:+pKlWGMw7gf6bQ+oDZB4KHQFypsfjYlq/C4rfL7D3g8=
+	dep	github.com/docker/go-units	v0.5.0	h1:69rxXcBk27SvSaaxTtLh/8llcHD8vYHT7WSdRZ/jvr4=
+	dep	github.com/felixge/httpsnoop	v1.0.4	h1:NFTV2Zj1bL4mc9sqWACXbQFVBBg2W3GPvqp8/ESS2Wg=
+	dep	github.com/firecracker-microvm/firecracker-go-sdk	v1.0.1-0.20250818195323-ed6ff32aa924	h1:15ZpqMV8W172Dzof5YaN1cHApY4F/WIuUDjBsn9AH84=
+	dep	github.com/go-logr/logr	v1.4.3	h1:CjnDlHq8ikf6E492q6eKboGOC0T8CDaOvkHCIg8idEI=
+	dep	github.com/go-logr/stdr	v1.2.2	h1:hSWxHoqTgW2S2qGc0LTAI563KZ5YKYRhT3MFKZMbjag=
+	dep	github.com/godbus/dbus/v5	v5.1.0	h1:4KLkAxT3aOY8Li4FRJe/KvhoNFFxo0m6fNuFUO8QJUk=
+	dep	github.com/gogo/protobuf	v1.3.2	h1:Ov1cvc58UF3b5XjBnZv7+opcTcQFZebYjWzi34vdm4Q=
+	dep	github.com/golang/protobuf	v1.5.4	h1:i7eJL8qZTpSEXOPTxNKhASYpMn+8e5Q6AdndVa1dWek=
+	dep	github.com/google/go-cmp	v0.7.0	h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
+	dep	github.com/google/uuid	v1.6.0	h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
+	dep	github.com/hashicorp/errwrap	v1.1.0	h1:OxrOeh75EUXMY8TBjag2fzXGZ40LB6IKw45YeGUDY2I=
+	dep	github.com/hashicorp/go-multierror	v1.1.1	h1:H5DkEtf6CXdFp0N0Em5UCwQpXMWke8IA0+lD48awMYo=
+	dep	github.com/klauspost/compress	v1.17.9	h1:6KIumPrER1LHsvBVuDa0r5xaG0Es51mhhB9BQB2qeMA=
+	dep	github.com/mdlayher/socket	v0.5.1	h1:VZaqt6RkGkt2OE9l3GcC6nZkqD3xKeQLyfleW/uBcos=
+	dep	github.com/mdlayher/vsock	v1.2.1	h1:pC1mTJTvjo1r9n9fbm7S1j04rCgCzhCOS5DY0zqHlnQ=
+	dep	github.com/miekg/dns	v1.1.62	h1:cN8OuEF1/x5Rq6Np+h1epln8OiyPWV+lROx9LxcGgIQ=
+	dep	github.com/moby/locker	v1.0.1	h1:fOXqR41zeveg4fFODix+1Ch4mj/gT0NE1XJbp/epuBg=
+	dep	github.com/moby/sys/mountinfo	v0.7.1	h1:/tTvQaSJRr2FshkhXiIpux6fQ2Zvc4j7tAhMTStAG2g=
+	dep	github.com/moby/sys/signal	v0.7.0	h1:25RW3d5TnQEoKvRbEKUGay6DCQ46IxAVTT9CUMgmsSI=
+	dep	github.com/moby/sys/user	v0.3.0	h1:9ni5DlcW5an3SvRSx4MouotOygvzaXbaSrc/wGDFWPo=
+	dep	github.com/moby/sys/userns	v0.1.0	h1:tVLXkFOxVu9A64/yh59slHVv9ahO9UIev4JZusOLG/g=
+	dep	github.com/opencontainers/go-digest	v1.0.0	h1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=
+	dep	github.com/opencontainers/image-spec	v1.1.0	h1:8SG7/vwALn54lVB/0yZ/MMwhFrPYtpEHQb2IpWsCzug=
+	dep	github.com/opencontainers/runc	v1.2.8	h1:RnEICeDReapbZ5lZEgHvj7E9Q3Eex9toYmaGBsbvU5Q=
+	dep	github.com/opencontainers/runtime-spec	v1.2.0	h1:z97+pHb3uELt/yiAWD691HNHQIF07bE7dzrbT927iTk=
+	dep	github.com/opencontainers/selinux	v1.13.1	h1:A8nNeceYngH9Ow++M+VVEwJVpdFmrlxsN22F+ISDCJE=
+	dep	github.com/pkg/errors	v0.9.1	h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
+	dep	github.com/pmezard/go-difflib	v1.0.0	h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
+	dep	github.com/shirou/gopsutil	v2.18.12+incompatible	h1:1eaJvGomDnH74/5cF4CTmTbLHAriGFsTZppLXDX93OM=
+	dep	github.com/sirupsen/logrus	v1.9.3	h1:dueUQJ1C2q9oE3F7wvmSGAaVtTmUizReu6fjN8uqzbQ=
+	dep	github.com/stretchr/testify	v1.11.1	h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
+	dep	go.opentelemetry.io/auto/sdk	v1.2.1	h1:jXsnJ4Lmnqd11kwkBV2LgLoFMZKizbCi5fNZ/ipaZ64=
+	dep	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp	v0.53.0	h1:4K4tsIXefpVJtvA/8srF4V4y0akAoPHkIslgAkjixJA=
+	dep	go.opentelemetry.io/otel	v1.41.0	h1:YlEwVsGAlCvczDILpUXpIpPSL/VPugt7zHThEMLce1c=
+	dep	go.opentelemetry.io/otel/metric	v1.41.0	h1:rFnDcs4gRzBcsO9tS8LCpgR0dxg4aaxWlJxCno7JlTQ=
+	dep	go.opentelemetry.io/otel/trace	v1.41.0	h1:Vbk2co6bhj8L59ZJ6/xFTskY+tGAbOnCtQGVVa9TIN0=
+	dep	golang.org/x/exp	v0.0.0-20240719175910-8a7402abbf56	h1:2dVuKD2vS7b0QIHQbpyTISPd0LeHDbnYEryqj5Q1ug8=
+	dep	golang.org/x/net	v0.55.0	h1:bcvxaJn3e1U6InsFWt1JUq1aSjnRxLzT2rtD2KfkDF8=
+	dep	golang.org/x/sync	v0.20.0	h1:e0PTpb7pjO8GAtTs2dQ6jYa5BWYlMuX047Dco/pItO4=
+	dep	golang.org/x/sys	v0.45.0	h1:dO4czNzziLiiXplLQgBCEpCvXQ3dnkn0SdaZSYdQ+FY=
+	dep	golang.org/x/text	v0.37.0	h1:Cqjiwd9eSg8e0QAkyCaQTNHFIIzWtidPahFWR83rTrc=
+	dep	google.golang.org/genproto	v0.0.0-20240123012728-ef4313101c80	h1:KAeGQVN3M9nD0/bQXnr/ClcEMJ968gUXJQ9pwfSynuQ=
+	dep	google.golang.org/genproto/googleapis/rpc	v0.0.0-20251202230838-ff82c1b0f217	h1:gRkg/vSppuSQoDjxyiGfN4Upv/h/DQmIR10ZU8dh4Ww=
+	dep	google.golang.org/grpc	v1.79.3	h1:sybAEdRIEtvcD68Gx7dmnwjZKlyfuc61Dyo9pGXXkKE=
+	dep	google.golang.org/protobuf	v1.36.10	h1:AYd7cD/uASjIL6Q9LiTjz8JLcrh/88q5UObnmY3aOOE=
+	dep	gopkg.in/yaml.v3	v3.0.1	h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
+	build	-buildmode=exe
+	build	-compiler=gc
+	build	-ldflags="-s -X main.revision=be68640a5d2237f5b427c37c1f5809ec154126c5"
+	build	DefaultGODEBUG=cryptocustomrand=1,httpservecontentmaxranges=1,tlssecpmlkem=0,urlstrictcolons=0
+	build	CGO_ENABLED=0
+	build	GOARCH=amd64
+	build	GOOS=linux
+	build	GOAMD64=v1
+	build	vcs=git
+	build	vcs.revision=be68640a5d2237f5b427c37c1f5809ec154126c5
+	build	vcs.time=2026-07-16T21:30:13Z
+	build	vcs.modified=false
+301458326813effb93e7e16de57ae93d96b35466ef3c6243beb2b804c896b897  /users/nehalem/fc-ctrd-mod/baseline/bin/firecracker
+4aefcb8e20c4d2788eafb939e3f70406594399326ca6943debecaf1705184c05  /users/nehalem/fc-ctrd-mod/baseline/_submodules/runc/runc
+ea5e7d5cf494a8c4ba043259812fc018b44880d70bcbbfc4d57d2760631b1cd6  /users/nehalem/fc-ctrd-mod/baseline/default-vmlinux.bin
+a1e58e872d754d58452f7173f56441427c56abef963cd7f5626091c36c3dcadb  /users/nehalem/fc-ctrd-mod/baseline/tools/image-builder/rootfs.img
+fcmod-baseline (252:0)
+ ├─ (7:0)
+ └─ (7:1)
+NAME       BACK-FILE
+/dev/loop1 /users/nehalem/fc-ctrd-mod/baseline/tmp/devmapper/metadata
+/dev/loop0 /users/nehalem/fc-ctrd-mod/baseline/tmp/devmapper/data
+/dev/sda3 ext3   /
+TASK    PID    STATUS    

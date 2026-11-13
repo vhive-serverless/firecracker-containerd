@@ -1,57 +1,81 @@
 # firecracker-containerd architecture
 
-firecracker-containerd aims to make it easier to run containers with virtual
-machine isolation provided by the [Firecracker virtual machine monitor
-(VMM)](https://github.com/firecracker-microvm/firecracker).
-firecracker-containerd integrates with [containerd](https://containerd.io) by
-implementing its interfaces and extending its APIs.
+This document describes the maintained runtime foundation. See the
+[branch guide](modernization/README.md) for the incremental Step 1–4 features,
+exact dependency pins and acceptance limits. The stack uses containerd 2.3.7,
+official Firecracker v1.18.0 and runc 1.4.2. The published vHive SDK revision
+and release checksums are pinned in `docs/modernization/versions.json`.
 
-firecracker-containerd implements the following containerd interfaces:
+## Host and guest boundary
 
-* [V2 runtime](https://github.com/containerd/containerd/blob/v1.2.6/runtime/v2/task/shim.proto):
-  Runtimes provide the implementation for configuring and running containerized
-  processes.  The V2 runtime is a containerd-specific interface and is not
-  standardized as part of the [Open Containers Initiative
-  (OCI)](https://www.opencontainers.org/).
+```mermaid
+flowchart LR
+  subgraph Host
+    C[Custom containerd with control plugin]
+    S[Firecracker runtime shim]
+    V[Firecracker VMM]
+    D[Host disk and snapshotters]
+    C -->|task v3 and control ttrpc| S
+    S -->|Firecracker API| V
+    D --> V
+  end
+  subgraph MicroVM
+    A[Guest agent with runc-v2 task service]
+    R[runc]
+    W[OCI workload processes]
+    A --> R --> W
+  end
+  S <-->|ttrpc and IO over vsock| A
+  V --- MicroVM
+```
 
-firecracker-containerd also adds a new API, which we call the "control" API,
-intended to model the lifecycle of a Firecracker microVM that can run multiple
-containers.
+The [control plugin](../firecracker-control) is compiled into the custom
+containerd binary. Its [control API](../proto/firecracker.proto) manages VMs
+that can contain multiple containers. It forwards requests to the per-VM shim.
+The [runtime shim](../runtime) implements containerd's runtime-v2 integration
+using the **task/v3 ttrpc API** and current shim-manager bootstrap. Runtime-v2
+and task/v3 name different interfaces; containerd's major release is 2.x.
 
-This repository contains the components that implement those interfaces and
-APIs.
+The shim runs on the host. It controls VMM startup/shutdown, devices, networking,
+resource configuration and recovery, and forwards task operations to the guest.
+Firecracker also runs on the host and provides the microVM through KVM. Its
+optional host runc jail is distinct from the guest runc used for OCI containers.
 
-There are currently several components in this repository:
+The [agent](../agent) runs **inside the microVM**. It embeds containerd's
+`containerd-shim-runc-v2/task` implementation rather than launching a separate
+runc shim daemon for every container. It invokes the guest runc binary to create
+and manage OCI processes, forwards events and metrics, and carries process IO
+over vsock. The guest kernel supplies namespaces and cgroup v2 isolation.
 
-* A [control plugin](../firecracker-control) managing the lifecycle of the
-  runtime and implementing our [control API](../proto/firecracker.proto) by
-  proxying commands to the runtime.  The control plugin is compiled in to the
-  containerd binary, which requires us to build a specialized containerd binary
-  for firecracker-containerd.
-* A [runtime](../runtime) implementing both the control API and the V2 runtime
-  API.  The runtime links containerd (outside the microVM) to the Firecracker
-  virtual machine monitor (VMM) for VM lifecycle operations and to the agent
-  running inside the microVM for container lifecycle operations.  The runtime is
-  implemented as an out-of-process [shim](https://github.com/containerd/containerd/issues/2426)
-  communicating over ttrpc.
-* An [agent](../agent) running inside the microVM, which is responsible for
-  acting on control instructions received from the runtime, for emitting event
-  and metric information to the runtime, and for proxying STDIO for the
-  container processes.  The agent invokes [runC](https://runc.io) via
-  containerd's `containerd-shim-runc-v1` to create standard Linux containers
-  inside the microVM.
+## Agent transport
 
-A high-level diagram of the various components and their interactions can be
-seen below:
+The guest retains lifecycle events in a bounded acknowledged journal. The host
+publishes each event before acknowledging it, and retries delivery across agent
+connection replacement without discarding the host publication cursor. Retained
+Wait calls use the stable task client; mutating task operations are not replayed.
 
-![firecracker-containerd architecture](img/architecture-diagram.png)
+Framed stdin/stdout/stderr streams keep FIFO ownership independent of the network
+connection. Reconnecting a stream retains accepted bytes, FINs and acknowledgements.
+The reusable Prepare/Describe/Resume operations coordinate stream read gates and
+matching process cursors. Step 1 does not persist a snapshot cut or coordinate VM
+capture; those operations are introduced with the snapshot consumer in Step 2.
+See [migration scope and validation](modernization/upstream-migration.md).
 
-A high-level diagram of how the components interact for starting a container can
-be seen below:
+## Storage and incremental features
 
-![firecracker-containerd container launch sequence diagram](img/container-launch-sequence-diagram.svg)
+Step 1 preserves an immutable SquashFS guest base with a tmpfs guest overlay
+upper; default devmapper container writable roots are already separate ext4
+block devices backed by host storage. The guest-root overlay, container writable
+root, exported host volumes and temporary mounts are separate storage layers.
+The optional guest stargz path has its own storage and must be assessed separately.
 
-* Overview of possible design approaches can be found in the [design approaches
-  doc](design-approaches.md).
-* More details on the architecture of the shims and design decisions behind
-  them can be found in the [shim design doc](shim-design.md).
+Step 2 adds vHive-managed snapshot/restore for its documented standalone profile.
+Step 3 adds a CRI frontend, ordinary Kubernetes RuntimeClass support and native
+checkpoint/restore components. Step 4 adds a private disk-backed guest upper,
+optional immutable pmem/DAX backing, and DAMON with free-page reporting. These
+features do not imply full CRI conformance or Kubernetes Pod restore. Consult
+the milestone documents for supported profiles, measured results and open gates.
+
+The original [design alternatives](design-approaches.md) and
+[shim design](shim-design.md) explain historical decisions. Their proposals and
+old diagrams are design history, not current implementation or acceptance claims.

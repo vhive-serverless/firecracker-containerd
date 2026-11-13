@@ -1,5 +1,12 @@
 # firecracker-containerd
 
+This branch uses official Firecracker/jailer v1.18.0 release binaries, the
+published vHive SDK dd9db32, and containerd v2.3.7. The recorded Step 1
+lint/build/install/test-stack pipeline passed on clean source `1074bdc8f2b6`;
+the later documentation tip was not rebuilt. See the
+[modernization procedure and validation status](docs/modernization/step-1.md)
+for the complete worker build, installation, tests, and dependency revisions.
+
 [![BuildKite](https://badge.buildkite.com/aab4ae547d5e5079a5915522e8cdb18492349aef67aae5a8c5.svg?branch=main)](https://buildkite.com/firecracker-microvm/firecracker-containerd)
 [![GitHub Actions](https://github.com/firecracker-microvm/firecracker-containerd/actions/workflows/build.yaml/badge.svg)](https://github.com/firecracker-microvm/firecracker-containerd/actions)
 
@@ -42,7 +49,7 @@ Firecracker microVMs to run containers:
   [shim runtime](https://github.com/containerd/containerd/issues/2426)
   communicating over ttrpc.
 * An [agent](agent) running inside the microVM, which invokes
-  [runC](https://runc.io) via containerd's `containerd-shim-runc-v1`
+  [runC](https://runc.io) via containerd's embedded runc-v2 task service
   to create standard Linux containers inside the microVM.
 * A [root file filesystem image builder](tools/image-builder) that
   constructs a firecracker microVM root filesystem containing runc and
@@ -51,30 +58,19 @@ Firecracker microVMs to run containers:
 For more detailed information on the components and how they work, see
 [architecture.md](docs/architecture.md).
 
-## Roadmap
+## Maintained branches and usage
 
-To support the widest variety of workloads, firecracker-containerd has to work
-with popular container orchestration frameworks such as Kubernetes and Amazon
-ECS, so we will work to ensure that the software is conformant or compatible
-where necessary.  The project currently allows you to launch a few containers
-colocated in the same microVM, and we are exploring how to raise the number of
-containers.  We recently added support for configuring networking at the microVM
-level with CNI plugins and provide a CNI plugin suitable for chaining called
-"tc-redirect-tap".  Our short term roadmap includes constraining or "jailing"
-the Firecracker VMM process to improve the host security posture.  Our
-longer-term roadmap includes polishing, packaging, and generally making
-firecracker-containerd easier to run as well as exploring CRI conformance and
-compatibility with Kubernetes.
+Use the [Step 1–4 branch guide](docs/modernization/README.md) for build,
+installation, validation and forward-merge maintenance.
+`firecracker-v1.18-containerdv2` is the maintained base;
+`firecracker-v1.18-containerdv2-vhive-integration` adds vHive. Later branches
+add CRI/native checkpoint components and disk-backed storage/memory mechanisms
+in order. Each branch pins its own
+stack. Step 3 and inherited Kubernetes/CRI acceptance gates remain WIP.
 
-Details of specific roadmap items are tracked in [GitHub
-issues](https://github.com/firecracker-microvm/firecracker-containerd/issues).
-
-## Usage
-
-For detailed instructions on building and running
-firecracker-containerd, see the
-[getting started guide](docs/getting-started.md) and the
-[quickstart guide](docs/quickstart.md).
+The original general getting-started and quickstart pages are historical
+references. The milestone procedures and their committed evidence identify
+what has actually been built and tested.
 
 ## Questions?
 

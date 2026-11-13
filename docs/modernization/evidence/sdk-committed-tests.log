@@ -1,0 +1,9 @@
+ok  	github.com/firecracker-microvm/firecracker-go-sdk	5.001s
+?   	github.com/firecracker-microvm/firecracker-go-sdk/client	[no test files]
+?   	github.com/firecracker-microvm/firecracker-go-sdk/client/models	[no test files]
+?   	github.com/firecracker-microvm/firecracker-go-sdk/client/operations	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-go-sdk/cni/internal	(cached)
+ok  	github.com/firecracker-microvm/firecracker-go-sdk/cni/vmconf	(cached)
+ok  	github.com/firecracker-microvm/firecracker-go-sdk/fctesting	(cached)
+ok  	github.com/firecracker-microvm/firecracker-go-sdk/internal	(cached)
+ok  	github.com/firecracker-microvm/firecracker-go-sdk/vsock	(cached)

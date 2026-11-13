@@ -1,0 +1,64 @@
+=== RUN   TestWait
+=== RUN   TestWait/StopVMM
+time="2026-11-10T13:04:19-07:00" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestWait_StopVMM3403595961/fc.sock"
+time="2026-11-10T13:04:19-07:00" level=info msg="VMM logging disabled."
+time="2026-11-10T13:04:19-07:00" level=info msg="VMM metrics disabled."
+time="2026-11-10T13:04:19-07:00" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-10T13:04:19-07:00" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-10T13:04:19-07:00" level=info msg="Attaching drive /users/nehalem/fc-ctrd-mod/sdk/testdata/root-drive.img, slot root, root true."
+time="2026-11-10T13:04:19-07:00" level=info msg="Attached drive /users/nehalem/fc-ctrd-mod/sdk/testdata/root-drive.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-10T13:04:19-07:00" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-10T13:04:19-07:00" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-10T13:04:19-07:00" level=warning msg="firecracker exited: signal: terminated"
+    machine_test.go:1592: err = 1 error occurred:
+        	* signal: terminated
+        
+=== RUN   TestWait/Kill
+time="2026-11-10T13:04:19-07:00" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestWait_Kill310883530/fc.sock"
+time="2026-11-10T13:04:19-07:00" level=info msg="VMM logging disabled."
+time="2026-11-10T13:04:19-07:00" level=info msg="VMM metrics disabled."
+time="2026-11-10T13:04:19-07:00" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-10T13:04:19-07:00" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-10T13:04:19-07:00" level=info msg="Attaching drive /users/nehalem/fc-ctrd-mod/sdk/testdata/root-drive.img, slot root, root true."
+time="2026-11-10T13:04:19-07:00" level=info msg="Attached drive /users/nehalem/fc-ctrd-mod/sdk/testdata/root-drive.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-10T13:04:19-07:00" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-10T13:04:19-07:00" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-10T13:04:19-07:00" level=warning msg="firecracker exited: signal: killed"
+    machine_test.go:1592: err = 1 error occurred:
+        	* signal: killed
+        
+=== RUN   TestWait/Context_Cancel
+time="2026-11-10T13:04:19-07:00" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestWait_Context_Cancel3167700048/fc.sock"
+time="2026-11-10T13:04:19-07:00" level=info msg="VMM logging disabled."
+time="2026-11-10T13:04:19-07:00" level=info msg="VMM metrics disabled."
+time="2026-11-10T13:04:19-07:00" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-10T13:04:19-07:00" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-10T13:04:19-07:00" level=info msg="Attaching drive /users/nehalem/fc-ctrd-mod/sdk/testdata/root-drive.img, slot root, root true."
+time="2026-11-10T13:04:19-07:00" level=info msg="Attached drive /users/nehalem/fc-ctrd-mod/sdk/testdata/root-drive.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-10T13:04:19-07:00" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-10T13:04:19-07:00" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-10T13:04:19-07:00" level=warning msg="firecracker exited: signal: terminated"
+    machine_test.go:1592: err = 1 error occurred:
+        	* signal: terminated
+        
+=== RUN   TestWait/StopVMM_+_Context_Cancel
+time="2026-11-10T13:04:19-07:00" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestWait_StopVMM_+_Context_Cancel2207544933/fc.sock"
+time="2026-11-10T13:04:19-07:00" level=info msg="VMM logging disabled."
+time="2026-11-10T13:04:19-07:00" level=info msg="VMM metrics disabled."
+time="2026-11-10T13:04:19-07:00" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-10T13:04:19-07:00" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-10T13:04:19-07:00" level=info msg="Attaching drive /users/nehalem/fc-ctrd-mod/sdk/testdata/root-drive.img, slot root, root true."
+time="2026-11-10T13:04:19-07:00" level=info msg="Attached drive /users/nehalem/fc-ctrd-mod/sdk/testdata/root-drive.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-10T13:04:19-07:00" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-10T13:04:19-07:00" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-10T13:04:19-07:00" level=warning msg="firecracker exited: signal: terminated"
+    machine_test.go:1592: err = 1 error occurred:
+        	* signal: terminated
+        
+--- PASS: TestWait (2.19s)
+    --- PASS: TestWait/StopVMM (0.05s)
+    --- PASS: TestWait/Kill (0.05s)
+    --- PASS: TestWait/Context_Cancel (0.04s)
+    --- PASS: TestWait/StopVMM_+_Context_Cancel (2.05s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-go-sdk	2.202s

@@ -1,0 +1,12 @@
+Step4 cache eviction log test validation
+Checkout: /users/nehalem/fc-ctrd-mod/step4-cache-test-dev
+Source: 907fc268ea85f60dfcdae2b1471b5ffb28811003 (current remote damon-virtio-pmem HEAD verified via ls-remote)
+Go: go1.26.11
+Local patch scope: snapshotter/demux/cache/evict_test.go only; no commit or push.
+
+Baseline: TestLogErrorOnEvictionFailure -count=30 passed; the old failure was not reproduced in these 30 executions.
+Patched targeted: TestLogErrorOnEvictionFailure -count=100 passed.
+Patched package: go test -race ./snapshotter/demux/cache -count=1 passed.
+Patch intent: wait for the reaper's logged Close error via an observed writer callback, assert the actual error text, and assert the entry has been removed after logging. One-second timeout only bounds a missing event.
+
+Original test Git blob ID (SHA-1) across refs modernize-runtime, vhive-compatible, cri-native-snapshot-restore: 29fab7b892a53f33156ffc7ef9e61f3be64536bf (identical content on all three refs).

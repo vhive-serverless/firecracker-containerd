@@ -1,5 +1,9 @@
 # Create Firecracker VM images for use with firecracker-containerd #
 
+> Historical upstream guide: version requirements and command examples below
+> are not the tested setup for the maintained Step 1–4 branches. Follow the
+> [modernization branch guide](../../docs/modernization/README.md) and its pinned worker procedures.
+
 ## Debian root image ##
 
 ### Overview ###
