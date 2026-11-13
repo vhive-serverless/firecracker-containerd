@@ -14,7 +14,7 @@ firecracker-v1.18-containerdv2
 | --- | --- | --- |
 | 1 | `firecracker-v1.18-containerdv2` | Modernized OCI runtime, acknowledged events and framed IO; the worker pipeline and separate installed-prefix lifecycle/controller-restart/shim-crash checks passed at `1074bdc8f2b6`, with one explicit SDK skip in the pipeline. [Receipt and scope](evidence/upstream-step1-1074bdc8f2b6/README.md). |
 | 2 | `firecracker-v1.18-containerdv2-vhive-integration` | Exact `2e03843816cf` has complete segmented check coverage: original full run failed on an unfixed existing CNI flake; unchanged five-VM repeats and remaining thinpool/SDK checks passed separately. Three provisional vHive VM cases passed. [Receipt and limits](evidence/upstream-step2-2e03843816cf/README.md). Final published/installed consumer acceptance remains pending. |
-| 3 | `cri-native-snapshot-restore` | Adds CRI integration, ordinary RuntimeClass Pods and native checkpoint components; **WIP**, with historical CRI failures, fresh migrated candidate validation pending, and Kubernetes Pod restore deferred to the 1.38 interface work. |
+| 3 | `cri-native-snapshot-restore` | Exact `751c03c6f9a9` passed eight jailed/nonjailed native leaves, real-volume continuity and focused CRI checks (4 specs passed, 138 skipped) plus resource/volume integration. [Receipt and scope](evidence/upstream-step3-751c03c6f9a9/README.md). Full CRI remains **WIP**; Kubernetes Pod restore is deferred to 1.38. |
 | 4 | `damon-virtio-pmem` | Adds disk-backed guest storage, pmem/DAX, DAMON/reporting and memory evaluation; historical direct runtime acceptance is revision-specific and does not validate the migrated candidate. Fresh migrated validation and inherited Step 3 gates remain open. |
 
 Read the milestone document on its own branch: [Step 1](step-1.md),
@@ -28,23 +28,25 @@ milestones and archived receipts; use the new names for current builds.
 
 ## Build and evidence
 
-Current Step 2 source `2e03843816cf` has complete check coverage across a failed
-full run, unchanged fresh-container diagnostics and passing supplemental tail.
-The CNI race remains unfixed; no uninterrupted full-stack pass is claimed. See
-[Step 2](step-2.md) and its exact receipt. Earlier `7386` acceptance below retains
-its original source scope; later milestones have separate gates.
-
 The migrated stack uses official Firecracker and jailer v1.18.0 release
 archives, verified against checksums in `versions.json`, and the published
 `vhive-serverless/firecracker-go-sdk` branch `firecracker-v1.18.0`, commit
 `dd9db322432989b96cff7a38a64703d60b6cabf9`. Runtime builds fetch the official
-binaries rather than compiling a custom VMM. Exact Step 2 source `7386ab5c5e8c`
-passed full-stack regression and all three provisional source/clone VM cases;
-see [Step 2 scope and reproduction](step-2.md). The receipt distinguishes that
-tested source from this documentation tip and preserves actual binary/image
-provenance, skips and failed earlier attempts. Final published-runtime-module
-and installed-vHive consumer acceptance remain open. Later-stage results have
-their own source revisions and gates.
+binaries rather than compiling a custom VMM. Exact Step 3 source `751c03c6f9a9`
+passed the native/volume/focused-CRI worker procedure documented in
+[Step 3](step-3.md). Its [receipt](evidence/upstream-step3-751c03c6f9a9/README.md)
+identifies the tested source and actual artifacts;
+this later documentation tip was not tested. Earlier milestones retain their own
+exact-source receipts and procedures below. Full CRI and final published/installed-vHive
+acceptance remain separate open gates; later-stage acceptance requires its own
+source and receipts.
+
+Exact Step 2 `2e03843816cf` has complete segmented check coverage; the original
+full run remains exit 2 on the unfixed CNI race, while unchanged five-VM repeats
+and remaining thinpool/SDK checks passed separately. See the
+[Step 2 receipt and limits](evidence/upstream-step2-2e03843816cf/README.md).
+Earlier `7386` clean acceptance retains its own receipt. No uninterrupted
+corrected-source full-stack pass or final installed-vHive result is inferred.
 
 The inherited Step 1 worker pipeline passed at exact source `1074bdc8f2b6`;
 its [receipt](evidence/upstream-step1-1074bdc8f2b6/README.md) preserves the SDK

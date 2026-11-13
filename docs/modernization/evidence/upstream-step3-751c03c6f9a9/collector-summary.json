@@ -1,0 +1,523 @@
+{
+  "runtime_source": "751c03c6f9a98b8726bc4d9066efce78db96952d",
+  "runtime_tree": "18f9c8c905eafa8fb86354b5996f68615e542852",
+  "authoritative_launcher_exit": 0,
+  "authoritative_stdout_marker": "STAGE3_SAME_ID_NATIVE_VOLUME_AND_FOCUSED_CRI_OK",
+  "marker_source": "Lead exec76601 terminal result",
+  "phase_status": {
+    "build": "0",
+    "install": "0",
+    "native": "0",
+    "volumes": "0",
+    "cri-focused": "0"
+  },
+  "raw_file_count": 38,
+  "native_outcome": {
+    "present": true,
+    "passes": [
+      "TestCheckpointTransportRejectsInvalidVersionAndThawSet (0.00s)",
+      "TestSealTransportPersistsAcknowledgedEventCursor (0.00s)",
+      "TestNativeRestoreExecStateIdentity (0.00s)",
+      "TestNativeRestoreCopyFailureCleanup (0.15s)",
+      "TestNativeRestoreCopiesPrivateArtifacts (0.02s)",
+      "TestNativeRestoreCreateVMSelectsArtifact (0.00s)",
+      "TestNativeRestoreCreateVMDeadlinePreservesRequestIdentity (0.01s)",
+      "TestNativeRestoreMountPlan (0.00s)",
+      "TestNativeCheckpoint_Isolated (65.81s)",
+      "TestNativeForkTransport_Isolated (73.94s)",
+      "TestNativeCheckpointInterrupt_Isolated (38.10s)",
+      "TestNativeRestore_Isolated (38.45s)"
+    ],
+    "failures": [],
+    "skips": []
+  },
+  "native_vm_leaves": [
+    "TestNativeCheckpointInterrupt_Isolated/jailed=false",
+    "TestNativeCheckpointInterrupt_Isolated/jailed=true",
+    "TestNativeCheckpoint_Isolated/jailed=false",
+    "TestNativeCheckpoint_Isolated/jailed=true",
+    "TestNativeForkTransport_Isolated/jailed=false",
+    "TestNativeForkTransport_Isolated/jailed=true",
+    "TestNativeRestore_Isolated/jailed=false",
+    "TestNativeRestore_Isolated/jailed=true"
+  ],
+  "expected_native_leaves": [
+    "TestNativeCheckpointInterrupt_Isolated/jailed=false",
+    "TestNativeCheckpointInterrupt_Isolated/jailed=true",
+    "TestNativeCheckpoint_Isolated/jailed=false",
+    "TestNativeCheckpoint_Isolated/jailed=true",
+    "TestNativeForkTransport_Isolated/jailed=false",
+    "TestNativeForkTransport_Isolated/jailed=true",
+    "TestNativeRestore_Isolated/jailed=false",
+    "TestNativeRestore_Isolated/jailed=true"
+  ],
+  "native_scope_verified": true,
+  "volume_outcome": {
+    "present": true,
+    "passes": [
+      "TestVolumeCheckpointRealVM (2.43s)"
+    ],
+    "failures": [],
+    "skips": []
+  },
+  "volume_continuity": {
+    "source_pid": 3210261,
+    "restored_pid": 3210282,
+    "inode": 2,
+    "captured_counter": 41,
+    "restored_counter": 42,
+    "shared": "42",
+    "orphan": "orphan42"
+  },
+  "volume_scope_verified": true,
+  "focused_cri": {
+    "suite_succeeded": true,
+    "counts": {
+      "skipped": 138,
+      "passed": 4
+    },
+    "passed_specs": [
+      "[k8s.io] Runtime info / runtime should support returning runtime info / runtime should return version info [Conformance]",
+      "[k8s.io] Runtime info / runtime should support returning runtime info / runtime should return runtime conditions [Conformance]",
+      "[k8s.io] Container / runtime should support adding volume and device / runtime should support starting container with volume [Conformance]",
+      "[k8s.io] Container / runtime should support adding volume and device / runtime should support starting container with volume when host path is a symlink [Conformance]"
+    ],
+    "pre_run_stats": [
+      {
+        "TotalSpecs": 142,
+        "SpecsThatWillRun": 4
+      }
+    ],
+    "focus_strings": [
+      [
+        "Runtime info|starting container with volume"
+      ]
+    ]
+  },
+  "cri_go_integration": {
+    "present": true,
+    "passes": [
+      "TestPodVMResources (12.62s)",
+      "TestPodVolumes (6.38s)"
+    ],
+    "failures": [],
+    "skips": []
+  },
+  "cri_resource_leaves": [
+    "TestPodVMResources/declared_limits",
+    "TestPodVMResources/unbounded_uses_requests_and_fallback",
+    "TestPodVMResources/unspecified_CPU_period"
+  ],
+  "cri_guest_resource_witnesses": [
+    {
+      "vcpus": 2,
+      "mem_total_kib": 363988
+    },
+    {
+      "vcpus": 2,
+      "mem_total_kib": 235348
+    },
+    {
+      "vcpus": 2,
+      "mem_total_kib": 493012
+    }
+  ],
+  "cri_exit_status": {
+    "docker_attach_exit": "0",
+    "container_exit": "0"
+  },
+  "cri_scope_verified": true,
+  "source_clean": true,
+  "images": {
+    "stack": {
+      "tag": "localhost/firecracker-containerd-test:751c03c6f9a9",
+      "inspect": [
+        {
+          "Id": "sha256:e0eef7a87dee88f2385d9b9f4159711b4f6a03e596419818396e76455afa7494",
+          "RepoTags": [
+            "localhost/firecracker-containerd-test:751c03c6f9a9"
+          ],
+          "RepoDigests": [
+            "localhost/firecracker-containerd-test@sha256:e0eef7a87dee88f2385d9b9f4159711b4f6a03e596419818396e76455afa7494"
+          ],
+          "Comment": "buildkit.dockerfile.v0",
+          "Created": "2026-11-12T18:05:44.042440992-07:00",
+          "Config": {
+            "Env": [
+              "PATH=/bin:/usr/bin:/usr/local/bin:/sbin:/usr/sbin:/usr/local/sbin:/usr/local/go/bin",
+              "GOLANG_VERSION=1.26.11",
+              "GOTOOLCHAIN=local",
+              "GOPATH=/go",
+              "INSTALLROOT=/usr/local",
+              "DEBIAN_FRONTEND=noninteractive",
+              "GOCACHE=/go/build-cache",
+              "FICD_LOG_DIR=/var/log/firecracker-containerd-test",
+              "FICD_CONTAINERD_OUTFILE=/var/log/firecracker-containerd-test/containerd.out",
+              "CTRD_VERSION=2.3.7",
+              "CRITEST_VERSION=1.37.0"
+            ],
+            "Entrypoint": [
+              "/entrypoint"
+            ],
+            "Cmd": [
+              "exec /bin/bash"
+            ],
+            "WorkingDir": "/go",
+            "ArgsEscaped": true
+          },
+          "Architecture": "amd64",
+          "Os": "linux",
+          "Size": 1047316202,
+          "RootFS": {
+            "Type": "layers",
+            "Layers": [
+              "sha256:05f9043663c0a4a3f7a75f1fe7cf08b5a69419f2e31425412598b5443e1887bc",
+              "sha256:74a1cce49db916676932c971e576f97b650bfdb55e355ee56d3b022d4c01ad1f",
+              "sha256:131853779658ab455b50696ca52922ea83febf8922703598ea672657331befbc",
+              "sha256:3b5af6bfa944fb0b89d547110ff58570f406e6d6c7b1d00d89865840f5dac7fb",
+              "sha256:b9757dc9f68b118b80b08e11b4b5b47178d7ba07e555dc4b78ea39dd433a2a3d",
+              "sha256:f1411b3c21558edd45e2f5260540a5a441883787796e8226961aa5149d4fabe7",
+              "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+              "sha256:7fa0fe72d5fd1423b8431fb5f8e6025c7ba0a5de4ce15e1995af773ed447a742",
+              "sha256:795e559326d6796fb74205cecbf67fdbe9a1d24ced5734c3d64000a19bd7c387",
+              "sha256:d1f75bfacbe765bca756465276249d0d0e8ceb6d88bbf1e13cb9ed38b04af0be",
+              "sha256:857253676d060f4ca91fcbff67bcee837334c27aed66e79c0af67de8b961f712",
+              "sha256:906fb47d6f88da68e2977893ce8fb24f8fde83163da85ac2b690f5a127157774",
+              "sha256:e98f8ad013d72b5f8a91d4005a068798de33988d72251ca259ce8b1e4ccfbdf3",
+              "sha256:f6f16ac120ec4038feebb387ab6f68c2feb9c15ed38afe65280d88c43f7c44e7",
+              "sha256:a374f36e2da2df3ab09eac5e385cc50ad7d85dae3c48101af3198ac5eb9d5ca5",
+              "sha256:e3236b1703f7714f86003b4e4680a2f90e94c8fcaa33e63a9f532950076c8502",
+              "sha256:861464b1a52904a594d2424579a113e9d446a4f524ec77792a5cfd275502bac2",
+              "sha256:5697df677ea9efe51d59a08c8a3ab9241a7374c0fda4afd89f04f0bba4ffd717",
+              "sha256:00eaa9df4da3d907977d3f9f737ce78d5d4a78ed3f10e4db6bd2962a44ae1558",
+              "sha256:fde757f2e2ac9c99c55c1a87cceb3e3ec54a8f4c607c8703bebb3bc0b1f920c7"
+            ]
+          },
+          "Metadata": {
+            "LastTagTime": "2026-11-13T01:06:02.477337453Z"
+          },
+          "Descriptor": {
+            "mediaType": "application/vnd.oci.image.index.v1+json",
+            "digest": "sha256:e0eef7a87dee88f2385d9b9f4159711b4f6a03e596419818396e76455afa7494",
+            "size": 856
+          }
+        }
+      ],
+      "error": null
+    }
+  },
+  "native_image_receipt_matches_current_tag": true,
+  "installed_artifacts": {
+    "bin/firecracker-containerd": {
+      "path": "/users/nehalem/fc-ctrd-mod/install/751c03c6f9a9/bin/firecracker-containerd",
+      "sha256": "e9e8f6cf0557865d9d79a6772df7619ab4c848d17c07d444a6543f60d0b3d809",
+      "error": null
+    },
+    "bin/containerd-shim-aws-firecracker": {
+      "path": "/users/nehalem/fc-ctrd-mod/install/751c03c6f9a9/bin/containerd-shim-aws-firecracker",
+      "sha256": "f7b0d97002ad2041c95f9221799b94e4edeea23716a5dc5a42e9f4ff353dab12",
+      "error": null
+    },
+    "bin/firecracker": {
+      "path": "/users/nehalem/fc-ctrd-mod/install/751c03c6f9a9/bin/firecracker",
+      "sha256": "b33f46cd6d88834cf6a4f8d184f08f219809c636236bffd286d233a60602a2ba",
+      "error": null
+    },
+    "bin/jailer": {
+      "path": "/users/nehalem/fc-ctrd-mod/install/751c03c6f9a9/bin/jailer",
+      "sha256": "ddadbaa15b5c942271a83b7040ca7259c8ccf92a9e08d44cce0b86fa407ba460",
+      "error": null
+    },
+    "bin/runc": {
+      "path": "/users/nehalem/fc-ctrd-mod/install/751c03c6f9a9/bin/runc",
+      "sha256": "9cd4a021610365032b0e13fa37e67b751ccc8205c5b14d313af28cbe6e219220",
+      "error": null
+    },
+    "bin/firecracker-cri": {
+      "path": "/users/nehalem/fc-ctrd-mod/install/751c03c6f9a9/bin/firecracker-cri",
+      "sha256": "1b7374a847ad41dd3583c16bd749ae16bf6e5b7d5fb9f6c861b13fb7c98326c8",
+      "error": null
+    },
+    "share/runtime/default-vmlinux.bin": {
+      "path": "/users/nehalem/fc-ctrd-mod/install/751c03c6f9a9/share/runtime/default-vmlinux.bin",
+      "sha256": "59cb04df4feb9696a75a78c0b15e54bf39c0f142649947e8fdb7948160b0a091",
+      "error": null
+    },
+    "share/runtime/default-rootfs.img": {
+      "path": "/users/nehalem/fc-ctrd-mod/install/751c03c6f9a9/share/runtime/default-rootfs.img",
+      "sha256": "316db9b14b3bc177aacfde668a9fdee2dd2e6594e7fcd8072f78c307dd419e5d",
+      "error": null
+    }
+  },
+  "actual_source_artifacts": {
+    "bin/vmlinux-6.18.56-fcmod": {
+      "bytes": 27747912,
+      "sha256": "59cb04df4feb9696a75a78c0b15e54bf39c0f142649947e8fdb7948160b0a091"
+    },
+    "bin/vmlinux-6.18.56-fcmod.config": {
+      "bytes": 98292,
+      "sha256": "99d0950a178b92a1db3d5ee233dc6a320c8892334b99ba6fea11bd7be3745067"
+    },
+    "default-vmlinux.bin": {
+      "bytes": 27747912,
+      "sha256": "59cb04df4feb9696a75a78c0b15e54bf39c0f142649947e8fdb7948160b0a091"
+    },
+    "agent/agent": {
+      "bytes": 18776226,
+      "sha256": "1f61fd99db893b052e776f189341338aefd6e2149fc5417aa8842a56ced150cb"
+    },
+    "runtime/containerd-shim-aws-firecracker": {
+      "bytes": 33178786,
+      "sha256": "f7b0d97002ad2041c95f9221799b94e4edeea23716a5dc5a42e9f4ff353dab12"
+    },
+    "firecracker-control/cmd/containerd/firecracker-containerd": {
+      "bytes": 60113560,
+      "sha256": "e9e8f6cf0557865d9d79a6772df7619ab4c848d17c07d444a6543f60d0b3d809"
+    },
+    "bin/firecracker": {
+      "bytes": 3921872,
+      "sha256": "b33f46cd6d88834cf6a4f8d184f08f219809c636236bffd286d233a60602a2ba"
+    },
+    "bin/jailer": {
+      "bytes": 2243040,
+      "sha256": "ddadbaa15b5c942271a83b7040ca7259c8ccf92a9e08d44cce0b86fa407ba460"
+    },
+    "_submodules/runc/runc": {
+      "bytes": 17001128,
+      "sha256": "9cd4a021610365032b0e13fa37e67b751ccc8205c5b14d313af28cbe6e219220"
+    },
+    "cri/firecracker-cri": {
+      "bytes": 30525212,
+      "sha256": "1b7374a847ad41dd3583c16bd749ae16bf6e5b7d5fb9f6c861b13fb7c98326c8"
+    },
+    "cri/cri-runtime.test": {
+      "bytes": 31989695,
+      "sha256": "8c27ad326cad895c9d3a3203057256079ff6fc71f35e262840ae1e0fbd5ad2c8"
+    },
+    "tools/image-builder/rootfs.img": {
+      "bytes": 72081408,
+      "sha256": "6e859297fde4781c5efc5a045276ff10c6eaaa0f1f0dc7e58df8545d4b0fb1cd"
+    },
+    "tools/image-builder/rootfs-stargz.img": {
+      "bytes": 104108032,
+      "sha256": "4782044c96968c51dcad024071dec1b3421ae873752762aa7e8a7af1b970f882"
+    }
+  },
+  "kernel_reuse_matches_seed_build_default_and_install": true,
+  "kernel_tracked_inputs": {
+    "Makefile": {
+      "accepted_blob": "e59c062a57b0965533ae58a9c3e8881cc41d272e",
+      "target_blob": "e59c062a57b0965533ae58a9c3e8881cc41d272e",
+      "equal": true
+    },
+    "tools/modernize/build-kernel.sh": {
+      "accepted_blob": "56a74a1ac1a02c2f87231e31fe09761603f853bc",
+      "target_blob": "56a74a1ac1a02c2f87231e31fe09761603f853bc",
+      "equal": true
+    },
+    "tools/kernel-configs/microvm-kernel-x86_64-6.18.config": {
+      "accepted_blob": "f2f75b5e5c8173d659483eab95a1382529617c40",
+      "target_blob": "f2f75b5e5c8173d659483eab95a1382529617c40",
+      "equal": true
+    }
+  },
+  "kernel_reuse_lead_receipt_sha256": "bf7efba9e66c1efb888719ac6744e894a23c942633ca2c3e5813cfa8bdd19952",
+  "independent_owned_cleanup_clean": true,
+  "cleanup_observations": {
+    "owned_containers": [],
+    "owned_pool_mappings": [],
+    "owned_loops": [],
+    "owned_backing_files": [],
+    "owned_mounts": [],
+    "sdk_owned_cgroup": {
+      "exists": false,
+      "processes": []
+    },
+    "owned_volume_processes": [],
+    "remaining_volume_fixture_paths": [],
+    "running_containers": [
+      {
+        "Command": "\"/usr/local/bin/entrypoint /sbin/init\"",
+        "CreatedAt": "2026-11-10 19:51:22 -0700 MST",
+        "ID": "1715f4a4061173a6eb936d419fbac8e1055a0a8042a6a9543670ee21f7f710d5",
+        "Image": "localhost/fcmod-kubernetes-node:v1.37.2",
+        "Labels": "io.x-k8s.kind.cluster=fcmod-upstream-137,io.x-k8s.kind.role=control-plane",
+        "LocalVolumes": "1",
+        "Mounts": "/lib/modules,b6eb13a16abaf3c65fa814e43c0940d7605a9c6d27e3dcb377c552423007e801",
+        "Names": "fcmod-upstream-137-control-plane",
+        "Networks": "kind",
+        "Platform": {
+          "architecture": "amd64",
+          "os": "linux"
+        },
+        "Ports": "127.0.0.1:37231->6443/tcp",
+        "RunningFor": "46 hours ago",
+        "Size": "3.93MB (virtual 962MB)",
+        "State": "running",
+        "Status": "Up 46 hours"
+      }
+    ]
+  },
+  "remote_local_raw_hashes_match": true,
+  "post_transfer_raw_files_unchanged": true,
+  "accepted_scope_complete": true,
+  "files": {
+    "stage3-build-751c03c6f9a9.log": {
+      "bytes": 106956,
+      "sha256": "6414dda66dd37e00d6d8c7cfb1cad2515854d38ab5a618cf89610fd40102d12c"
+    },
+    "stage3-command-status-751c03c6f9a9.tsv": {
+      "bytes": 66,
+      "sha256": "62219cafc8561205463be02356e7a8db0000ec70d2612e56be1c1c977c12982e"
+    },
+    "stage3-cri-focused-751c03c6f9a9.log": {
+      "bytes": 8211,
+      "sha256": "45b4b32d101e5bd074c9e0daf7297b672b0813e3fdeb27fa1111e8a239aed9b6"
+    },
+    "stage3-install-751c03c6f9a9.log": {
+      "bytes": 10446,
+      "sha256": "005af97cd0dabe2a5c1fd82aa08994d2a81a4487ec471fe8506665ff8d3b1873"
+    },
+    "stage3-kernel-seed-751c03c6f9a9.json": {
+      "bytes": 1050,
+      "sha256": "bf7efba9e66c1efb888719ac6744e894a23c942633ca2c3e5813cfa8bdd19952"
+    },
+    "stage3-launcher-751c03c6f9a9.sh": {
+      "bytes": 2291,
+      "sha256": "f1ccd846ee91fcec4b86570a2cfe24f49930310fa9ae6512b8dae8857a7e4417"
+    },
+    "stage3-native-751c03c6f9a9.log": {
+      "bytes": 124748,
+      "sha256": "403abe551cd878099d818bf5509e2daf80927c969b123b3b104662a18025f85a"
+    },
+    "stage3-tested-source-751c03c6f9a9.txt": {
+      "bytes": 82,
+      "sha256": "899f9c60ade9d5b50b05304b9496df37974f1f4c28a496a2b35d51d979f85fcb"
+    },
+    "stage3-volumes-751c03c6f9a9.log": {
+      "bytes": 876,
+      "sha256": "a92ba8286e7c1ccfedd130389ffd89fb655bd77f9a072f2dbe64b9f273681aa6"
+    },
+    "build/agent-build-info": {
+      "bytes": 6259,
+      "sha256": "b24ae99d3dabd543cf13b83cd69f7e682cb0b67b693d30184878fc558db39f5f"
+    },
+    "build/binaries.sha256": {
+      "bytes": 967,
+      "sha256": "efbc1aeae2414e6244793d9d995c6a85e3b67b8c22bccdccdcb33c119ba5d356"
+    },
+    "build/cri-build-info": {
+      "bytes": 7655,
+      "sha256": "aea24203e537df20612cc65865adf7967707d8bd26b53ca71d701522cf19da4c"
+    },
+    "build/cri-go-modules.json": {
+      "bytes": 73599,
+      "sha256": "a900aef226891263d940daecc97dd5956f090db490b9afa685b0bf98fd5dfa50"
+    },
+    "build/firecracker-release.txt": {
+      "bytes": 636,
+      "sha256": "a18e151d850371c1ceddbc1c63667a1aafdb7ff6146c3e245ca9c516084fdb7d"
+    },
+    "build/go-modules.json": {
+      "bytes": 120919,
+      "sha256": "e319c4596584886b31220e4a94cb291ab22bf2cf3fdf19fd5194989d33c179f3"
+    },
+    "build/runtime-revision": {
+      "bytes": 41,
+      "sha256": "9cd09c956d0e443bca5e64403f421946748dcd1cc69bb1bd1d856f8c94280503"
+    },
+    "build/submodules": {
+      "bytes": 231,
+      "sha256": "be508e11a4bd2ab77a9b89c3c69e1043e9f3823b9e5474cd4d12e634557e7c80"
+    },
+    "native-restore/binaries.sha256": {
+      "bytes": 786,
+      "sha256": "680d7a80e51b55dee7a3c9a620db5efa7828927624de4ac694f7d1103565dd75"
+    },
+    "native-restore/runtime-revision": {
+      "bytes": 41,
+      "sha256": "9cd09c956d0e443bca5e64403f421946748dcd1cc69bb1bd1d856f8c94280503"
+    },
+    "native-restore/submodules": {
+      "bytes": 231,
+      "sha256": "be508e11a4bd2ab77a9b89c3c69e1043e9f3823b9e5474cd4d12e634557e7c80"
+    },
+    "native-restore/test-image.json": {
+      "bytes": 3648,
+      "sha256": "089a093d009cec0817aa35ab3fae1580228eec8e637476415575625074fd2a8f"
+    },
+    "provenance/versions.json": {
+      "bytes": 16415,
+      "sha256": "8ea05a1dd0c1efb797094865fd2810dfeddd30e322c8e8a4a46c3045bfdc8c04"
+    },
+    "provenance/kernel.config": {
+      "bytes": 98292,
+      "sha256": "99d0950a178b92a1db3d5ee233dc6a320c8892334b99ba6fea11bd7be3745067"
+    },
+    "provenance/tracked-kernel.config": {
+      "bytes": 97960,
+      "sha256": "8fa45f9c6d91f1c91e16393a921abeec74adf94a245849c8f54ba04545264e92"
+    },
+    "provenance/build-kernel.sh": {
+      "bytes": 1354,
+      "sha256": "f75d4d4af61da72168b3e67c12d703e60a99bddde040b2d5e8c26ec2322159c8"
+    },
+    "provenance/Makefile": {
+      "bytes": 16373,
+      "sha256": "23c6647c6c93e9c14d774921aecd7e69af5d3ff8f136a8d332382df9d72881fd"
+    },
+    "cri/container-id": {
+      "bytes": 65,
+      "sha256": "8df238ec458fc3c91dafb5c174a79c396fea3ebadd971df890668989824999bf"
+    },
+    "cri/containerd.out": {
+      "bytes": 778707,
+      "sha256": "2e326e748b8f5adf1649fffc6bc4202659690d962d56966243aa3426826b046f"
+    },
+    "cri/cri-gateway.out": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "cri/cri-version.log": {
+      "bytes": 57,
+      "sha256": "0396ebc68fd80474f2984f1aac26d420cee38786a75e25c799b71cf34d5f62f1"
+    },
+    "cri/critest.log": {
+      "bytes": 7799,
+      "sha256": "1ee69688076751b8797fb61e54e3122fe906e815a1b6a7f1091feb442d50d404"
+    },
+    "cri/exit-status": {
+      "bytes": 38,
+      "sha256": "302d82554abaf5133b4d32e7a14a6ece841c79f90c45260c4b8e4979790a3839"
+    },
+    "cri/images.log": {
+      "bytes": 1810,
+      "sha256": "cd1e5f46e665ceb043c8fc372d66e13cd984652d2a926da701dc25cb3ea20b1f"
+    },
+    "cri/inputs.log": {
+      "bytes": 607,
+      "sha256": "e8cf8d099a82f4fc49997d98f92f8acda5dae1f32661a42e00babe4c83cee27d"
+    },
+    "cri/plugins.log": {
+      "bytes": 6603,
+      "sha256": "83a1fbfb495b9d4cc99414626ed6bcc31183c71b14545696a22da424907cedc6"
+    },
+    "cri/report.json": {
+      "bytes": 222450,
+      "sha256": "e77969f167719a6132328eccd534927e7c3260013969f139eb8306b5b0a32d24"
+    },
+    "cri/runtime-version.log": {
+      "bytes": 244,
+      "sha256": "032176692c7a25411a608415de6482dad03abd67691aec795e1666842c810cb4"
+    },
+    "cri/tasks-at-exit.log": {
+      "bytes": 26,
+      "sha256": "e534c26cb27299b3032819e28e6ad94f42dcd896fffbe8520146779346f9c11e"
+    }
+  },
+  "limits": [
+    "Installed-prefix rootfs and rebuilt native test rootfs remain distinct.",
+    "No binary/rootfs/backing payloads copied.",
+    "Focused CRI only; complete CRI compliance remains WIP and Kubernetes Pod restore is deferred to1.38. Final published/installed vHive remains separate."
+  ]
+}

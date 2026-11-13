@@ -1,0 +1,9 @@
+b33f46cd6d88834cf6a4f8d184f08f219809c636236bffd286d233a60602a2ba  /users/nehalem/fc-ctrd-mod/upstream-migration/stage3-runtime/bin/firecracker
+59cb04df4feb9696a75a78c0b15e54bf39c0f142649947e8fdb7948160b0a091  /users/nehalem/fc-ctrd-mod/upstream-migration/stage3-runtime/default-vmlinux.bin
+f95a395bf8245f6082b0b8ddd7f7e05eb94e4d02bdc6c388baba6d93771fda0a  /tmp/fc-volume-fixture.g0V838/init
+e0add2a1c04262c1f23b62484c259f03e9948a677fbb65e4f69e08c938715bd1  /tmp/fc-volume-fixture.g0V838/initrd.cpio
+0ea2b30ca5b51df8d739f4c68bca930a8b9af7253adcbc70ff904939b6310c96  /tmp/fc-volume-fixture.g0V838/native-volume.test
+=== RUN   TestVolumeCheckpointRealVM
+    checkpoint_vm_linux_test.go:160: source_pid=2427640 restored_pid=2427662 captured_counter=41 restored_counter=42 inode=2 shared=42 orphan=orphan42
+--- PASS: TestVolumeCheckpointRealVM (2.46s)
+PASS

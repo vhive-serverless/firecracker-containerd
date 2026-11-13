@@ -78,6 +78,22 @@ CNI race; its original full run remains failed. See the
 [Step 2 scope and receipt](modernization/step-2.md). This is not a clean full-run
 claim or final published/installed-vHive acceptance.
 
+## Step 3 native recapture and jailed slot ownership
+
+Native recapture translates output paths below an unjailed restored VM's live
+shim directory to `/.firecracker-restore-shared`; snapshot load inputs and
+captured disk paths keep their original identities. Jailed native mount setup
+can reuse only a slot registered by this launch's creator and pinned by its
+exact inode/path/drive identity with unchanged regular-file metadata. Foreign
+files, replacements, symlinks and extra hardlinks remain rejected. Pins are
+CLOEXEC and released during normal or failed-start jail cleanup; ordinary and
+legacy launches keep the existing exclusive-creation behavior.
+
+Exact `751c03c6f9a9` passed the [native/volume/focused-CRI procedure](modernization/step-3.md).
+The receipt covers its eight native leaves and separate volume/focused-CRI
+cases. Additional probes retain their own evidence. Full CRI/Kubernetes and final installed-consumer gates stay
+separate; the inherited CNI flake above remains unfixed.
+
 ## Storage and incremental features
 
 Step 1 preserves an immutable SquashFS guest base with a tmpfs guest overlay
@@ -92,6 +108,10 @@ checkpoint/restore components. Step 4 adds a private disk-backed guest upper,
 optional immutable pmem/DAX backing, and DAMON with free-page reporting. These
 features do not imply full CRI conformance or Kubernetes Pod restore. Consult
 the milestone documents for supported profiles, measured results and open gates.
+Exact Step 3 source `751c03c6f9a9` has
+[native/volume VM and focused CRI acceptance](modernization/step-3.md), including
+both native jail modes. Those results do not establish full CRI conformance;
+Kubernetes Pod checkpoint/restore remains deferred to the 1.38 interface work.
 
 The original [design alternatives](design-approaches.md) and
 [shim design](shim-design.md) explain historical decisions. Their proposals and
