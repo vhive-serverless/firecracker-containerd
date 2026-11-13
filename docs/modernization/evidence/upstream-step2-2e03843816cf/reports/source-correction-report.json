@@ -1,0 +1,79 @@
+{
+  "clone": "/home/jyp/project/fc-ctrd-mod/migration-upstream/stage2-same-id-runtime-fix",
+  "base_commit": "7386ab5c5e8c3519ad1698c27f548803e714e304",
+  "base_tree": "45c82884ea40ff22e5407da36911cf344d6f9e6c",
+  "commit": "2e03843816cf95d184ad4ad429adf6ea2ccc1412",
+  "tree": "76c862aa60162a0b510d7626d523f047709e48d9",
+  "original_fix": "53d6c9b09adf8f9f1642b3c8ec6c8230b93f1c15",
+  "attribution": "Clean cherry-pick with -x and original Migration Candidate DCO retained.",
+  "adaptation": "No manual adaptation required: added and removed lines are identical per path to original fix. Pre-existing context lacks later native branches. No native/CRI/PMEM/guest-upper/DAMON APIs or tests introduced.",
+  "added_removed_content_equal": true,
+  "stable_patch_id": "442cc4ba961d1f38cdc85ea4fb205edabcd0673d",
+  "original_stable_patch_id": "99d56cb86edc1b39b9c4a84eccdc5d96ded73227",
+  "patch_id_note": "Stable patch IDs differ because unchanged stage context differs; added/removed content proof is exact.",
+  "changed_paths": [
+    "runtime/drive_handler.go",
+    "runtime/noop_jailer.go",
+    "runtime/restore_mounts.go",
+    "runtime/restore_mounts_test.go",
+    "runtime/restore_namespace.go",
+    "runtime/restore_namespace_test.go",
+    "runtime/restore_stub_release_test.go",
+    "runtime/snapshot.go"
+  ],
+  "diff_stat": "runtime/drive_handler.go             | 11 +++-\n runtime/noop_jailer.go               | 68 ++++++++++++++++++++++---\n runtime/restore_mounts.go            | 32 +++++++++++-\n runtime/restore_mounts_test.go       | 30 +++++++++++\n runtime/restore_namespace.go         | 70 ++++++++++++++++----------\n runtime/restore_namespace_test.go    | 68 +++++++++++++++++++++----\n runtime/restore_stub_release_test.go | 97 ++++++++++++++++++++++++++++++++++++\n runtime/snapshot.go                  |  2 +-\n 8 files changed, 331 insertions(+), 47 deletions(-)",
+  "other_tree_entries_unchanged": true,
+  "clean": true,
+  "validation": {
+    "focused_race20": "PASS (9.076s)",
+    "root_short": "PASS, root-only tests intentionally disabled through existing DISABLE_ROOT_TESTS gate",
+    "runtime_lint": "PASS (0 issues)",
+    "commands": {
+      "race": "PATH=/tmp/sdk-upstream-toolchain/go/bin:$PATH CGO_ENABLED=1 /tmp/sdk-upstream-toolchain/go/bin/go test -mod=readonly -race ./runtime -run 'Test(SameIDRestore|RestoreAPIPath|RestoreNamespaceSharedInputs|NoopResetStubRecapture|RestoreMount|LegacyRestoreMountPlan|ContainerStubs|DriveMountStubs)' -count=20",
+      "root_short": "PATH=/tmp/sdk-upstream-toolchain/go/bin:$PATH DISABLE_ROOT_TESTS=1 CGO_ENABLED=0 /tmp/sdk-upstream-toolchain/go/bin/go test -mod=readonly -short -p=2 ./...",
+      "lint": "PATH=/tmp/sdk-upstream-toolchain/go/bin:$PATH /tmp/migration-golangci-lint run ./runtime/..."
+    },
+    "privileged_namespace": "NOT RUN on this Step2 target",
+    "VM_acceptance": "NOT RUN on this Step2 target; accepted7386 receipts remain tied to old accepted source."
+  },
+  "behavior": [
+    "Live host shim directory appears only at reserved VMM alias; API/vsock basename cwd retained using standard upstream overrides.",
+    "Captured same-ID drive paths remain exact private tmpfs mounts with independent backing.",
+    "Snapshot state/memory explicitly bind readonly; log/metrics outputs explicitly bind writable.",
+    "Dynamic disks under original host-shared paths receive explicit descriptor-backed mounts.",
+    "Legacy snapshot output API paths use live alias.",
+    "Noop release records absolute original stub path; existing private captured stub is reusable only after full generated slot marker plus padding verification; generic disk overlap rejection remains."
+  ],
+  "not_included": [
+    "native recapture commit cae35edc7ce6d39f628e0dd890da762f4f827a02",
+    "jailed owned-stub commit c825fbabeb557b3b4daf1aa4abd33b4a86350e51"
+  ],
+  "evidence": {
+    "added-removed-content-proof.json": {
+      "bytes": 44179,
+      "sha256": "48a127f9f1933333c943484c54eb14e3f7f070c8d565761a683e7bf6964fdf62"
+    },
+    "lint.log": {
+      "bytes": 10,
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47"
+    },
+    "race.log": {
+      "bytes": 74,
+      "sha256": "3ea3b1037af8fdd29bc186bcf50ff22832824ec7f08affbe86f8676e39394317"
+    },
+    "root-short.log": {
+      "bytes": 3651,
+      "sha256": "8691e9eda327ee1d4efbf695fe0da441378c511e66c05ac8e3db5c062d7d7b95"
+    },
+    "step2-common-alias.patch": {
+      "bytes": 32813,
+      "sha256": "c37acf8cc1fbf30439d25211321f1e220cc648b03bbe8d7a3c7ab3d51685a2ca"
+    }
+  },
+  "no_actions": [
+    "No remote or worker actions",
+    "No publication or accepted-source/ref modifications",
+    "No docs/history changes",
+    "No dependency/build configuration changes"
+  ]
+}

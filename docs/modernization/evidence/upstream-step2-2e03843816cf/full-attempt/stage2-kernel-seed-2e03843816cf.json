@@ -1,0 +1,18 @@
+{
+  "source_revision": "7386ab5c5e8c3519ad1698c27f548803e714e304",
+  "target_revision": "2e03843816cf95d184ad4ad429adf6ea2ccc1412",
+  "source_checkout": "/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-runtime",
+  "target_checkout": "/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix",
+  "files_sha256": {
+    "vmlinux-6.18.56-fcmod": "04907cab23ef65513c76deb5d805bf8df21b844542d04be0dcb852c0a4305a59",
+    "vmlinux-6.18.56-fcmod.config": "99d0950a178b92a1db3d5ee233dc6a320c8892334b99ba6fea11bd7be3745067"
+  },
+  "equal_tracked_inputs": [
+    "Makefile",
+    "tools/modernize/build-kernel.sh",
+    "tools/kernel-configs/microvm-kernel-x86_64-6.18.config"
+  ],
+  "kernel_source_revision": "7483450dec64b4f923037de31d8c28298a7c3359",
+  "make_dry_run": "make: Nothing to be done for 'kernel'.\ninstall -m 644 bin/vmlinux-6.18.56-fcmod default-vmlinux.bin\n",
+  "scope": "Reused each stage own previously accepted kernel/config; no new kernel compilation claimed; runtime/guest image builds and acceptance remain required."
+}

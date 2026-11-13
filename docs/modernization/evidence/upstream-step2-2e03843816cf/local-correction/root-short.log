@@ -1,0 +1,40 @@
+ok  	github.com/firecracker-microvm/firecracker-containerd/agent	0.038s
+?   	github.com/firecracker-microvm/firecracker-containerd/client	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-containerd/config	0.006s
+ok  	github.com/firecracker-microvm/firecracker-containerd/eventbridge	0.028s
+?   	github.com/firecracker-microvm/firecracker-containerd/examples	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/firecracker-control	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/firecracker-control/client	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-containerd/firecracker-control/cmd/containerd	0.027s [no tests to run]
+ok  	github.com/firecracker-microvm/firecracker-containerd/internal	0.004s
+?   	github.com/firecracker-microvm/firecracker-containerd/internal/bundle	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/internal/cmd/test-bridged-tap	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-containerd/internal/debug	0.003s
+?   	github.com/firecracker-microvm/firecracker-containerd/internal/event	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/internal/integtest	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/internal/shim	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-containerd/internal/vm	1.515s
+?   	github.com/firecracker-microvm/firecracker-containerd/proto	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/proto/service/drivemount/ttrpc	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/proto/service/fccontrol/ttrpc	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/proto/service/ioproxy/ttrpc	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	0.874s
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime/cpuset	0.003s
+?   	github.com/firecracker-microvm/firecracker-containerd/runtime/firecrackeroci	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/runtime/vm	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter	0.008s
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/app	0.275s
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/config	0.002s
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux	0.007s
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/cache	0.087s
+?   	github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/internal	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/metrics	0.004s
+?   	github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/metrics/discovery	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/proxy	0.004s
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/proxy/address	0.002s
+?   	github.com/firecracker-microvm/firecracker-containerd/snapshotter/internal	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/snapshotter/internal/integtest/stargz/fs/config	[no test files]
+?   	github.com/firecracker-microvm/firecracker-containerd/snapshotter/internal/integtest/stargz/fs/source	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/internal/mount	0.002s
+ok  	github.com/firecracker-microvm/firecracker-containerd/volume	0.012s
+ok  	github.com/firecracker-microvm/firecracker-containerd/volume/cmd/volume-init	0.007s

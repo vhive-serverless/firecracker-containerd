@@ -1,0 +1,463 @@
+{
+  "runtime_source": "2e03843816cf95d184ad4ad429adf6ea2ccc1412",
+  "runtime_tree": "76c862aa60162a0b510d7626d523f047709e48d9",
+  "launcher_pid_absent": true,
+  "open_evidence_writers": [],
+  "source_status_porcelain": "",
+  "phases": {
+    "build": "0",
+    "install": "0",
+    "test-images": "0",
+    "vhive": "0",
+    "acceptance": "2"
+  },
+  "files": {
+    "stage2-acceptance-2e03843816cf.log": {
+      "remote": "/users/nehalem/fc-ctrd-mod/upstream-migration/evidence/stage2-acceptance-2e03843816cf.log",
+      "bytes": 195626,
+      "sha256": "62c89484ef518584cf7e188c5d02b94b6417c68f8c4b6a954f79b31f82dd5561"
+    },
+    "stage2-build-2e03843816cf.log": {
+      "remote": "/users/nehalem/fc-ctrd-mod/upstream-migration/evidence/stage2-build-2e03843816cf.log",
+      "bytes": 105863,
+      "sha256": "69c07055f5ccd1647936f492c8571c71781e0cf220e53497c3b0ac7c6770479a"
+    },
+    "stage2-command-status-2e03843816cf.tsv": {
+      "remote": "/users/nehalem/fc-ctrd-mod/upstream-migration/evidence/stage2-command-status-2e03843816cf.tsv",
+      "bytes": 68,
+      "sha256": "26ee246b2db17ad9d047c5ec113fcd0c733399468bedde61e79ae880e98e7775"
+    },
+    "stage2-install-2e03843816cf.log": {
+      "remote": "/users/nehalem/fc-ctrd-mod/upstream-migration/evidence/stage2-install-2e03843816cf.log",
+      "bytes": 9398,
+      "sha256": "3551347ea8781dceba96ab6821e9c6728303db845fdfe95a14a67667abf98f2e"
+    },
+    "stage2-kernel-seed-2e03843816cf.json": {
+      "remote": "/users/nehalem/fc-ctrd-mod/upstream-migration/evidence/stage2-kernel-seed-2e03843816cf.json",
+      "bytes": 1050,
+      "sha256": "d8fbbab0cd1bcf36bdd8d3b2d7518486f78157ee5e90ea5b62d996b32315d9f8"
+    },
+    "stage2-launcher-2e03843816cf.sh": {
+      "remote": "/users/nehalem/fc-ctrd-mod/upstream-migration/evidence/stage2-launcher-2e03843816cf.sh",
+      "bytes": 2123,
+      "sha256": "631c564ac65a1670ddf6d0e2c9c4bfcfd20eb572c75bc2fb4ec9859088b3ce1f"
+    },
+    "stage2-test-images-2e03843816cf.log": {
+      "remote": "/users/nehalem/fc-ctrd-mod/upstream-migration/evidence/stage2-test-images-2e03843816cf.log",
+      "bytes": 109926,
+      "sha256": "8435dd8f2d084d7219605a29dfd74ec7b0d763c4c19933e2610c9c7b9ad462c2"
+    },
+    "stage2-tested-source-2e03843816cf.txt": {
+      "remote": "/users/nehalem/fc-ctrd-mod/upstream-migration/evidence/stage2-tested-source-2e03843816cf.txt",
+      "bytes": 82,
+      "sha256": "16beffeaefc6a521370ac4b5fb9426309be7edb33cadc44c370e31d138cceccc"
+    },
+    "stage2-vhive-2e03843816cf.log": {
+      "remote": "/users/nehalem/fc-ctrd-mod/upstream-migration/evidence/stage2-vhive-2e03843816cf.log",
+      "bytes": 7719,
+      "sha256": "c7481f88fcb188b1086ac20e8b35b177b9683793facfbf4970607896cb95ec42"
+    },
+    "build/agent-build-info": {
+      "remote": "/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/bin/receipts/build/agent-build-info",
+      "bytes": 6169,
+      "sha256": "05914d64a45ee10e717a698b7808c02d13575e7c27548612bd3d985136135483"
+    },
+    "build/binaries.sha256": {
+      "remote": "/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/bin/receipts/build/binaries.sha256",
+      "bytes": 881,
+      "sha256": "034666f096a5da9dd6435445c0f53e5e91611817d6d419fe6380788a5245856c"
+    },
+    "build/firecracker-release.txt": {
+      "remote": "/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/bin/receipts/build/firecracker-release.txt",
+      "bytes": 636,
+      "sha256": "8ba6a59d088e7b10c3f385e7c910de87130a213d508abfd46d7ee5d8a4b219a5"
+    },
+    "build/go-modules.json": {
+      "remote": "/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/bin/receipts/build/go-modules.json",
+      "bytes": 120540,
+      "sha256": "67e373be041d72c2860dace0a3ae57ebad68fece9c38dc74bd62001c9c345ae8"
+    },
+    "build/runtime-revision": {
+      "remote": "/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/bin/receipts/build/runtime-revision",
+      "bytes": 41,
+      "sha256": "fa791564cfe728962762e826a15ee1d63c08142d2a1d5fde54f104beb16c5fa8"
+    },
+    "build/submodules": {
+      "remote": "/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/bin/receipts/build/submodules",
+      "bytes": 231,
+      "sha256": "be508e11a4bd2ab77a9b89c3c69e1043e9f3823b9e5474cd4d12e634557e7c80"
+    },
+    "provenance/versions.json": {
+      "remote": "/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/docs/modernization/versions.json",
+      "bytes": 13190,
+      "sha256": "220b0a75a2f9740cfa5ea2fc24b59846b7077bf93afa6a7b617ff3343d7576c4"
+    },
+    "provenance/kernel.config": {
+      "remote": "/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/bin/vmlinux-6.18.56-fcmod.config",
+      "bytes": 98292,
+      "sha256": "99d0950a178b92a1db3d5ee233dc6a320c8892334b99ba6fea11bd7be3745067"
+    },
+    "provenance/tracked-kernel.config": {
+      "remote": "/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/tools/kernel-configs/microvm-kernel-x86_64-6.18.config",
+      "bytes": 97960,
+      "sha256": "8fa45f9c6d91f1c91e16393a921abeec74adf94a245849c8f54ba04545264e92"
+    },
+    "provenance/build-kernel.sh": {
+      "remote": "/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/tools/modernize/build-kernel.sh",
+      "bytes": 1354,
+      "sha256": "f75d4d4af61da72168b3e67c12d703e60a99bddde040b2d5e8c26ec2322159c8"
+    },
+    "provenance/Makefile": {
+      "remote": "/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/Makefile",
+      "bytes": 15978,
+      "sha256": "b22eca5ed9417c68e245e57875f786641f3a65ea01346a47660c5ff33a6263bb"
+    },
+    "vhive/acceptance.log": {
+      "remote": "/users/nehalem/fc-ctrd-mod/evidence/vhive-2e03843816cf.g3Hbja9A/acceptance.log",
+      "bytes": 3783,
+      "sha256": "2b243d5ee405b10f635f9932bfab2a8741275e478647c519cfcd96580a43e1b8"
+    },
+    "vhive/binaries.sha256": {
+      "remote": "/users/nehalem/fc-ctrd-mod/evidence/vhive-2e03843816cf.g3Hbja9A/binaries.sha256",
+      "bytes": 542,
+      "sha256": "29b8828d9f8b373ba6bf6612f8a17974188bf7c5b50a9de173c1b5b6102ba98c"
+    },
+    "vhive/containerd.out": {
+      "remote": "/users/nehalem/fc-ctrd-mod/evidence/vhive-2e03843816cf.g3Hbja9A/containerd.out",
+      "bytes": 222170,
+      "sha256": "c0fe8d5f88a245341d13907340a29fe4bf6996d45205aeed5195fb0c217647c3"
+    },
+    "vhive/demux-snapshotter.out": {
+      "remote": "/users/nehalem/fc-ctrd-mod/evidence/vhive-2e03843816cf.g3Hbja9A/demux-snapshotter.out",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "vhive/http-address-resolver.out": {
+      "remote": "/users/nehalem/fc-ctrd-mod/evidence/vhive-2e03843816cf.g3Hbja9A/http-address-resolver.out",
+      "bytes": 81,
+      "sha256": "42b5925bdb87d6b33325d7eee76395ffcf0a4851549ce9c26fb531433e9afc19"
+    },
+    "vhive/inputs": {
+      "remote": "/users/nehalem/fc-ctrd-mod/evidence/vhive-2e03843816cf.g3Hbja9A/inputs",
+      "bytes": 484,
+      "sha256": "d3adf77f883e36729ae1c761107bcfa9b74029b991dbdfb46ff0306ffd8b9055"
+    },
+    "vhive/modules.json": {
+      "remote": "/users/nehalem/fc-ctrd-mod/evidence/vhive-2e03843816cf.g3Hbja9A/modules.json",
+      "bytes": 99237,
+      "sha256": "4069b5e383eb50bfe6d0c805f44da418c693b4fd187e16029e01f7360c5938b0"
+    },
+    "vhive/test-buildinfo.txt": {
+      "remote": "/users/nehalem/fc-ctrd-mod/evidence/vhive-2e03843816cf.g3Hbja9A/test-buildinfo.txt",
+      "bytes": 289,
+      "sha256": "27e526fb97d891510e983512c1eebf3e442b8701d14ebd9529ab0c1efed1ea2f"
+    },
+    "vhive/vhive-runtime-version": {
+      "remote": "/users/nehalem/fc-ctrd-mod/evidence/vhive-2e03843816cf.g3Hbja9A/vhive-runtime-version",
+      "bytes": 244,
+      "sha256": "46241cd66810f4fa239eea60c02085b18ae7d807f06115aabc36a83bb3c299c9"
+    },
+    "vhive/vhive-tests.log": {
+      "remote": "/users/nehalem/fc-ctrd-mod/evidence/vhive-2e03843816cf.g3Hbja9A/vhive-tests.log",
+      "bytes": 3504,
+      "sha256": "78424663d509297167e36867c8dcc1b1ad1a871e8b220aa464ce096a567e01ef"
+    }
+  },
+  "vhive_directory": "/users/nehalem/fc-ctrd-mod/evidence/vhive-2e03843816cf.g3Hbja9A",
+  "images": {
+    "stack": {
+      "tag": "localhost/firecracker-containerd-test:2e03843816cf",
+      "inspect": [
+        {
+          "Id": "sha256:97f3745973e8856190db513d2d1def3a84a603eb3337bc4ccac655e554b27117",
+          "RepoTags": [
+            "localhost/firecracker-containerd-test:2e03843816cf"
+          ],
+          "RepoDigests": [
+            "localhost/firecracker-containerd-test@sha256:97f3745973e8856190db513d2d1def3a84a603eb3337bc4ccac655e554b27117"
+          ],
+          "Comment": "buildkit.dockerfile.v0",
+          "Created": "2026-11-12T17:37:52.494886943-07:00",
+          "Config": {
+            "Env": [
+              "PATH=/bin:/usr/bin:/usr/local/bin:/sbin:/usr/sbin:/usr/local/sbin:/usr/local/go/bin",
+              "GOLANG_VERSION=1.26.11",
+              "GOTOOLCHAIN=local",
+              "GOPATH=/go",
+              "INSTALLROOT=/usr/local",
+              "DEBIAN_FRONTEND=noninteractive",
+              "GOCACHE=/go/build-cache",
+              "FICD_LOG_DIR=/var/log/firecracker-containerd-test",
+              "FICD_CONTAINERD_OUTFILE=/var/log/firecracker-containerd-test/containerd.out",
+              "CTRD_VERSION=2.3.7",
+              "CRITEST_VERSION=1.37.0"
+            ],
+            "Entrypoint": [
+              "/entrypoint"
+            ],
+            "Cmd": [
+              "exec /bin/bash"
+            ],
+            "WorkingDir": "/go",
+            "ArgsEscaped": true
+          },
+          "Architecture": "amd64",
+          "Os": "linux",
+          "Size": 1013438023,
+          "RootFS": {
+            "Type": "layers",
+            "Layers": [
+              "sha256:05f9043663c0a4a3f7a75f1fe7cf08b5a69419f2e31425412598b5443e1887bc",
+              "sha256:74a1cce49db916676932c971e576f97b650bfdb55e355ee56d3b022d4c01ad1f",
+              "sha256:131853779658ab455b50696ca52922ea83febf8922703598ea672657331befbc",
+              "sha256:3b5af6bfa944fb0b89d547110ff58570f406e6d6c7b1d00d89865840f5dac7fb",
+              "sha256:b9757dc9f68b118b80b08e11b4b5b47178d7ba07e555dc4b78ea39dd433a2a3d",
+              "sha256:f1411b3c21558edd45e2f5260540a5a441883787796e8226961aa5149d4fabe7",
+              "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+              "sha256:7fa0fe72d5fd1423b8431fb5f8e6025c7ba0a5de4ce15e1995af773ed447a742",
+              "sha256:795e559326d6796fb74205cecbf67fdbe9a1d24ced5734c3d64000a19bd7c387",
+              "sha256:d1f75bfacbe765bca756465276249d0d0e8ceb6d88bbf1e13cb9ed38b04af0be",
+              "sha256:857253676d060f4ca91fcbff67bcee837334c27aed66e79c0af67de8b961f712",
+              "sha256:906fb47d6f88da68e2977893ce8fb24f8fde83163da85ac2b690f5a127157774",
+              "sha256:e98f8ad013d72b5f8a91d4005a068798de33988d72251ca259ce8b1e4ccfbdf3",
+              "sha256:f6f16ac120ec4038feebb387ab6f68c2feb9c15ed38afe65280d88c43f7c44e7",
+              "sha256:991123313e3e1d7cb2e5007a3d8515ea1b70d4257f4cfa2a8a14acddc3db9277",
+              "sha256:29fc71acd362f53272d6deaa2196c20eb858597fc59c690e5492d332a79bbb43",
+              "sha256:3667225bca494ed01f3df71be043a2c9561d88b0bd7aac90dd03fb83d8df81e7",
+              "sha256:583d6b5bdb0f879b174154a3d3a0a78e36014881e70d6fe359e3637ce9e4122f",
+              "sha256:e27f49a9c1bad7e35754e426db3f13c54de56bb646451a3abaab37bc21abca77",
+              "sha256:7c293548e014bee7da541706deec93d8a692919d6e86c5dac58f6adfe277fa8b"
+            ]
+          },
+          "Metadata": {
+            "LastTagTime": "2026-11-13T00:38:09.489849378Z"
+          },
+          "Descriptor": {
+            "mediaType": "application/vnd.oci.image.index.v1+json",
+            "digest": "sha256:97f3745973e8856190db513d2d1def3a84a603eb3337bc4ccac655e554b27117",
+            "size": 856
+          }
+        }
+      ],
+      "error": null
+    },
+    "provisional_vhive": {
+      "tag": "localhost/fcmod-vhive-test:2e03843816cf",
+      "inspect": [
+        {
+          "Id": "sha256:5314abcb909df65f704a9912383875617a89fba8d54077c3438bd689240f887b",
+          "RepoTags": [
+            "localhost/fcmod-vhive-test:2e03843816cf"
+          ],
+          "RepoDigests": [
+            "localhost/fcmod-vhive-test@sha256:5314abcb909df65f704a9912383875617a89fba8d54077c3438bd689240f887b"
+          ],
+          "Comment": "buildkit.dockerfile.v0",
+          "Created": "2026-11-12T17:34:04.113091288-07:00",
+          "Config": {
+            "Env": [
+              "PATH=/bin:/usr/bin:/usr/local/bin:/sbin:/usr/sbin:/usr/local/sbin:/usr/local/go/bin",
+              "GOLANG_VERSION=1.26.11",
+              "GOTOOLCHAIN=local",
+              "GOPATH=/go",
+              "INSTALLROOT=/usr/local",
+              "DEBIAN_FRONTEND=noninteractive",
+              "GOCACHE=/go/build-cache",
+              "FICD_LOG_DIR=/var/log/firecracker-containerd-test",
+              "FICD_CONTAINERD_OUTFILE=/var/log/firecracker-containerd-test/containerd.out",
+              "CTRD_VERSION=2.3.7",
+              "CRITEST_VERSION=1.37.0"
+            ],
+            "Entrypoint": [
+              "/entrypoint"
+            ],
+            "Cmd": [
+              "exec /bin/bash"
+            ],
+            "WorkingDir": "/go",
+            "ArgsEscaped": true
+          },
+          "Architecture": "amd64",
+          "Os": "linux",
+          "Size": 1029734719,
+          "RootFS": {
+            "Type": "layers",
+            "Layers": [
+              "sha256:05f9043663c0a4a3f7a75f1fe7cf08b5a69419f2e31425412598b5443e1887bc",
+              "sha256:74a1cce49db916676932c971e576f97b650bfdb55e355ee56d3b022d4c01ad1f",
+              "sha256:131853779658ab455b50696ca52922ea83febf8922703598ea672657331befbc",
+              "sha256:3b5af6bfa944fb0b89d547110ff58570f406e6d6c7b1d00d89865840f5dac7fb",
+              "sha256:b9757dc9f68b118b80b08e11b4b5b47178d7ba07e555dc4b78ea39dd433a2a3d",
+              "sha256:f1411b3c21558edd45e2f5260540a5a441883787796e8226961aa5149d4fabe7",
+              "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+              "sha256:7fa0fe72d5fd1423b8431fb5f8e6025c7ba0a5de4ce15e1995af773ed447a742",
+              "sha256:795e559326d6796fb74205cecbf67fdbe9a1d24ced5734c3d64000a19bd7c387",
+              "sha256:d1f75bfacbe765bca756465276249d0d0e8ceb6d88bbf1e13cb9ed38b04af0be",
+              "sha256:857253676d060f4ca91fcbff67bcee837334c27aed66e79c0af67de8b961f712",
+              "sha256:906fb47d6f88da68e2977893ce8fb24f8fde83163da85ac2b690f5a127157774",
+              "sha256:e98f8ad013d72b5f8a91d4005a068798de33988d72251ca259ce8b1e4ccfbdf3",
+              "sha256:f6f16ac120ec4038feebb387ab6f68c2feb9c15ed38afe65280d88c43f7c44e7",
+              "sha256:cd06dad07a13f1aef9c9fbed0f830f776acfc454783e50ec7a804ed19f7a77f1",
+              "sha256:d7519f4c1b32ecf32e240bf5ffd6e996a42c5ef35b98b5cf68c8f9c1176412d5",
+              "sha256:2a78fcff12012f8bcbf06cfb59901066f3d159dd492cde04710ed8e267f4b1c4",
+              "sha256:ea9ed7a6ff8998f22318dc05661d836e2728d76b7baf2a6092ae7f3bcb8931d8",
+              "sha256:7ca2c9010ac1b385c21e0a4ff4171bac356eac77218345afc7bf1446ce00d653",
+              "sha256:7c293548e014bee7da541706deec93d8a692919d6e86c5dac58f6adfe277fa8b",
+              "sha256:f1a5a06a7a0f64e3400cda0cdf31da18e7cc14f476bf7e07cdfc64fcc53740bf",
+              "sha256:6584a09c2cf6bdcfef7f88cc06c2169669520f2412167c73e1d5d1886d1e1266",
+              "sha256:a834f7b118d25838548276a94110b0e6c6513ffab3f6862cea49d6e7dff351bf"
+            ]
+          },
+          "Metadata": {
+            "LastTagTime": "2026-11-13T00:34:05.391706712Z"
+          },
+          "Descriptor": {
+            "mediaType": "application/vnd.oci.image.index.v1+json",
+            "digest": "sha256:5314abcb909df65f704a9912383875617a89fba8d54077c3438bd689240f887b",
+            "size": 856
+          }
+        }
+      ],
+      "error": null
+    }
+  },
+  "acceptance_image_receipt_id": null,
+  "installed_artifacts": {
+    "bin/firecracker-containerd": {
+      "path": "/users/nehalem/fc-ctrd-mod/install/2e03843816cf/bin/firecracker-containerd",
+      "sha256": "d85a16c8b20f2c477eeaad4cff661b7fb1e3b17b234bf0e8eb2ce9d5bb5be90e",
+      "error": null
+    },
+    "bin/containerd-shim-aws-firecracker": {
+      "path": "/users/nehalem/fc-ctrd-mod/install/2e03843816cf/bin/containerd-shim-aws-firecracker",
+      "sha256": "3ddbe8a651d93f312aa4c408e7745a7cb243db7397f95433dbc055f7752b92a3",
+      "error": null
+    },
+    "bin/firecracker": {
+      "path": "/users/nehalem/fc-ctrd-mod/install/2e03843816cf/bin/firecracker",
+      "sha256": "b33f46cd6d88834cf6a4f8d184f08f219809c636236bffd286d233a60602a2ba",
+      "error": null
+    },
+    "bin/jailer": {
+      "path": "/users/nehalem/fc-ctrd-mod/install/2e03843816cf/bin/jailer",
+      "sha256": "ddadbaa15b5c942271a83b7040ca7259c8ccf92a9e08d44cce0b86fa407ba460",
+      "error": null
+    },
+    "bin/runc": {
+      "path": "/users/nehalem/fc-ctrd-mod/install/2e03843816cf/bin/runc",
+      "sha256": "9cd4a021610365032b0e13fa37e67b751ccc8205c5b14d313af28cbe6e219220",
+      "error": null
+    },
+    "share/runtime/default-vmlinux.bin": {
+      "path": "/users/nehalem/fc-ctrd-mod/install/2e03843816cf/share/runtime/default-vmlinux.bin",
+      "sha256": "04907cab23ef65513c76deb5d805bf8df21b844542d04be0dcb852c0a4305a59",
+      "error": null
+    },
+    "share/runtime/default-rootfs.img": {
+      "path": "/users/nehalem/fc-ctrd-mod/install/2e03843816cf/share/runtime/default-rootfs.img",
+      "sha256": "e4ab2bd242a1d3ce5157c99d3c9c1cf38228263c0b8c35a37a6081ffa17d6ca4",
+      "error": null
+    }
+  },
+  "actual_source_artifacts": {
+    "bin/vmlinux-6.18.56-fcmod": {
+      "bytes": 27747912,
+      "sha256": "04907cab23ef65513c76deb5d805bf8df21b844542d04be0dcb852c0a4305a59"
+    },
+    "bin/vmlinux-6.18.56-fcmod.config": {
+      "bytes": 98292,
+      "sha256": "99d0950a178b92a1db3d5ee233dc6a320c8892334b99ba6fea11bd7be3745067"
+    },
+    "default-vmlinux.bin": {
+      "bytes": 27747912,
+      "sha256": "04907cab23ef65513c76deb5d805bf8df21b844542d04be0dcb852c0a4305a59"
+    },
+    "agent/agent": {
+      "bytes": 18337954,
+      "sha256": "ce2e7e5136c9135f25b4bf8f0c7ab671de10be81fe6ee6cdb346f2a8e199ee3a"
+    },
+    "runtime/containerd-shim-aws-firecracker": {
+      "bytes": 32399023,
+      "sha256": "3ddbe8a651d93f312aa4c408e7745a7cb243db7397f95433dbc055f7752b92a3"
+    },
+    "firecracker-control/cmd/containerd/firecracker-containerd": {
+      "bytes": 60095280,
+      "sha256": "d85a16c8b20f2c477eeaad4cff661b7fb1e3b17b234bf0e8eb2ce9d5bb5be90e"
+    },
+    "bin/firecracker": {
+      "bytes": 3921872,
+      "sha256": "b33f46cd6d88834cf6a4f8d184f08f219809c636236bffd286d233a60602a2ba"
+    },
+    "bin/jailer": {
+      "bytes": 2243040,
+      "sha256": "ddadbaa15b5c942271a83b7040ca7259c8ccf92a9e08d44cce0b86fa407ba460"
+    },
+    "_submodules/runc/runc": {
+      "bytes": 17001128,
+      "sha256": "9cd4a021610365032b0e13fa37e67b751ccc8205c5b14d313af28cbe6e219220"
+    },
+    "tools/image-builder/rootfs.img": {
+      "bytes": 71938048,
+      "sha256": "5454922651a3fd2507f15b7e079e5d34288141189cf9a43ab70c3896cfebe4d1"
+    },
+    "tools/image-builder/rootfs-stargz.img": {
+      "bytes": 103960576,
+      "sha256": "676fda76417049f43297281c9cabea34169d9f83dc8a9ce1afad0cee40eff770"
+    }
+  },
+  "kernel_tracked_inputs": {
+    "Makefile": {
+      "accepted_blob": "e2560f1421ed2c6b26472fe665cf878c76e0804c",
+      "target_blob": "e2560f1421ed2c6b26472fe665cf878c76e0804c",
+      "equal": true
+    },
+    "tools/modernize/build-kernel.sh": {
+      "accepted_blob": "56a74a1ac1a02c2f87231e31fe09761603f853bc",
+      "target_blob": "56a74a1ac1a02c2f87231e31fe09761603f853bc",
+      "equal": true
+    },
+    "tools/kernel-configs/microvm-kernel-x86_64-6.18.config": {
+      "accepted_blob": "f2f75b5e5c8173d659483eab95a1382529617c40",
+      "target_blob": "f2f75b5e5c8173d659483eab95a1382529617c40",
+      "equal": true
+    }
+  },
+  "cleanup": {
+    "owned_containers": [],
+    "owned_pool_mappings": [],
+    "owned_loops": [],
+    "owned_backing_files": [],
+    "owned_mounts": [],
+    "sdk_owned_cgroup": {
+      "exists": false,
+      "processes": []
+    },
+    "running_containers": [
+      {
+        "Command": "\"/usr/local/bin/entrypoint /sbin/init\"",
+        "CreatedAt": "2026-11-10 19:51:22 -0700 MST",
+        "ID": "1715f4a4061173a6eb936d419fbac8e1055a0a8042a6a9543670ee21f7f710d5",
+        "Image": "localhost/fcmod-kubernetes-node:v1.37.2",
+        "Labels": "io.x-k8s.kind.cluster=fcmod-upstream-137,io.x-k8s.kind.role=control-plane",
+        "LocalVolumes": "1",
+        "Mounts": "/lib/modules,b6eb13a16abaf3c65fa814e43c0940d7605a9c6d27e3dcb377c552423007e801",
+        "Names": "fcmod-upstream-137-control-plane",
+        "Networks": "kind",
+        "Platform": {
+          "architecture": "amd64",
+          "os": "linux"
+        },
+        "Ports": "127.0.0.1:37231->6443/tcp",
+        "RunningFor": "46 hours ago",
+        "Size": "3.93MB (virtual 962MB)",
+        "State": "running",
+        "Status": "Up 46 hours"
+      }
+    ]
+  },
+  "limits": [
+    "Installed-prefix rootfs, provisional vHive base image and rebuilt full-stack test rootfs remain distinct.",
+    "No binary/rootfs/backing payloads copied.",
+    "Final published/installed vHive consumer acceptance remains separate."
+  ]
+}

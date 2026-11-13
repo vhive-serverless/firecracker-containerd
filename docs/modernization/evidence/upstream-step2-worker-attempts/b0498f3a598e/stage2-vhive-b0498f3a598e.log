@@ -1,0 +1,93 @@
+VHIVE_LOGS=/users/nehalem/fc-ctrd-mod/evidence/vhive-b0498f3a598e.Q5DGOdlz
+From /users/nehalem/fc-ctrd-mod/upstream-migration/vhive-source
+ * branch            89593103ac667cc096f89770c94a77b2b93c3a7d -> FETCH_HEAD
+HEAD is now at 8959310 Track guest and container PIDs separately in snapshot continuity test
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 222B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for localhost/firecracker-containerd-test:b0498f3a598e
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/3] FROM localhost/firecracker-containerd-test:b0498f3a598e@sha256:a54e724aeb08d7d5759f561206abd1b223ed28d5078dd74184d5916a3ee70068
+#4 resolve localhost/firecracker-containerd-test:b0498f3a598e@sha256:a54e724aeb08d7d5759f561206abd1b223ed28d5078dd74184d5916a3ee70068 0.0s done
+#4 DONE 0.2s
+
+#5 [internal] load build context
+#5 transferring context: 32.29MB 0.2s done
+#5 DONE 0.2s
+
+#6 [2/3] COPY vhive-acceptance.test /usr/local/bin/
+#6 DONE 0.2s
+
+#7 [3/3] COPY run-in-container.sh /usr/local/bin/run-vhive-acceptance
+#7 DONE 0.0s
+
+#8 exporting to image
+#8 exporting layers
+#8 exporting layers 1.4s done
+#8 exporting manifest sha256:e9ff41947765dc1b3fb1fcc1a5f965cd1d9dba7d2ae0c44ffd413e1218209c83
+#8 exporting manifest sha256:e9ff41947765dc1b3fb1fcc1a5f965cd1d9dba7d2ae0c44ffd413e1218209c83 done
+#8 exporting config sha256:2c1e96853172bfea06a91afc05a72162136c9cdce5ba775d2e84d9190ca15302 done
+#8 exporting attestation manifest sha256:f48347e80c32a4fd2b6827f71f4a270b26ccce63ce679086e6775881d8677aa6 done
+#8 exporting manifest list sha256:e67591097cd4932f3572ca6a34ea071172436ed8f6a05bf113f79d5d0f3ead17 done
+#8 naming to localhost/fcmod-vhive-test:b0498f3a598e done
+#8 unpacking to localhost/fcmod-vhive-test:b0498f3a598e
+#8 unpacking to localhost/fcmod-vhive-test:b0498f3a598e 0.4s done
+#8 DONE 1.8s
+Client:
+  Version:  2.3.7+unknown
+  Revision: b0498f3a598e06fa54f7bf0089cb8c7e6b01a7c1
+  Go version: go1.26.11
+
+Server:
+  Version:  2.3.7+unknown
+  Revision: b0498f3a598e06fa54f7bf0089cb8c7e6b01a7c1
+  UUID: 8219645e-a8f5-4d24-931e-e2b32ac73980
+=== RUN   TestPauseSnapResume
+time="2026-11-12T19:52:09.978095204Z" level=warning msg="Failed to Fetch k8s dns clusterIP exec: \"kubectl\": executable file not found in $PATH\n\n"
+time="2026-11-12T19:52:09.978172229Z" level=warning msg="Using google dns 8.8.8.8\n"
+time="2026-11-12T19:52:09.978301974Z" level=warning msg="Failed to fetch host net interfaces exec: \"route\": executable file not found in $PATH\n\n"
+time="2026-11-12T19:52:09.978311111Z" level=info msg="exec: \"route\": executable file not found in $PATH"
+time="2026-11-12T19:52:09.978922933Z" level=info msg="Creating containerd client"
+time="2026-11-12T19:52:09.979027179Z" level=info msg="Created containerd client"
+time="2026-11-12T19:52:09.979036567Z" level=info msg="Creating firecracker client"
+time="2026-11-12T19:52:09.979170269Z" level=info msg="Created firecracker client"
+time="2026-11-12T19:52:09.979190817Z" level=info msg="Creating image manager"
+--- FAIL: TestPauseSnapResume (0.00s)
+panic: runtime error: invalid memory address or nil pointer dereference [recovered, repanicked]
+[signal SIGSEGV: segmentation violation code=0x1 addr=0x0 pc=0xd57a60]
+
+goroutine 8 [running]:
+testing.tRunner.func1.2({0xf33160, 0x192e310})
+	testing/testing.go:1974 +0x232
+testing.tRunner.func1()
+	testing/testing.go:1977 +0x349
+panic({0xf33160?, 0x192e310?})
+	runtime/panic.go:860 +0x13a
+internal/sync.(*Mutex).Lock(...)
+	internal/sync/mutex.go:63
+sync.(*Mutex).Lock(...)
+	sync/mutex.go:46
+github.com/vhive-serverless/vhive/networking.(*NetworkManager).allocNetConfig(0x0, {0x1102a08, 0x1})
+	github.com/vhive-serverless/vhive/networking@v0.0.0-00010101000000-000000000000/networkManager.go:148 +0x180
+github.com/vhive-serverless/vhive/networking.(*NetworkManager).CreateNetwork(0x0, {0x1102a08, 0x1})
+	github.com/vhive-serverless/vhive/networking@v0.0.0-00010101000000-000000000000/networkManager.go:224 +0x16b
+github.com/vhive-serverless/vhive/misc.(*VMPool).Allocate(0xe3a3fcee880, {0x1102a08, 0x1})
+	github.com/vhive-serverless/vhive/misc/vm_pool.go:58 +0x218
+github.com/vhive-serverless/vhive/ctriface.(*Orchestrator).StartVMWithEnvironment(0xe3a3fb2d2c0, {0x1119700, 0xe3a3fcf0070}, {0x1102a08, 0x1}, {0x7ffe647d8c9f, 0x63}, {0x19e5be0, 0x0, 0x0})
+	github.com/vhive-serverless/vhive/ctriface/iface.go:93 +0x2a5
+github.com/vhive-serverless/vhive/ctriface.(*Orchestrator).StartVM(...)
+	github.com/vhive-serverless/vhive/ctriface/iface.go:81
+github.com/vhive-serverless/vhive/ctriface.TestPauseSnapResume(0xe3a3fb72908)
+	github.com/vhive-serverless/vhive/ctriface/iface_test.go:262 +0x21a
+testing.tRunner(0xe3a3fb72908, 0x10ff158)
+	testing/testing.go:2036 +0xea
+created by testing.(*T).Run in goroutine 1
+	testing/testing.go:2101 +0x4c5

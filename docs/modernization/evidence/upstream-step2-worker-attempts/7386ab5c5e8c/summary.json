@@ -1,0 +1,80 @@
+{
+  "runtime_revision": "7386ab5c5e8c3519ad1698c27f548803e714e304",
+  "runtime_tree": "45c82884ea40ff22e5407da36911cf344d6f9e6c",
+  "purpose": "provisional local-module vHive acceptance after dependency metadata correction",
+  "pipeline_exit_code": 0,
+  "passes": [
+    "TestPauseSnapResume (15.50s)",
+    "TestSnapshotConcurrentClones (28.12s)",
+    "TestSnapshotSourceMemoryAndDiskIsolation (21.73s)"
+  ],
+  "failures": [],
+  "vhive_test_source": "89593103ac667cc096f89770c94a77b2b93c3a7d",
+  "scope": "build/install/test-images and unchanged three VM cases",
+  "limits": [
+    "Full Step2 regression running separately; not claimed passed.",
+    "Final published consumer and installed-stack acceptance remain pending."
+  ],
+  "files": {
+    "stage2-build-7386ab5c5e8c.log": {
+      "bytes": 104604,
+      "sha256": "f7beb62f22f749c78921efe35a1480be080c3d4e89c47ecf70a3963e7768ad16"
+    },
+    "stage2-command-status-7386ab5c5e8c.tsv": {
+      "bytes": 55,
+      "sha256": "bc7039f8924dc0ff549e92dd4414758420089bf576941cd44f9c5e8e20171a9d"
+    },
+    "stage2-install-7386ab5c5e8c.log": {
+      "bytes": 9098,
+      "sha256": "e119b5c65a86534e0cb9760745a5b2958deb2ee385fbb47c349b1a98b31a144c"
+    },
+    "stage2-test-images-7386ab5c5e8c.log": {
+      "bytes": 109704,
+      "sha256": "11457d2149f7543671fafd20beb6fe224a90e288988e23354c0b100689ad62ec"
+    },
+    "stage2-vhive-7386ab5c5e8c.log": {
+      "bytes": 7719,
+      "sha256": "562ba545d6c7e5467cf7fd004fd8cdd2fef37b8e2bc7877d1e4d33b40872a4f3"
+    },
+    "vhive-7386ab5c5e8c.zVF8PyYI/acceptance.log": {
+      "bytes": 3783,
+      "sha256": "f813de5181d649f7bdf38811b5c74e59914f063a7602199b4d99742e21f8e168"
+    },
+    "vhive-7386ab5c5e8c.zVF8PyYI/binaries.sha256": {
+      "bytes": 506,
+      "sha256": "e2cd889b38eb9a9436186248e81a8987a1fbe460147f189fa6054893ed7152b0"
+    },
+    "vhive-7386ab5c5e8c.zVF8PyYI/containerd.out": {
+      "bytes": 223151,
+      "sha256": "5664a447ba75f49e8f52336848aa40166254287ab3bce5990f6c5b6a1ee6bd91"
+    },
+    "vhive-7386ab5c5e8c.zVF8PyYI/demux-snapshotter.out": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "vhive-7386ab5c5e8c.zVF8PyYI/http-address-resolver.out": {
+      "bytes": 81,
+      "sha256": "ff80b91d6aefcbd8d54ec71afc79971c7be31497d4e1394e671f5e9e9d8e0980"
+    },
+    "vhive-7386ab5c5e8c.zVF8PyYI/inputs": {
+      "bytes": 484,
+      "sha256": "37bfe1f12c015016d793c9535724893c0f25f530156ed3624ab3d10fa60f401e"
+    },
+    "vhive-7386ab5c5e8c.zVF8PyYI/modules.json": {
+      "bytes": 99215,
+      "sha256": "3f41a082aac33391692c42e0317030f5bdcffd28c6bab164d4a5edd44fc9902c"
+    },
+    "vhive-7386ab5c5e8c.zVF8PyYI/test-buildinfo.txt": {
+      "bytes": 289,
+      "sha256": "27e526fb97d891510e983512c1eebf3e442b8701d14ebd9529ab0c1efed1ea2f"
+    },
+    "vhive-7386ab5c5e8c.zVF8PyYI/vhive-runtime-version": {
+      "bytes": 244,
+      "sha256": "5b17adfcd146bce728467a0a95d5f0679fd319740702932450010c24248499e8"
+    },
+    "vhive-7386ab5c5e8c.zVF8PyYI/vhive-tests.log": {
+      "bytes": 3504,
+      "sha256": "a0432606eb74518c020eb8b9a184f6d78417662a4d5f897c9188ca0bdb1938fa"
+    }
+  }
+}

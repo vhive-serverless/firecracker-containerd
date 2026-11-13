@@ -1,0 +1,18 @@
+{
+  "runtime_revision": "9000f53fb03d23699b1a88fe167d6f4aa5a0a707",
+  "pipeline_exit_code": 1,
+  "stage": "generated dependency/protobuf cleanliness check before VM regression",
+  "cause": "go mod tidy promotes github.com/containerd/errdefs/pkg v0.3.0 from indirect to direct after shutdown.go imports errgrpc",
+  "worker_status": "Only go.mod modified; one insertion and one deletion; runtime test cases not reached",
+  "decision": "Commit correct dependency classification in Steps2/3/4; preserve failure, rerun unchanged acceptance on corrected source",
+  "files": {
+    "stage2-acceptance-9000f53fb03d.log": {
+      "bytes": 123918,
+      "sha256": "7226958e01b0f0b21f64e5ad97412e8a262203dc43f982caf39258381157595a"
+    },
+    "stage2-full-regression-status-9000f53fb03d.txt": {
+      "bytes": 7,
+      "sha256": "cf205dbb8cea84897b488abcc281bf96698d5e94b1096b16657b4caba9082a22"
+    }
+  }
+}

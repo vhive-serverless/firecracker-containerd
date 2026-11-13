@@ -1,0 +1,4 @@
+time="2026-11-13T00:54:54Z" level=error msg="Function called without namespaced context" error="namespace is required: failed precondition" function=Walk
+time="2026-11-13T00:54:54Z" level=debug msg="no namespace found, proxying walk function to all cached snapshotters" function=Walk
+time="2026-11-13T00:54:54Z" level=error msg="Function called without namespaced context" error="namespace is required: failed precondition" function=Walk
+time="2026-11-13T00:54:54Z" level=debug msg="no namespace found, proxying walk function to all cached snapshotters" function=Walk

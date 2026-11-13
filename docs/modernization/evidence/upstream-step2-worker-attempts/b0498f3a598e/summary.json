@@ -1,0 +1,92 @@
+{
+  "runtime_revision": "b0498f3a598e06fa54f7bf0089cb8c7e6b01a7c1",
+  "stack_acceptance": "PASS",
+  "pipeline_exit_code": 2,
+  "vhive_candidate_acceptance": "FAIL before first VM: route executable missing in image; nil network manager panic",
+  "verbose_stack_passes": 127,
+  "stack_skips": [
+    "TestLogAndMetrics (0.00s)"
+  ],
+  "files": {
+    "acceptance/agent-build-info": {
+      "bytes": 6169,
+      "sha256": "6b0503b499fc78fb7c156656537fa97d05fc8ffa55d14516db3baea36b3ddc5b"
+    },
+    "acceptance/binaries.sha256": {
+      "bytes": 1168,
+      "sha256": "a2075489509a66ccda3a0d7d6d0955e32954b848fe09a2337cce3fd4a9171c77"
+    },
+    "acceptance/go-modules.json": {
+      "bytes": 120535,
+      "sha256": "1db8b3e5547a15d93612a37383f6a3c16675186ade4967e6f7a338a23f9fff08"
+    },
+    "acceptance/runtime-revision": {
+      "bytes": 41,
+      "sha256": "4bfc9a1a95810dd3d8c530df679d2b5db5576e33ce1773e0a0535ab4885a465e"
+    },
+    "acceptance/test-image.json": {
+      "bytes": 3648,
+      "sha256": "b9627709fca4a28d8532c345acf825cce32c0723aaff535117bf12a07b1951c2"
+    },
+    "stage2-acceptance-b0498f3a598e.log": {
+      "bytes": 289180,
+      "sha256": "e95e529811999c36cf6a9583af9cecc04affd3177bb8b71c92f623b36ce0a93f"
+    },
+    "stage2-build-b0498f3a598e.log": {
+      "bytes": 225798,
+      "sha256": "d443f83568712c1745464404fd8d74de7dff5314fc1df3c3880272d2d6a90b32"
+    },
+    "stage2-install-b0498f3a598e.log": {
+      "bytes": 9172,
+      "sha256": "ac2c05eaa2979afa0eb4b142eaa2ca79467eec1cd1051e7e86e7e40d8ab403b1"
+    },
+    "stage2-lint-b0498f3a598e.log": {
+      "bytes": 1181,
+      "sha256": "1ea6d6d6c8a1cbbd878b7d2ece8c539d20e4dcf32e4b0d170d1d89138638b3da"
+    },
+    "stage2-vhive-b0498f3a598e.log": {
+      "bytes": 4898,
+      "sha256": "b19b579414cc853fb7ad21b85f0cb76c1286acbabc6c6b2ef078d641c9d450e6"
+    },
+    "vhive-b0498f3a598e.Q5DGOdlz/acceptance.log": {
+      "bytes": 2947,
+      "sha256": "4e7b3e55b6ab987089af8b9d0bb487587c7380905615b000b900078fa1368b3e"
+    },
+    "vhive-b0498f3a598e.Q5DGOdlz/binaries.sha256": {
+      "bytes": 506,
+      "sha256": "43f0eb56ec3012d8e59a54668bc45364beded03f7ed797541a116ba97a038dae"
+    },
+    "vhive-b0498f3a598e.Q5DGOdlz/containerd.out": {
+      "bytes": 18485,
+      "sha256": "2bfae653c68dc75bcc489e65db9ccce6f9e6109292e639974b6a0381da28b0b5"
+    },
+    "vhive-b0498f3a598e.Q5DGOdlz/demux-snapshotter.out": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "vhive-b0498f3a598e.Q5DGOdlz/http-address-resolver.out": {
+      "bytes": 81,
+      "sha256": "5d01489916099dad2242aca71d99ca670fdb7b5344a2fb45079ebabb5b79eaac"
+    },
+    "vhive-b0498f3a598e.Q5DGOdlz/inputs": {
+      "bytes": 484,
+      "sha256": "7fa51e9600b1e3926e7fc91c1bc27b9999263152fd123eedb4467cd5bb36d0f5"
+    },
+    "vhive-b0498f3a598e.Q5DGOdlz/modules.json": {
+      "bytes": 98813,
+      "sha256": "57e68cbb2528ce3b058ce4cdff854fa65a2225860b5f07d29f91bbf9a1699227"
+    },
+    "vhive-b0498f3a598e.Q5DGOdlz/test-buildinfo.txt": {
+      "bytes": 289,
+      "sha256": "27e526fb97d891510e983512c1eebf3e442b8701d14ebd9529ab0c1efed1ea2f"
+    },
+    "vhive-b0498f3a598e.Q5DGOdlz/vhive-runtime-version": {
+      "bytes": 244,
+      "sha256": "ded343bb9aa9ed0306f5685d2cec7d0ed26c72daf0090e6d6be6a2046d064d5b"
+    },
+    "vhive-b0498f3a598e.Q5DGOdlz/vhive-tests.log": {
+      "bytes": 2703,
+      "sha256": "d668d14942d392391c20369eb42e717c31dbacdb876efea28ef09c2bf8c4bc00"
+    }
+  }
+}

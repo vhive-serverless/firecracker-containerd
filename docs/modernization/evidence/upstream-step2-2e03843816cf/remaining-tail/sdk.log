@@ -1,0 +1,932 @@
+Cloning into '/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/tmp/sdk-tests/dd9db322432989b96cff7a38a64703d60b6cabf9'...
+HEAD is now at dd9db32 Preserve application bytes following the vsock connection acknowledgement
+FC_TEST_DATA_PATH=/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/tmp/sdk-testdata/dd9db322432989b96cff7a38a64703d60b6cabf9 bash tools/prepare-testdata.sh
+sha256sum: /users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/tmp/sdk-testdata/dd9db322432989b96cff7a38a64703d60b6cabf9/vmlinux: No such file or directory
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100 26.6M  100 26.6M    0     0  27.4M      0 --:--:-- --:--:-- --:--:-- 27.4M
+/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/tmp/sdk-testdata/dd9db322432989b96cff7a38a64703d60b6cabf9/vmlinux.partial: OK
+sha256sum: /users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/tmp/sdk-testdata/dd9db322432989b96cff7a38a64703d60b6cabf9/root-drive.img: No such file or directory
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0 80 30.0M   80 24.1M    0     0  22.6M      0  0:00:01  0:00:01 --:--:-- 22.6M100 30.0M  100 30.0M    0     0  26.4M      0  0:00:01  0:00:01 --:--:-- 26.4M
+/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/tmp/sdk-testdata/dd9db322432989b96cff7a38a64703d60b6cabf9/root-drive.img.partial: OK
+sha256sum: /users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/tmp/sdk-testdata/dd9db322432989b96cff7a38a64703d60b6cabf9/firecracker.tgz: No such file or directory
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100 7427k  100 7427k    0     0  18.8M      0 --:--:-- --:--:-- --:--:-- 18.8M
+/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/tmp/sdk-testdata/dd9db322432989b96cff7a38a64703d60b6cabf9/firecracker.tgz.partial: OK
+GOBIN=/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/tmp/sdk-testdata/dd9db322432989b96cff7a38a64703d60b6cabf9/bin go install github.com/containernetworking/plugins/plugins/ipam/host-local@v1.9.1
+GOBIN=/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/tmp/sdk-testdata/dd9db322432989b96cff7a38a64703d60b6cabf9/bin go install github.com/kunalkushwaha/ltag@v0.2.5
+GOBIN=/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/tmp/sdk-testdata/dd9db322432989b96cff7a38a64703d60b6cabf9/bin go install github.com/containernetworking/plugins/plugins/main/ptp@v1.9.1
+FC_TEST_DATA_PATH=/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/tmp/sdk-testdata/dd9db322432989b96cff7a38a64703d60b6cabf9 bash tools/prepare-testdata.sh --ssh
+sha256sum: /users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/tmp/sdk-testdata/dd9db322432989b96cff7a38a64703d60b6cabf9/ubuntu-24.04.squashfs: No such file or directory
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0 16 94.2M   16 15.9M    0     0  19.0M      0  0:00:04 --:--:--  0:00:04 19.0M 76 94.2M   76 71.9M    0     0  39.6M      0  0:00:02  0:00:01  0:00:01 39.6M100 94.2M  100 94.2M    0     0  43.8M      0  0:00:02  0:00:02 --:--:-- 43.8M
+/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/tmp/sdk-testdata/dd9db322432989b96cff7a38a64703d60b6cabf9/ubuntu-24.04.squashfs.partial: OK
+Parallel unsquashfs: Using 32 processors
+6069 inodes (6997 blocks) to write
+
+[===========================/                                ]  6061/13066  46%[=========================================-                  ]  9161/13066  70%[========================================================\   ] 12557/13066  96%[===========================================================\] 13066/13066 100%
+
+created 5402 files
+created 674 directories
+created 665 symlinks
+created 0 devices
+created 0 fifos
+created 0 sockets
+created 2 hardlinks
+GOBIN=/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/tmp/sdk-testdata/dd9db322432989b96cff7a38a64703d60b6cabf9/bin go install github.com/containernetworking/plugins/plugins/ipam/static@v1.9.1
+GOBIN=/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/tmp/sdk-testdata/dd9db322432989b96cff7a38a64703d60b6cabf9/bin go install github.com/awslabs/tc-redirect-tap/cmd/tc-redirect-tap@v0.0.0-20250516183331-34bf829e9a5c
+DISABLE_ROOT_TESTS=1 go test ./... -run=^$
+ok  	github.com/firecracker-microvm/firecracker-go-sdk	0.009s [no tests to run]
+?   	github.com/firecracker-microvm/firecracker-go-sdk/client	[no test files]
+?   	github.com/firecracker-microvm/firecracker-go-sdk/client/models	[no test files]
+?   	github.com/firecracker-microvm/firecracker-go-sdk/client/operations	[no test files]
+ok  	github.com/firecracker-microvm/firecracker-go-sdk/cni/internal	0.005s [no tests to run]
+ok  	github.com/firecracker-microvm/firecracker-go-sdk/cni/vmconf	0.005s [no tests to run]
+ok  	github.com/firecracker-microvm/firecracker-go-sdk/fctesting	0.008s [no tests to run]
+ok  	github.com/firecracker-microvm/firecracker-go-sdk/internal	0.005s [no tests to run]
+ok  	github.com/firecracker-microvm/firecracker-go-sdk/vsock	0.004s [no tests to run]
+test -z "$(git ls-files '*.go' | xargs gofmt -s -l)"
+/users/nehalem/fc-ctrd-mod/upstream-migration/stage2-same-id-runtime-fix/tmp/sdk-testdata/dd9db322432989b96cff7a38a64703d60b6cabf9/bin/ltag -check -v -t .headers -excludes "build testdata"
+No template file for Dockerfile, shall skip all Dockerfile
+No template file for bash scripts, shall skip all bash scripts
+=== RUN   TestNewBalloonDevice
+--- PASS: TestNewBalloonDevice (0.00s)
+=== RUN   TestUpdateAmountMiB
+--- PASS: TestUpdateAmountMiB (0.00s)
+=== RUN   TestUpdateStatsPollingIntervals
+--- PASS: TestUpdateStatsPollingIntervals (0.00s)
+=== RUN   TestNewUnixSocketTransport
+--- PASS: TestNewUnixSocketTransport (0.00s)
+=== RUN   TestVMCommandBuilder
+=== RUN   TestVMCommandBuilder/immutability
+=== RUN   TestVMCommandBuilder/chaining
+=== RUN   TestVMCommandBuilder/build
+--- PASS: TestVMCommandBuilder (0.00s)
+    --- PASS: TestVMCommandBuilder/immutability (0.00s)
+    --- PASS: TestVMCommandBuilder/chaining (0.00s)
+    --- PASS: TestVMCommandBuilder/build (0.00s)
+=== RUN   TestDrivesBuilder
+--- PASS: TestDrivesBuilder (0.00s)
+=== RUN   TestDrivesBuilderWithRootDrive
+--- PASS: TestDrivesBuilderWithRootDrive (0.00s)
+=== RUN   TestDrivesBuilderWithCacheType
+--- PASS: TestDrivesBuilderWithCacheType (0.00s)
+=== RUN   TestDrivesBuilderAddDrive
+--- PASS: TestDrivesBuilderAddDrive (0.00s)
+=== RUN   TestDrivesBuilderWithIoEngine
+--- PASS: TestDrivesBuilderWithIoEngine (0.00s)
+=== RUN   TestClient
+--- PASS: TestClient (0.01s)
+=== RUN   TestGetFirecrackerVersion
+--- PASS: TestGetFirecrackerVersion (0.01s)
+=== RUN   TestHandlerListAppend
+--- PASS: TestHandlerListAppend (0.00s)
+=== RUN   TestHandlerListPrepend
+--- PASS: TestHandlerListPrepend (0.00s)
+=== RUN   TestHandlerListRemove
+--- PASS: TestHandlerListRemove (0.00s)
+=== RUN   TestHandlerListClear
+--- PASS: TestHandlerListClear (0.00s)
+=== RUN   TestHandlerListRun
+time="2026-11-13T00:56:52Z" level=warning msg="Failed handler \"baz\": baz error"
+--- PASS: TestHandlerListRun (0.00s)
+=== RUN   TestHandlerListHas
+=== RUN   TestHandlerListHas/contains
+=== RUN   TestHandlerListHas/does_not_contain
+=== RUN   TestHandlerListHas/similar_names
+--- PASS: TestHandlerListHas (0.00s)
+    --- PASS: TestHandlerListHas/contains (0.00s)
+    --- PASS: TestHandlerListHas/does_not_contain (0.00s)
+    --- PASS: TestHandlerListHas/similar_names (0.00s)
+=== RUN   TestHandlerListSwappend
+=== RUN   TestHandlerListSwappend/append_one
+=== RUN   TestHandlerListSwappend/swap_single
+=== RUN   TestHandlerListSwappend/swap_multiple
+--- PASS: TestHandlerListSwappend (0.00s)
+    --- PASS: TestHandlerListSwappend/append_one (0.00s)
+    --- PASS: TestHandlerListSwappend/swap_single (0.00s)
+    --- PASS: TestHandlerListSwappend/swap_multiple (0.00s)
+=== RUN   TestHandlerListReplace
+=== RUN   TestHandlerListReplace/swap_none
+=== RUN   TestHandlerListReplace/swap_single
+=== RUN   TestHandlerListReplace/swap_multiple
+--- PASS: TestHandlerListReplace (0.00s)
+    --- PASS: TestHandlerListReplace/swap_none (0.00s)
+    --- PASS: TestHandlerListReplace/swap_single (0.00s)
+    --- PASS: TestHandlerListReplace/swap_multiple (0.00s)
+=== RUN   TestHandlerListAppendAfter
+=== RUN   TestHandlerListAppendAfter/no_append
+=== RUN   TestHandlerListAppendAfter/append_after
+--- PASS: TestHandlerListAppendAfter (0.00s)
+    --- PASS: TestHandlerListAppendAfter/no_append (0.00s)
+    --- PASS: TestHandlerListAppendAfter/append_after (0.00s)
+=== RUN   TestHandlers
+=== RUN   TestHandlers/fcinit.BootstrapLogging
+=== RUN   TestHandlers/fcinit.CreateMachine
+time="2026-11-13T00:56:52Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"mem_size_mib\":null,\"vcpu_count\":null}"
+=== RUN   TestHandlers/fcinit.CreateBootSource
+time="2026-11-13T00:56:52Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+=== RUN   TestHandlers/fcinit.AttachDrives
+time="2026-11-13T00:56:52Z" level=info msg="Attaching drive /foo/bar, slot root_drive, root true."
+time="2026-11-13T00:56:52Z" level=info msg="Attached drive /foo/bar: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+=== RUN   TestHandlers/fcinit.CreatePmem
+=== RUN   TestHandlers/fcinit.CreateSerial
+=== RUN   TestHandlers/fcinit.CreateMemoryHotplug
+=== RUN   TestHandlers/fcinit.CreateNetworkInterfaces
+time="2026-11-13T00:56:52Z" level=info msg="Attaching NIC host (hwaddr macaddress) at index 1"
+=== RUN   TestHandlers/fcinit.AddVsocks
+=== RUN   TestHandlers/fcinit.SetMetadata
+time="2026-11-13T00:56:52Z" level=info msg="SetMetadata successful"
+=== RUN   TestHandlers/fcinit.ConfigMmds
+--- PASS: TestHandlers (0.00s)
+    --- PASS: TestHandlers/fcinit.BootstrapLogging (0.00s)
+    --- PASS: TestHandlers/fcinit.CreateMachine (0.00s)
+    --- PASS: TestHandlers/fcinit.CreateBootSource (0.00s)
+    --- PASS: TestHandlers/fcinit.AttachDrives (0.00s)
+    --- PASS: TestHandlers/fcinit.CreatePmem (0.00s)
+    --- PASS: TestHandlers/fcinit.CreateSerial (0.00s)
+    --- PASS: TestHandlers/fcinit.CreateMemoryHotplug (0.00s)
+    --- PASS: TestHandlers/fcinit.CreateNetworkInterfaces (0.00s)
+    --- PASS: TestHandlers/fcinit.AddVsocks (0.00s)
+    --- PASS: TestHandlers/fcinit.SetMetadata (0.00s)
+    --- PASS: TestHandlers/fcinit.ConfigMmds (0.00s)
+=== RUN   TestJailerBuilder
+=== RUN   TestJailerBuilder/required_fields
+=== RUN   TestJailerBuilder/other_jailer_binary_name
+=== RUN   TestJailerBuilder/optional_fields
+--- PASS: TestJailerBuilder (0.00s)
+    --- PASS: TestJailerBuilder/required_fields (0.00s)
+    --- PASS: TestJailerBuilder/other_jailer_binary_name (0.00s)
+    --- PASS: TestJailerBuilder/optional_fields (0.00s)
+=== RUN   TestJail
+=== RUN   TestJail/required_fields
+=== RUN   TestJail/other_jailer_binary_name
+=== RUN   TestJail/optional_fields
+=== RUN   TestJail/custom_socket_path
+=== RUN   TestJail/firecracker_flags
+--- PASS: TestJail (0.00s)
+    --- PASS: TestJail/required_fields (0.00s)
+    --- PASS: TestJail/other_jailer_binary_name (0.00s)
+    --- PASS: TestJail/optional_fields (0.00s)
+    --- PASS: TestJail/custom_socket_path (0.00s)
+    --- PASS: TestJail/firecracker_flags (0.00s)
+=== RUN   TestKernelArgsSerder
+--- PASS: TestKernelArgsSerder (0.00s)
+=== RUN   TestNewMachine
+--- PASS: TestNewMachine (0.00s)
+=== RUN   TestJailerMicroVMExecution
+time="2026-11-13T00:56:52Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/jailer-test1210558144/firecracker/b/root/TestJailerMicroVMExecution.socket"
+time="2026-11-13T00:56:52Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:56:52Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:56:52Z" level=info msg="Attaching drive root-drive.img, slot 1, root true."
+time="2026-11-13T00:56:52Z" level=info msg="Attached drive root-drive.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:56:52Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:56:52Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:56:52Z" level=warning msg="firecracker exited: signal: terminated"
+--- PASS: TestJailerMicroVMExecution (0.21s)
+=== RUN   TestMicroVMExecution
+time="2026-11-13T00:56:52Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestMicroVMExecution2184288802/TestMicroVMExecution.sock"
+=== RUN   TestMicroVMExecution/TestCreateMachine
+time="2026-11-13T00:56:52Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+    machine_test.go:639: firecracker created a machine
+=== RUN   TestMicroVMExecution/TestGetFirecrackerVersion
+=== RUN   TestMicroVMExecution/TestMachineConfigApplication
+=== RUN   TestMicroVMExecution/TestCreateBootSource
+time="2026-11-13T00:56:52Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+=== RUN   TestMicroVMExecution/TestCreateNetworkInterface
+time="2026-11-13T00:56:52Z" level=info msg="Attaching NIC fc-test-tap0 (hwaddr 02:00:00:01:02:03) at index 1"
+=== RUN   TestMicroVMExecution/TestAttachRootDrive
+time="2026-11-13T00:56:52Z" level=info msg="Attaching drive /fixtures/root-drive.img, slot 0, root true."
+time="2026-11-13T00:56:52Z" level=info msg="Attached drive /fixtures/root-drive.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+=== RUN   TestMicroVMExecution/TestAttachSecondaryDrive
+time="2026-11-13T00:56:52Z" level=info msg="Attaching drive /fixtures/drive-2.img, slot 2, root false."
+time="2026-11-13T00:56:52Z" level=info msg="Attached drive /fixtures/drive-2.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+=== RUN   TestMicroVMExecution/TestAttachVsock
+=== RUN   TestMicroVMExecution/SetMetadata
+time="2026-11-13T00:56:52Z" level=info msg="SetMetadata successful"
+=== RUN   TestMicroVMExecution/UpdateMetadata
+time="2026-11-13T00:56:52Z" level=info msg="UpdateMetadata successful"
+=== RUN   TestMicroVMExecution/GetMetadata
+time="2026-11-13T00:56:52Z" level=info msg="GetMetadata successful"
+=== RUN   TestMicroVMExecution/TestCreateBalloon
+=== RUN   TestMicroVMExecution/TestStartInstance
+time="2026-11-13T00:56:52Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+=== RUN   TestMicroVMExecution/TestGetInstanceInfo
+time="2026-11-13T00:56:52Z" level=info msg="GetInstanceInfo successful"
+=== RUN   TestMicroVMExecution/TestGetBalloonConfig
+=== RUN   TestMicroVMExecution/TestGetBalloonStats
+=== RUN   TestMicroVMExecution/TestUpdateGuestDrive
+time="2026-11-13T00:56:57Z" level=info msg="PatchGuestDrive successful"
+=== RUN   TestMicroVMExecution/TestUpdateGuestNetworkInterface
+time="2026-11-13T00:56:57Z" level=info msg="Updated network interface: 1"
+=== RUN   TestMicroVMExecution/TestUpdateBalloon
+=== RUN   TestMicroVMExecution/TestUpdateBalloonStats
+=== RUN   TestMicroVMExecution/TestShutdown
+time="2026-11-13T00:56:57Z" level=info msg="Sent instance shutdown request: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:56:57Z" level=warning msg="firecracker exited: signal: terminated"
+--- PASS: TestMicroVMExecution (5.07s)
+    --- PASS: TestMicroVMExecution/TestCreateMachine (0.00s)
+    --- PASS: TestMicroVMExecution/TestGetFirecrackerVersion (0.00s)
+    --- PASS: TestMicroVMExecution/TestMachineConfigApplication (0.00s)
+    --- PASS: TestMicroVMExecution/TestCreateBootSource (0.00s)
+    --- PASS: TestMicroVMExecution/TestCreateNetworkInterface (0.00s)
+    --- PASS: TestMicroVMExecution/TestAttachRootDrive (0.00s)
+    --- PASS: TestMicroVMExecution/TestAttachSecondaryDrive (0.00s)
+    --- PASS: TestMicroVMExecution/TestAttachVsock (0.00s)
+    --- PASS: TestMicroVMExecution/SetMetadata (0.00s)
+    --- PASS: TestMicroVMExecution/UpdateMetadata (0.00s)
+    --- PASS: TestMicroVMExecution/GetMetadata (0.00s)
+    --- PASS: TestMicroVMExecution/TestCreateBalloon (0.00s)
+    --- PASS: TestMicroVMExecution/TestStartInstance (0.02s)
+    --- PASS: TestMicroVMExecution/TestGetInstanceInfo (0.00s)
+    --- PASS: TestMicroVMExecution/TestGetBalloonConfig (0.00s)
+    --- PASS: TestMicroVMExecution/TestGetBalloonStats (0.00s)
+    --- PASS: TestMicroVMExecution/TestUpdateGuestDrive (0.00s)
+    --- PASS: TestMicroVMExecution/TestUpdateGuestNetworkInterface (0.00s)
+    --- PASS: TestMicroVMExecution/TestUpdateBalloon (0.00s)
+    --- PASS: TestMicroVMExecution/TestUpdateBalloonStats (0.00s)
+    --- PASS: TestMicroVMExecution/TestShutdown (0.00s)
+=== RUN   TestStartVMM
+time="2026-11-13T00:56:57Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestStartVMM2044443162/fc.sock"
+    machine_test.go:441: firecracker ran for 250ms
+time="2026-11-13T00:56:58Z" level=warning msg="firecracker exited: signal: terminated"
+--- PASS: TestStartVMM (0.25s)
+=== RUN   TestLogAndMetrics
+    machine_test.go:454: 
+--- SKIP: TestLogAndMetrics (0.00s)
+=== RUN   TestStartVMMOnce
+time="2026-11-13T00:56:58Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestStartVMMOnce3401053729/fc.sock"
+time="2026-11-13T00:56:58Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:56:58Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:56:58Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":64,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":1}"
+time="2026-11-13T00:56:58Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:56:58Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:56:58Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+    machine_test.go:599: firecracker ran for 250ms
+=== RUN   TestStartVMMOnce/TestStopVMM
+time="2026-11-13T00:56:58Z" level=warning msg="firecracker exited: signal: terminated"
+--- PASS: TestStartVMMOnce (0.28s)
+    --- PASS: TestStartVMMOnce/TestStopVMM (0.03s)
+=== RUN   TestStopVMMCleanup
+time="2026-11-13T00:56:58Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestStopVMMCleanup1392188938/fc.sock"
+time="2026-11-13T00:56:58Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:56:58Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:56:58Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":64,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":1}"
+time="2026-11-13T00:56:58Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:56:58Z" level=info msg="Attaching NIC tap0 (hwaddr 02:e3:b0:fb:7f:5d) at index 1"
+time="2026-11-13T00:56:58Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:56:58Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:56:58Z" level=warning msg="firecracker exited: signal: terminated"
+--- PASS: TestStopVMMCleanup (0.11s)
+=== RUN   TestWaitForSocket
+--- PASS: TestWaitForSocket (0.71s)
+=== RUN   TestMicroVMExecutionWithMmdsV2
+time="2026-11-13T00:56:59Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestMicroVMExecutionWithMmdsV21614943716/TestMicroVMExecution.sock"
+=== RUN   TestMicroVMExecutionWithMmdsV2/TestCreateMachine
+time="2026-11-13T00:56:59Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+    machine_test.go:639: firecracker created a machine
+=== RUN   TestMicroVMExecutionWithMmdsV2/TestCreateBootSource
+time="2026-11-13T00:56:59Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+=== RUN   TestMicroVMExecutionWithMmdsV2/TestCreateNetworkInterface
+time="2026-11-13T00:56:59Z" level=info msg="Attaching NIC fc-test-tap0 (hwaddr 02:00:00:01:02:03) at index 1"
+=== RUN   TestMicroVMExecutionWithMmdsV2/TestAttachRootDrive
+time="2026-11-13T00:56:59Z" level=info msg="Attaching drive /fixtures/root-drive.img, slot 0, root true."
+time="2026-11-13T00:56:59Z" level=info msg="Attached drive /fixtures/root-drive.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+=== RUN   TestMicroVMExecutionWithMmdsV2/SetMetadata
+time="2026-11-13T00:56:59Z" level=info msg="SetMetadata successful"
+=== RUN   TestMicroVMExecutionWithMmdsV2/UpdateMetadata
+time="2026-11-13T00:56:59Z" level=info msg="UpdateMetadata successful"
+=== RUN   TestMicroVMExecutionWithMmdsV2/GetMetadata
+time="2026-11-13T00:56:59Z" level=info msg="GetMetadata successful"
+time="2026-11-13T00:56:59Z" level=warning msg="firecracker exited: signal: terminated"
+--- PASS: TestMicroVMExecutionWithMmdsV2 (0.03s)
+    --- PASS: TestMicroVMExecutionWithMmdsV2/TestCreateMachine (0.00s)
+    --- PASS: TestMicroVMExecutionWithMmdsV2/TestCreateBootSource (0.00s)
+    --- PASS: TestMicroVMExecutionWithMmdsV2/TestCreateNetworkInterface (0.00s)
+    --- PASS: TestMicroVMExecutionWithMmdsV2/TestAttachRootDrive (0.00s)
+    --- PASS: TestMicroVMExecutionWithMmdsV2/SetMetadata (0.00s)
+    --- PASS: TestMicroVMExecutionWithMmdsV2/UpdateMetadata (0.00s)
+    --- PASS: TestMicroVMExecutionWithMmdsV2/GetMetadata (0.00s)
+=== RUN   TestLogFiles
+time="2026-11-13T00:56:59Z" level=info msg="Called startVMM(), setting up a VMM on /fixtures/socket-path"
+time="2026-11-13T00:56:59Z" level=info msg="firecracker exited: status=0"
+time="2026-11-13T00:56:59Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:56:59Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:56:59Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"mem_size_mib\":null,\"vcpu_count\":null}"
+time="2026-11-13T00:56:59Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:56:59Z" level=info msg="Attaching drive /fixtures/root-drive.img, slot 0, root true."
+time="2026-11-13T00:56:59Z" level=info msg="Attached drive /fixtures/root-drive.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:56:59Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+--- PASS: TestLogFiles (0.00s)
+=== RUN   TestCaptureFifoToFile
+--- PASS: TestCaptureFifoToFile (0.00s)
+=== RUN   TestCaptureFifoToFile_nonblock
+time="2026-11-13T00:56:59Z" level=warning msg="Failed to unlink /tmp/TestCaptureFifoToFile1470590691/TestCaptureFifoToFile: no such file or directory"
+--- PASS: TestCaptureFifoToFile_nonblock (0.25s)
+time="2026-11-13T00:56:59Z" level=warning msg="Failed to unlink /tmp/TestCaptureFifoToFile_nonblock389896257/TestCaptureFifoToFile_nonblock: no such file or directory"
+=== RUN   TestSocketPathSet
+--- PASS: TestSocketPathSet (0.00s)
+=== RUN   TestConfigureBuilderAddsFlags
+--- PASS: TestConfigureBuilderAddsFlags (0.00s)
+=== RUN   TestPID
+time="2026-11-13T00:56:59Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestPID3654325696/TestPID.sock"
+time="2026-11-13T00:56:59Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:56:59Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:56:59Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:56:59Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:56:59Z" level=info msg="Attaching drive /tmp/TestPID3654325696/TestPID.img, slot 1, root true."
+time="2026-11-13T00:56:59Z" level=info msg="Attached drive /tmp/TestPID3654325696/TestPID.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:56:59Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:56:59Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:56:59Z" level=warning msg="firecracker exited: signal: terminated"
+--- PASS: TestPID (0.15s)
+=== RUN   TestCaptureFifoToFile_leak
+--- PASS: TestCaptureFifoToFile_leak (0.00s)
+=== RUN   TestWait
+=== RUN   TestWait/StopVMM
+time="2026-11-13T00:56:59Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestWait_StopVMM3343642331/fc.sock"
+time="2026-11-13T00:56:59Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:56:59Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:56:59Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:56:59Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:56:59Z" level=info msg="Attaching drive /fixtures/root-drive.img, slot root, root true."
+time="2026-11-13T00:56:59Z" level=info msg="Attached drive /fixtures/root-drive.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:56:59Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:56:59Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:56:59Z" level=warning msg="firecracker exited: signal: terminated"
+    machine_test.go:1589: err = 1 error occurred:
+        	* signal: terminated
+        
+=== RUN   TestWait/Kill
+time="2026-11-13T00:56:59Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestWait_Kill2014559085/fc.sock"
+time="2026-11-13T00:56:59Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:56:59Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:56:59Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:56:59Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:56:59Z" level=info msg="Attaching drive /fixtures/root-drive.img, slot root, root true."
+time="2026-11-13T00:56:59Z" level=info msg="Attached drive /fixtures/root-drive.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:56:59Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:56:59Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:56:59Z" level=warning msg="firecracker exited: signal: killed"
+    machine_test.go:1589: err = 1 error occurred:
+        	* signal: killed
+        
+=== RUN   TestWait/Context_Cancel
+time="2026-11-13T00:56:59Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestWait_Context_Cancel254977084/fc.sock"
+time="2026-11-13T00:56:59Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:56:59Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:56:59Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:56:59Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:56:59Z" level=info msg="Attaching drive /fixtures/root-drive.img, slot root, root true."
+time="2026-11-13T00:56:59Z" level=info msg="Attached drive /fixtures/root-drive.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:56:59Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:56:59Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:56:59Z" level=warning msg="firecracker exited: signal: terminated"
+    machine_test.go:1589: err = 1 error occurred:
+        	* signal: terminated
+        
+=== RUN   TestWait/StopVMM_+_Context_Cancel
+time="2026-11-13T00:56:59Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestWait_StopVMM_+_Context_Cancel776164771/fc.sock"
+time="2026-11-13T00:56:59Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:56:59Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:56:59Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:56:59Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:56:59Z" level=info msg="Attaching drive /fixtures/root-drive.img, slot root, root true."
+time="2026-11-13T00:56:59Z" level=info msg="Attached drive /fixtures/root-drive.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:56:59Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:56:59Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:56:59Z" level=warning msg="firecracker exited: signal: terminated"
+    machine_test.go:1589: err = 1 error occurred:
+        	* signal: terminated
+        
+--- PASS: TestWait (2.18s)
+    --- PASS: TestWait/StopVMM (0.04s)
+    --- PASS: TestWait/Kill (0.04s)
+    --- PASS: TestWait/Context_Cancel (0.04s)
+    --- PASS: TestWait/StopVMM_+_Context_Cancel (2.05s)
+=== RUN   TestWaitWithInvalidBinary
+time="2026-11-13T00:57:01Z" level=info msg="Called startVMM(), setting up a VMM on /fixtures/TestWaitWithInvalidBinary"
+time="2026-11-13T00:57:01Z" level=error msg="Failed to start VMM: exec: \"invalid-bin\": executable file not found in $PATH"
+time="2026-11-13T00:57:01Z" level=warning msg="Failed handler \"fcinit.StartVMM\": exec: \"invalid-bin\": executable file not found in $PATH"
+--- PASS: TestWaitWithInvalidBinary (0.00s)
+=== RUN   TestWaitWithNoSocket
+time="2026-11-13T00:57:01Z" level=info msg="Called startVMM(), setting up a VMM on /fixtures/TestWaitWithNoSocket"
+time="2026-11-13T00:57:04Z" level=warning msg="Failed handler \"fcinit.StartVMM\": Firecracker did not create API socket /fixtures/TestWaitWithNoSocket: context deadline exceeded"
+--- PASS: TestWaitWithNoSocket (3.00s)
+=== RUN   TestSignalForwarding
+time="2026-11-13T00:57:04Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestSignalForwarding1986389605/fc.sock"
+    machine_test.go:1813: sending signal user defined signal 1 to self
+    machine_test.go:1813: sending signal user defined signal 2 to self
+    machine_test.go:1813: sending signal interrupt to self
+    machine_test.go:1813: sending signal terminated to self
+    machine_test.go:1813: sending signal hangup to self
+    machine_test.go:1813: sending signal quit to self
+    machine_test.go:1807: received signal hangup, ignoring
+time="2026-11-13T00:57:05Z" level=info msg="firecracker exited: status=0"
+--- PASS: TestSignalForwarding (1.01s)
+=== RUN   TestPauseResume
+=== RUN   TestPauseResume/PauseVM
+time="2026-11-13T00:57:05Z" level=error msg="failed to pause the VM: Patch \"http://localhost/vm\": dial unix /tmp/TestPauseResume_PauseVM156529272/fc.sock: connect: no such file or directory"
+time="2026-11-13T00:57:05Z" level=error msg="failed to resume the VM: Patch \"http://localhost/vm\": dial unix /tmp/TestPauseResume_PauseVM156529272/fc.sock: connect: no such file or directory"
+time="2026-11-13T00:57:05Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestPauseResume_PauseVM156529272/fc.sock"
+time="2026-11-13T00:57:05Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:05Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:05Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:05Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:05Z" level=info msg="Attaching drive /fixtures/root-drive.img, slot root, root true."
+time="2026-11-13T00:57:05Z" level=info msg="Attached drive /fixtures/root-drive.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:05Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:05Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:05Z" level=warning msg="firecracker exited: signal: terminated"
+time="2026-11-13T00:57:05Z" level=error msg="failed to pause the VM: Patch \"http://localhost/vm\": dial unix /tmp/TestPauseResume_PauseVM156529272/fc.sock: connect: no such file or directory"
+time="2026-11-13T00:57:05Z" level=error msg="failed to resume the VM: Patch \"http://localhost/vm\": dial unix /tmp/TestPauseResume_PauseVM156529272/fc.sock: connect: no such file or directory"
+=== RUN   TestPauseResume/ResumeVM
+time="2026-11-13T00:57:05Z" level=error msg="failed to pause the VM: Patch \"http://localhost/vm\": dial unix /tmp/TestPauseResume_ResumeVM554256879/fc.sock: connect: no such file or directory"
+time="2026-11-13T00:57:05Z" level=error msg="failed to resume the VM: Patch \"http://localhost/vm\": dial unix /tmp/TestPauseResume_ResumeVM554256879/fc.sock: connect: no such file or directory"
+time="2026-11-13T00:57:05Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestPauseResume_ResumeVM554256879/fc.sock"
+time="2026-11-13T00:57:05Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:05Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:05Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:05Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:05Z" level=info msg="Attaching drive /fixtures/root-drive.img, slot root, root true."
+time="2026-11-13T00:57:05Z" level=info msg="Attached drive /fixtures/root-drive.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:05Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:05Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:05Z" level=warning msg="firecracker exited: signal: terminated"
+time="2026-11-13T00:57:05Z" level=error msg="failed to pause the VM: Patch \"http://localhost/vm\": dial unix /tmp/TestPauseResume_ResumeVM554256879/fc.sock: connect: no such file or directory"
+time="2026-11-13T00:57:05Z" level=error msg="failed to resume the VM: Patch \"http://localhost/vm\": dial unix /tmp/TestPauseResume_ResumeVM554256879/fc.sock: connect: no such file or directory"
+=== RUN   TestPauseResume/Consecutive_PauseVM
+time="2026-11-13T00:57:05Z" level=error msg="failed to pause the VM: Patch \"http://localhost/vm\": dial unix /tmp/TestPauseResume_Consecutive_PauseVM317361310/fc.sock: connect: no such file or directory"
+time="2026-11-13T00:57:05Z" level=error msg="failed to resume the VM: Patch \"http://localhost/vm\": dial unix /tmp/TestPauseResume_Consecutive_PauseVM317361310/fc.sock: connect: no such file or directory"
+time="2026-11-13T00:57:05Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestPauseResume_Consecutive_PauseVM317361310/fc.sock"
+time="2026-11-13T00:57:05Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:05Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:05Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:05Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:05Z" level=info msg="Attaching drive /fixtures/root-drive.img, slot root, root true."
+time="2026-11-13T00:57:05Z" level=info msg="Attached drive /fixtures/root-drive.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:05Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:05Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:05Z" level=warning msg="firecracker exited: signal: terminated"
+time="2026-11-13T00:57:05Z" level=error msg="failed to pause the VM: Patch \"http://localhost/vm\": dial unix /tmp/TestPauseResume_Consecutive_PauseVM317361310/fc.sock: connect: no such file or directory"
+time="2026-11-13T00:57:05Z" level=error msg="failed to resume the VM: Patch \"http://localhost/vm\": dial unix /tmp/TestPauseResume_Consecutive_PauseVM317361310/fc.sock: connect: no such file or directory"
+=== RUN   TestPauseResume/Consecutive_ResumeVM
+time="2026-11-13T00:57:05Z" level=error msg="failed to pause the VM: Patch \"http://localhost/vm\": dial unix /tmp/TestPauseResume_Consecutive_ResumeVM481710173/fc.sock: connect: no such file or directory"
+time="2026-11-13T00:57:05Z" level=error msg="failed to resume the VM: Patch \"http://localhost/vm\": dial unix /tmp/TestPauseResume_Consecutive_ResumeVM481710173/fc.sock: connect: no such file or directory"
+time="2026-11-13T00:57:05Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestPauseResume_Consecutive_ResumeVM481710173/fc.sock"
+time="2026-11-13T00:57:05Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:05Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:05Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:05Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:05Z" level=info msg="Attaching drive /fixtures/root-drive.img, slot root, root true."
+time="2026-11-13T00:57:05Z" level=info msg="Attached drive /fixtures/root-drive.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:05Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:05Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:05Z" level=warning msg="firecracker exited: signal: terminated"
+time="2026-11-13T00:57:05Z" level=error msg="failed to pause the VM: Patch \"http://localhost/vm\": dial unix /tmp/TestPauseResume_Consecutive_ResumeVM481710173/fc.sock: connect: no such file or directory"
+time="2026-11-13T00:57:05Z" level=error msg="failed to resume the VM: Patch \"http://localhost/vm\": dial unix /tmp/TestPauseResume_Consecutive_ResumeVM481710173/fc.sock: connect: no such file or directory"
+=== RUN   TestPauseResume/ResumeVM_PauseVM
+time="2026-11-13T00:57:05Z" level=error msg="failed to pause the VM: Patch \"http://localhost/vm\": dial unix /tmp/TestPauseResume_ResumeVM_PauseVM2666742174/fc.sock: connect: no such file or directory"
+time="2026-11-13T00:57:05Z" level=error msg="failed to resume the VM: Patch \"http://localhost/vm\": dial unix /tmp/TestPauseResume_ResumeVM_PauseVM2666742174/fc.sock: connect: no such file or directory"
+time="2026-11-13T00:57:05Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestPauseResume_ResumeVM_PauseVM2666742174/fc.sock"
+time="2026-11-13T00:57:05Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:05Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:05Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:05Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:05Z" level=info msg="Attaching drive /fixtures/root-drive.img, slot root, root true."
+time="2026-11-13T00:57:05Z" level=info msg="Attached drive /fixtures/root-drive.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:05Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:05Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:05Z" level=warning msg="firecracker exited: signal: terminated"
+time="2026-11-13T00:57:05Z" level=error msg="failed to pause the VM: Patch \"http://localhost/vm\": dial unix /tmp/TestPauseResume_ResumeVM_PauseVM2666742174/fc.sock: connect: no such file or directory"
+time="2026-11-13T00:57:05Z" level=error msg="failed to resume the VM: Patch \"http://localhost/vm\": dial unix /tmp/TestPauseResume_ResumeVM_PauseVM2666742174/fc.sock: connect: no such file or directory"
+=== RUN   TestPauseResume/PauseVM_ResumeVM
+time="2026-11-13T00:57:05Z" level=error msg="failed to pause the VM: Patch \"http://localhost/vm\": dial unix /tmp/TestPauseResume_PauseVM_ResumeVM453014244/fc.sock: connect: no such file or directory"
+time="2026-11-13T00:57:05Z" level=error msg="failed to resume the VM: Patch \"http://localhost/vm\": dial unix /tmp/TestPauseResume_PauseVM_ResumeVM453014244/fc.sock: connect: no such file or directory"
+time="2026-11-13T00:57:05Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestPauseResume_PauseVM_ResumeVM453014244/fc.sock"
+time="2026-11-13T00:57:05Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:05Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:05Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:05Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:05Z" level=info msg="Attaching drive /fixtures/root-drive.img, slot root, root true."
+time="2026-11-13T00:57:05Z" level=info msg="Attached drive /fixtures/root-drive.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:05Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:06Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:06Z" level=warning msg="firecracker exited: signal: terminated"
+time="2026-11-13T00:57:06Z" level=error msg="failed to pause the VM: Patch \"http://localhost/vm\": dial unix /tmp/TestPauseResume_PauseVM_ResumeVM453014244/fc.sock: connect: no such file or directory"
+time="2026-11-13T00:57:06Z" level=error msg="failed to resume the VM: Patch \"http://localhost/vm\": dial unix /tmp/TestPauseResume_PauseVM_ResumeVM453014244/fc.sock: connect: no such file or directory"
+--- PASS: TestPauseResume (0.29s)
+    --- PASS: TestPauseResume/PauseVM (0.05s)
+    --- PASS: TestPauseResume/ResumeVM (0.05s)
+    --- PASS: TestPauseResume/Consecutive_PauseVM (0.05s)
+    --- PASS: TestPauseResume/Consecutive_ResumeVM (0.05s)
+    --- PASS: TestPauseResume/ResumeVM_PauseVM (0.04s)
+    --- PASS: TestPauseResume/PauseVM_ResumeVM (0.05s)
+=== RUN   TestCreateSnapshot
+=== RUN   TestCreateSnapshot/CreateSnapshot
+time="2026-11-13T00:57:06Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestCreateSnapshot3354404562/TestCreateSnapshot_CreateSnapshot"
+time="2026-11-13T00:57:06Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:06Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:06Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:06Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:06Z" level=info msg="Attaching drive /fixtures/root-drive.img, slot root, root true."
+time="2026-11-13T00:57:06Z" level=info msg="Attached drive /fixtures/root-drive.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:06Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:06Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:07Z" level=warning msg="firecracker exited: signal: terminated"
+=== RUN   TestCreateSnapshot/CreateSnapshot_before_pause
+time="2026-11-13T00:57:07Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestCreateSnapshot3354404562/TestCreateSnapshot_CreateSnapshot_before_pause"
+time="2026-11-13T00:57:07Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:07Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:07Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:07Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:07Z" level=info msg="Attaching drive /fixtures/root-drive.img, slot root, root true."
+time="2026-11-13T00:57:07Z" level=info msg="Attached drive /fixtures/root-drive.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:07Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:07Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:07Z" level=error msg="failed to create a snapshot of the VM: [PUT /snapshot/create][400] createSnapshotBadRequest {\"fault_message\":\"Create snapshot error: Cannot save the microVM state: Operation not allowed: save/restore unavailable while running\"}"
+time="2026-11-13T00:57:07Z" level=warning msg="firecracker exited: signal: terminated"
+--- PASS: TestCreateSnapshot (1.25s)
+    --- PASS: TestCreateSnapshot/CreateSnapshot (1.20s)
+    --- PASS: TestCreateSnapshot/CreateSnapshot_before_pause (0.05s)
+=== RUN   TestLoadSnapshot
+time="2026-11-13T00:57:11Z" level=info msg="firecracker exited: status=0"
+=== RUN   TestLoadSnapshot/TestLoadSnapshot
+time="2026-11-13T00:57:13Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestLoadSnapshot3607237058/TestLoadSnapshot_TestLoadSnapshot.create"
+time="2026-11-13T00:57:13Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:13Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:13Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:13Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:13Z" level=info msg="Attaching drive /fixtures/root-drive.img, slot root, root true."
+time="2026-11-13T00:57:13Z" level=info msg="Attached drive /fixtures/root-drive.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:13Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:13Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:17Z" level=warning msg="firecracker exited: signal: terminated"
+time="2026-11-13T00:57:17Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestLoadSnapshot3607237058/TestLoadSnapshot_TestLoadSnapshot.load"
+time="2026-11-13T00:57:17Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:17Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:17Z" level=warning msg="firecracker exited: signal: terminated"
+=== RUN   TestLoadSnapshot/TestLoadSnapshotWithMemoryBackend
+time="2026-11-13T00:57:17Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestLoadSnapshot3607237058/TestLoadSnapshot_TestLoadSnapshotWithMemoryBackend.create"
+time="2026-11-13T00:57:17Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:17Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:17Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:17Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:17Z" level=info msg="Attaching drive /fixtures/root-drive.img, slot root, root true."
+time="2026-11-13T00:57:17Z" level=info msg="Attached drive /fixtures/root-drive.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:17Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:17Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:18Z" level=warning msg="firecracker exited: signal: terminated"
+time="2026-11-13T00:57:18Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestLoadSnapshot3607237058/TestLoadSnapshot_TestLoadSnapshotWithMemoryBackend.load"
+time="2026-11-13T00:57:18Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:18Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:18Z" level=warning msg="firecracker exited: signal: terminated"
+=== RUN   TestLoadSnapshot/TestLoadSnapshot_without_create
+time="2026-11-13T00:57:18Z" level=warning msg="Failed handler \"validate.LoadSnapshotCfg\": stat /tmp/TestLoadSnapshot3607237058/TestLoadSnapshot_TestLoadSnapshot_without_createSnapFile: no such file or directory"
+=== RUN   TestLoadSnapshot/TestLoadSnapshot_and_check_contents_(via_ssh)
+time="2026-11-13T00:57:18Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestLoadSnapshot3607237058/TestLoadSnapshot_TestLoadSnapshot_and_check_contents_(via_ssh).create"
+time="2026-11-13T00:57:18Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:18Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:18Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:18Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:18Z" level=info msg="Attaching drive /tmp/TestLoadSnapshot3607237058/rootfs.img, slot root, root true."
+time="2026-11-13T00:57:18Z" level=info msg="Attached drive /tmp/TestLoadSnapshot3607237058/rootfs.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:18Z" level=info msg="Attaching NIC tap0 (hwaddr 3e:1b:4b:89:fa:86) at index 1"
+time="2026-11-13T00:57:18Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:18Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:21Z" level=info msg="Sent instance shutdown request: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:21Z" level=warning msg="firecracker exited: signal: terminated"
+time="2026-11-13T00:57:21Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestLoadSnapshot3607237058/TestLoadSnapshot_TestLoadSnapshot_and_check_contents_(via_ssh).load"
+time="2026-11-13T00:57:21Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:21Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:21Z" level=warning msg="firecracker exited: signal: terminated"
+--- PASS: TestLoadSnapshot (14.78s)
+    --- PASS: TestLoadSnapshot/TestLoadSnapshot (4.12s)
+    --- PASS: TestLoadSnapshot/TestLoadSnapshotWithMemoryBackend (1.24s)
+    --- PASS: TestLoadSnapshot/TestLoadSnapshot_without_create (0.00s)
+    --- PASS: TestLoadSnapshot/TestLoadSnapshot_and_check_contents_(via_ssh) (2.62s)
+=== RUN   TestNetworkStaticValidation
+--- PASS: TestNetworkStaticValidation (0.00s)
+=== RUN   TestNetworkStaticValidationFails_HostDevName
+--- PASS: TestNetworkStaticValidationFails_HostDevName (0.00s)
+=== RUN   TestNetworkStaticValidationFails_TooManyNameservers
+--- PASS: TestNetworkStaticValidationFails_TooManyNameservers (0.00s)
+=== RUN   TestNetworkStaticValidationFails_IPConfiguration
+--- PASS: TestNetworkStaticValidationFails_IPConfiguration (0.00s)
+=== RUN   TestNetworkCNIValidation
+--- PASS: TestNetworkCNIValidation (0.00s)
+=== RUN   TestNetworkCNIValidationFails_NetworkName
+--- PASS: TestNetworkCNIValidationFails_NetworkName (0.00s)
+=== RUN   TestNetworkInterfacesValidation_None
+--- PASS: TestNetworkInterfacesValidation_None (0.00s)
+=== RUN   TestNetworkInterfacesValidation_Static
+--- PASS: TestNetworkInterfacesValidation_Static (0.00s)
+=== RUN   TestNetworkInterfacesValidation_CNI
+--- PASS: TestNetworkInterfacesValidation_CNI (0.00s)
+=== RUN   TestNetworkInterfacesValidation_MultipleStatic
+--- PASS: TestNetworkInterfacesValidation_MultipleStatic (0.00s)
+=== RUN   TestNetworkInterfacesValidationFails_MultipleCNI
+--- PASS: TestNetworkInterfacesValidationFails_MultipleCNI (0.00s)
+=== RUN   TestNetworkInterfacesValidationFails_IPWithMultiple
+--- PASS: TestNetworkInterfacesValidationFails_IPWithMultiple (0.00s)
+=== RUN   TestNetworkInterfacesValidationFails_IPWithKernelArg
+--- PASS: TestNetworkInterfacesValidationFails_IPWithKernelArg (0.00s)
+=== RUN   TestNetworkInterfacesValidationFails_CNIWithMultiple
+--- PASS: TestNetworkInterfacesValidationFails_CNIWithMultiple (0.00s)
+=== RUN   TestNetworkInterfacesValidationFails_CNIWithKernelArg
+--- PASS: TestNetworkInterfacesValidationFails_CNIWithKernelArg (0.00s)
+=== RUN   TestNetworkInterfacesValidationFails_NeitherSpecified
+--- PASS: TestNetworkInterfacesValidationFails_NeitherSpecified (0.00s)
+=== RUN   TestNetworkInterfacesValidationFails_BothSpecified
+--- PASS: TestNetworkInterfacesValidationFails_BothSpecified (0.00s)
+=== RUN   TestNetworkMachineCNIWithConfFile
+time="2026-11-13T00:57:22Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-0.sock"
+time="2026-11-13T00:57:22Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:22Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:22Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:22Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Attaching drive /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-0.img, slot 1, root true."
+time="2026-11-13T00:57:22Z" level=info msg="Attached drive /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-0.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Attaching NIC tap0 (hwaddr 7a:8c:3c:47:c7:8a) at index 1"
+time="2026-11-13T00:57:22Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:22Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-1.sock"
+time="2026-11-13T00:57:22Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:22Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:22Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:22Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Attaching drive /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-1.img, slot 1, root true."
+time="2026-11-13T00:57:22Z" level=info msg="Attached drive /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-1.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Attaching NIC tap0 (hwaddr 36:38:fa:d6:b1:2c) at index 1"
+time="2026-11-13T00:57:22Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:22Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-2.sock"
+time="2026-11-13T00:57:22Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:22Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:22Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:22Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Attaching drive /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-2.img, slot 1, root true."
+time="2026-11-13T00:57:22Z" level=info msg="Attached drive /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-2.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Attaching NIC tap0 (hwaddr f6:11:7f:27:8d:3d) at index 1"
+time="2026-11-13T00:57:22Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:22Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-3.sock"
+time="2026-11-13T00:57:22Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:22Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:22Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:22Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Attaching drive /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-3.img, slot 1, root true."
+time="2026-11-13T00:57:22Z" level=info msg="Attached drive /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-3.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Attaching NIC tap0 (hwaddr fa:62:66:af:7c:92) at index 1"
+time="2026-11-13T00:57:22Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:22Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-4.sock"
+time="2026-11-13T00:57:22Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:22Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:22Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:22Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Attaching drive /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-4.img, slot 1, root true."
+time="2026-11-13T00:57:22Z" level=info msg="Attached drive /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-4.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Attaching NIC tap0 (hwaddr 32:3e:98:52:a8:fc) at index 1"
+time="2026-11-13T00:57:22Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:22Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-5.sock"
+time="2026-11-13T00:57:22Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:22Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:22Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:22Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Attaching drive /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-5.img, slot 1, root true."
+time="2026-11-13T00:57:22Z" level=info msg="Attached drive /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-5.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Attaching NIC tap0 (hwaddr 56:8f:2e:c0:a6:70) at index 1"
+time="2026-11-13T00:57:22Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:22Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-6.sock"
+time="2026-11-13T00:57:22Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:22Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:22Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:22Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Attaching drive /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-6.img, slot 1, root true."
+time="2026-11-13T00:57:22Z" level=info msg="Attached drive /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-6.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Attaching NIC tap0 (hwaddr d6:32:bf:2a:33:66) at index 1"
+time="2026-11-13T00:57:22Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:22Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-7.sock"
+time="2026-11-13T00:57:22Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:22Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:22Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:22Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Attaching drive /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-7.img, slot 1, root true."
+time="2026-11-13T00:57:22Z" level=info msg="Attached drive /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-7.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Attaching NIC tap0 (hwaddr 4a:8b:75:4c:35:02) at index 1"
+time="2026-11-13T00:57:22Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:22Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-8.sock"
+time="2026-11-13T00:57:22Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:22Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:22Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:22Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Attaching drive /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-8.img, slot 1, root true."
+time="2026-11-13T00:57:22Z" level=info msg="Attached drive /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-8.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Attaching NIC tap0 (hwaddr 1a:3f:25:46:5d:18) at index 1"
+time="2026-11-13T00:57:22Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:22Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-9.sock"
+time="2026-11-13T00:57:22Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:22Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:22Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:22Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Attaching drive /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-9.img, slot 1, root true."
+time="2026-11-13T00:57:22Z" level=info msg="Attached drive /tmp/TestNetworkMachineCNIWithConfFile3778145024/TestCNI/1794531442055698151-fcnet-9.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:22Z" level=info msg="Attaching NIC tap0 (hwaddr 26:52:0d:44:f7:c5) at index 1"
+time="2026-11-13T00:57:22Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:22Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:25Z" level=warning msg="firecracker exited: signal: terminated"
+time="2026-11-13T00:57:25Z" level=warning msg="firecracker exited: signal: terminated"
+time="2026-11-13T00:57:25Z" level=error msg="failed to cleanup after VM exit: 1 error occurred:\n\t* failed to remove netns parent dir \"/var/run/netns\": remove /var/run/netns: directory not empty\n\n"
+time="2026-11-13T00:57:25Z" level=warning msg="firecracker exited: signal: terminated"
+time="2026-11-13T00:57:25Z" level=warning msg="firecracker exited: signal: terminated"
+time="2026-11-13T00:57:25Z" level=warning msg="firecracker exited: signal: terminated"
+time="2026-11-13T00:57:25Z" level=warning msg="firecracker exited: signal: terminated"
+time="2026-11-13T00:57:25Z" level=warning msg="firecracker exited: signal: terminated"
+time="2026-11-13T00:57:25Z" level=warning msg="firecracker exited: signal: terminated"
+time="2026-11-13T00:57:25Z" level=warning msg="firecracker exited: signal: terminated"
+time="2026-11-13T00:57:26Z" level=warning msg="firecracker exited: signal: terminated"
+--- PASS: TestNetworkMachineCNIWithConfFile (4.21s)
+=== RUN   TestNetworkMachineCNIWithParsedConfig
+time="2026-11-13T00:57:26Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-0.sock"
+time="2026-11-13T00:57:26Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:26Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:26Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:26Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:26Z" level=info msg="Attaching drive /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-0.img, slot 1, root true."
+time="2026-11-13T00:57:26Z" level=info msg="Attached drive /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-0.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:26Z" level=info msg="Attaching NIC tap0 (hwaddr e2:6e:9d:93:4e:bb) at index 1"
+time="2026-11-13T00:57:26Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:26Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:26Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-1.sock"
+time="2026-11-13T00:57:26Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:26Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:26Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:26Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:26Z" level=info msg="Attaching drive /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-1.img, slot 1, root true."
+time="2026-11-13T00:57:26Z" level=info msg="Attached drive /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-1.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:26Z" level=info msg="Attaching NIC tap0 (hwaddr 76:31:bd:75:ba:66) at index 1"
+time="2026-11-13T00:57:26Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:26Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:26Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-2.sock"
+time="2026-11-13T00:57:26Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:26Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:26Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:26Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:26Z" level=info msg="Attaching drive /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-2.img, slot 1, root true."
+time="2026-11-13T00:57:26Z" level=info msg="Attached drive /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-2.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:26Z" level=info msg="Attaching NIC tap0 (hwaddr 82:9b:b2:f2:96:24) at index 1"
+time="2026-11-13T00:57:26Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:26Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:26Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-3.sock"
+time="2026-11-13T00:57:26Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:26Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:26Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:26Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:26Z" level=info msg="Attaching drive /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-3.img, slot 1, root true."
+time="2026-11-13T00:57:26Z" level=info msg="Attached drive /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-3.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:26Z" level=info msg="Attaching NIC tap0 (hwaddr 56:62:ce:ee:40:67) at index 1"
+time="2026-11-13T00:57:26Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:26Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:26Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-4.sock"
+time="2026-11-13T00:57:26Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:26Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:26Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:26Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:26Z" level=info msg="Attaching drive /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-4.img, slot 1, root true."
+time="2026-11-13T00:57:26Z" level=info msg="Attached drive /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-4.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:26Z" level=info msg="Attaching NIC tap0 (hwaddr 62:9a:ed:01:05:1a) at index 1"
+time="2026-11-13T00:57:26Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:26Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:26Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-5.sock"
+time="2026-11-13T00:57:26Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:26Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:26Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:26Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:26Z" level=info msg="Attaching drive /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-5.img, slot 1, root true."
+time="2026-11-13T00:57:26Z" level=info msg="Attached drive /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-5.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:26Z" level=info msg="Attaching NIC tap0 (hwaddr 36:64:c1:31:d6:e0) at index 1"
+time="2026-11-13T00:57:26Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:26Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:26Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-6.sock"
+time="2026-11-13T00:57:26Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:26Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:26Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:26Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:26Z" level=info msg="Attaching drive /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-6.img, slot 1, root true."
+time="2026-11-13T00:57:26Z" level=info msg="Attached drive /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-6.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:26Z" level=info msg="Attaching NIC tap0 (hwaddr 12:c9:b2:42:5c:97) at index 1"
+time="2026-11-13T00:57:26Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:26Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:26Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-7.sock"
+time="2026-11-13T00:57:26Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:26Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:26Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:26Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:26Z" level=info msg="Attaching drive /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-7.img, slot 1, root true."
+time="2026-11-13T00:57:26Z" level=info msg="Attached drive /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-7.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:26Z" level=info msg="Attaching NIC tap0 (hwaddr 86:75:86:12:9d:a6) at index 1"
+time="2026-11-13T00:57:26Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:26Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:27Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-8.sock"
+time="2026-11-13T00:57:27Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:27Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:27Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:27Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:27Z" level=info msg="Attaching drive /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-8.img, slot 1, root true."
+time="2026-11-13T00:57:27Z" level=info msg="Attached drive /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-8.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:27Z" level=info msg="Attaching NIC tap0 (hwaddr 8e:7a:f2:cf:01:0e) at index 1"
+time="2026-11-13T00:57:27Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:27Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:27Z" level=info msg="Called startVMM(), setting up a VMM on /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-9.sock"
+time="2026-11-13T00:57:27Z" level=info msg="VMM logging disabled."
+time="2026-11-13T00:57:27Z" level=info msg="VMM metrics disabled."
+time="2026-11-13T00:57:27Z" level=info msg="refreshMachineConfiguration: [GET /machine-config][200] getMachineConfigurationOK {\"huge_pages\":\"None\",\"mem_size_mib\":256,\"smt\":false,\"track_dirty_pages\":false,\"vcpu_count\":2}"
+time="2026-11-13T00:57:27Z" level=info msg="PutGuestBootSource: [PUT /boot-source][204] putGuestBootSourceNoContent"
+time="2026-11-13T00:57:27Z" level=info msg="Attaching drive /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-9.img, slot 1, root true."
+time="2026-11-13T00:57:27Z" level=info msg="Attached drive /tmp/TestNetworkMachineCNIWithParsedConfig72004173/TestCNI/1794531446265849031-fcnet-9.img: [PUT /drives/{drive_id}][204] putGuestDriveByIdNoContent"
+time="2026-11-13T00:57:27Z" level=info msg="Attaching NIC tap0 (hwaddr f6:d2:b0:c2:5c:4c) at index 1"
+time="2026-11-13T00:57:27Z" level=info msg="No interfaces are allowed to access MMDS, skipping MMDS config"
+time="2026-11-13T00:57:27Z" level=info msg="startInstance successful: [PUT /actions][204] createSyncActionNoContent"
+time="2026-11-13T00:57:29Z" level=warning msg="firecracker exited: signal: terminated"
+time="2026-11-13T00:57:29Z" level=warning msg="firecracker exited: signal: terminated"
+time="2026-11-13T00:57:29Z" level=warning msg="firecracker exited: signal: terminated"
+time="2026-11-13T00:57:29Z" level=warning msg="firecracker exited: signal: terminated"
+time="2026-11-13T00:57:29Z" level=warning msg="firecracker exited: signal: terminated"
+time="2026-11-13T00:57:29Z" level=warning msg="firecracker exited: signal: terminated"
+time="2026-11-13T00:57:30Z" level=warning msg="firecracker exited: signal: terminated"
+time="2026-11-13T00:57:30Z" level=warning msg="firecracker exited: signal: terminated"
+time="2026-11-13T00:57:30Z" level=warning msg="firecracker exited: signal: terminated"
+time="2026-11-13T00:57:30Z" level=warning msg="firecracker exited: signal: terminated"
+--- PASS: TestNetworkMachineCNIWithParsedConfig (4.26s)
+=== RUN   TestReleaseAPI
+--- PASS: TestReleaseAPI (0.01s)
+=== RUN   TestSnapshotRestoreOverrides
+--- PASS: TestSnapshotRestoreOverrides (0.00s)
+=== RUN   TestSnapshotRestoreSkipsDeviceCreation
+--- PASS: TestSnapshotRestoreSkipsDeviceCreation (0.00s)
+=== RUN   TestEnvValueOrDefaultInt
+--- PASS: TestEnvValueOrDefaultInt (0.00s)
+=== RUN   TestRateLimiter
+--- PASS: TestRateLimiter (0.00s)
+=== RUN   TestRateLimiter_RefillTime
+=== RUN   TestRateLimiter_RefillTime/one_hour
+=== RUN   TestRateLimiter_RefillTime/zero
+--- PASS: TestRateLimiter_RefillTime (0.00s)
+    --- PASS: TestRateLimiter_RefillTime/one_hour (0.00s)
+    --- PASS: TestRateLimiter_RefillTime/zero (0.00s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-go-sdk	38.407s
+?   	github.com/firecracker-microvm/firecracker-go-sdk/client	[no test files]
+?   	github.com/firecracker-microvm/firecracker-go-sdk/client/models	[no test files]
+?   	github.com/firecracker-microvm/firecracker-go-sdk/client/operations	[no test files]
+=== RUN   TestInterfaceIPs
+--- PASS: TestInterfaceIPs (0.00s)
+=== RUN   TestFilterBySandbox
+--- PASS: TestFilterBySandbox (0.00s)
+=== RUN   TestIfacesWithName
+--- PASS: TestIfacesWithName (0.00s)
+=== RUN   TestGetVMTapPair
+--- PASS: TestGetVMTapPair (0.00s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-go-sdk/cni/internal	0.003s
+=== RUN   TestMTUOf
+--- PASS: TestMTUOf (0.00s)
+=== RUN   TestIPBootParams
+--- PASS: TestIPBootParams (0.00s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-go-sdk/cni/vmconf	0.004s
+=== RUN   TestLoggingPanic
+time="2026-11-13T00:56:52Z" level=debug msg=TestLoggingPanic
+--- PASS: TestLoggingPanic (0.00s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-go-sdk/fctesting	0.007s
+=== RUN   TestFindFirstVendorID
+--- PASS: TestFindFirstVendorID (0.00s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-go-sdk/internal	0.003s
+=== RUN   TestTemporaryNetErr
+--- PASS: TestTemporaryNetErr (0.00s)
+=== RUN   TestTryConnReadUntilPreservesFollowingBytes
+--- PASS: TestTryConnReadUntilPreservesFollowingBytes (0.00s)
+=== RUN   TestDialContextPreservesFollowingBytes
+--- PASS: TestDialContextPreservesFollowingBytes (0.00s)
+=== RUN   TestTryConnReadUntilBoundsACK
+--- PASS: TestTryConnReadUntilBoundsACK (0.00s)
+=== RUN   TestTryConnReadUntilTimeoutClearsDeadline
+--- PASS: TestTryConnReadUntilTimeoutClearsDeadline (0.02s)
+=== RUN   TestTryConnReadUntilIncompleteACK
+--- PASS: TestTryConnReadUntilIncompleteACK (0.00s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-go-sdk/vsock	0.026s
+PINNED_SDK_PRIVILEGED_SUITE_OK

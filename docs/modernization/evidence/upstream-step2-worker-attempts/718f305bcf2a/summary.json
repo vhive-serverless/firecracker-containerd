@@ -1,0 +1,72 @@
+{
+  "runtime_revision": "718f305bcf2a481e98e854ca5960cda5880ce362",
+  "pipeline_exit_code": 1,
+  "build_install_images": "PASS",
+  "vhive_candidate_result": "FAIL",
+  "passes": [
+    "TestPauseSnapResume (16.59s)"
+  ],
+  "failures": [
+    "TestSnapshotConcurrentClones (20.33s)",
+    "TestSnapshotSourceMemoryAndDiskIsolation (20.13s)"
+  ],
+  "cause": "restore mount source validation rejects normal /dev/mapper block-device symlink with O_NOFOLLOW; both clone tests fail before restore boot",
+  "files": {
+    "stage2-build-718f305bcf2a.log": {
+      "bytes": 104525,
+      "sha256": "dc76c88bc30830719d6335979df9c89e771480f84a555aec1d3478ef76feb4f8"
+    },
+    "stage2-install-718f305bcf2a.log": {
+      "bytes": 9098,
+      "sha256": "ec42a60227cb9e78603edcea4282ff8847d100de55e60cfee60424e04806c811"
+    },
+    "stage2-test-images-718f305bcf2a.log": {
+      "bytes": 109625,
+      "sha256": "6e3b6e81176e4f021c122971a9206b5694f7f0afa27e1511a94c4361e6f51ae8"
+    },
+    "stage2-vhive-718f305bcf2a.log": {
+      "bytes": 9475,
+      "sha256": "41ea1efd94d023959f90841920af31c29a68614cb9747f56fe2c309bb9db54b9"
+    },
+    "vhive-718f305bcf2a.UMNtWA8L/acceptance.log": {
+      "bytes": 5565,
+      "sha256": "65c62698f95db8b5c33dae0e346fc10144a97718a6cf8f5d67c64a95a5a72a21"
+    },
+    "vhive-718f305bcf2a.UMNtWA8L/binaries.sha256": {
+      "bytes": 506,
+      "sha256": "cfc4cf5d68903046af8b5571df3cc8d807c3b4b05b04f05af4ff1296b92da150"
+    },
+    "vhive-718f305bcf2a.UMNtWA8L/containerd.out": {
+      "bytes": 209197,
+      "sha256": "54549b5855b8a64c15983ec23989def5943ea43160ac40d96ec71adf529a4f6c"
+    },
+    "vhive-718f305bcf2a.UMNtWA8L/demux-snapshotter.out": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "vhive-718f305bcf2a.UMNtWA8L/http-address-resolver.out": {
+      "bytes": 81,
+      "sha256": "33af7980a16f451dadfe6b42d421dd8651d1c24a3000c5b27eae8899f47e6fc2"
+    },
+    "vhive-718f305bcf2a.UMNtWA8L/inputs": {
+      "bytes": 484,
+      "sha256": "b17b3d1751388957f1c9d2e4d78fa85687e3a7c440c5a56bf68fdb8273620eb9"
+    },
+    "vhive-718f305bcf2a.UMNtWA8L/modules.json": {
+      "bytes": 99283,
+      "sha256": "e4862893cbad1fd6cd99258034315bedfe1ed46bd1978b867b6f640422f4d43d"
+    },
+    "vhive-718f305bcf2a.UMNtWA8L/test-buildinfo.txt": {
+      "bytes": 289,
+      "sha256": "27e526fb97d891510e983512c1eebf3e442b8701d14ebd9529ab0c1efed1ea2f"
+    },
+    "vhive-718f305bcf2a.UMNtWA8L/vhive-runtime-version": {
+      "bytes": 244,
+      "sha256": "cbbdfba8ef17971b5b7f5634f4a812fd8701ccf7ff42ed7ad296cb027f4132b4"
+    },
+    "vhive-718f305bcf2a.UMNtWA8L/vhive-tests.log": {
+      "bytes": 5321,
+      "sha256": "e866d8ce43723c63684b82d60ebd4b21fadc0523eda540ee6231d069f697260e"
+    }
+  }
+}

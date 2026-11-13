@@ -1,0 +1,12 @@
+{
+  "image": "localhost/fcmod-vhive-test:cf0d9708bb34",
+  "rootfs_path": "/var/lib/firecracker-containerd/runtime/default-rootfs.img",
+  "rootfs_sha256": "c26b5f4daf2c8ffad5fa6694eb91c81c3761e0ee953b6c46306b1bd6b2c2d1c7",
+  "agent_path_in_rootfs": "usr/local/bin/agent",
+  "agent_sha256": "d4693c4811a178cfd3865c8ef8e8a1db3e9427a048bdff0c8d653955b20a29f9",
+  "method": "Network-disabled temporary container with entrypoint /bin/cat copied the exact image rootfs to a private host temporary file; host unsquashfs -cat extracted agent bytes for sha256sum. All commands exit0; temporary file/container removed.",
+  "comparison": "Agent matches built/staged/SquashFS agent receipt cf0-agent-rootfs-provenance.txt with vcs.revision cf0d9708 and vcs.modified=false.",
+  "limit": "Verifies stored test-image filesystem, not live guest memory.",
+  "image_id": "sha256:afee504b391cf0b83f0e268763e32b12eec9d05b44de9f759f33b38351c5ad71",
+  "image_identity_match": "docker image inspect ID equals manifest list exported in original stage2-vhive-cf0d9708bb34.log"
+}

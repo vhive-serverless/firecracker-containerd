@@ -61,6 +61,23 @@ matching process cursors. Step 1 does not persist a snapshot cut or coordinate V
 capture; those operations are introduced with the snapshot consumer in Step 2.
 See [migration scope and validation](modernization/upstream-migration.md).
 
+## Step 2 restored path separation
+
+Unjailed restore exposes the live shim directory at reserved
+`/.firecracker-restore-shared`, while original captured disk paths remain
+independent private mappings even for a reused VM ID. API/vsock basenames use
+that alias as the VMM working directory. Snapshot inputs have explicit read-only
+binds, log/metrics outputs explicit writable binds, and newly exposed disks need
+validated descriptor-backed mounts. Legacy recapture outputs below the live
+host shim directory use the alias; captured disk identities keep their original
+paths. Only verified pristine reset stubs can reuse a captured slot. Native
+recapture and jailed current-launch stub ownership are later Step 3 features.
+
+Exact Step 2 `2e03843816cf` has segmented check coverage with an unfixed existing
+CNI race; its original full run remains failed. See the
+[Step 2 scope and receipt](modernization/step-2.md). This is not a clean full-run
+claim or final published/installed-vHive acceptance.
+
 ## Storage and incremental features
 
 Step 1 preserves an immutable SquashFS guest base with a tmpfs guest overlay

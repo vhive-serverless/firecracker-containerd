@@ -1,0 +1,192 @@
+{
+  "conclusion": "Strong source-supported existing pinned CNI chain check/create race; not evidence of same-ID runtime regression. Exact failing interleaving remains inference pending bounded diagnostics.",
+  "original_failure": {
+    "source": "2e03843816cf95d184ad4ad429adf6ea2ccc1412",
+    "terminal_exit": 2,
+    "authority": {
+      "exec_session": 7329,
+      "launcher_pid": 2921144,
+      "exit_code": 2,
+      "stdout_marker": "",
+      "source": "Explicit lead terminal confirmation, not inferred from files"
+    },
+    "phase_codes": {
+      "build": 0,
+      "install": 0,
+      "test-images": 0,
+      "vhive": 0,
+      "acceptance": 2
+    },
+    "test": "TestLaunchMultipleContainersWithRemoteSnapshotter_Isolated",
+    "duration_seconds": 0.31,
+    "failed_VM": "2",
+    "exact_error": "Failed to create VM[2]: rpc error: code = Unknown desc = failed to create VM: failed to start the VM: failure when invoking CNI: failed to create CNI network: plugin type=\"firewall\" failed (add): running [/sbin/iptables -t filter -N CNI-FORWARD --wait]: exit status 4: iptables v1.8.9 (nf_tables):  CHAIN_USER_ADD failed (File exists): chain CNI-FORWARD",
+    "raw_log": "/home/jyp/project/fc-ctrd-mod/migration-upstream/stage2-2e038-terminal-evidence/stage2-acceptance-2e03843816cf.log",
+    "raw_log_sha256": "62c89484ef518584cf7e188c5d02b94b6417c68f8c4b6a954f79b31f82dd5561",
+    "raw_error_line": 4482,
+    "failed_test_line": 4484
+  },
+  "source_revisions": {
+    "Step1accepted": "1074bdc8f2b602c9f986d3975d5c94b40bd1cac7",
+    "Step2accepted": "7386ab5c5e8c3519ad1698c27f548803e714e304",
+    "Step2corrected": "2e03843816cf95d184ad4ad429adf6ea2ccc1412"
+  },
+  "full_file_blob_identity": {
+    "tools/demo/fcnet.conflist": {
+      "identical": true,
+      "sources": {
+        "Step1accepted": {
+          "blob_oid": "3f1ef50b2235fd2545e5e46326886c3ac31bb3b8",
+          "sha256": "3e31e66f022b30002087c3880d63e2598d9a895d02ddeae80cc85e76aa19fdf8"
+        },
+        "Step2accepted": {
+          "blob_oid": "3f1ef50b2235fd2545e5e46326886c3ac31bb3b8",
+          "sha256": "3e31e66f022b30002087c3880d63e2598d9a895d02ddeae80cc85e76aa19fdf8"
+        },
+        "Step2corrected": {
+          "blob_oid": "3f1ef50b2235fd2545e5e46326886c3ac31bb3b8",
+          "sha256": "3e31e66f022b30002087c3880d63e2598d9a895d02ddeae80cc85e76aa19fdf8"
+        }
+      }
+    },
+    "snapshotter/service_integ_test.go": {
+      "identical": true,
+      "sources": {
+        "Step1accepted": {
+          "blob_oid": "4d0a15635009563e7e92f1f45a47746eb4b993fb",
+          "sha256": "d4c1dc36db136e2c4adbd764257ec88e6739194296f6198419de4ef157faa31d"
+        },
+        "Step2accepted": {
+          "blob_oid": "4d0a15635009563e7e92f1f45a47746eb4b993fb",
+          "sha256": "d4c1dc36db136e2c4adbd764257ec88e6739194296f6198419de4ef157faa31d"
+        },
+        "Step2corrected": {
+          "blob_oid": "4d0a15635009563e7e92f1f45a47746eb4b993fb",
+          "sha256": "d4c1dc36db136e2c4adbd764257ec88e6739194296f6198419de4ef157faa31d"
+        }
+      }
+    },
+    "internal/integtest/runtime.go": {
+      "identical": true,
+      "sources": {
+        "Step1accepted": {
+          "blob_oid": "58b505a7a62122597b9ff15c5cd2440bb33e34e2",
+          "sha256": "3b69e53d4d14b96f1f25c21c8e45d74f4e5352460f2a015fc03b0b4125e1dac3"
+        },
+        "Step2accepted": {
+          "blob_oid": "58b505a7a62122597b9ff15c5cd2440bb33e34e2",
+          "sha256": "3b69e53d4d14b96f1f25c21c8e45d74f4e5352460f2a015fc03b0b4125e1dac3"
+        },
+        "Step2corrected": {
+          "blob_oid": "58b505a7a62122597b9ff15c5cd2440bb33e34e2",
+          "sha256": "3b69e53d4d14b96f1f25c21c8e45d74f4e5352460f2a015fc03b0b4125e1dac3"
+        }
+      }
+    },
+    "internal/integtest/network.go": {
+      "identical": true,
+      "sources": {
+        "Step1accepted": {
+          "blob_oid": "ee7fb7633115c5f7ec3ed7bd7e29c25ec96fbda4",
+          "sha256": "3739cd3930d9d2fe71daf4258a481e2c8cc1f0bb7a8bda40d077404c756fe9e6"
+        },
+        "Step2accepted": {
+          "blob_oid": "ee7fb7633115c5f7ec3ed7bd7e29c25ec96fbda4",
+          "sha256": "3739cd3930d9d2fe71daf4258a481e2c8cc1f0bb7a8bda40d077404c756fe9e6"
+        },
+        "Step2corrected": {
+          "blob_oid": "ee7fb7633115c5f7ec3ed7bd7e29c25ec96fbda4",
+          "sha256": "3739cd3930d9d2fe71daf4258a481e2c8cc1f0bb7a8bda40d077404c756fe9e6"
+        }
+      }
+    },
+    "runtime/helpers.go": {
+      "identical": true,
+      "sources": {
+        "Step1accepted": {
+          "blob_oid": "8f90d629709cdb108938e0ec0ce36db8e8989464",
+          "sha256": "ce647182cf5981a9bcd0bea8d157257938bccaccfabb9563e59f5ff9188396fa"
+        },
+        "Step2accepted": {
+          "blob_oid": "8f90d629709cdb108938e0ec0ce36db8e8989464",
+          "sha256": "ce647182cf5981a9bcd0bea8d157257938bccaccfabb9563e59f5ff9188396fa"
+        },
+        "Step2corrected": {
+          "blob_oid": "8f90d629709cdb108938e0ec0ce36db8e8989464",
+          "sha256": "ce647182cf5981a9bcd0bea8d157257938bccaccfabb9563e59f5ff9188396fa"
+        }
+      }
+    },
+    "snapshotter/Makefile": {
+      "identical": true,
+      "sources": {
+        "Step1accepted": {
+          "blob_oid": "73f3b701895345907f8fe70fccb6315d717eca7a",
+          "sha256": "cffb4ffbb29b43efd9556182182dd05d733841a80d7dcc36a5f0fc8b1be8deef"
+        },
+        "Step2accepted": {
+          "blob_oid": "73f3b701895345907f8fe70fccb6315d717eca7a",
+          "sha256": "cffb4ffbb29b43efd9556182182dd05d733841a80d7dcc36a5f0fc8b1be8deef"
+        },
+        "Step2corrected": {
+          "blob_oid": "73f3b701895345907f8fe70fccb6315d717eca7a",
+          "sha256": "cffb4ffbb29b43efd9556182182dd05d733841a80d7dcc36a5f0fc8b1be8deef"
+        }
+      }
+    }
+  },
+  "CNI_pin_excerpts": {
+    "Step1accepted": {
+      "Makefile_blob_oid": "e2560f1421ed2c6b26472fe665cf878c76e0804c",
+      "CNI_build_block_sha256": "2b1a931492f4a5fa577eb2beb2911ddf21f3a17af702a545468db5bc7bb62f5a",
+      "go_mod_blob_oid": "8d17af9ffaedeb0c4a33b3fc60bf5eebd5ef33ec",
+      "CNI_module_pin_text": "github.com/containernetworking/cni v1.3.0\ngithub.com/containernetworking/plugins v1.9.1\ngithub.com/containerd/go-cni v1.1.13 // indirect",
+      "CNI_module_pin_sha256": "a205b252a9aa7368978bd8dce279afeece396d6c27cf43abbfc447891ac3fb6c"
+    },
+    "Step2accepted": {
+      "Makefile_blob_oid": "e2560f1421ed2c6b26472fe665cf878c76e0804c",
+      "CNI_build_block_sha256": "2b1a931492f4a5fa577eb2beb2911ddf21f3a17af702a545468db5bc7bb62f5a",
+      "go_mod_blob_oid": "0e3556306ce5a3f1caa141553fdb958e83c0f8d4",
+      "CNI_module_pin_text": "github.com/containernetworking/cni v1.3.0\ngithub.com/containernetworking/plugins v1.9.1\ngithub.com/containerd/go-cni v1.1.13 // indirect",
+      "CNI_module_pin_sha256": "a205b252a9aa7368978bd8dce279afeece396d6c27cf43abbfc447891ac3fb6c"
+    },
+    "Step2corrected": {
+      "Makefile_blob_oid": "e2560f1421ed2c6b26472fe665cf878c76e0804c",
+      "CNI_build_block_sha256": "2b1a931492f4a5fa577eb2beb2911ddf21f3a17af702a545468db5bc7bb62f5a",
+      "go_mod_blob_oid": "0e3556306ce5a3f1caa141553fdb958e83c0f8d4",
+      "CNI_module_pin_text": "github.com/containernetworking/cni v1.3.0\ngithub.com/containernetworking/plugins v1.9.1\ngithub.com/containerd/go-cni v1.1.13 // indirect",
+      "CNI_module_pin_sha256": "a205b252a9aa7368978bd8dce279afeece396d6c27cf43abbfc447891ac3fb6c"
+    }
+  },
+  "cached_primary_plugin_source": {
+    "module": "github.com/containernetworking/plugins@v1.9.1",
+    "files_sha256": {
+      "pkg/utils/iptables.go": "0be01d4ca10c250b543ae5c4f57d69302bfd4d79db98b75dde5b135d2a8b3f15",
+      "plugins/meta/firewall/iptables.go": "fcdff47521c4d7067d38d0b872bb3b245b46ee108f2facbbb2666ead74104fa3",
+      "plugins/meta/firewall/firewall_iptables_test.go": "1d1a04193d71d7f14ddbe8c2fde7f37757f118c9085eaaf79f47e87b77d9892c"
+    },
+    "EnsureChain_lines": "pkg/utils/iptables.go:24-41",
+    "shared_chain_lines": "plugins/meta/firewall/iptables.go:59-67,213-220",
+    "test_limit": "firewall_iptables_test.go:277-291 checks sequential idempotent creation, not the simultaneous missing-chain create interleaving"
+  },
+  "mechanism": [
+    "Five goroutines launch fresh VMs in one testcontainer network namespace; defaultNumberOfVms5 and allrelevantsource/config/pins identicalaccepted1074/7386.",
+    "Firewallbackend uses fixedCNI-FORWARD and performs ChainExists then NewChain.",
+    "Two ADDs can observe absence; one createschain; other iptables-nftNewChain returns EEXIST4; helper suppressesonlyexit1 and propagates4. --wait on theindividual command doesnot make check+create atransaction.",
+    "Failingtest is ordinaryCreateVM,notrestore;2e changed8restore/namespace/stub/snapshotfiles and noCNI/helper/plugin/test configuration.",
+    "Samecomponentpassed atStep4bbcaf16.40s; corroborates nondeterminism butdoesnotproveinterleaving or erase2efailure."
+  ],
+  "diagnostic": {
+    "status": "Stage2_candidate executing3serialfreshcontainerrepeats; outcomes not yet claimed",
+    "requirements": [
+      "Exactunchangedsourceandexistingimmutableimage; recordimageID/pluginhashversion",
+      "Eachrepeatgetsnewnetworknamespace/freshownedpool whilepreservingdefault5concurrentVMs",
+      "Run thefullunchanged selectedtest ineachcontainer; no warmchainprecreation orsequentializingVMs",
+      "Preserveall3results,originalfailure,containerd/pluginlogs andcleanup",
+      "Nohost/K8s/iptablesflush,chainsurgery,dependencychange,runtimesourcechange,skip,automaticretrywrapper,orweakenedassertion"
+    ],
+    "limitation": "Diagnosticrepeatsdo notrewrite originalacceptanceexit2,claimfullStep2acceptance,orcoverunreachedthinpool/SDKtail. Completeunchangedagreedacceptance separately.",
+    "if_reproducible": "Review narrow dependency-facing racehandling/serialization onlyafter evidence; verify chain existence after narrowalready-existsfailure ratherthanignoreallstatus4. No broadsameIDruntimefix justifiednow."
+  },
+  "actions": "Localread-onlysource/logreview plus requested externalreportfiles; noworkerqueries/mutations,tests,builds orcodeedits."
+}
