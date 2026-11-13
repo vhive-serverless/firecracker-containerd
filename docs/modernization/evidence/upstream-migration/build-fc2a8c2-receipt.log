@@ -1,0 +1,26 @@
+fc2a8c2023c915f98bb8b484902e05de12277b8b
+ eaf83bb718a559d324613d566eaf776b31a62340 _submodules/firecracker (v1.18.0)
+ c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e _submodules/runc (v1.4.2)
+ 3070538befb5a6c09f93e99164762b3a76310357 _submodules/stargz-snapshotter (cmd/v0.18.2)
+b33f46cd6d88834cf6a4f8d184f08f219809c636236bffd286d233a60602a2ba  bin/firecracker
+ddadbaa15b5c942271a83b7040ca7259c8ccf92a9e08d44cce0b86fa407ba460  bin/jailer
+9cd4a021610365032b0e13fa37e67b751ccc8205c5b14d313af28cbe6e219220  _submodules/runc/runc
+1fabe7c0fc34b3108f5902d20ea07c1d294dbc860766195f0718e84912fafa27  _submodules/stargz-snapshotter/out/containerd-stargz-grpc
+b90a904869d7dbbb2bc00996bf7467938de2eb7e17583a60b44e6a65f5e98d07  volume/volume-init
+6f014f2497cfbe7734e73343105cb21c19611cc0c073e4a35638a94b3c1d0973  agent/agent
+483d9bccb3a5516b72dede5229cb82c354d8784fad8b636941d5960cc0aa7a4c  runtime/containerd-shim-aws-firecracker
+e4a22153d933b268250027a6d6d4b339c18260d672c479de054314c9bdac8045  firecracker-control/cmd/containerd/firecracker-containerd
+3b35ee2043d6e15df9b836fff37703be41a9ec07784c4b48825d5778967c69cc  firecracker-control/cmd/containerd/firecracker-ctr
+7d1b0043a14facd7972dd471552b9e7cfb605783157c822cbb2a76f7be3028ea  cri/firecracker-cri
+DAX_ROOT_IMAGE_READY bytes=536870912 block_size=4096 nominal_pmem_metadata_bytes=8388608
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/upstream-migration/runtime/tools/image-builder'
+Firecracker v1.18.0
+
+2026-11-12T11:43:31.142458743 [anonymous-instance:main] Firecracker exiting successfully. exit_code=0
+runc version 1.4.2
+commit: c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e
+spec: 1.3.0
+go: go1.26.11
+libseccomp: 2.5.4
+containerd github.com/containerd/containerd/v2 2.3.7+unknown fc2a8c2023c915f98bb8b484902e05de12277b8b
+firecracker-cri fc2a8c2023c915f98bb8b484902e05de12277b8b

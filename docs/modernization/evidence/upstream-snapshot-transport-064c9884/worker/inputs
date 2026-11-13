@@ -1,0 +1,6 @@
+supplement_revision=064c9884a0a34a52c1e648847a4bb5f336fa2dde
+accepted_runtime_revision=332da2a7065baa0050037250bbf2ff316a1a8519
+accepted_image=localhost/firecracker-containerd-test:332da2a7065b
+accepted_image_id=sha256:17046a2aeb5c501161f0761094b96b3f5347602888759d56ac8cf9d6c40ab64d
+owner_label=org.firecracker.transport-supplement=064c9884-f4adc03e949a
+pool=fc-supp-064c9884-f4adc03e949a

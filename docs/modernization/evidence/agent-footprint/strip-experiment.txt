@@ -1,0 +1,17 @@
+agent.original 18682018
+92eeebb550e0b91741e84ebf59c157c817fdbb46d7ebcb37af3fd2a27e0f5bcf  /tmp/fcmod-agent-footprint-audit-worker/agent.original
+18099929	 570891	33862424	52533244	32197fc	/tmp/fcmod-agent-footprint-audit-worker/agent.original
+agent.strip-debug 18680568
+d86ea5df989089a32c7382ecaa4038b1e1820388fa411113085424c32ac0bee4  /tmp/fcmod-agent-footprint-audit-worker/agent.strip-debug
+18099929	 570891	33862424	52533244	32197fc	/tmp/fcmod-agent-footprint-audit-worker/agent.strip-debug
+runc.original 17001136
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  /tmp/fcmod-agent-footprint-audit-worker/runc.original
+10938886	1415389	33811464	46165739	2c06eeb	/tmp/fcmod-agent-footprint-audit-worker/runc.original
+runc.strip-debug 13660736
+2426f1d05de1d5339046ecd4ff9818be82ebd9c6aa2c4363c1877127af1505ec  /tmp/fcmod-agent-footprint-audit-worker/runc.strip-debug
+10938886	1415389	33811464	46165739	2c06eeb	/tmp/fcmod-agent-footprint-audit-worker/runc.strip-debug
+runc.strip-all 12364536
+66245abb53d07112c3d6caa5a5c41ac0c3c1ea2752e403330c67ed1cb4fcc6dc  /tmp/fcmod-agent-footprint-audit-worker/runc.strip-all
+10938886	1415389	33811464	46165739	2c06eeb	/tmp/fcmod-agent-footprint-audit-worker/runc.strip-all
+original_agent_sha=92eeebb550e0b91741e84ebf59c157c817fdbb46d7ebcb37af3fd2a27e0f5bcf
+original_runc_sha=bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a

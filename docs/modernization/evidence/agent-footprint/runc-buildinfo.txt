@@ -1,0 +1,35 @@
+_submodules/runc/runc: go1.26.11
+	path	github.com/opencontainers/runc
+	mod	github.com/opencontainers/runc	(devel)	
+	dep	github.com/checkpoint-restore/go-criu/v7	v7.2.0	
+	dep	github.com/cilium/ebpf	v0.17.3	
+	dep	github.com/containerd/console	v1.0.5	
+	dep	github.com/coreos/go-systemd/v22	v22.7.0	
+	dep	github.com/cyphar/filepath-securejoin	v0.6.1	
+	dep	github.com/docker/go-units	v0.5.0	
+	dep	github.com/godbus/dbus/v5	v5.1.0	
+	dep	github.com/moby/sys/capability	v0.4.0	
+	dep	github.com/moby/sys/mountinfo	v0.7.2	
+	dep	github.com/moby/sys/user	v0.4.0	
+	dep	github.com/moby/sys/userns	v0.1.0	
+	dep	github.com/mrunalp/fileutils	v0.5.1	
+	dep	github.com/opencontainers/cgroups	v0.0.6	
+	dep	github.com/opencontainers/runtime-spec	v1.3.0	
+	dep	github.com/opencontainers/selinux	v1.13.0	
+	dep	github.com/seccomp/libseccomp-golang	v0.11.1	
+	dep	github.com/sirupsen/logrus	v1.9.3	
+	dep	github.com/urfave/cli	v1.22.17	
+	dep	github.com/vishvananda/netlink	v1.3.1	
+	dep	github.com/vishvananda/netns	v0.0.5	
+	dep	golang.org/x/net	v0.43.0	
+	dep	golang.org/x/sys	v0.38.0	
+	dep	google.golang.org/protobuf	v1.36.8	
+	build	-buildmode=pie
+	build	-compiler=gc
+	build	-tags=seccomp,urfave_cli_no_docs,netgo,osusergo
+	build	-trimpath=true
+	build	DefaultGODEBUG=containermaxprocs=0,cryptocustomrand=1,decoratemappings=0,httpservecontentmaxranges=1,tlssecpmlkem=0,tlssha1=1,updatemaxprocs=0,urlstrictcolons=0,x509sha256skid=0
+	build	CGO_ENABLED=1
+	build	GOARCH=amd64
+	build	GOOS=linux
+	build	GOAMD64=v1

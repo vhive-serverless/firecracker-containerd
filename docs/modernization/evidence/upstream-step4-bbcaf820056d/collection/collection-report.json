@@ -1,0 +1,41 @@
+{
+  "collection": "/home/jyp/project/fc-ctrd-mod/migration-upstream/stage4-bbcaf-terminal-evidence",
+  "status": "EXACT_BBCAF_TERMINAL_ACCEPTANCE_PASSED",
+  "runtime_source": "bbcaf820056d78e33887059465504c6647f3d983",
+  "runtime_tree": "9dcfa565a91171b00af8bd5fb271dfc47fd4c388",
+  "raw_files": 41,
+  "raw_bytes": 1666372,
+  "raw_manifest_sha256": "148335cc82244207455f9acb62dbdf7c88e179ab293c847c0cde0dfcff1ab145",
+  "collector_summary_sha256": "75f1714f09501e2c2059734790fbaf9c87ed5d52b7707c940802c38563186307",
+  "summary_sha256": "97f729bc918c1c8b0084fc07aa0655ddc04deea887002479faea4e129946b017",
+  "pass_counts": {
+    "runtime": 49,
+    "snapshotter": 7,
+    "sdk": 86
+  },
+  "top_level_pass_total": 142,
+  "top_level_skip_count": 2,
+  "nested_skip_count": 8,
+  "native_leaves": 22,
+  "reporting_cases": 2,
+  "stargz_native_leaves": 12,
+  "unique_checks_passed": true,
+  "cleanup_verified": true,
+  "build16originals_unchanged": true,
+  "test_image_id": "sha256:f6becb18f0df98ffb0d5086b54740328c91a8df697d811abb598a2fc95eeaaa8",
+  "installed_rootfs_sha256": "8ed46c277f6fa36e4a822ffee857a4e603d8871add1fd883d853f701fd36217d",
+  "final_test_rootfs_sha256": "b638c52bf69348f2f43d070878068182f088d179f75d74b0a834fc5366ed22a1",
+  "source_of_terminal_exit": {
+    "kind": "Lead-reported tools.write_stdin result",
+    "session": 54045,
+    "chunk_id": "60c7f2",
+    "exit_code": 0,
+    "output": "STAGE4_STACK_AND_UNIQUE_COMPONENT_CHECKS_OK\n"
+  },
+  "scope_limits": [
+    "CorrectedStep2_2e/Step3_751 acceptance is separate and not claimed here.",
+    "FullCRI WIP/K8sPodrestoredeferred1.38; finalpublishedinstalledvHivepending.",
+    "No newmemorytrials/performanceclaim; installed/testrootfs distinct."
+  ],
+  "worker_actions": "Read-onlycollectionandresourcequeriesonly; no environmentmutation,testsorcleanupbycollector."
+}

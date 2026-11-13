@@ -1,0 +1,9 @@
+=== RUN   TestGuestOverlayAllocation
+--- PASS: TestGuestOverlayAllocation (0.52s)
+=== RUN   TestGuestOverlayRejectsRAMAndCleansFailure
+--- PASS: TestGuestOverlayRejectsRAMAndCleansFailure (0.37s)
+=== RUN   TestGuestOverlayHostENOSPC
+    guest_storage_test.go:64: test-storage.sh supplies a private, disk-backed 32 MiB filesystem
+--- SKIP: TestGuestOverlayHostENOSPC (0.00s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	1.949s

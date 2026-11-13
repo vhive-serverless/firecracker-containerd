@@ -1,0 +1,5 @@
+branch=cri-native-snapshot-restore
+expected=aacebc90f4fe7d87819bb91ad736816a2ee0300f
+actual=aacebc90f4fe7d87819bb91ad736816a2ee0300f
+status=clean
+go version go1.26.11 linux/amd64

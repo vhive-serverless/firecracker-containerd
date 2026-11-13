@@ -1,0 +1,9 @@
+url=https://github.com/firecracker-microvm/firecracker/releases/download/v1.18.0/firecracker-v1.18.0-x86_64.tgz
+archive_sha256=1ac8eec866dd5eea14efecf6323e22b23eea24054545338a5b34bc5bca6623cd
+Firecracker v1.18.0
+
+2026-11-12T16:39:50.993729207 [anonymous-instance:main] Firecracker exiting successfully. exit_code=0
+Jailer v1.18.0
+
+b33f46cd6d88834cf6a4f8d184f08f219809c636236bffd286d233a60602a2ba  /users/nehalem/fc-ctrd-mod/upstream-migration/stage4-same-id-integrated/bin/firecracker
+ddadbaa15b5c942271a83b7040ca7259c8ccf92a9e08d44cce0b86fa407ba460  /users/nehalem/fc-ctrd-mod/upstream-migration/stage4-same-id-integrated/bin/jailer

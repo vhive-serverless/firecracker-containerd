@@ -1,0 +1,14 @@
+{
+  "test_source_revision": "c4af54e80cbe1178882f899c4d51b4fa4af50aa4",
+  "host_shim_revision": "19599d00965777d5dde84b73334de2b9f858d2f2",
+  "guest_and_daemon_revision": "57b93fc288e2c606d8d1b291fc11103c81311511",
+  "sdk_revision": "dd9db322432989b96cff7a38a64703d60b6cabf9",
+  "firecracker": "official v1.18.0",
+  "base_image_id": "sha256:390b467fdb27ed4d42dda93f04c9c4ebc2f49469d83cfc9dbea4e0e06b418d76",
+  "test_image": "localhost/firecracker-containerd-test:19599d0-host-diagnostic",
+  "test": "TestNativeCheckpointInterrupt_Isolated",
+  "result": "passed both jail modes",
+  "duration_seconds": 51.07,
+  "scope": "Mixed-revision host-only diagnostic; not full committed stack acceptance",
+  "worker": "amd218.utah.cloudlab.us"
+}

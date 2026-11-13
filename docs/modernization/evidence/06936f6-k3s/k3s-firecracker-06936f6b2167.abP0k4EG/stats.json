@@ -1,0 +1,242 @@
+{
+  "stats": [
+    {
+      "attributes": {
+        "id": "58c41f48b24634f86b958ad109138d4b2690bbddf4d6d987ddc46244d3e3600c",
+        "metadata": {
+          "name": "sidecar",
+          "attempt": 0
+        },
+        "labels": {
+          "io.kubernetes.container.name": "sidecar",
+          "io.kubernetes.pod.name": "firecracker",
+          "io.kubernetes.pod.namespace": "fcmod-smoke",
+          "io.kubernetes.pod.uid": "f22879a0-7297-4d98-b1db-4c76a9cb3f97"
+        },
+        "annotations": {
+          "io.kubernetes.container.hash": "f1b6e0cc",
+          "io.kubernetes.container.restartCount": "0",
+          "io.kubernetes.container.terminationMessagePath": "/dev/termination-log",
+          "io.kubernetes.container.terminationMessagePolicy": "File",
+          "io.kubernetes.pod.terminationGracePeriod": "5"
+        }
+      },
+      "cpu": {
+        "timestamp": "1794421837259656015",
+        "usageCoreNanoSeconds": {
+          "value": "12596000"
+        },
+        "usageNanoCores": {
+          "value": "0"
+        }
+      },
+      "memory": {
+        "timestamp": "1794421837259656015",
+        "workingSetBytes": {
+          "value": "499712"
+        },
+        "availableBytes": {
+          "value": "33054720"
+        },
+        "usageBytes": {
+          "value": "1302528"
+        },
+        "rssBytes": {
+          "value": "36864"
+        },
+        "pageFaults": {
+          "value": "1345"
+        },
+        "majorPageFaults": {
+          "value": "14"
+        }
+      },
+      "writableLayer": {
+        "timestamp": "1794421836938674754",
+        "fsId": {
+          "mountpoint": "/var/lib/containerd/io.containerd.snapshotter.v1.devmapper"
+        },
+        "usedBytes": {
+          "value": "0"
+        },
+        "inodesUsed": {
+          "value": "0"
+        }
+      }
+    },
+    {
+      "attributes": {
+        "id": "6e523e317e196ff479edc3d4d3e932b3f6bdad0d1edd85f4daf69d8813afdc08",
+        "metadata": {
+          "name": "coredns",
+          "attempt": 0
+        },
+        "labels": {
+          "io.kubernetes.container.name": "coredns",
+          "io.kubernetes.pod.name": "coredns-875f564df-2ncpp",
+          "io.kubernetes.pod.namespace": "kube-system",
+          "io.kubernetes.pod.uid": "892a4fb0-909e-4559-95f0-103e70ac7c0c"
+        },
+        "annotations": {
+          "io.kubernetes.container.hash": "3793a8ea",
+          "io.kubernetes.container.ports": "[{\"name\":\"dns\",\"containerPort\":53,\"protocol\":\"UDP\"},{\"name\":\"dns-tcp\",\"containerPort\":53,\"protocol\":\"TCP\"},{\"name\":\"metrics\",\"containerPort\":9153,\"protocol\":\"TCP\"}]",
+          "io.kubernetes.container.restartCount": "0",
+          "io.kubernetes.container.terminationMessagePath": "/dev/termination-log",
+          "io.kubernetes.container.terminationMessagePolicy": "File",
+          "io.kubernetes.pod.terminationGracePeriod": "30"
+        }
+      },
+      "cpu": {
+        "timestamp": "1794421837257466063",
+        "usageCoreNanoSeconds": {
+          "value": "135854000"
+        },
+        "usageNanoCores": {
+          "value": "1505217"
+        },
+        "psi": {
+          "Full": {
+            "Total": "1300000",
+            "Avg10": 0,
+            "Avg60": 0,
+            "Avg300": 0
+          },
+          "Some": {
+            "Total": "1300000",
+            "Avg10": 0,
+            "Avg60": 0,
+            "Avg300": 0
+          }
+        }
+      },
+      "memory": {
+        "timestamp": "1794421837257466063",
+        "workingSetBytes": {
+          "value": "69902336"
+        },
+        "availableBytes": {
+          "value": "108355584"
+        },
+        "usageBytes": {
+          "value": "70156288"
+        },
+        "rssBytes": {
+          "value": "11685888"
+        },
+        "pageFaults": {
+          "value": "5179"
+        },
+        "majorPageFaults": {
+          "value": "507"
+        },
+        "psi": {
+          "Full": {
+            "Total": "0",
+            "Avg10": 0,
+            "Avg60": 0,
+            "Avg300": 0
+          },
+          "Some": {
+            "Total": "0",
+            "Avg10": 0,
+            "Avg60": 0,
+            "Avg300": 0
+          }
+        }
+      },
+      "writableLayer": {
+        "timestamp": "1794421836940668738",
+        "fsId": {
+          "mountpoint": "/var/lib/containerd/io.containerd.snapshotter.v1.devmapper"
+        },
+        "usedBytes": {
+          "value": "0"
+        },
+        "inodesUsed": {
+          "value": "0"
+        }
+      },
+      "io": {
+        "timestamp": "1794421837257466063",
+        "psi": {
+          "Full": {
+            "Total": "12032000",
+            "Avg10": 0,
+            "Avg60": 0,
+            "Avg300": 0
+          },
+          "Some": {
+            "Total": "12032000",
+            "Avg10": 0,
+            "Avg60": 0,
+            "Avg300": 0
+          }
+        }
+      }
+    },
+    {
+      "attributes": {
+        "id": "7fce69593060f742789ca20bd3af691fa0e796965e402a4a1927b3566c6881bf",
+        "metadata": {
+          "name": "main",
+          "attempt": 0
+        },
+        "labels": {
+          "io.kubernetes.container.name": "main",
+          "io.kubernetes.pod.name": "firecracker",
+          "io.kubernetes.pod.namespace": "fcmod-smoke",
+          "io.kubernetes.pod.uid": "f22879a0-7297-4d98-b1db-4c76a9cb3f97"
+        },
+        "annotations": {
+          "io.kubernetes.container.hash": "2b7702ec",
+          "io.kubernetes.container.restartCount": "0",
+          "io.kubernetes.container.terminationMessagePath": "/dev/termination-log",
+          "io.kubernetes.container.terminationMessagePolicy": "File",
+          "io.kubernetes.pod.terminationGracePeriod": "5"
+        }
+      },
+      "cpu": {
+        "timestamp": "1794421837258320612",
+        "usageCoreNanoSeconds": {
+          "value": "38493000"
+        },
+        "usageNanoCores": {
+          "value": "25985018"
+        }
+      },
+      "memory": {
+        "timestamp": "1794421837258320612",
+        "workingSetBytes": {
+          "value": "1073152"
+        },
+        "availableBytes": {
+          "value": "66035712"
+        },
+        "usageBytes": {
+          "value": "1318912"
+        },
+        "rssBytes": {
+          "value": "32768"
+        },
+        "pageFaults": {
+          "value": "8768"
+        },
+        "majorPageFaults": {
+          "value": "16"
+        }
+      },
+      "writableLayer": {
+        "timestamp": "1794421836942782687",
+        "fsId": {
+          "mountpoint": "/var/lib/containerd/io.containerd.snapshotter.v1.devmapper"
+        },
+        "usedBytes": {
+          "value": "0"
+        },
+        "inodesUsed": {
+          "value": "0"
+        }
+      }
+    }
+  ]
+}

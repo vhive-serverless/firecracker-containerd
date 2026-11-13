@@ -1,0 +1,50 @@
+{
+  "items": [
+    {
+      "id": "07552f004890906ba6f63a53eaf265fcc2a3737662ac2b9dfcb37a04b15ba29e",
+      "metadata": {
+        "name": "firecracker",
+        "uid": "63069a28-a87e-4af9-b556-524ba67a1f1d",
+        "namespace": "fcmod-smoke",
+        "attempt": 0
+      },
+      "state": "SANDBOX_READY",
+      "createdAt": "1794421976397955157",
+      "labels": {
+        "app": "firecracker-smoke",
+        "io.kubernetes.pod.name": "firecracker",
+        "io.kubernetes.pod.namespace": "fcmod-smoke",
+        "io.kubernetes.pod.uid": "63069a28-a87e-4af9-b556-524ba67a1f1d"
+      },
+      "annotations": {
+        "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"v1\",\"kind\":\"Pod\",\"metadata\":{\"annotations\":{},\"labels\":{\"app\":\"firecracker-smoke\"},\"name\":\"firecracker\",\"namespace\":\"fcmod-smoke\"},\"spec\":{\"containers\":[{\"args\":[\"echo FIRECRACKER_SHARED_VOLUME \\u003e /shared/hello; echo FIRECRACKER_KUBERNETES_STARTED; sleep 600\"],\"command\":[\"/bin/sh\",\"-ec\"],\"image\":\"registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf\",\"name\":\"main\",\"resources\":{\"limits\":{\"cpu\":\"500m\",\"memory\":\"64Mi\"},\"requests\":{\"cpu\":\"100m\",\"memory\":\"32Mi\"}},\"volumeMounts\":[{\"mountPath\":\"/shared\",\"name\":\"shared\"}]},{\"args\":[\"exec httpd -f -p 8080 -h /shared\"],\"command\":[\"/bin/sh\",\"-ec\"],\"image\":\"registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf\",\"name\":\"sidecar\",\"resources\":{\"limits\":{\"cpu\":\"500m\",\"memory\":\"32Mi\"},\"requests\":{\"cpu\":\"100m\",\"memory\":\"16Mi\"}},\"volumeMounts\":[{\"mountPath\":\"/shared\",\"name\":\"shared\"}]}],\"runtimeClassName\":\"firecracker\",\"terminationGracePeriodSeconds\":5,\"volumes\":[{\"emptyDir\":{},\"name\":\"shared\"}]}}\n",
+        "kubernetes.io/config.seen": "2026-11-11T18:32:55.968628380Z",
+        "kubernetes.io/config.source": "api"
+      },
+      "runtimeHandler": "firecracker"
+    },
+    {
+      "id": "692dd84ae34b97fbc7ede6efd18a5d580c009a82508d579ace2fa48f847d4371",
+      "metadata": {
+        "name": "coredns-875f564df-njmmh",
+        "uid": "ea62b3f8-c598-44e4-9655-3a5630418660",
+        "namespace": "kube-system",
+        "attempt": 0
+      },
+      "state": "SANDBOX_READY",
+      "createdAt": "1794421971192039948",
+      "labels": {
+        "io.kubernetes.pod.name": "coredns-875f564df-njmmh",
+        "io.kubernetes.pod.namespace": "kube-system",
+        "io.kubernetes.pod.uid": "ea62b3f8-c598-44e4-9655-3a5630418660",
+        "k8s-app": "kube-dns",
+        "pod-template-hash": "875f564df"
+      },
+      "annotations": {
+        "kubernetes.io/config.seen": "2026-11-11T18:32:49.875658260Z",
+        "kubernetes.io/config.source": "api"
+      },
+      "runtimeHandler": ""
+    }
+  ]
+}

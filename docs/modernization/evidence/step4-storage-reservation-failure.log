@@ -1,0 +1,12 @@
+=== RUN   TestGuestOverlayAllocation
+    guest_storage_test.go:38: 
+        	Error Trace:	/users/nehalem/fc-ctrd-mod/step4-storage-dev/runtime/guest_storage_test.go:38
+        	Error:      	"58732544" is not greater than or equal to "67108864"
+        	Test:       	TestGuestOverlayAllocation
+        	Messages:   	full guest capacity must consume reserved host disk blocks
+--- FAIL: TestGuestOverlayAllocation (0.39s)
+=== RUN   TestGuestOverlayRejectsRAMAndCleansFailure
+--- PASS: TestGuestOverlayRejectsRAMAndCleansFailure (0.30s)
+FAIL
+FAIL	github.com/firecracker-microvm/firecracker-containerd/runtime	0.706s
+FAIL

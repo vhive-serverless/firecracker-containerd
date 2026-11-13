@@ -1,0 +1,54 @@
+Committed DAMON and free-page reporting component acceptance PASS; overall Step 4 and Step 3 WIP
+Wed Nov 11 15:16:23 UTC 2026
+worker=nehalem@amd218.utah.cloudlab.us
+checkout=/users/nehalem/fc-ctrd-mod/step4-memory-dev
+commands=tools/modernize/build-stack.sh; tools/modernize/install-stack.sh; tools/modernize/test-reclamation.sh
+TMPDIR=/tmp/fc-damon-9706231
+STACK_DIR=/users/nehalem/fc-ctrd-mod
+source_clean=true
+97062314463adb53ee6534afc5d8eafd82bbf509
+ ce86b117d59ca93b1c04b791a251b445ace76703 _submodules/firecracker (v1.18.0-2-gce86b117d)
+ c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e _submodules/runc (v1.4.2)
+ 3070538befb5a6c09f93e99164762b3a76310357 _submodules/stargz-snapshotter (cmd/v0.18.2)
+go version go1.26.11 linux/amd64
+ce15b3d35a4811fbf164371b72f57757cce5e846ad5959b547a471fd564a6e89  bin/firecracker
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  _submodules/runc/runc
+3dd9ea4a0c2bc1eda0aafcc751447a9ef8511281065335e0aebc569ef14dab1b  _submodules/stargz-snapshotter/out/containerd-stargz-grpc
+29c2cd53e1b014ca301eb341593a032858168d3be4002b549985e9e285e8baaf  agent/agent
+51f3508a8afb6127503e920bce004ce1e46e63c3a7f33ff0f7762d4b3049f109  runtime/containerd-shim-aws-firecracker
+7ba5c9140c1ceb68d8797a2e5a0da192406860298c04e30a418982823c149057  firecracker-control/cmd/containerd/firecracker-containerd
+66266891b137455eb6af076bbbcfc8824314148d7b3b86fa036557827f9149ad  cri/firecracker-cri
+f7c763775c948bd8b779e432e5f4d418463a96a3e222b959df2d648c5b798dac  default-vmlinux.bin
+f9faf5daee2579d7c2ea4f6784cb6f5d30ab271c041eddf9133d84733c728536  tools/image-builder/rootfs.img
+f06a2fa186e5a4e425c371e70d95e8e91bc8e0cd964a18cca054871be928dcdb  /users/nehalem/fc-ctrd-mod/evidence/9706231-damon-build.log
+79ee8ba56919565f027ffe4715a5a3e18099aec3ffe0b1e933a3699d2b48b6ce  /users/nehalem/fc-ctrd-mod/evidence/9706231-damon-install.log
+505ba4b69287a4b8ae6a130f4446c8a313b196c3272e1f566d1ea2356273e121  /users/nehalem/fc-ctrd-mod/evidence/9706231-damon-acceptance.log
+8aa72f9352804d7d305aa3068f86dbebef2a04e870233b095f7303626603479c  /users/nehalem/fc-ctrd-mod/evidence/9706231-damon-results.log
+test_image=sha256:5ad78b0c0a140d9cce69c099dc047aa56c5a5067802989f45eb8ec72317475b6
+0 issues.
+0 issues.
+=== RUN   TestGuestReclamationConfiguration
+--- PASS: TestGuestReclamationConfiguration (0.00s)
+=== RUN   TestGuestReclamationRejectsConflictingAndUnboundedInputs
+--- PASS: TestGuestReclamationRejectsConflictingAndUnboundedInputs (0.00s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	1.053s
+=== RUN   TestFreePageReporting_Isolated
+=== RUN   TestFreePageReporting_Isolated/enabled=false
+=== RUN   TestFreePageReporting_Isolated/enabled=true
+--- PASS: TestFreePageReporting_Isolated (19.00s)
+    --- PASS: TestFreePageReporting_Isolated/enabled=false (8.66s)
+    --- PASS: TestFreePageReporting_Isolated/enabled=true (10.34s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	19.018s
+=== RUN   TestGuestReclamation_Isolated
+    guest_reclamation_integ_test.go:143: damon_enabled=true skip_anon=true report_order=9 target_mib=0 filled_rss_kib=287388 idle_rss_kib=251532 reloaded_rss_kib=286208 reclaimed_delta_bytes=41943040 reports=76 reported_bytes=304087040 failures=0
+--- PASS: TestGuestReclamation_Isolated (28.97s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	28.984s
+=== RUN   TestMemoryBalloon_Isolated
+--- PASS: TestMemoryBalloon_Isolated (9.30s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	9.316s
+COMMITTED_DAMON_AND_REPORTING_OK
+Scope: lint, race units, forced protobuf regeneration, full build/private install, isolated reporting/DAMON/ordinary balloon VMs; no pmem, controlled evaluation or native restore acceptance.

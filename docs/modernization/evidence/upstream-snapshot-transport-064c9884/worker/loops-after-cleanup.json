@@ -1,0 +1,53 @@
+{
+   "loopdevices": [
+      {
+         "name": "/dev/loop1",
+         "back-file": "/users/nehalem/fc-ctrd-mod/baseline/tmp/devmapper/metadata"
+      },{
+         "name": "/dev/loop8",
+         "back-file": "/users/nehalem/fc-ctrd-mod/step1-repro.SwuCJ3fv/tmp/devmapper/fcmod-repro-61cf6e590d48-1794352356/data"
+      },{
+         "name": "/dev/loop15",
+         "back-file": "/users/nehalem/fc-ctrd-mod/validated-runtime/tmp/devmapper/fcmod-acceptance/metadata"
+      },{
+         "name": "/dev/loop6",
+         "back-file": "/users/nehalem/fc-ctrd-mod/validated-runtime/tmp/devmapper/fcmod-7961db121569/data"
+      },{
+         "name": "/dev/loop13",
+         "back-file": "/users/nehalem/fc-ctrd-mod/validated-runtime/tmp/devmapper/fcmod-validation/metadata"
+      },{
+         "name": "/dev/loop4",
+         "back-file": "/users/nehalem/fc-ctrd-mod/validated-runtime/tmp/devmapper/fcmod-e666612819bc/data"
+      },{
+         "name": "/dev/loop11",
+         "back-file": "/users/nehalem/fc-ctrd-mod/step1-repro.SwuCJ3fv/tmp/devmapper/fcmod-0d8e700f6888/metadata"
+      },{
+         "name": "/dev/loop2",
+         "back-file": "/users/nehalem/fc-ctrd-mod/runtime/tmp/devmapper/data"
+      },{
+         "name": "/dev/loop0",
+         "back-file": "/users/nehalem/fc-ctrd-mod/baseline/tmp/devmapper/data"
+      },{
+         "name": "/dev/loop9",
+         "back-file": "/users/nehalem/fc-ctrd-mod/step1-repro.SwuCJ3fv/tmp/devmapper/fcmod-repro-61cf6e590d48-1794352356/metadata"
+      },{
+         "name": "/dev/loop7",
+         "back-file": "/users/nehalem/fc-ctrd-mod/validated-runtime/tmp/devmapper/fcmod-7961db121569/metadata"
+      },{
+         "name": "/dev/loop14",
+         "back-file": "/users/nehalem/fc-ctrd-mod/validated-runtime/tmp/devmapper/fcmod-acceptance/data"
+      },{
+         "name": "/dev/loop5",
+         "back-file": "/users/nehalem/fc-ctrd-mod/validated-runtime/tmp/devmapper/fcmod-e666612819bc/metadata"
+      },{
+         "name": "/dev/loop12",
+         "back-file": "/users/nehalem/fc-ctrd-mod/validated-runtime/tmp/devmapper/fcmod-validation/data"
+      },{
+         "name": "/dev/loop3",
+         "back-file": "/users/nehalem/fc-ctrd-mod/runtime/tmp/devmapper/metadata"
+      },{
+         "name": "/dev/loop10",
+         "back-file": "/users/nehalem/fc-ctrd-mod/step1-repro.SwuCJ3fv/tmp/devmapper/fcmod-0d8e700f6888/data"
+      }
+   ]
+}

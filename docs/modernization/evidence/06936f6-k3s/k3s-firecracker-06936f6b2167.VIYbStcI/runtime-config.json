@@ -1,0 +1,8 @@
+{
+  "shim_base_dir": "/srv/firecracker_containerd_tests",
+  "guest_root_mode": "disk",
+  "guest_root_size_mib": 512,
+  "guest_reclamation": {
+    "Enabled": false
+  }
+}

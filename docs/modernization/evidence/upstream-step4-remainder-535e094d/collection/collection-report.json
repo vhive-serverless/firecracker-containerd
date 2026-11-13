@@ -1,0 +1,188 @@
+{
+  "status": "AUTHORITATIVE_TERMINAL_FAILURE_FROZEN",
+  "local_collection": "/home/jyp/project/fc-ctrd-mod/migration-upstream/stage4-535e-worker-evidence",
+  "remote_root": "/users/nehalem/fc-ctrd-mod/upstream-migration/evidence/stage4-remainder-535e094d",
+  "runtime_source": "9c3ea8e618a46d6d59e64a5812eff4f1bd382cdc",
+  "test_fixture_source": "535e094d36ff2689d254bdefd2d0452ea37c9ef0",
+  "image_id": "sha256:70b8de8f4d8250a4a7d2919607dae67c8949094268569fadc58ee321cd1c66e6",
+  "terminal_exit": 1,
+  "cleanup_exit": 0,
+  "raw_original_count": 35,
+  "raw_original_bytes": 5770731,
+  "summary_sha256": "ba1107195117d442e4e069c68577461349c641ba801c53433b6a59cfefd7e047",
+  "raw_manifest_sha256": "678088eee466ce0008bebc8d6d5a166f60e2d6b6a0a84a9fac5e127c7f0cea18",
+  "remote_local_raw_hashes_verified": true,
+  "exclusions": [],
+  "exclusion_reason": "No large probe/backing-image payload remained after authoritative launcher cleanup. All35remaining regular originalfiles included, including full runtime logs and originalpriorfailure copies. Compiledprobes/fixtureimages/VMbackings would have been inventoried/excluded, but none exist.",
+  "failed_leaves": [
+    {
+      "test": "TestStargzNativeRestore_Isolated/disk/jailed=false",
+      "profile": "disk",
+      "jailed": false,
+      "duration": "21.69s",
+      "error": "private restore disk mapping rejects target overlap"
+    },
+    {
+      "test": "TestStargzNativeRestore_Isolated/disk/jailed=true",
+      "profile": "disk",
+      "jailed": true,
+      "duration": "21.11s",
+      "error": "jailed VM start fails: openat ctrstub0: file exists"
+    },
+    {
+      "test": "TestStargzNativeRestore_Isolated/ext4-block/jailed=false",
+      "profile": "ext4-block",
+      "jailed": false,
+      "duration": "25.69s",
+      "error": "private restore disk mapping rejects target overlap"
+    },
+    {
+      "test": "TestStargzNativeRestore_Isolated/ext4-block/jailed=true",
+      "profile": "ext4-block",
+      "jailed": true,
+      "duration": "23.78s",
+      "error": "jailed VM start fails: openat ctrstub0: file exists"
+    },
+    {
+      "test": "TestStargzNativeRestore_Isolated/pmem/jailed=false",
+      "profile": "pmem",
+      "jailed": false,
+      "duration": "23.37s",
+      "error": "private restore disk mapping rejects target overlap"
+    },
+    {
+      "test": "TestStargzNativeRestore_Isolated/pmem/jailed=true",
+      "profile": "pmem",
+      "jailed": true,
+      "duration": "22.99s",
+      "error": "jailed VM start fails: openat ctrstub0: file exists"
+    },
+    {
+      "test": "TestStargzNativeRestore_Isolated/reclaim/jailed=false",
+      "profile": "reclaim",
+      "jailed": false,
+      "duration": "20.42s",
+      "error": "private restore disk mapping rejects target overlap"
+    },
+    {
+      "test": "TestStargzNativeRestore_Isolated/reclaim/jailed=true",
+      "profile": "reclaim",
+      "jailed": true,
+      "duration": "21.04s",
+      "error": "jailed VM start fails: openat ctrstub0: file exists"
+    },
+    {
+      "test": "TestStargzNativeRestore_Isolated/combined/jailed=false",
+      "profile": "combined",
+      "jailed": false,
+      "duration": "23.71s",
+      "error": "private restore disk mapping rejects target overlap"
+    },
+    {
+      "test": "TestStargzNativeRestore_Isolated/combined/jailed=true",
+      "profile": "combined",
+      "jailed": true,
+      "duration": "25.05s",
+      "error": "jailed VM start fails: openat ctrstub0: file exists"
+    },
+    {
+      "test": "TestStargzNativeRestore_Isolated/ext4-reclaim/jailed=false",
+      "profile": "ext4-reclaim",
+      "jailed": false,
+      "duration": "23.79s",
+      "error": "private restore disk mapping rejects target overlap"
+    },
+    {
+      "test": "TestStargzNativeRestore_Isolated/ext4-reclaim/jailed=true",
+      "profile": "ext4-reclaim",
+      "jailed": true,
+      "duration": "23.61s",
+      "error": "jailed VM start fails: openat ctrstub0: file exists"
+    }
+  ],
+  "failure_counts": {
+    "nonjailed_overlap": 6,
+    "jailed_ctrstub_exists": 6
+  },
+  "corrected_manifest_observations": 12,
+  "original_manifest_fixture_assertion_passed_but_restore_acceptance_failed": true,
+  "not_reached": [
+    "twelve-pass guard",
+    "thinpool tail",
+    "SDKsuite/SDKpassguard",
+    "unitrace",
+    "overlay/stargzsyntax",
+    "36Pythonchecks/countguard",
+    "runtime/volfsprobebuild",
+    "namespace/APIchecks",
+    "private32MiBENOSPC",
+    "fivehostFUSEchecks",
+    "artifacts-after/identityguard",
+    "source-after/final-image-identitycompletionsteps"
+  ],
+  "before_after_artifact_identity_claim": false,
+  "original_prior_failure_summary_preserved": true,
+  "independent_post_cleanup_checks": {
+    "terminal_summary": {
+      "runtime_source": "9c3ea8e618a46d6d59e64a5812eff4f1bd382cdc",
+      "test_fixture_source": "535e094d36ff2689d254bdefd2d0452ea37c9ef0",
+      "image_id": "sha256:70b8de8f4d8250a4a7d2919607dae67c8949094268569fadc58ee321cd1c66e6",
+      "result": "failed",
+      "exit_code": 1,
+      "cleanup_exit": 0,
+      "active_step_on_exit": "",
+      "phase_exit_codes": {
+        "source-before": "0",
+        "prior-failure": "0",
+        "original-summary-integrity": "0",
+        "artifacts-before": "0",
+        "image-inspect": "0",
+        "image-identity": "0",
+        "image-artifacts": "0",
+        "sudo-ready": "0",
+        "filesystem": "0",
+        "pool-create": "0",
+        "stargz-native": "1",
+        "cleanup-on-exit": "0"
+      },
+      "original_failed_run": {
+        "result": "failed",
+        "acceptance_exit": 2,
+        "retained_top_level_passes": 55
+      },
+      "scope": "Targeted corrected stargz twelve leaves plus previously-unreached thinpool/SDK and unique followups; no full-stack rebuild/rerun.",
+      "rootfs_scope": "Image ID is frozen. Current host test-rootfs hashes are recorded before/after; no equality to installed rootfs or pre-test build rootfs is claimed."
+    },
+    "owned_container_name": "fc-rem-535e094d36ff-da35f71bf8da",
+    "owned_named_containers": [],
+    "owned_labeled_containers": [],
+    "owned_pool": "fc-rem-535e094d36ff-da35f71bf8da-stargz",
+    "owned_mappings": [],
+    "owned_loops": [],
+    "owned_probe_vm_mounts": [],
+    "vms_directory_absent": true,
+    "created_bind_targets_record_absent": true,
+    "checkouts": {
+      "/users/nehalem/fc-ctrd-mod/upstream-migration/stage4-runtime": {
+        "revision": "9c3ea8e618a46d6d59e64a5812eff4f1bd382cdc",
+        "status_porcelain": ""
+      },
+      "/users/nehalem/fc-ctrd-mod/upstream-migration/stage4-stargz-manifest-fix": {
+        "revision": "535e094d36ff2689d254bdefd2d0452ea37c9ef0",
+        "status_porcelain": ""
+      }
+    },
+    "running_containers": [
+      "1715f4a4061173a6eb936d419fbac8e1055a0a8042a6a9543670ee21f7f710d5 fcmod-upstream-137-control-plane Up 44 hours"
+    ]
+  },
+  "source_equality_receipt": {
+    "runtime_source": "9c3ea8e618a46d6d59e64a5812eff4f1bd382cdc",
+    "test_source": "535e094d36ff2689d254bdefd2d0452ea37c9ef0",
+    "sole_changed_path": "snapshotter/stargz_restore_integ_test.go",
+    "all_other_mode_type_oid_entries_exact": 944,
+    "production_entries_sha256": "e5bf1cf43e6aa9cca3dc45c2197c17a2468f3a4d18a8114b5aad1c7453557148"
+  },
+  "scope": "Targetedtest-onlyfixture535e versus exactexisting9c3runtimeimage; no stack/image rebuild, no finalStep4acceptance.",
+  "collector_actions": "Read-only SSH/Python/tar/dockerlisting/dmsetupquery/losetupquery/gitstatus; localwrites only. No worker mutations, termination/restart, builds, tests, or release-doc edits."
+}
