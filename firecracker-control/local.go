@@ -217,7 +217,6 @@ func (s *local) CreateVM(requestCtx context.Context, req *proto.CreateVMRequest)
 		s.logger.WithError(err).Error("shim CreateVM returned error")
 		return nil, err
 	}
-
 	// Control-created shims do not pass through containerd's task bootstrap.
 	// Publish the same endpoint for adopted tasks and bundle address links.
 	err = shimDir.WriteAddress(shimSocketAddress)
@@ -299,6 +298,16 @@ func (s *local) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotReq
 	}
 	defer client.Close()
 	return client.CreateSnapshot(ctx, req)
+}
+
+// CheckpointVM captures native VM state through its owning shim.
+func (s *local) CheckpointVM(ctx context.Context, req *proto.CheckpointVMRequest) (*types.Empty, error) {
+	client, err := s.shimFirecrackerClient(ctx, req.VMID)
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+	return client.CheckpointVM(ctx, req)
 }
 
 // ResumeVM resumes a VM

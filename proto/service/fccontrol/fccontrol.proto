@@ -19,6 +19,9 @@ service Firecracker {
     // Saves a paused VM's state and memory for vHive.
     rpc CreateSnapshot(CreateSnapshotRequest) returns (google.protobuf.Empty);
 
+    // Quiesces and captures native VM state, storage and runtime metadata.
+    rpc CheckpointVM(CheckpointVMRequest) returns (google.protobuf.Empty);
+
     // Stops existing Firecracker instance by VM ID
     rpc StopVM(StopVMRequest) returns (google.protobuf.Empty);
 
