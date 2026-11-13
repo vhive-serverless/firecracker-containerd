@@ -1,0 +1,13 @@
+{
+  "sdk_commit": "76af8abe770941a987e6071677b8228df75cdd86",
+  "firecracker_release": "v1.18.0",
+  "harness_image": "localhost/firecracker-containerd-test:06b55e3b78cc",
+  "harness_note": "Existing test environment only; SDK source and official VMM/jailer bind-mounted explicitly. Not runtime acceptance.",
+  "top_level_passes": 81,
+  "skips": [
+    "--- SKIP: TestLogAndMetrics (0.00s)"
+  ],
+  "failures": [],
+  "receipt_marker": true,
+  "log_sha256": "f0532073c576ade740404db61bffc5d5b6d8b093be0fac1840fad0db9ad83e10"
+}

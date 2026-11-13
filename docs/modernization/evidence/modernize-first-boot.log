@@ -1,0 +1,1709 @@
+ee829b4a9c7ebc665a533286ceecb1d4c5841790
+/dev/sda3 ext3   /
+Running as unit: fcmod-modernize.service; invocation ID: 559bce93ddff4eedb5a64428e304df96
+Client:
+  Version:  2.3.7+unknown
+  Revision: ee829b4a9c7ebc665a533286ceecb1d4c5841790
+  Go version: go1.26.11
+
+ctr: cannot access socket /run/fcmod-modernize/containerd.sock: stat /run/fcmod-modernize/containerd.sock: no such file or directory
+Client:
+  Version:  2.3.7+unknown
+  Revision: ee829b4a9c7ebc665a533286ceecb1d4c5841790
+  Go version: go1.26.11
+
+Server:
+  Version:  2.3.7+unknown
+  Revision: ee829b4a9c7ebc665a533286ceecb1d4c5841790
+  UUID: bcb43bb4-9429-479e-8851-676547130d13
+TYPE                                      ID                       PLATFORMS      STATUS    
+io.containerd.content.v1                  content                  -              ok        
+io.containerd.image-verifier.v1           bindir                   -              ok        
+io.containerd.internal.v1                 opt                      -              ok        
+io.containerd.warning.v1                  deprecations             -              ok        
+io.containerd.event.v1                    exchange                 -              ok        
+io.containerd.mount-handler.v1            erofs                    linux/amd64    ok        
+io.containerd.snapshotter.v1              blockfile                linux/amd64    skip      
+io.containerd.snapshotter.v1              btrfs                    linux/amd64    skip      
+io.containerd.snapshotter.v1              devmapper                linux/amd64    ok        
+io.containerd.snapshotter.v1              erofs                    linux/amd64    skip      
+io.containerd.snapshotter.v1              native                   linux/amd64    ok        
+io.containerd.snapshotter.v1              overlayfs                linux/amd64    ok        
+io.containerd.snapshotter.v1              zfs                      linux/amd64    skip      
+io.containerd.monitor.task.v1             cgroups                  linux/amd64    ok        
+io.containerd.metadata.v1                 bolt                     -              ok        
+io.containerd.gc.v1                       scheduler                -              ok        
+io.containerd.server.v1                   metrics                  -              skip      
+io.containerd.tracing.processor.v1        otlp                     -              skip      
+io.containerd.internal.v1                 tracing                  -              skip      
+io.containerd.nri.v1                      nri                      -              ok        
+io.containerd.ttrpc.v1                    otelttrpc                -              ok        
+io.containerd.service.v1                  containers-service       -              ok        
+io.containerd.service.v1                  content-service          -              ok        
+io.containerd.differ.v1                   erofs                    -              skip      
+io.containerd.mount-manager.v1            bolt                     -              ok        
+io.containerd.differ.v1                   walking                  linux/amd64    ok        
+io.containerd.service.v1                  diff-service             -              ok        
+io.containerd.service.v1                  images-service           -              ok        
+io.containerd.service.v1                  introspection-service    -              ok        
+io.containerd.service.v1                  namespaces-service       -              ok        
+io.containerd.service.v1                  snapshots-service        -              ok        
+io.containerd.shim.v1                     manager                  -              ok        
+io.containerd.runtime.v2                  task                     linux/amd64    ok        
+io.containerd.service.v1                  tasks-service            -              ok        
+io.containerd.service.v1                  fc-control               -              ok        
+io.containerd.grpc.v1                     containers               -              ok        
+io.containerd.grpc.v1                     content                  -              ok        
+io.containerd.grpc.v1                     diff                     -              ok        
+io.containerd.grpc.v1                     events                   -              ok        
+io.containerd.grpc.v1                     images                   -              ok        
+io.containerd.grpc.v1                     introspection            -              ok        
+io.containerd.lease.v1                    manager                  -              ok        
+io.containerd.grpc.v1                     leases                   -              ok        
+io.containerd.grpc.v1                     mounts                   -              ok        
+io.containerd.grpc.v1                     namespaces               -              ok        
+io.containerd.sandbox.store.v1            local                    -              ok        
+io.containerd.transfer.v1                 local                    -              ok        
+io.containerd.cri.v1                      images                   -              ok        
+io.containerd.cri.v1                      runtime                  linux/amd64    ok        
+io.containerd.podsandbox.controller.v1    podsandbox               -              ok        
+io.containerd.sandbox.controller.v1       shim                     -              ok        
+io.containerd.grpc.v1                     sandbox-controllers      -              ok        
+io.containerd.grpc.v1                     sandboxes                -              ok        
+io.containerd.grpc.v1                     snapshots                -              ok        
+io.containerd.streaming.v1                manager                  -              ok        
+io.containerd.grpc.v1                     streaming                -              ok        
+io.containerd.grpc.v1                     tasks                    -              ok        
+io.containerd.grpc.v1                     transfer                 -              ok        
+io.containerd.grpc.v1                     version                  -              ok        
+io.containerd.grpc.v1                     fc-control-service       -              ok        
+io.containerd.grpc.v1                     healthcheck              -              ok        
+io.containerd.server.v1                   ttrpc                    -              ok        
+io.containerd.monitor.container.v1        restart                  -              ok        
+io.containerd.metrics.v1                  grpc-prometheus          -              ok        
+io.containerd.metrics.v1                  grpc-otel                -              ok        
+io.containerd.server.v1                   grpc                     -              ok        
+io.containerd.server.v1                   grpc-tcp                 -              skip      
+io.containerd.http.v1                     pprof                    -              ok        
+io.containerd.server.v1                   debug                    -              skip      
+docker.io/library/alpine:3.23.0         	fetching image content	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:   0.0 B	(0.0 B/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:   0.0 B	(0.0 B/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  9.0 Ki	(24.9 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   └──manifest (a107a3c03173)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  9.0 Ki	(24.7 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (135aac389d86)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  9.0 Ki	(24.7 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (ad2445a2c5f0)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  9.0 Ki	(24.7 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (ed4a87b21407)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  9.0 Ki	(24.7 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (d6218bcba4fa)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  9.0 Ki	(24.7 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (3e4690e11f84)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  9.0 Ki	(24.7 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (3e4690e11f84)           	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (8d133a316546)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  9.0 Ki	(24.7 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (3e4690e11f84)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (c78ded0fee44)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  9.0 Ki	(24.7 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (3e4690e11f84)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (fddefdcec3ff)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  9.0 Ki	(24.7 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (3e4690e11f84)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (fddefdcec3ff)           	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (8e6e34008e3a)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  9.0 Ki	(24.7 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (3e4690e11f84)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (fddefdcec3ff)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (a9e9814086aa)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  9.0 Ki	(24.7 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (3e4690e11f84)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (fddefdcec3ff)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (1888a4ac62d4)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  9.0 Ki	(24.7 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (3e4690e11f84)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (fddefdcec3ff)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (1888a4ac62d4)           	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (21fdb77c56a0)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  9.0 Ki	(24.7 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (3e4690e11f84)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (fddefdcec3ff)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (1888a4ac62d4)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (2c4dfe443161)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  9.0 Ki	(24.7 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (3e4690e11f84)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (fddefdcec3ff)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (1888a4ac62d4)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (5a3386629390)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  9.0 Ki	(24.7 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (3e4690e11f84)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (fddefdcec3ff)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (1888a4ac62d4)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (b37b830f7e32)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  9.0 Ki	(24.7 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   ├──manifest (135aac389d86)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (3e4690e11f84)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (fddefdcec3ff)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (1888a4ac62d4)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (b37b830f7e32)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  10.0 K	(27.4 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   ├──manifest (ad2445a2c5f0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (3e4690e11f84)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (fddefdcec3ff)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (1888a4ac62d4)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (b37b830f7e32)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  10.8 K	(29.7 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   ├──manifest (ad2445a2c5f0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   ├──manifest (3e4690e11f84)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (fddefdcec3ff)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (1888a4ac62d4)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (b37b830f7e32)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  11.8 K	(32.4 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   ├──manifest (ad2445a2c5f0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   ├──manifest (3e4690e11f84)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	already exists	
+   ├──manifest (fddefdcec3ff)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (1888a4ac62d4)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (b37b830f7e32)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  12.8 K	(35.1 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   ├──manifest (ad2445a2c5f0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   ├──manifest (3e4690e11f84)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	already exists	
+   ├──manifest (fddefdcec3ff)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (1888a4ac62d4)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (b37b830f7e32)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  13.8 K	(37.8 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   ├──manifest (ad2445a2c5f0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   ├──manifest (8d133a316546)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	already exists	
+   ├──manifest (fddefdcec3ff)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (1888a4ac62d4)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (b37b830f7e32)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  14.6 K	(40.0 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   ├──manifest (ad2445a2c5f0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   ├──manifest (8d133a316546)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	already exists	
+   ├──manifest (fddefdcec3ff)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	already exists	
+   ├──manifest (1888a4ac62d4)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (b37b830f7e32)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  15.6 K	(42.7 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   ├──manifest (ad2445a2c5f0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   ├──manifest (8d133a316546)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	already exists	
+   ├──manifest (fddefdcec3ff)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	already exists	
+   ├──manifest (1888a4ac62d4)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	already exists	
+   └──manifest (b37b830f7e32)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  16.2 K	(44.1 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   ├──manifest (ed4a87b21407)           	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   ├──manifest (8d133a316546)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	already exists	
+   ├──manifest (fddefdcec3ff)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	already exists	
+   ├──manifest (1888a4ac62d4)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	already exists	
+   └──manifest (b37b830f7e32)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  17.0 K	(46.3 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   ├──manifest (ed4a87b21407)           	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   ├──manifest (8d133a316546)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	already exists	
+   ├──manifest (fddefdcec3ff)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	already exists	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   ├──manifest (21fdb77c56a0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	already exists	
+   └──manifest (b37b830f7e32)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  17.8 K	(48.5 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   ├──manifest (ed4a87b21407)           	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   ├──manifest (8d133a316546)           	already exists	
+   ├──manifest (c78ded0fee44)           	already exists	
+   ├──manifest (fddefdcec3ff)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	already exists	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   ├──manifest (21fdb77c56a0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	already exists	
+   └──manifest (b37b830f7e32)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  18.8 K	(51.2 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   ├──manifest (ed4a87b21407)           	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   ├──manifest (8d133a316546)           	already exists	
+   ├──manifest (c78ded0fee44)           	already exists	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   ├──manifest (8e6e34008e3a)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	already exists	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   ├──manifest (21fdb77c56a0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	already exists	
+   └──manifest (b37b830f7e32)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  19.6 K	(53.3 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   ├──manifest (ed4a87b21407)           	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   ├──manifest (8d133a316546)           	already exists	
+   ├──manifest (c78ded0fee44)           	already exists	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   ├──manifest (a9e9814086aa)           	already exists	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   ├──manifest (21fdb77c56a0)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	already exists	
+   └──manifest (b37b830f7e32)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  20.5 K	(55.5 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   ├──manifest (ed4a87b21407)           	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   ├──manifest (8d133a316546)           	already exists	
+   ├──manifest (c78ded0fee44)           	already exists	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   ├──manifest (a9e9814086aa)           	already exists	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   ├──manifest (2c4dfe443161)           	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	already exists	
+   └──manifest (b37b830f7e32)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  21.5 K	(58.2 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   ├──manifest (ed4a87b21407)           	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   ├──manifest (8d133a316546)           	already exists	
+   ├──manifest (c78ded0fee44)           	already exists	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   ├──manifest (a9e9814086aa)           	already exists	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   ├──manifest (2c4dfe443161)           	already exists	
+   ├──manifest (5a3386629390)           	already exists	
+   └──manifest (b37b830f7e32)           	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  22.5 K	(60.8 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   ├──manifest (ed4a87b21407)           	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   ├──manifest (8d133a316546)           	already exists	
+   ├──manifest (c78ded0fee44)           	already exists	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   ├──manifest (a9e9814086aa)           	already exists	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   ├──manifest (2c4dfe443161)           	already exists	
+   ├──manifest (5a3386629390)           	already exists	
+   └──manifest (b37b830f7e32)           	already exists	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  23.3 K	(63.0 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   ├──manifest (ed4a87b21407)           	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   ├──manifest (8d133a316546)           	already exists	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   ├──manifest (a9e9814086aa)           	already exists	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   ├──manifest (2c4dfe443161)           	already exists	
+   ├──manifest (5a3386629390)           	already exists	
+   └──manifest (b37b830f7e32)           	already exists	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  23.3 K	(61.4 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	already exists	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   ├──manifest (ed4a87b21407)           	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   ├──manifest (8d133a316546)           	already exists	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   ├──manifest (a9e9814086aa)           	already exists	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   ├──manifest (2c4dfe443161)           	already exists	
+   ├──manifest (5a3386629390)           	already exists	
+   └──manifest (b37b830f7e32)           	already exists	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  23.3 K	(61.4 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	already exists	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   ├──manifest (8d133a316546)           	already exists	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   ├──manifest (a9e9814086aa)           	already exists	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   ├──manifest (2c4dfe443161)           	already exists	
+   ├──manifest (5a3386629390)           	already exists	
+   └──manifest (b37b830f7e32)           	already exists	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  23.3 K	(61.4 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	already exists	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	already exists	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   ├──manifest (a9e9814086aa)           	already exists	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   ├──manifest (2c4dfe443161)           	already exists	
+   ├──manifest (5a3386629390)           	already exists	
+   └──manifest (b37b830f7e32)           	already exists	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  23.3 K	(61.4 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	already exists	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	already exists	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   ├──manifest (a9e9814086aa)           	already exists	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   ├──manifest (2c4dfe443161)           	already exists	
+   ├──manifest (5a3386629390)           	already exists	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  23.3 K	(61.4 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	already exists	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	already exists	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   ├──manifest (2c4dfe443161)           	already exists	
+   ├──manifest (5a3386629390)           	already exists	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  23.3 K	(61.4 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	already exists	
+   │  └──config (f386f0c85682)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	already exists	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   ├──manifest (2c4dfe443161)           	already exists	
+   ├──manifest (5a3386629390)           	already exists	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  23.3 K	(61.4 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	already exists	
+   │  └──config (f386f0c85682)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   │  └──config (5b27d072f754)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	already exists	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   ├──manifest (2c4dfe443161)           	already exists	
+   ├──manifest (5a3386629390)           	already exists	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  23.3 K	(61.3 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	already exists	
+   │  └──config (f386f0c85682)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   │  └──config (5b27d072f754)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   │  └──config (2863f9493a81)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	already exists	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   ├──manifest (2c4dfe443161)           	already exists	
+   ├──manifest (5a3386629390)           	already exists	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  23.3 K	(61.3 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	already exists	
+   │  └──config (f386f0c85682)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   │  └──config (5b27d072f754)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   │  └──config (2863f9493a81)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	already exists	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   │  └──config (4e411f4c890c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   ├──manifest (2c4dfe443161)           	already exists	
+   ├──manifest (5a3386629390)           	already exists	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  23.3 K	(61.3 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	already exists	
+   │  └──config (f386f0c85682)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   │  └──config (5b27d072f754)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   │  └──config (2863f9493a81)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	already exists	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   │  └──config (4e411f4c890c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   │  └──config (2a49e1bb9aac)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	already exists	
+   ├──manifest (5a3386629390)           	already exists	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  23.3 K	(61.3 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	already exists	
+   │  └──config (f386f0c85682)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   │  └──config (5b27d072f754)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   │  └──config (2863f9493a81)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	already exists	
+   │  └──config (296a95dcb335)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   │  └──config (4e411f4c890c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   │  └──config (2a49e1bb9aac)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	already exists	
+   ├──manifest (5a3386629390)           	already exists	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  23.3 K	(61.3 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	already exists	
+   │  └──config (f386f0c85682)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   │  └──config (5b27d072f754)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   │  └──config (2863f9493a81)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	already exists	
+   │  └──config (296a95dcb335)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   │  └──config (4e411f4c890c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   │  └──config (2a49e1bb9aac)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	already exists	
+   │  └──config (148348cd4568)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	already exists	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  23.3 K	(61.3 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	already exists	
+   │  └──config (f386f0c85682)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   │  └──config (5b27d072f754)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   │  └──config (2863f9493a81)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	already exists	
+   │  └──config (296a95dcb335)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   │  └──config (4e411f4c890c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   │  └──config (2a49e1bb9aac)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	already exists	
+   │  └──config (148348cd4568)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	already exists	
+   │  └──config (b7bcdd83889e)          	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  23.3 K	(61.3 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	already exists	
+   │  └──config (f386f0c85682)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   │  └──config (5b27d072f754)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   │  └──config (2863f9493a81)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	already exists	
+   │  └──config (296a95dcb335)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   │  └──config (586fcb872f80)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   │  └──config (4e411f4c890c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   │  └──config (2a49e1bb9aac)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	already exists	
+   │  └──config (148348cd4568)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	already exists	
+   │  └──config (b7bcdd83889e)          	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  23.3 K	(61.3 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	already exists	
+   │  └──config (f386f0c85682)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   │  └──config (5b27d072f754)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   │  └──config (2863f9493a81)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	already exists	
+   │  └──config (296a95dcb335)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   │  └──config (e6d00bb7ca6c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   │  └──config (586fcb872f80)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   │  └──config (4e411f4c890c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   │  └──config (2a49e1bb9aac)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	already exists	
+   │  └──config (148348cd4568)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	already exists	
+   │  └──config (b7bcdd83889e)          	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  23.3 K	(61.3 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (135aac389d86)           	already exists	
+   │  └──config (f386f0c85682)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   │  └──config (5b27d072f754)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   │  └──config (2863f9493a81)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	already exists	
+   │  └──config (296a95dcb335)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	already exists	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   │  └──config (e6d00bb7ca6c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   │  └──config (586fcb872f80)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   │  └──config (4e411f4c890c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   │  └──config (2a49e1bb9aac)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	already exists	
+   │  └──config (148348cd4568)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	already exists	
+   │  └──config (b7bcdd83889e)          	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  23.9 K	(62.8 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   │  └──config (f386f0c85682)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   │  └──config (5b27d072f754)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   │  └──config (2863f9493a81)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	already exists	
+   │  └──config (296a95dcb335)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	already exists	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   │  └──config (e6d00bb7ca6c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   │  └──config (586fcb872f80)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   │  └──config (4e411f4c890c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   │  └──config (2a49e1bb9aac)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	already exists	
+   │  └──config (148348cd4568)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	already exists	
+   │  └──config (b7bcdd83889e)          	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  24.5 K	(64.4 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   │  └──config (f386f0c85682)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   │  └──config (5b27d072f754)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   │  └──config (2863f9493a81)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8d133a316546)           	already exists	
+   │  └──config (296a95dcb335)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	already exists	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   │  └──config (e6d00bb7ca6c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   │  └──config (586fcb872f80)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   │  └──config (4e411f4c890c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   │  └──config (2a49e1bb9aac)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	already exists	
+   │  └──config (148348cd4568)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	already exists	
+   │  └──config (b7bcdd83889e)          	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  25.1 K	(66.0 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   │  └──config (f386f0c85682)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   │  └──config (5b27d072f754)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   │  └──config (2863f9493a81)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	already exists	
+   ├──manifest (8d133a316546)           	already exists	
+   │  └──config (296a95dcb335)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	already exists	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   │  └──config (e6d00bb7ca6c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   │  └──config (586fcb872f80)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   │  └──config (4e411f4c890c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   │  └──config (2a49e1bb9aac)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	already exists	
+   │  └──config (148348cd4568)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	already exists	
+   │  └──config (b7bcdd83889e)          	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  25.3 K	(66.6 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   │  └──config (f386f0c85682)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   │  └──config (5b27d072f754)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   │  └──config (2863f9493a81)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	already exists	
+   ├──manifest (8d133a316546)           	already exists	
+   │  └──config (296a95dcb335)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	already exists	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   │  └──config (e6d00bb7ca6c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   │  └──config (586fcb872f80)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	already exists	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   │  └──config (4e411f4c890c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   │  └──config (2a49e1bb9aac)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	already exists	
+   │  └──config (148348cd4568)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	already exists	
+   │  └──config (b7bcdd83889e)          	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	waiting    	|[32m[0m--------------------------------------|	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  25.9 K	(68.1 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   │  └──config (f386f0c85682)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   │  └──config (5b27d072f754)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   │  └──config (2863f9493a81)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	already exists	
+   ├──manifest (8d133a316546)           	already exists	
+   │  └──config (296a95dcb335)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	already exists	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   │  └──config (e6d00bb7ca6c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   │  └──config (586fcb872f80)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	already exists	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   │  └──config (4e411f4c890c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   │  └──config (2a49e1bb9aac)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	already exists	
+   │  └──config (148348cd4568)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	already exists	
+   │  └──config (b7bcdd83889e)          	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	already exists	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  26.1 K	(68.7 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   │  └──config (f386f0c85682)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   │  └──config (5b27d072f754)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   │  └──config (2863f9493a81)          	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	already exists	
+   ├──manifest (8d133a316546)           	already exists	
+   │  └──config (296a95dcb335)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	already exists	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   │  └──config (e6d00bb7ca6c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   │  └──config (586fcb872f80)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	already exists	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   │  └──config (4e411f4c890c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   │  └──config (2a49e1bb9aac)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (2c4dfe443161)           	already exists	
+   │  └──config (148348cd4568)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	already exists	
+   │  └──config (b7bcdd83889e)          	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	already exists	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  26.8 K	(70.3 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   │  └──config (f386f0c85682)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   │  └──config (5b27d072f754)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   │  └──config (2863f9493a81)          	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	already exists	
+   ├──manifest (8d133a316546)           	already exists	
+   │  └──config (296a95dcb335)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	already exists	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   │  └──config (e6d00bb7ca6c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   │  └──config (586fcb872f80)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	already exists	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   │  └──config (4e411f4c890c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   │  └──config (2a49e1bb9aac)          	already exists	
+   ├──manifest (2c4dfe443161)           	already exists	
+   │  └──config (148348cd4568)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	already exists	
+   │  └──config (b7bcdd83889e)          	waiting    	|[32m[0m--------------------------------------|	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	already exists	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  27.4 K	(71.8 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   │  └──config (f386f0c85682)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   │  └──config (5b27d072f754)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   │  └──config (2863f9493a81)          	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	already exists	
+   ├──manifest (8d133a316546)           	already exists	
+   │  └──config (296a95dcb335)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	already exists	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   │  └──config (e6d00bb7ca6c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   │  └──config (586fcb872f80)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	already exists	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   │  └──config (4e411f4c890c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   │  └──config (2a49e1bb9aac)          	already exists	
+   ├──manifest (2c4dfe443161)           	already exists	
+   │  └──config (148348cd4568)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (5a3386629390)           	already exists	
+   │  └──config (b7bcdd83889e)          	already exists	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	already exists	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  27.5 K	(72.2 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   │  └──config (f386f0c85682)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   │  └──config (5b27d072f754)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   │  └──config (2863f9493a81)          	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	already exists	
+   ├──manifest (8d133a316546)           	already exists	
+   │  └──config (296a95dcb335)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	already exists	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   │  └──config (e6d00bb7ca6c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   │  └──config (586fcb872f80)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	already exists	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   │  └──config (4e411f4c890c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   │  └──config (2a49e1bb9aac)          	already exists	
+   ├──manifest (2c4dfe443161)           	already exists	
+   │  └──config (148348cd4568)          	already exists	
+   ├──manifest (5a3386629390)           	already exists	
+   │  └──config (b7bcdd83889e)          	already exists	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	already exists	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  28.1 K	(73.7 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   │  └──config (f386f0c85682)          	already exists	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   │  └──config (5b27d072f754)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   │  └──config (2863f9493a81)          	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	already exists	
+   ├──manifest (8d133a316546)           	already exists	
+   │  └──config (296a95dcb335)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	already exists	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   │  └──config (e6d00bb7ca6c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   │  └──config (586fcb872f80)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	already exists	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   │  └──config (4e411f4c890c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   │  └──config (2a49e1bb9aac)          	already exists	
+   ├──manifest (2c4dfe443161)           	already exists	
+   │  └──config (148348cd4568)          	already exists	
+   ├──manifest (5a3386629390)           	already exists	
+   │  └──config (b7bcdd83889e)          	already exists	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	already exists	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  28.3 K	(74.2 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   │  └──config (f386f0c85682)          	already exists	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   │  └──config (5b27d072f754)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   │  └──config (2863f9493a81)          	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	already exists	
+   ├──manifest (8d133a316546)           	already exists	
+   │  └──config (296a95dcb335)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	already exists	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   │  └──config (e6d00bb7ca6c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   │  └──config (586fcb872f80)          	already exists	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	already exists	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   │  └──config (4e411f4c890c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   │  └──config (2a49e1bb9aac)          	already exists	
+   ├──manifest (2c4dfe443161)           	already exists	
+   │  └──config (148348cd4568)          	already exists	
+   ├──manifest (5a3386629390)           	already exists	
+   │  └──config (b7bcdd83889e)          	already exists	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	already exists	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  28.6 K	(74.8 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   │  └──config (f386f0c85682)          	already exists	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   │  └──config (5b27d072f754)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   │  └──config (2863f9493a81)          	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	already exists	
+   ├──manifest (8d133a316546)           	already exists	
+   │  └──config (296a95dcb335)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	already exists	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   │  └──config (e6d00bb7ca6c)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   │  └──config (586fcb872f80)          	already exists	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	already exists	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   │  └──config (4e411f4c890c)          	already exists	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   │  └──config (2a49e1bb9aac)          	already exists	
+   ├──manifest (2c4dfe443161)           	already exists	
+   │  └──config (148348cd4568)          	already exists	
+   ├──manifest (5a3386629390)           	already exists	
+   │  └──config (b7bcdd83889e)          	already exists	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	already exists	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  28.8 K	(75.4 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   │  └──config (f386f0c85682)          	already exists	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   │  └──config (5b27d072f754)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   │  └──config (2863f9493a81)          	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	already exists	
+   ├──manifest (8d133a316546)           	already exists	
+   │  └──config (296a95dcb335)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	already exists	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   │  └──config (e6d00bb7ca6c)          	already exists	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   │  └──config (586fcb872f80)          	already exists	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	already exists	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   │  └──config (4e411f4c890c)          	already exists	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   │  └──config (2a49e1bb9aac)          	already exists	
+   ├──manifest (2c4dfe443161)           	already exists	
+   │  └──config (148348cd4568)          	already exists	
+   ├──manifest (5a3386629390)           	already exists	
+   │  └──config (b7bcdd83889e)          	already exists	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	already exists	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  29.1 K	(75.9 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   │  └──config (f386f0c85682)          	already exists	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   │  └──config (5b27d072f754)          	already exists	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   │  └──config (2863f9493a81)          	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	already exists	
+   ├──manifest (8d133a316546)           	already exists	
+   │  └──config (296a95dcb335)          	waiting    	|[32m[0m--------------------------------------|	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	already exists	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   │  └──config (e6d00bb7ca6c)          	already exists	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   │  └──config (586fcb872f80)          	already exists	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	already exists	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   │  └──config (4e411f4c890c)          	already exists	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   │  └──config (2a49e1bb9aac)          	already exists	
+   ├──manifest (2c4dfe443161)           	already exists	
+   │  └──config (148348cd4568)          	already exists	
+   ├──manifest (5a3386629390)           	already exists	
+   │  └──config (b7bcdd83889e)          	already exists	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	already exists	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  29.3 K	(76.4 KiB/s)	
+docker.io/library/alpine:3.23.0         	fetching image content	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   │  └──config (f386f0c85682)          	already exists	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   │  └──config (5b27d072f754)          	already exists	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   │  └──config (2863f9493a81)          	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	already exists	
+   ├──manifest (8d133a316546)           	already exists	
+   │  └──config (296a95dcb335)          	already exists	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	already exists	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   │  └──config (e6d00bb7ca6c)          	already exists	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   │  └──config (586fcb872f80)          	already exists	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	already exists	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   │  └──config (4e411f4c890c)          	already exists	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   │  └──config (2a49e1bb9aac)          	already exists	
+   ├──manifest (2c4dfe443161)           	already exists	
+   │  └──config (148348cd4568)          	already exists	
+   ├──manifest (5a3386629390)           	already exists	
+   │  └──config (b7bcdd83889e)          	already exists	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	already exists	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  29.9 K	(77.9 KiB/s)	
+docker.io/library/alpine:3.23.0         	saved	
+└──index (51183f2cfa63)                 	already exists	
+   ├──manifest (a107a3c03173)           	already exists	
+   │  └──config (7acffee03fe8)          	already exists	
+   ├──manifest (135aac389d86)           	already exists	
+   │  └──config (f386f0c85682)          	already exists	
+   ├──manifest (ad2445a2c5f0)           	already exists	
+   │  └──config (5b27d072f754)          	already exists	
+   ├──manifest (ed4a87b21407)           	already exists	
+   │  └──config (8764bc580cf9)          	already exists	
+   ├──manifest (d6218bcba4fa)           	already exists	
+   │  └──config (2863f9493a81)          	already exists	
+   ├──manifest (3e4690e11f84)           	already exists	
+   │  └──config (cf24d50ed803)          	already exists	
+   ├──manifest (8d133a316546)           	already exists	
+   │  └──config (296a95dcb335)          	already exists	
+   ├──manifest (c78ded0fee44)           	already exists	
+   │  └──config (cc6c74fc458f)          	already exists	
+   ├──manifest (fddefdcec3ff)           	already exists	
+   │  └──config (e6d00bb7ca6c)          	already exists	
+   ├──manifest (8e6e34008e3a)           	already exists	
+   │  └──config (586fcb872f80)          	already exists	
+   ├──manifest (a9e9814086aa)           	already exists	
+   │  └──config (09158a16f1cb)          	already exists	
+   ├──manifest (1888a4ac62d4)           	already exists	
+   │  └──config (4e411f4c890c)          	already exists	
+   ├──manifest (21fdb77c56a0)           	already exists	
+   │  └──config (2a49e1bb9aac)          	already exists	
+   ├──manifest (2c4dfe443161)           	already exists	
+   │  └──config (148348cd4568)          	already exists	
+   ├──manifest (5a3386629390)           	already exists	
+   │  └──config (b7bcdd83889e)          	already exists	
+   └──manifest (b37b830f7e32)           	already exists	
+      └──config (061b5f1229e9)          	already exists	
+application/vnd.oci.image.index.v1+json sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375
+Pulling from OCI Registry (docker.io/library/alpine:3.23.0)	elapsed: 0.4 s	total:  29.9 K	(77.2 KiB/s)	
+Linux microvm 6.18.56-fcmod #2 SMP PREEMPT_DYNAMIC Tue Nov 10 13:25:51 MST 2026 x86_64 Linux
+/dev/vdb / ext4 rw,relatime,stripe=16 0 0
+proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
+tmpfs /dev tmpfs rw,nosuid,size=65536k,mode=755 0 0
+devpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=666 0 0
+shm /dev/shm tmpfs rw,nosuid,nodev,noexec,relatime,size=65536k 0 0
+mqueue /dev/mqueue mqueue rw,nosuid,nodev,noexec,relatime 0 0
+sysfs /sys sysfs ro,nosuid,nodev,noexec,relatime 0 0
+tmpfs /run tmpfs rw,nosuid,size=65536k,mode=755 0 0
+proc /proc/bus proc ro,nosuid,nodev,noexec,relatime 0 0
+proc /proc/fs proc ro,nosuid,nodev,noexec,relatime 0 0
+proc /proc/irq proc ro,nosuid,nodev,noexec,relatime 0 0
+proc /proc/sys proc ro,nosuid,nodev,noexec,relatime 0 0
+proc /proc/sysrq-trigger proc ro,nosuid,nodev,noexec,relatime 0 0
+tmpfs /proc/acpi tmpfs ro,relatime 0 0
+tmpfs /proc/interrupts tmpfs rw,nosuid,size=65536k,mode=755 0 0
+tmpfs /proc/kcore tmpfs rw,nosuid,size=65536k,mode=755 0 0
+tmpfs /proc/keys tmpfs rw,nosuid,size=65536k,mode=755 0 0
+tmpfs /proc/timer_list tmpfs rw,nosuid,size=65536k,mode=755 0 0
+tmpfs /sys/firmware tmpfs ro,relatime 0 0
+tmpfs /proc/scsi tmpfs ro,relatime 0 0
+MODERNIZED_CONTAINER_OK

@@ -1,0 +1,27 @@
+e666612819bc1efa71c645434bc36385f92e6423
+ eaf83bb718a559d324613d566eaf776b31a62340 _submodules/firecracker (v1.18.0)
+ c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e _submodules/runc (v1.4.2)
+ 3070538befb5a6c09f93e99164762b3a76310357 _submodules/stargz-snapshotter (cmd/v0.18.2)
+9d6c1876564e6cafefaade17cbc3e415cf243c520613f3e388e32154ab562e89  bin/firecracker
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  _submodules/runc/runc
+f5b30f5d2744f120e806f8bf86b69e465eeee3487d76f9ab0402d88684380267  _submodules/stargz-snapshotter/out/containerd-stargz-grpc
+5eaefd4bd7f4d4fbc77641315cf5b0daa3f76da175927631acadb57e8cbb0f9e  volume/volume-init
+1c2dd8c026161404cc032e3f48a94c484ff331d68b39bd9cf54197f1cce631df  agent/agent
+36fc61ef0ea5d194fc33cf540b13cca708853d3469cf3f0757da7e887c59d5c9  runtime/containerd-shim-aws-firecracker
+6b4e9fbb9079142ade3822af31a8dea1642d24cabcf24f15ef6d5412734663ee  firecracker-control/cmd/containerd/firecracker-containerd
+9905973963e355d836c19c5f14a8540634f8ebd2a611c9009cd6c0ddf4e49f09  firecracker-control/cmd/containerd/firecracker-ctr
+	dep	github.com/firecracker-microvm/firecracker-go-sdk	v1.0.1-0.20250818195323-ed6ff32aa924
+	=>	github.com/JooyoungPark73/firecracker-go-sdk	v0.0.0-20261110215740-0d7a093c9b0c	h1:l7EOt6Kz+Q/HdLeFOdkW3YvCMw1kewYNha40Ttw3QYc=
+	
+rustc 1.97.0 (2d8144b78 2026-07-07)
+Firecracker v1.18.0
+runc version 1.4.2
+libseccomp: 2.5.4
+containerd github.com/containerd/containerd/v2 2.3.7+unknown e666612819bc1efa71c645434bc36385f92e6423
+6b4e9fbb9079142ade3822af31a8dea1642d24cabcf24f15ef6d5412734663ee  /users/nehalem/fc-ctrd-mod/install/e666612819bc/bin/firecracker-containerd
+36fc61ef0ea5d194fc33cf540b13cca708853d3469cf3f0757da7e887c59d5c9  /users/nehalem/fc-ctrd-mod/install/e666612819bc/bin/containerd-shim-aws-firecracker
+9d6c1876564e6cafefaade17cbc3e415cf243c520613f3e388e32154ab562e89  /users/nehalem/fc-ctrd-mod/install/e666612819bc/bin/firecracker
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  /users/nehalem/fc-ctrd-mod/install/e666612819bc/bin/runc
+4b7f9d0e6748f9933f0bda64b76bf5c907946774205230d897be8f03b2b583c4  /users/nehalem/fc-ctrd-mod/install/e666612819bc/share/runtime/default-vmlinux.bin
+158114bed98609e53f405b29b97d2844cf2b88e333c881811808df53de9a0fa4  /users/nehalem/fc-ctrd-mod/install/e666612819bc/share/runtime/default-rootfs.img
+INSTALL_DIR=/users/nehalem/fc-ctrd-mod/install/e666612819bc

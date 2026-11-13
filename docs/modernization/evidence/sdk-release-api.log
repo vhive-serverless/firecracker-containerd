@@ -1,0 +1,4 @@
+=== RUN   TestReleaseAPI
+--- PASS: TestReleaseAPI (0.01s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-go-sdk	0.023s
