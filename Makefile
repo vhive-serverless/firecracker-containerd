@@ -11,7 +11,7 @@
 # express or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-SUBDIRS:=agent runtime examples firecracker-control/cmd/containerd snapshotter docker-credential-mmds volume
+SUBDIRS:=agent runtime examples firecracker-control/cmd/containerd snapshotter docker-credential-mmds volume cri
 TEST_SUBDIRS:=$(addprefix test-,$(SUBDIRS))
 INTEG_TEST_SUBDIRS:=$(addprefix integ-test-,$(SUBDIRS))
 
@@ -82,7 +82,7 @@ $(SUBDIRS):
 		--env GOPROXY=$(shell go env GOPROXY) \
 		--workdir /src \
 		$(FIRECRACKER_CONTAINERD_BUILDER_IMAGE) \
-		$(MAKE) $(subst -in-docker,,$@)
+		$(MAKE) $(subst -in-docker,,$@) REVISION=$(shell git rev-parse HEAD)
 
 proto:
 	DOCKER_BUILDKIT=1 docker build \
@@ -123,6 +123,7 @@ lint: $(deps)
 # https://github.com/firecracker-microvm/firecracker-containerd/commit/9711138b150ac9133ca01379ac19a2e7884c251d
 	$(BINPATH)/git-validation -run DCO,short-subject -range HEAD~1..HEAD
 	$(BINPATH)/golangci-lint run
+	cd cri && $(BINPATH)/golangci-lint run --config ../.golangci.yml
 
 tidy:
 	./tools/tidy.sh
@@ -207,6 +208,7 @@ firecracker-containerd-test-image: all-in-docker firecracker runc test-cni-bins 
 		--progress=plain \
 		--file tools/docker/Dockerfile.integ-test \
 		--build-arg FIRECRACKER_TARGET=$(FIRECRACKER_TARGET) \
+		--build-arg RUNTIME_REVISION=$(shell git rev-parse HEAD) \
 		--tag $(FIRECRACKER_CONTAINERD_TEST_IMAGE):${DOCKER_IMAGE_TAG} .
 
 .PHONY: all $(SUBDIRS) clean proto lint install image test-images firecracker-container-test-image firecracker-containerd-integ-test-image test test-in-docker $(TEST_SUBDIRS) integ-test $(INTEG_TEST_SUBDIRS) tidy
@@ -298,8 +300,12 @@ LOOPBACK_BIN?=$(BINPATH)/loopback
 $(LOOPBACK_BIN):
 	GOBIN=$(dir $@) go install github.com/containernetworking/plugins/plugins/main/loopback@v1.9.1
 
+PORTMAP_BIN?=$(BINPATH)/portmap
+$(PORTMAP_BIN):
+	GOBIN=$(dir $@) go install github.com/containernetworking/plugins/plugins/meta/portmap@v1.9.1
+
 .PHONY: cni-bins
-cni-bins: $(BRIDGE_BIN) $(PTP_BIN) $(HOSTLOCAL_BIN) $(FIREWALL_BIN) $(TC_REDIRECT_TAP_BIN) $(LOOPBACK_BIN)
+cni-bins: $(BRIDGE_BIN) $(PTP_BIN) $(HOSTLOCAL_BIN) $(FIREWALL_BIN) $(TC_REDIRECT_TAP_BIN) $(LOOPBACK_BIN) $(PORTMAP_BIN)
 
 .PHONY: test-cni-bins
 test-cni-bins: $(TEST_BRIDGED_TAP_BIN)
@@ -312,6 +318,7 @@ install-cni-bins: cni-bins $(CNI_BIN_ROOT)
 	install -D -o root -g root -m755 -t $(CNI_BIN_ROOT) $(FIREWALL_BIN)
 	install -D -o root -g root -m755 -t $(CNI_BIN_ROOT) $(TC_REDIRECT_TAP_BIN)
 	install -D -o root -g root -m755 -t $(CNI_BIN_ROOT) $(LOOPBACK_BIN)
+	install -D -o root -g root -m755 -t $(CNI_BIN_ROOT) $(PORTMAP_BIN)
 
 .PHONY: install-test-cni-bins
 install-test-cni-bins: test-cni-bins $(CNI_BIN_ROOT)

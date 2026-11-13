@@ -24,6 +24,7 @@ sudo -n env PATH="$PATH" \
     install install-firecracker install-runc install-kernel \
     install-default-rootfs install-default-runc-jailer-config install-cni-bins
 sudo -n sha256sum "$install_dir/bin/firecracker-containerd" \
+    "$install_dir/bin/firecracker-cri" \
     "$install_dir/bin/containerd-shim-aws-firecracker" "$install_dir/bin/firecracker" \
     "$install_dir/bin/jailer" "$install_dir/bin/runc" "$install_dir/share/runtime/default-vmlinux.bin" \
     "$install_dir/share/runtime/default-rootfs.img"
