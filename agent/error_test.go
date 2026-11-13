@@ -43,6 +43,16 @@ func TestIsRetryableMountError(t *testing.T) {
 			Expected: true,
 		},
 		{
+			Name:     "mount wraps ENOMEM",
+			Error:    fmt.Errorf("mount source /dev/vdb: %w", syscall.ENOMEM),
+			Expected: true,
+		},
+		{
+			Name:     "mount wraps EINVAL",
+			Error:    fmt.Errorf("mount source /dev/vdb: %w", syscall.EINVAL),
+			Expected: true,
+		},
+		{
 			Name:     "syscall.Errno ENOENT case",
 			Error:    syscall.ENOENT,
 			Expected: false,

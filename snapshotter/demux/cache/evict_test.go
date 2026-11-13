@@ -22,9 +22,19 @@ import (
 
 	"github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/internal"
 	"github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/proxy"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/goleak"
 )
+
+type logMessageCapture struct {
+	messages chan string
+}
+
+func (w logMessageCapture) Write(p []byte) (int, error) {
+	w.messages <- string(p)
+	return len(p), nil
+}
 
 func getSnapshotter(_ context.Context, _ string) (*proxy.RemoteSnapshotter, error) {
 	return &proxy.RemoteSnapshotter{Snapshotter: &internal.SuccessfulSnapshotter{}}, nil
@@ -132,6 +142,12 @@ func TestBackgroundEnforcersCanBeStopped(t *testing.T) {
 func TestLogErrorOnEvictionFailure(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
+	logger := log.StandardLogger()
+	previousOutput := logger.Out
+	logCapture := logMessageCapture{messages: make(chan string, 1)}
+	logger.SetOutput(logCapture)
+	defer logger.SetOutput(previousOutput)
+
 	dial := func(_ context.Context, _ string) (net.Conn, error) {
 		return nil, errors.New("mock dial error")
 	}
@@ -143,23 +159,11 @@ func TestLogErrorOnEvictionFailure(t *testing.T) {
 	_, err := cache.Get(context.Background(), "test")
 	require.NoError(t, err, "Snapshotter not added to cache correctly")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 25*time.Millisecond)
-	defer cancel()
-
-	ticker := time.NewTimer(5 * time.Millisecond)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-ticker.C:
-			if cache.length() == 1 {
-				continue
-			}
-
-			return
-		case <-ctx.Done():
-			require.Len(t, cache.snapshotters, 1, "Cache entry was never evicted")
-			return
-		}
+	select {
+	case message := <-logCapture.messages:
+		require.Contains(t, message, "mock Close error from remote snapshotter")
+		require.Zero(t, cache.length(), "Snapshotter should be removed even when Close returns an error")
+	case <-time.After(time.Second):
+		t.Fatal("cache reaper did not log the snapshotter Close error")
 	}
 }

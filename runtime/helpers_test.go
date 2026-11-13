@@ -50,7 +50,7 @@ func TestMachineConfigurationFromProto(t *testing.T) {
 				HtEnabled:   true,
 			},
 			expectedMachineConfig: models.MachineConfiguration{
-				CPUTemplate: models.CPUTemplateC3,
+				CPUTemplate: new(models.CPUTemplateC3),
 				VcpuCount:   firecracker.Int64(vcpuCount),
 				MemSizeMib:  firecracker.Int64(memSize),
 				Smt:         firecracker.Bool(true),
@@ -63,7 +63,7 @@ func TestMachineConfigurationFromProto(t *testing.T) {
 			},
 			proto: &proto.FirecrackerMachineConfiguration{},
 			expectedMachineConfig: models.MachineConfiguration{
-				CPUTemplate: models.CPUTemplateC3,
+				CPUTemplate: new(models.CPUTemplateC3),
 				VcpuCount:   firecracker.Int64(defaultCPUCount),
 				MemSizeMib:  firecracker.Int64(defaultMemSizeMb),
 				Smt:         firecracker.Bool(false),
@@ -75,7 +75,7 @@ func TestMachineConfigurationFromProto(t *testing.T) {
 				CPUTemplate: "C3",
 			},
 			expectedMachineConfig: models.MachineConfiguration{
-				CPUTemplate: models.CPUTemplateC3,
+				CPUTemplate: new(models.CPUTemplateC3),
 				VcpuCount:   firecracker.Int64(defaultCPUCount),
 				MemSizeMib:  firecracker.Int64(defaultMemSizeMb),
 				Smt:         firecracker.Bool(false),
@@ -93,7 +93,7 @@ func TestMachineConfigurationFromProto(t *testing.T) {
 				HtEnabled:   true,
 			},
 			expectedMachineConfig: models.MachineConfiguration{
-				CPUTemplate: models.CPUTemplateC3,
+				CPUTemplate: new(models.CPUTemplateC3),
 				VcpuCount:   firecracker.Int64(vcpuCount),
 				MemSizeMib:  firecracker.Int64(memSize),
 				Smt:         firecracker.Bool(true),

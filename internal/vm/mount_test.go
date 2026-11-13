@@ -17,7 +17,7 @@ import (
 	"testing"
 
 	"github.com/containerd/containerd/api/types"
-	"github.com/containerd/containerd/mount"
+	"github.com/containerd/containerd/v2/core/mount"
 	"github.com/stretchr/testify/assert"
 )
 
