@@ -20,19 +20,20 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/containerd/containerd/containers"
-	"github.com/containerd/containerd/errdefs"
-	"github.com/containerd/containerd/mount"
-	"github.com/containerd/containerd/oci"
+	"github.com/containerd/containerd/v2/core/containers"
+	"github.com/containerd/containerd/v2/core/mount"
+	"github.com/containerd/containerd/v2/pkg/oci"
 	"github.com/containerd/continuity/fs"
+	"github.com/containerd/errdefs"
 	"github.com/firecracker-microvm/firecracker-containerd/proto"
 	"github.com/hashicorp/go-multierror"
 	"github.com/opencontainers/runtime-spec/specs-go"
 )
 
 const (
-	vmVolumePath = "/vmv"
-	fsType       = "ext4"
+	bindMountType = "bind"
+	vmVolumePath  = "/vmv"
+	fsType        = "ext4"
 )
 
 // Set is a set of volumes.
@@ -316,7 +317,7 @@ func (vs *Set) WithMounts(mountpoints []Mount) (oci.SpecOpts, error) {
 			return nil, fmt.Errorf("failed to find volume %q", mp.Source)
 		}
 
-		options := []string{"bind"}
+		options := []string{bindMountType}
 		if mp.ReadOnly {
 			options = append(options, "ro")
 		}
@@ -333,7 +334,7 @@ func (vs *Set) WithMounts(mountpoints []Mount) (oci.SpecOpts, error) {
 			// We may be able to have bind-mounts from in-VM snapshotters' mount points.
 			Source:      source,
 			Destination: mp.Destination,
-			Type:        "bind",
+			Type:        bindMountType,
 			Options:     options,
 		})
 	}

@@ -17,9 +17,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/containerd/containerd/plugin"
-	"github.com/containerd/containerd/protobuf/types"
+	"github.com/containerd/containerd/v2/pkg/protobuf/types"
+	"github.com/containerd/containerd/v2/plugins"
 	"github.com/containerd/log"
+	"github.com/containerd/plugin"
+	"github.com/containerd/plugin/registry"
 	"github.com/containerd/ttrpc"
 
 	"github.com/firecracker-microvm/firecracker-containerd/proto"
@@ -27,16 +29,16 @@ import (
 )
 
 func init() {
-	plugin.Register(&plugin.Registration{
-		Type: plugin.GRPCPlugin,
+	registry.Register(&plugin.Registration{
+		Type: plugins.GRPCPlugin,
 		ID:   grpcPluginID,
 		Requires: []plugin.Type{
-			plugin.ServicePlugin,
+			plugins.ServicePlugin,
 		},
 		InitFn: func(ic *plugin.InitContext) (interface{}, error) {
 			log.G(ic.Context).Debugf("initializing %s plugin", grpcPluginID)
 
-			list, err := ic.GetByType(plugin.ServicePlugin)
+			list, err := ic.GetByType(plugins.ServicePlugin)
 			if err != nil {
 				return nil, err
 			}
@@ -46,12 +48,7 @@ func init() {
 				return nil, fmt.Errorf("service %q not found", localPluginID)
 			}
 
-			instance, err := item.Instance()
-			if err != nil {
-				return nil, err
-			}
-
-			return &service{local: instance.(fccontrol.FirecrackerService)}, nil
+			return &service{local: item.(fccontrol.FirecrackerService)}, nil
 		},
 	})
 }

@@ -21,6 +21,7 @@ import (
 	"math"
 	"net"
 	"os"
+	"path/filepath"
 	"runtime/debug"
 	"strconv"
 	"strings"
@@ -33,21 +34,22 @@ import (
 	// secure randomness
 	"math/rand" // #nosec
 
-	taskAPI "github.com/containerd/containerd/api/runtime/task/v2"
+	bootapi "github.com/containerd/containerd/api/runtime/bootstrap/v1"
+	taskAPI "github.com/containerd/containerd/api/runtime/task/v3"
 	"github.com/containerd/containerd/api/types/task"
-	"github.com/containerd/containerd/cio"
-	"github.com/containerd/containerd/events/exchange"
-	"github.com/containerd/containerd/namespaces"
-	"github.com/containerd/containerd/pkg/ttrpcutil"
-	"github.com/containerd/containerd/protobuf"
-	"github.com/containerd/containerd/protobuf/types"
-	"github.com/containerd/containerd/runtime/v2/shim"
+	"github.com/containerd/containerd/v2/pkg/cio"
+	"github.com/containerd/containerd/v2/pkg/namespaces"
+	"github.com/containerd/containerd/v2/pkg/protobuf"
+	"github.com/containerd/containerd/v2/pkg/protobuf/types"
+	"github.com/containerd/containerd/v2/pkg/shim"
+	"github.com/containerd/containerd/v2/pkg/shutdown"
+	"github.com/containerd/containerd/v2/pkg/ttrpcutil"
 	"github.com/containerd/fifo"
 	"github.com/containerd/log"
 	"github.com/containerd/ttrpc"
+	"github.com/containerd/typeurl/v2"
 	"github.com/firecracker-microvm/firecracker-go-sdk"
 	"github.com/firecracker-microvm/firecracker-go-sdk/client/models"
-	"github.com/firecracker-microvm/firecracker-go-sdk/vsock"
 	"github.com/gofrs/uuid"
 	"github.com/hashicorp/go-multierror"
 	"github.com/sirupsen/logrus"
@@ -71,6 +73,8 @@ func init() {
 }
 
 const (
+	logTaskID        = "task_id"
+	logExecID        = "exec_id"
 	defaultVsockPort = 10789
 	minVsockIOPort   = uint32(11000)
 
@@ -96,15 +100,15 @@ const (
 
 var (
 	// type assertions
-	_ taskAPI.TaskService = &service{}
-	_ shim.Init           = NewService
+	_ taskAPI.TTRPCTaskService = &service{}
+	_ shim.TTRPCService        = &service{}
 )
 
 // implements shimapi
 type service struct {
-	taskManager   vm.TaskManager
-	eventExchange *exchange.Exchange
-	namespace     string
+	taskManager     vm.TaskManager
+	remotePublisher shim.Publisher
+	namespace       string
 
 	logger *logrus.Entry
 
@@ -135,8 +139,13 @@ type service struct {
 	// vmReady is closed once CreateVM has been successfully called
 	vmReady                  chan struct{}
 	vmStartOnce              sync.Once
-	agentClient              taskAPI.TaskService
-	eventBridgeClient        eventbridge.Getter
+	agentClient              taskAPI.TTRPCTaskService
+	agentRPCMu               sync.RWMutex
+	agentRPC                 *ttrpc.Client
+	eventMu                  sync.Mutex
+	eventForwarder           *eventbridge.JournalForwarder
+	eventCancel              context.CancelFunc
+	eventDone                chan struct{}
 	driveMountClient         drivemount.DriveMounterService
 	ioProxyClient            ioproxy.IOProxyService
 	jailer                   jailer
@@ -144,7 +153,7 @@ type service struct {
 	driveMountStubs          []MountableStubDrive
 	exitAfterAllTasksDeleted bool // exit the VM and shim when all tasks are deleted
 
-	blockDeviceTasks map[string]struct{}
+	blockDeviceTasks sync.Map
 
 	cleanupErr  error
 	cleanupOnce sync.Once
@@ -169,7 +178,7 @@ func shimOpts(shimCtx context.Context) (*shim.Opts, error) {
 }
 
 // NewService creates new runtime shim.
-func NewService(shimCtx context.Context, _ string, remotePublisher shim.Publisher, shimCancel func()) (shim.Shim, error) {
+func NewService(shimCtx context.Context, remotePublisher shim.Publisher, sd shutdown.Service) (*service, error) {
 	cfg, err := config.LoadConfig("")
 	if err != nil {
 		return nil, err
@@ -206,28 +215,27 @@ func NewService(shimCtx context.Context, _ string, remotePublisher shim.Publishe
 	}
 
 	s := &service{
-		taskManager:   vm.NewTaskManager(shimCtx, logger),
-		eventExchange: exchange.NewExchange(),
-		namespace:     namespace,
+		taskManager:     vm.NewTaskManager(shimCtx, logger),
+		remotePublisher: remotePublisher,
+		namespace:       namespace,
 
 		logger:     logger,
 		shimCtx:    shimCtx,
-		shimCancel: shimCancel,
+		shimCancel: sd.Shutdown,
 
 		vmID:    vmID,
 		shimDir: shimDir,
 
 		config: cfg,
 
-		vmReady:          make(chan struct{}),
-		jailer:           newNoopJailer(shimCtx, logger, shimDir),
-		blockDeviceTasks: make(map[string]struct{}),
-		fifos:            make(map[string]map[string]cio.Config),
+		vmReady: make(chan struct{}),
+		jailer:  newNoopJailer(shimCtx, logger, shimDir),
+		fifos:   make(map[string]map[string]cio.Config),
 	}
 
-	s.startEventForwarders(remotePublisher)
+	go s.closeAgentOnShutdown()
 
-	err = s.serveFCControl()
+	err = s.serveFCControl(sd)
 	if err != nil {
 		err = fmt.Errorf("failed to start fccontrol server: %w", err)
 		s.logger.WithError(err).Error()
@@ -237,54 +245,16 @@ func NewService(shimCtx context.Context, _ string, remotePublisher shim.Publishe
 	return s, nil
 }
 
-func (s *service) startEventForwarders(remotePublisher shim.Publisher) {
-	ns, ok := namespaces.Namespace(s.shimCtx)
-	if !ok {
-		s.logger.Error("failed to fetch the namespace from the context")
-	}
-	ctx := namespaces.WithNamespace(context.Background(), ns)
-
-	// Republish each event received on our exchange to the provided remote publisher.
-	// TODO ideally we would be forwarding events instead of re-publishing them, which would
-	// preserve the events' original timestamps and namespaces. However, as of this writing,
-	// the containerd v2 runtime model only provides a shim with a publisher, not a forwarder.
-	republishCh := eventbridge.Republish(ctx, s.eventExchange, remotePublisher)
-
-	go func() {
-		<-s.vmReady
-
-		// Once the VM is ready, also start forwarding events from it to our exchange
-		attachCh := eventbridge.Attach(ctx, s.eventBridgeClient, s.eventExchange)
-
-		err := <-attachCh
-		if err != nil && err != context.Canceled {
-			s.logger.WithError(err).Error("error while forwarding events from VM agent")
-		}
-
-		err = <-republishCh
-		if err != nil && err != context.Canceled {
-			s.logger.WithError(err).Error("error while republishing events")
-		}
-
-		remotePublisher.Close()
-	}()
-}
-
 // TODO we have to create separate listeners for the fccontrol service and shim service because
 // containerd does not currently expose the shim server for us to register the fccontrol service with too.
 // This is likely addressable through some relatively small upstream contributions; the following is a stop-gap
 // solution until that time.
-func (s *service) serveFCControl() error {
+func (s *service) serveFCControl(sd shutdown.Service) error {
 	// If the fccontrol socket was configured, setup the fccontrol server
 	fcSocketFDEnvVal := os.Getenv(internal.FCSocketFDEnvKey)
 	if fcSocketFDEnvVal == "" {
 		// if there's no socket, we don't need to serve the API (this must be a shim start or shim delete call)
 		return nil
-	}
-
-	fcServer, err := ttrpc.NewServer(ttrpc.WithServerHandshaker(ttrpc.UnixSocketRequireSameUser()))
-	if err != nil {
-		return err
 	}
 
 	socketFD, err := strconv.Atoi(fcSocketFDEnvVal)
@@ -294,16 +264,29 @@ func (s *service) serveFCControl() error {
 		return err
 	}
 
-	fccontrolTtrpc.RegisterFirecrackerService(fcServer, s)
 	fcListener, err := net.FileListener(os.NewFile(uintptr(socketFD), "fccontrol"))
 	if err != nil {
 		return err
 	}
 
+	drain := newFCControlDrain(fcListener)
+	fcServer, err := ttrpc.NewServer(ttrpc.WithServerHandshaker(drain))
+	if err != nil {
+		_ = fcListener.Close()
+		return err
+	}
+	fccontrolTtrpc.RegisterFirecrackerService(fcServer, s)
+
+	// The controller closes each connection after consuming its reply.
+	// Wait for that acknowledgement before RunShim can exit.
+	sd.RegisterCallback(func(ctx context.Context) error {
+		drainErr := drain.Drain(ctx)
+		return errors.Join(drainErr, fcServer.Close())
+	})
 	go func() {
-		defer fcListener.Close()
-		err := fcServer.Serve(s.shimCtx, fcListener)
-		if err != nil && !strings.Contains(err.Error(), "use of closed network connection") {
+		defer drain.Close()
+		err := fcServer.Serve(s.shimCtx, drain)
+		if err != nil && !errors.Is(err, ttrpc.ErrServerClosed) && !errors.Is(err, net.ErrClosed) {
 			s.logger.WithError(err).Error("fccontrol ttrpc server error")
 		}
 	}()
@@ -311,51 +294,51 @@ func (s *service) serveFCControl() error {
 	return nil
 }
 
-func (s *service) StartShim(shimCtx context.Context, opts shim.StartOpts) (string, error) {
+func (m *shimManager) Start(shimCtx context.Context, opts *bootapi.BootstrapParams) (*bootapi.BootstrapResult, error) {
 	// In the shim start routine, we can assume that containerd provided a "log" FIFO in the current working dir.
 	// We have to use that instead of stdout/stderr because containerd reads the stdio pipes of shim start to get
 	// either the shim address or the error returned here.
 	logFifo, err := fifo.OpenFifo(shimCtx, "log", unix.O_WRONLY, 0200)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	logrus.SetOutput(logFifo)
 
-	log := log.G(shimCtx).WithField("task_id", opts.ID)
+	log := log.G(shimCtx).WithField(logTaskID, opts.GetInstanceID())
 	log.Debug("StartShim")
 
 	// If we are running a shim start routine, we can safely assume our current working
 	// directory is the bundle directory
 	cwd, err := os.Getwd()
 	if err != nil {
-		return "", fmt.Errorf("failed to get current working directory: %w", err)
+		return nil, fmt.Errorf("failed to get current working directory: %w", err)
 	}
 	bundleDir := bundle.Dir(cwd)
 
 	// Since we're running a shim start routine, we need to determine the vmID for the incoming
 	// container. Start by looking at the container's OCI annotations
-	s.vmID, err = bundleDir.OCIConfig().VMID()
+	vmID, err := bundleDir.OCIConfig().VMID()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	var exitAfterAllTasksDeleted bool
 	containerCount := 0
 
-	if s.vmID == "" {
+	if vmID == "" {
 		// If here, no VMID has been provided by the client for this container, so auto-generate a new one.
 		// This results in a default behavior of running each container in its own VM if not otherwise
 		// specified by the client.
 		uuid, err := uuid.NewV4()
 		if err != nil {
-			return "", fmt.Errorf("failed to generate UUID for VMID: %w", err)
+			return nil, fmt.Errorf("failed to generate UUID for VMID: %w", err)
 		}
-		s.vmID = uuid.String()
+		vmID = uuid.String()
 
 		// This request is handled by a short-lived shim process to find its control socket.
 		// A long-running shim process won't have the request. So, setting s.logger doesn't affect others.
-		log = log.WithField("vmID", s.vmID)
+		log = log.WithField("vmID", vmID)
 
 		// If the client didn't specify a VMID, this is a single-task VM and should thus exit after this
 		// task is deleted
@@ -363,19 +346,24 @@ func (s *service) StartShim(shimCtx context.Context, opts shim.StartOpts) (strin
 		exitAfterAllTasksDeleted = true
 	}
 
-	client, err := ttrpcutil.NewClient(opts.TTRPCAddress)
+	if err := os.WriteFile(filepath.Join(cwd, "firecracker-vm-id"), []byte(vmID), 0600); err != nil {
+		return nil, err
+	}
+	client, err := ttrpcutil.NewClient(opts.GetContainerdTtrpcAddress())
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	ttrpcClient, err := client.Client()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
+
+	defer ttrpcClient.Close()
 
 	fcControlClient := fccontrolTtrpc.NewFirecrackerClient(ttrpcClient)
 	_, err = fcControlClient.CreateVM(shimCtx, &proto.CreateVMRequest{
-		VMID:                     s.vmID,
+		VMID:                     vmID,
 		ExitAfterAllTasksDeleted: exitAfterAllTasksDeleted,
 		ContainerCount:           int32(containerCount),
 	})
@@ -383,7 +371,7 @@ func (s *service) StartShim(shimCtx context.Context, opts shim.StartOpts) (strin
 		errStatus, ok := status.FromError(err)
 		// ignore AlreadyExists errors, that just means the shim is already up and running
 		if !ok || errStatus.Code() != codes.AlreadyExists {
-			return "", fmt.Errorf("unexpected error from CreateVM: %w", err)
+			return nil, fmt.Errorf("unexpected error from CreateVM: %w", err)
 		}
 	}
 
@@ -395,9 +383,13 @@ func (s *service) StartShim(shimCtx context.Context, opts shim.StartOpts) (strin
 	if exitAfterAllTasksDeleted {
 		str = " The VM will be torn down after serving a single task."
 	}
-	log.WithField("vmID", s.vmID).Infof("successfully started shim (git commit: %s).%s", revision, str)
+	log.WithField("vmID", vmID).Infof("successfully started shim (git commit: %s).%s", revision, str)
 
-	return shim.SocketAddress(shimCtx, opts.Address, s.vmID)
+	address, err := shim.SocketAddress(shimCtx, opts.GetContainerdGrpcAddress(), vmID, false)
+	if err != nil {
+		return nil, err
+	}
+	return &bootapi.BootstrapResult{Version: 3, Protocol: "ttrpc", Address: address}, nil
 }
 
 func logPanicAndDie(logger *logrus.Entry) {
@@ -479,14 +471,18 @@ func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRe
 		return nil, status.Error(codes.AlreadyExists, "shim cannot create VM more than once")
 	}
 
-	// If we failed to create the VM, we have no point in existing anymore, so shutdown
+	// Return the creation error before the controller tears down this shim.
+	// Cancelling the shim here closes ttrpc before its status response is sent.
 	if err != nil {
-		s.shimCancel()
 		s.logger.WithError(err).Error("failed to create VM")
 		if errors.Is(err, context.DeadlineExceeded) {
 			return nil, status.Errorf(codes.DeadlineExceeded, "VM %q didn't start within %s: %s", request.VMID, timeout, err)
 		}
 		return nil, fmt.Errorf("failed to create VM: %w", err)
+	}
+	socketPath, err := s.firecrackerSocketPath()
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve Firecracker API socket path: %w", err)
 	}
 
 	// creating the VM succeeded, setup monitors and publish events to celebrate
@@ -502,7 +498,7 @@ func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRe
 	resp.VMID = s.vmID
 	resp.MetricsFifoPath = s.machineConfig.MetricsFifo
 	resp.LogFifoPath = s.machineConfig.LogFifo
-	resp.SocketPath = s.shimDir.FirecrackerSockPath()
+	resp.SocketPath = socketPath
 	if c, ok := s.jailer.(cgroupPather); ok {
 		resp.CgroupPath = c.CgroupPath()
 	}
@@ -511,11 +507,15 @@ func (s *service) CreateVM(requestCtx context.Context, request *proto.CreateVMRe
 }
 
 func (s *service) publishVMStart() error {
-	return s.eventExchange.Publish(s.shimCtx, StartEventName, &proto.VMStart{VMID: s.vmID})
+	return s.remotePublisher.Publish(s.shimCtx, StartEventName, &proto.VMStart{VMID: s.vmID})
 }
 
 func (s *service) publishVMStop() error {
-	return s.eventExchange.Publish(s.shimCtx, StopEventName, &proto.VMStop{VMID: s.vmID})
+	// The VM is gone and this shim is about to exit. Deliver its final event
+	// directly so the asynchronous guest event bridge cannot lose it.
+	ctx, cancel := context.WithTimeout(context.WithoutCancel(s.shimCtx), defaultStopVMTimeout)
+	defer cancel()
+	return s.remotePublisher.Publish(ctx, StopEventName, &proto.VMStop{VMID: s.vmID})
 }
 
 func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRequest) (err error) {
@@ -563,10 +563,6 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 		logger.Logger.SetLevel(v)
 		opts = append(opts, firecracker.WithLogger(logger))
 	}
-	relVSockPath, err := s.jailer.JailPath().FirecrackerVSockRelPath()
-	if err != nil {
-		return fmt.Errorf("failed to get relative path to firecracker vsock: %w", err)
-	}
 
 	jailedOpts, err := s.jailer.BuildJailedMachine(s.config, s.machineConfig, s.vmID)
 	if err != nil {
@@ -598,24 +594,17 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 	if err != nil {
 		return fmt.Errorf("failed to create new machine instance: %w", err)
 	}
+	if err := s.configureRecovery(); err != nil {
+		return fmt.Errorf("failed to record VM recovery state: %w", err)
+	}
 
 	if err = s.machine.Start(s.shimCtx); err != nil {
 		return fmt.Errorf("failed to start the VM: %w", err)
 	}
 
-	s.logger.Info("calling agent")
-	conn, err := vsock.DialContext(requestCtx, relVSockPath, defaultVsockPort,
-		vsock.WithLogger(s.logger),
-		vsock.WithRetryTimeout(defaultCreateVMTimeout))
-	if err != nil {
-		return fmt.Errorf("failed to dial the VM over vsock: %w", err)
+	if err := s.connectAgent(requestCtx); err != nil {
+		return err
 	}
-
-	rpcClient := ttrpc.NewClient(conn, ttrpc.WithOnClose(func() { _ = conn.Close() }))
-	s.agentClient = taskAPI.NewTaskClient(rpcClient)
-	s.eventBridgeClient = eventbridge.NewGetterClient(rpcClient)
-	s.driveMountClient = drivemount.NewDriveMounterClient(rpcClient)
-	s.ioProxyClient = ioproxy.NewIOProxyClient(rpcClient)
 	s.exitAfterAllTasksDeleted = request.ExitAfterAllTasksDeleted
 
 	err = s.mountDrives(requestCtx)
@@ -623,6 +612,9 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 		return err
 	}
 
+	if err := s.resumeEventForwarding(requestCtx); err != nil {
+		return fmt.Errorf("start acknowledged agent events: %w", err)
+	}
 	s.logger.Info("successfully started the VM")
 	return nil
 }
@@ -710,15 +702,41 @@ func (s *service) GetVMInfo(_ context.Context, _ *proto.GetVMInfoRequest) (*prot
 	if c, ok := s.jailer.(cgroupPather); ok {
 		cgroupPath = c.CgroupPath()
 	}
+	socketPath, err := s.firecrackerSocketPath()
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve Firecracker API socket path: %w", err)
+	}
 
 	return &proto.GetVMInfoResponse{
 		VMID:            s.vmID,
-		SocketPath:      s.shimDir.FirecrackerSockPath(),
+		SocketPath:      socketPath,
 		LogFifoPath:     s.machineConfig.LogPath,
 		MetricsFifoPath: s.machineConfig.MetricsPath,
 		CgroupPath:      cgroupPath,
-		VSockPath:       s.shimDir.FirecrackerVSockPath(),
+		VSockPath:       s.jailer.JailPath().FirecrackerVSockPath(),
 	}, nil
+}
+
+// firecrackerSocketPath resolves the SDK's configured API socket to the host
+// path reported to controllers. The noop runner inherits the shim's working
+// directory, so its relative path is cwd-relative. The runc jailer instead
+// places its relative API path under the VM's shim directory (for example,
+// rootfs/api.socket). Absolute paths are already authoritative and are kept.
+func (s *service) firecrackerSocketPath() (string, error) {
+	if s.machineConfig == nil {
+		return "", errors.New("firecracker machine configuration is unavailable")
+	}
+	socketPath := s.machineConfig.SocketPath
+	if filepath.IsAbs(socketPath) {
+		return socketPath, nil
+	}
+	if s.jailer == nil {
+		return "", errors.New("firecracker jailer is unavailable")
+	}
+	if filepath.Clean(s.jailer.JailPath().RootPath()) != filepath.Clean(s.shimDir.RootPath()) {
+		return filepath.Join(s.shimDir.RootPath(), socketPath), nil
+	}
+	return filepath.Abs(socketPath)
 }
 
 // SetVMMetadata will update the VM being managed by this shim with the provided metadata. If the VM has not been created yet, this
@@ -798,7 +816,7 @@ func (s *service) createBalloon(_ context.Context, request *proto.CreateVMReques
 	balloonDevice := firecracker.NewBalloonDevice(amountMiB, deflateOnOom, firecracker.WithStatsPollingIntervals(statsPollingIntervals))
 	balloon := balloonDevice.Build()
 	if balloon.AmountMib == nil || balloon.DeflateOnOom == nil {
-		return balloon, fmt.Errorf("One of balloon properties is nil, please check %+v: ", balloon)
+		return balloon, fmt.Errorf("one of balloon properties is nil, please check %+v: ", balloon)
 	}
 	s.logger.Infof("Creating a balloon device: AmountMib=%d, DeflateOnOom=%t and statsPollingIntervals=%d ", *balloon.AmountMib, *balloon.DeflateOnOom, balloon.StatsPollingIntervals)
 	return balloon, nil
@@ -827,7 +845,7 @@ func (s *service) GetBalloonConfig(requestCtx context.Context, _ *proto.GetBallo
 	s.logger.Info("Getting configuration for the balloon device")
 	balloon, err := s.machine.GetBalloonConfig(requestCtx)
 	if err != nil {
-		return nil, errors.New("Failed to get balloon configuration. Please check if you have successfully created a balloon device")
+		return nil, errors.New("failed to get balloon configuration. Please check if you have successfully created a balloon device")
 	}
 	balloonConfig := &proto.FirecrackerBalloonDevice{
 		AmountMib:             *balloon.AmountMib,
@@ -879,7 +897,7 @@ func (s *service) GetBalloonStats(requestCtx context.Context, _ *proto.GetBalloo
 		balloonStats.ActualPages == nil ||
 		balloonStats.TargetMib == nil ||
 		balloonStats.TargetPages == nil {
-		return nil, fmt.Errorf("One of BalloonStats properties is nil, please check %+v: ", balloonStats)
+		return nil, fmt.Errorf("one of BalloonStats properties is nil, please check %+v: ", balloonStats)
 	}
 
 	resp := &proto.GetBalloonStatsResponse{
@@ -959,7 +977,7 @@ func (s *service) buildVMConfiguration(req *proto.CreateVMRequest) (*firecracker
 		return nil, err
 	}
 	if !flag {
-		cfg.MachineCfg.CPUTemplate = ""
+		cfg.MachineCfg.CPUTemplate = nil
 	}
 
 	logPath := s.shimDir.FirecrackerLogFifoPath()
@@ -1066,43 +1084,20 @@ func (s *service) buildRootDrive(req *proto.CreateVMRequest) []models.Drive {
 }
 
 func (s *service) newIOProxy(logger *logrus.Entry, stdin, stdout, stderr string, extraData *proto.ExtraData) (vm.IOProxy, error) {
-	var ioConnectorSet vm.IOProxy
+	return s.newIOProxyWithCut(logger, stdin, stdout, stderr, extraData, nil)
+}
 
-	relVSockPath, err := s.jailer.JailPath().FirecrackerVSockRelPath()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get relative path to firecracker vsock: %w", err)
-	}
-
+func (s *service) newIOProxyWithCut(logger *logrus.Entry, stdin, stdout, stderr string, extraData *proto.ExtraData, streams []vm.TransportStreamIO) (vm.IOProxy, error) {
 	if vm.IsAgentOnlyIO(stdout, logger) {
-		ioConnectorSet = vm.NewNullIOProxy()
-	} else {
-		var stdinConnectorPair *vm.IOConnectorPair
-		if stdin != "" {
-			stdinConnectorPair = &vm.IOConnectorPair{
-				ReadConnector:  vm.ReadFIFOConnector(stdin),
-				WriteConnector: vm.VSockDialConnector(defaultVSockConnectTimeout, relVSockPath, extraData.StdinPort),
-			}
-		}
-
-		var stdoutConnectorPair *vm.IOConnectorPair
-		if stdout != "" {
-			stdoutConnectorPair = &vm.IOConnectorPair{
-				ReadConnector:  vm.VSockDialConnector(defaultVSockConnectTimeout, relVSockPath, extraData.StdoutPort),
-				WriteConnector: vm.WriteFIFOConnector(stdout),
-			}
-		}
-
-		var stderrConnectorPair *vm.IOConnectorPair
-		if stderr != "" {
-			stderrConnectorPair = &vm.IOConnectorPair{
-				ReadConnector:  vm.VSockDialConnector(defaultVSockConnectTimeout, relVSockPath, extraData.StderrPort),
-				WriteConnector: vm.WriteFIFOConnector(stderr),
-			}
-		}
-
-		ioConnectorSet = vm.NewIOConnectorProxy(stdinConnectorPair, stdoutConnectorPair, stderrConnectorPair)
+		return vm.NewNullIOProxy(), nil
 	}
-	return ioConnectorSet, nil
+	path, err := s.jailer.JailPath().FirecrackerVSockRelPath()
+	if err != nil {
+		return nil, fmt.Errorf("resolve IO vsock path: %w", err)
+	}
+	return vm.NewTransportHostIOProxy(defaultVSockConnectTimeout, path,
+		vm.TransportPorts{Stdin: extraData.StdinPort, Stdout: extraData.StdoutPort, Stderr: extraData.StderrPort},
+		stdin, stdout, stderr, streams), nil
 }
 
 func (s *service) addFIFOs(taskID, execID string, config cio.Config) error {
@@ -1138,8 +1133,8 @@ func (s *service) deleteFIFOs(taskID, execID string) error {
 	return nil
 }
 
-func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTaskRequest) (*taskAPI.CreateTaskResponse, error) {
-	logger := s.logger.WithField("task_id", request.ID)
+func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTaskRequest) (_ *taskAPI.CreateTaskResponse, retErr error) {
+	logger := s.logger.WithField(logTaskID, request.ID)
 	defer logPanicAndDie(logger)
 
 	err := s.waitVMReady()
@@ -1164,6 +1159,33 @@ func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTask
 		logger.WithError(err).Error()
 		return nil, err
 	}
+	addressCreated, driveReserved := false, false
+	defer func() {
+		if retErr == nil {
+			return
+		}
+		// The caller may have canceled the failed Create. Roll back resources
+		// with a separate bound before another container reuses this VM.
+		cleanupCtx, cancel := context.WithTimeout(context.WithoutCancel(requestCtx), 5*time.Second)
+		defer cancel()
+		if driveReserved {
+			if err := s.containerStubHandler.Release(cleanupCtx, request.ID, s.driveMountClient, s.machine); err != nil {
+				retErr = errors.Join(retErr, fmt.Errorf("failed to release drive after create failure: %w", err))
+				return // Retain the bundle links if the drive still needs cleanup.
+			}
+			s.blockDeviceTasks.Delete(request.ID)
+		}
+		if addressCreated {
+			if err := os.Remove(hostBundleDir.AddrFilePath()); err != nil && !os.IsNotExist(err) {
+				retErr = errors.Join(retErr, fmt.Errorf("failed to remove address after create failure: %w", err))
+			}
+		}
+		if link, err := s.shimDir.BundleLink(request.ID); err == nil {
+			if err := os.Remove(link.RootPath()); err != nil && !os.IsNotExist(err) {
+				retErr = errors.Join(retErr, fmt.Errorf("failed to remove bundle link after create failure: %w", err))
+			}
+		}
+	}()
 
 	err = s.shimDir.CreateAddressLink(request.ID)
 	if err != nil {
@@ -1171,6 +1193,7 @@ func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTask
 		logger.WithError(err).Error()
 		return nil, err
 	}
+	addressCreated = true
 
 	// We don't support a rootfs with multiple mounts, only one mount can be exposed to the
 	// vm per-container
@@ -1191,7 +1214,8 @@ func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTask
 			logger.WithError(err).Error()
 			return nil, err
 		}
-		s.blockDeviceTasks[request.ID] = struct{}{}
+		s.blockDeviceTasks.Store(request.ID, struct{}{})
+		driveReserved = true
 	}
 
 	ociConfigBytes, err := hostBundleDir.OCIConfig().Bytes()
@@ -1206,7 +1230,7 @@ func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTask
 		return nil, err
 	}
 
-	request.Options, err = protobuf.MarshalAnyToProto(extraData)
+	request.Options, err = typeurl.MarshalAnyToProto(extraData)
 	if err != nil {
 		err = fmt.Errorf("failed to marshal extra data: %w", err)
 		logger.WithError(err).Error()
@@ -1256,7 +1280,7 @@ func (s *service) Create(requestCtx context.Context, request *taskAPI.CreateTask
 func (s *service) Start(requestCtx context.Context, req *taskAPI.StartRequest) (*taskAPI.StartResponse, error) {
 	defer logPanicAndDie(log.G(requestCtx))
 
-	log.G(requestCtx).WithFields(logrus.Fields{"task_id": req.ID, "exec_id": req.ExecID}).Debug("start")
+	log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, logExecID: req.ExecID}).Debug("start")
 	agent, err := s.agent()
 	if err != nil {
 		return nil, err
@@ -1271,7 +1295,7 @@ func (s *service) Start(requestCtx context.Context, req *taskAPI.StartRequest) (
 
 func (s *service) Delete(requestCtx context.Context, req *taskAPI.DeleteRequest) (*taskAPI.DeleteResponse, error) {
 	defer logPanicAndDie(log.G(requestCtx))
-	logger := log.G(requestCtx).WithFields(logrus.Fields{"task_id": req.ID, "exec_id": req.ExecID})
+	logger := log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, logExecID: req.ExecID})
 
 	logger.Debug("delete")
 
@@ -1297,10 +1321,12 @@ func (s *service) Delete(requestCtx context.Context, req *taskAPI.DeleteRequest)
 
 	var result *multierror.Error
 
-	if _, contains := s.blockDeviceTasks[req.ID]; contains {
+	if _, contains := s.blockDeviceTasks.Load(req.ID); contains {
 		// Trying to release stub drive for further reuse
 		if err := s.containerStubHandler.Release(requestCtx, req.ID, s.driveMountClient, s.machine); err != nil {
 			result = multierror.Append(fmt.Errorf("failed to release stub drive for container: %s: %w", req.ID, err))
+		} else {
+			s.blockDeviceTasks.Delete(req.ID)
 		}
 	}
 
@@ -1325,7 +1351,7 @@ func (s *service) Delete(requestCtx context.Context, req *taskAPI.DeleteRequest)
 // Exec an additional process inside the container
 func (s *service) Exec(requestCtx context.Context, req *taskAPI.ExecProcessRequest) (*types.Empty, error) {
 	defer logPanicAndDie(log.G(requestCtx))
-	logger := s.logger.WithField("task_id", req.ID).WithField("exec_id", req.ExecID)
+	logger := s.logger.WithField(logTaskID, req.ID).WithField(logExecID, req.ExecID)
 	logger.Debug("exec")
 
 	agent, err := s.agent()
@@ -1341,7 +1367,7 @@ func (s *service) Exec(requestCtx context.Context, req *taskAPI.ExecProcessReque
 		return nil, err
 	}
 
-	req.Spec, err = protobuf.MarshalAnyToProto(extraData)
+	req.Spec, err = typeurl.MarshalAnyToProto(extraData)
 	if err != nil {
 		err = fmt.Errorf("failed to marshal extra data: %w", err)
 		logger.WithError(err).Error()
@@ -1375,7 +1401,7 @@ func (s *service) Exec(requestCtx context.Context, req *taskAPI.ExecProcessReque
 func (s *service) ResizePty(requestCtx context.Context, req *taskAPI.ResizePtyRequest) (*types.Empty, error) {
 	defer logPanicAndDie(log.G(requestCtx))
 
-	log.G(requestCtx).WithFields(logrus.Fields{"task_id": req.ID, "exec_id": req.ExecID}).Debug("resize_pty")
+	log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, logExecID: req.ExecID}).Debug("resize_pty")
 	agent, err := s.agent()
 	if err != nil {
 		return nil, err
@@ -1392,7 +1418,7 @@ func (s *service) ResizePty(requestCtx context.Context, req *taskAPI.ResizePtyRe
 func (s *service) State(requestCtx context.Context, req *taskAPI.StateRequest) (*taskAPI.StateResponse, error) {
 	defer logPanicAndDie(log.G(requestCtx))
 
-	logger := log.G(requestCtx).WithFields(logrus.Fields{"task_id": req.ID, "exec_id": req.ExecID})
+	logger := log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, logExecID: req.ExecID})
 	logger.Debug("state")
 	agent, err := s.agent()
 	if err != nil {
@@ -1475,7 +1501,7 @@ func (s *service) attachNewProxy(
 func (s *service) Pause(requestCtx context.Context, req *taskAPI.PauseRequest) (*types.Empty, error) {
 	defer logPanicAndDie(log.G(requestCtx))
 
-	log.G(requestCtx).WithField("task_id", req.ID).Debug("pause")
+	log.G(requestCtx).WithField(logTaskID, req.ID).Debug("pause")
 	agent, err := s.agent()
 	if err != nil {
 		return nil, err
@@ -1492,7 +1518,7 @@ func (s *service) Pause(requestCtx context.Context, req *taskAPI.PauseRequest) (
 func (s *service) Resume(requestCtx context.Context, req *taskAPI.ResumeRequest) (*types.Empty, error) {
 	defer logPanicAndDie(log.G(requestCtx))
 
-	log.G(requestCtx).WithField("task_id", req.ID).Debug("resume")
+	log.G(requestCtx).WithField(logTaskID, req.ID).Debug("resume")
 	agent, err := s.agent()
 	if err != nil {
 		return nil, err
@@ -1509,7 +1535,7 @@ func (s *service) Resume(requestCtx context.Context, req *taskAPI.ResumeRequest)
 func (s *service) Kill(requestCtx context.Context, req *taskAPI.KillRequest) (*types.Empty, error) {
 	defer logPanicAndDie(log.G(requestCtx))
 
-	log.G(requestCtx).WithFields(logrus.Fields{"task_id": req.ID, "exec_id": req.ExecID}).Debug("kill")
+	log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, logExecID: req.ExecID}).Debug("kill")
 	agent, err := s.agent()
 	if err != nil {
 		return nil, err
@@ -1525,7 +1551,7 @@ func (s *service) Kill(requestCtx context.Context, req *taskAPI.KillRequest) (*t
 func (s *service) Pids(requestCtx context.Context, req *taskAPI.PidsRequest) (*taskAPI.PidsResponse, error) {
 	defer logPanicAndDie(log.G(requestCtx))
 
-	log.G(requestCtx).WithField("task_id", req.ID).Debug("pids")
+	log.G(requestCtx).WithField(logTaskID, req.ID).Debug("pids")
 	agent, err := s.agent()
 	if err != nil {
 		return nil, err
@@ -1542,7 +1568,7 @@ func (s *service) Pids(requestCtx context.Context, req *taskAPI.PidsRequest) (*t
 func (s *service) CloseIO(requestCtx context.Context, req *taskAPI.CloseIORequest) (*types.Empty, error) {
 	defer logPanicAndDie(log.G(requestCtx))
 
-	log.G(requestCtx).WithFields(logrus.Fields{"task_id": req.ID, "exec_id": req.ExecID}).Debug("close_io")
+	log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, logExecID: req.ExecID}).Debug("close_io")
 	agent, err := s.agent()
 	if err != nil {
 		return nil, err
@@ -1559,7 +1585,7 @@ func (s *service) CloseIO(requestCtx context.Context, req *taskAPI.CloseIOReques
 func (s *service) Checkpoint(requestCtx context.Context, req *taskAPI.CheckpointTaskRequest) (*types.Empty, error) {
 	defer logPanicAndDie(log.G(requestCtx))
 
-	log.G(requestCtx).WithFields(logrus.Fields{"task_id": req.ID, "path": req.Path}).Info("checkpoint")
+	log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, "path": req.Path}).Info("checkpoint")
 	agent, err := s.agent()
 	if err != nil {
 		return nil, err
@@ -1600,7 +1626,7 @@ func (s *service) Connect(requestCtx context.Context, req *taskAPI.ConnectReques
 // * After any task Create call returns an error
 func (s *service) Shutdown(requestCtx context.Context, req *taskAPI.ShutdownRequest) (*types.Empty, error) {
 	defer logPanicAndDie(log.G(requestCtx))
-	s.logger.WithFields(logrus.Fields{"task_id": req.ID, "now": req.Now}).Debug("Shutdown")
+	s.logger.WithFields(logrus.Fields{logTaskID: req.ID, "now": req.Now}).Debug("Shutdown")
 
 	shouldShutdown := req.Now || s.exitAfterAllTasksDeleted && s.taskManager.ShutdownIfEmpty()
 	if !shouldShutdown {
@@ -1692,7 +1718,7 @@ func (s *service) terminate(ctx context.Context) (retErr error) {
 
 func (s *service) Stats(requestCtx context.Context, req *taskAPI.StatsRequest) (*taskAPI.StatsResponse, error) {
 	defer logPanicAndDie(log.G(requestCtx))
-	log.G(requestCtx).WithField("task_id", req.ID).Debug("stats")
+	log.G(requestCtx).WithField(logTaskID, req.ID).Debug("stats")
 
 	agent, err := s.agent()
 	if err != nil {
@@ -1709,7 +1735,7 @@ func (s *service) Stats(requestCtx context.Context, req *taskAPI.StatsRequest) (
 // Update a running container
 func (s *service) Update(requestCtx context.Context, req *taskAPI.UpdateTaskRequest) (*types.Empty, error) {
 	defer logPanicAndDie(log.G(requestCtx))
-	log.G(requestCtx).WithField("task_id", req.ID).Debug("update")
+	log.G(requestCtx).WithField(logTaskID, req.ID).Debug("update")
 
 	agent, err := s.agent()
 	if err != nil {
@@ -1726,7 +1752,7 @@ func (s *service) Update(requestCtx context.Context, req *taskAPI.UpdateTaskRequ
 // Wait for a process to exit
 func (s *service) Wait(requestCtx context.Context, req *taskAPI.WaitRequest) (*taskAPI.WaitResponse, error) {
 	defer logPanicAndDie(log.G(requestCtx))
-	log.G(requestCtx).WithFields(logrus.Fields{"task_id": req.ID, "exec_id": req.ExecID}).Debug("wait")
+	log.G(requestCtx).WithFields(logrus.Fields{logTaskID: req.ID, logExecID: req.ExecID}).Debug("wait")
 
 	agent, err := s.agent()
 	if err != nil {
@@ -1806,8 +1832,10 @@ func (s *service) monitorJailedFirecracker(rj *runcJailer) {
 			return
 		case <-ticker.C:
 			if !rj.IsRunning(s.shimCtx) {
-				s.logger.Warn("runc container init process died, canceling shim context")
-				s.shimCancel()
+				s.logger.Warn("runc container init process died, cleaning up VM")
+				if err := s.cleanup(); err != nil {
+					s.logger.WithError(err).Error("failed to clean up the jailed VM")
+				}
 				return
 			}
 		}
@@ -1815,7 +1843,7 @@ func (s *service) monitorJailedFirecracker(rj *runcJailer) {
 }
 
 // agent returns a client to talk to in-VM agent, only if the VM is not terminated.
-func (s *service) agent() (taskAPI.TaskService, error) {
+func (s *service) agent() (taskAPI.TTRPCTaskService, error) {
 	pid, _ := s.machine.PID()
 	if pid == 0 {
 		return nil, status.Errorf(codes.NotFound, "failed to find VM %q", s.vmID)

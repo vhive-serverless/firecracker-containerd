@@ -17,62 +17,15 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/containerd/containerd/cmd/containerd/command"
+	"github.com/containerd/containerd/v2/cmd/containerd/command"
 
-	"github.com/containerd/containerd/pkg/seed"
-
-	// Register containerd builtins
-	// See https://github.com/containerd/containerd/blob/main/cmd/containerd/builtins.go
-	_ "github.com/containerd/containerd/diff/walking/plugin"
-	_ "github.com/containerd/containerd/events/plugin"
-	_ "github.com/containerd/containerd/gc/scheduler"
-	_ "github.com/containerd/containerd/leases/plugin"
-	_ "github.com/containerd/containerd/metadata/plugin"
-	_ "github.com/containerd/containerd/pkg/nri/plugin"
-	_ "github.com/containerd/containerd/plugins/sandbox"
-	_ "github.com/containerd/containerd/plugins/streaming"
-	_ "github.com/containerd/containerd/plugins/transfer"
-	_ "github.com/containerd/containerd/runtime/restart/monitor"
-	_ "github.com/containerd/containerd/runtime/v2"
-	_ "github.com/containerd/containerd/services/containers"
-	_ "github.com/containerd/containerd/services/content"
-	_ "github.com/containerd/containerd/services/diff"
-	_ "github.com/containerd/containerd/services/events"
-	_ "github.com/containerd/containerd/services/healthcheck"
-	_ "github.com/containerd/containerd/services/images"
-	_ "github.com/containerd/containerd/services/introspection"
-	_ "github.com/containerd/containerd/services/leases"
-	_ "github.com/containerd/containerd/services/namespaces"
-	_ "github.com/containerd/containerd/services/opt"
-	_ "github.com/containerd/containerd/services/sandbox"
-	_ "github.com/containerd/containerd/services/snapshots"
-	_ "github.com/containerd/containerd/services/streaming"
-	_ "github.com/containerd/containerd/services/tasks"
-	_ "github.com/containerd/containerd/services/transfer"
-	_ "github.com/containerd/containerd/services/version"
-	_ "github.com/containerd/containerd/services/warning"
-
-	// Linux specific builtins
-	// See https://github.com/containerd/containerd/blob/main/cmd/containerd/builtins_linux.go
-	_ "github.com/containerd/containerd/metrics/cgroups"
-	_ "github.com/containerd/containerd/metrics/cgroups/v2"
-	_ "github.com/containerd/containerd/runtime/v1/linux"
-	_ "github.com/containerd/containerd/runtime/v2/runc/options"
-
-	// Snapshotters
-	_ "github.com/containerd/containerd/snapshots/devmapper/plugin"
-	_ "github.com/containerd/containerd/snapshots/overlay/plugin"
-
-	// Register cri plugin
-	_ "github.com/containerd/containerd/pkg/cri"
+	// Use the selected containerd release's complete builtin plugin registry.
+	_ "github.com/containerd/containerd/v2/cmd/containerd/builtins"
+	_ "github.com/containerd/containerd/v2/plugins/snapshots/devmapper/plugin"
 
 	// Register fc-control plugin
 	_ "github.com/firecracker-microvm/firecracker-containerd/firecracker-control"
 )
-
-func init() {
-	seed.WithTimeAndRand()
-}
 
 func main() {
 	app := command.App()

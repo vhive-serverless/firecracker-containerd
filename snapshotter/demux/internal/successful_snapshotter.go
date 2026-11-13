@@ -16,8 +16,8 @@ package internal
 import (
 	"context"
 
-	"github.com/containerd/containerd/mount"
-	"github.com/containerd/containerd/snapshots"
+	"github.com/containerd/containerd/v2/core/mount"
+	"github.com/containerd/containerd/v2/core/snapshots"
 )
 
 // SuccessfulSnapshotter mocks containerd snapshots.Snapshotter interface

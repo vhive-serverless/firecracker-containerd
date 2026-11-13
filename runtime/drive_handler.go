@@ -39,7 +39,7 @@ const (
 var (
 	// ErrDrivesExhausted occurs when there are no more drives left to use. This
 	// can happen by calling PatchStubDrive greater than the number of drives.
-	ErrDrivesExhausted = fmt.Errorf("There are no remaining drives to be used")
+	ErrDrivesExhausted = fmt.Errorf("there are no remaining drives to be used")
 )
 
 // CreateContainerStubs will create a StubDriveHandler for managing the stub drives
@@ -67,8 +67,8 @@ func CreateContainerStubs(
 
 		machineCfg.Drives = append(machineCfg.Drives, models.Drive{
 			DriveID:      firecracker.String(stubDrive.driveID),
-			PathOnHost:   firecracker.String(stubDrive.stubPath),
-			IsReadOnly:   firecracker.Bool(!isWritable),
+			PathOnHost:   stubDrive.stubPath,
+			IsReadOnly:   !isWritable,
 			RateLimiter:  rateLimiterFromProto(rateLimiter),
 			IsRootDevice: firecracker.Bool(false),
 		})
@@ -202,8 +202,8 @@ func CreateDriveMountStubs(
 
 		machineCfg.Drives = append(machineCfg.Drives, models.Drive{
 			DriveID:      firecracker.String(stubDrive.driveID),
-			PathOnHost:   firecracker.String(stubDrive.stubPath),
-			IsReadOnly:   firecracker.Bool(!isWritable),
+			PathOnHost:   stubDrive.stubPath,
+			IsReadOnly:   !isWritable,
 			RateLimiter:  rateLimiterFromProto(rateLimiter),
 			IsRootDevice: firecracker.Bool(false),
 			CacheType:    cacheTypeFromProto(cacheType),

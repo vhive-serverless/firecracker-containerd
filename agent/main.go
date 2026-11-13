@@ -21,10 +21,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	taskAPI "github.com/containerd/containerd/api/runtime/task/v2"
-	"github.com/containerd/containerd/events/exchange"
-	"github.com/containerd/containerd/namespaces"
-	"github.com/containerd/containerd/sys/reaper"
+	taskAPI "github.com/containerd/containerd/api/runtime/task/v3"
+	"github.com/containerd/containerd/v2/pkg/namespaces"
+	"github.com/containerd/containerd/v2/pkg/sys/reaper"
 	"github.com/containerd/log"
 	"github.com/containerd/ttrpc"
 	"github.com/firecracker-microvm/firecracker-go-sdk/vsock"
@@ -34,7 +33,6 @@ import (
 	"golang.org/x/sys/unix"
 
 	"github.com/firecracker-microvm/firecracker-containerd/eventbridge"
-	"github.com/firecracker-microvm/firecracker-containerd/internal/event"
 
 	drivemount "github.com/firecracker-microvm/firecracker-containerd/proto/service/drivemount/ttrpc"
 	ioproxy "github.com/firecracker-microvm/firecracker-containerd/proto/service/ioproxy/ttrpc"
@@ -97,14 +95,14 @@ func main() {
 		log.G(shimCtx).WithError(err).Fatal("failed to create ttrpc server")
 	}
 
-	eventExchange := &event.ExchangeCloser{Exchange: exchange.NewExchange()}
-	eventbridge.RegisterGetterService(server, eventbridge.NewGetterService(shimCtx, eventExchange))
+	eventJournal := eventbridge.NewJournal(8 << 20)
+	eventbridge.RegisterJournalService(server, eventJournal)
 
-	taskService, err := NewTaskService(shimCtx, shimCancel, eventExchange)
+	taskService, err := NewTaskService(shimCtx, shimCancel, eventJournal)
 	if err != nil {
 		log.G(shimCtx).WithError(err).Fatal("failed to create task service")
 	}
-	taskAPI.RegisterTaskService(server, taskService)
+	taskAPI.RegisterTTRPCTaskService(server, taskService)
 
 	dh, err := newDriveHandler(blockPath, drivePath)
 	if err != nil {

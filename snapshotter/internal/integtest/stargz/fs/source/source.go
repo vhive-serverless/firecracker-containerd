@@ -41,8 +41,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/containerd/containerd/images"
-	"github.com/containerd/containerd/labels"
+	"github.com/containerd/containerd/v2/core/images"
+	"github.com/containerd/containerd/v2/pkg/labels"
 	"github.com/firecracker-microvm/firecracker-containerd/snapshotter/internal/integtest/stargz/fs/config"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )

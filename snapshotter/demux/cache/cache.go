@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/containerd/containerd/snapshots"
+	"github.com/containerd/containerd/v2/core/snapshots"
 	"github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/proxy"
 	"github.com/hashicorp/go-multierror"
 	log "github.com/sirupsen/logrus"
@@ -111,8 +111,8 @@ func (c *RemoteSnapshotterCache) Get(ctx context.Context, key string) (*proxy.Re
 
 	if !ok {
 		c.mutex.Lock()
+		defer c.mutex.Unlock()
 		snapshotter, ok = c.snapshotters[key]
-		c.mutex.Unlock()
 
 		if !ok {
 			newSnapshotter, err := c.fetch(ctx, key)
@@ -120,9 +120,8 @@ func (c *RemoteSnapshotterCache) Get(ctx context.Context, key string) (*proxy.Re
 				return nil, err
 			}
 
-			c.mutex.Lock()
+			// Only one provider owns the connection and metrics listener per key.
 			c.snapshotters[key] = newSnapshotter
-			c.mutex.Unlock()
 
 			if c.lease != nil {
 				c.lease.Enforce(key)

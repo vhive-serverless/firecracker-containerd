@@ -19,7 +19,7 @@ package client
 import (
 	"fmt"
 
-	"github.com/containerd/containerd/pkg/ttrpcutil"
+	"github.com/containerd/containerd/v2/pkg/ttrpcutil"
 
 	fccontrol "github.com/firecracker-microvm/firecracker-containerd/proto/service/fccontrol/ttrpc"
 )
