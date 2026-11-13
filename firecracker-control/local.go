@@ -218,6 +218,13 @@ func (s *local) CreateVM(requestCtx context.Context, req *proto.CreateVMRequest)
 		return nil, err
 	}
 
+	// Control-created shims do not pass through containerd's task bootstrap.
+	// Publish the same endpoint for adopted tasks and bundle address links.
+	err = shimDir.WriteAddress(shimSocketAddress)
+	if err != nil {
+		return nil, fmt.Errorf("publish shim task address: %w", err)
+	}
+
 	s.addShim(shimSocketAddress, cmd)
 
 	return resp, nil
@@ -282,6 +289,16 @@ func (s *local) PauseVM(ctx context.Context, req *proto.PauseVMRequest) (*types.
 	}
 
 	return resp, nil
+}
+
+// CreateSnapshot writes the state and memory of a paused VM.
+func (s *local) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotRequest) (*types.Empty, error) {
+	client, err := s.shimFirecrackerClient(ctx, req.VMID)
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+	return client.CreateSnapshot(ctx, req)
 }
 
 // ResumeVM resumes a VM
