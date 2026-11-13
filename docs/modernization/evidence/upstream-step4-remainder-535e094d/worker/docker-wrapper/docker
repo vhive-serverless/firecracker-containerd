@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+if [[ ${1:-} == run ]]; then
+    shift
+    exec "$real_docker" run --label "$owner_label=$run_id" "$@"
+fi
+exec "$real_docker" "$@"

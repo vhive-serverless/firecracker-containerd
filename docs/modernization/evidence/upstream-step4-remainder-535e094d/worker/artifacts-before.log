@@ -1,0 +1,78 @@
+{
+  "build_receipt_verified": {
+    "_submodules/runc/runc": "9cd4a021610365032b0e13fa37e67b751ccc8205c5b14d313af28cbe6e219220",
+    "_submodules/stargz-snapshotter/out/containerd-stargz-grpc": "8e5c7aa4afe7068277f76ea58a4b55256455de344f538fa85f5d446dde89efff",
+    "agent/agent": "d0ebe2f2c4c43e2a2644efb995cceb2f1007a70c70721af6f5d2ea97cebfae7f",
+    "bin/firecracker": "b33f46cd6d88834cf6a4f8d184f08f219809c636236bffd286d233a60602a2ba",
+    "bin/jailer": "ddadbaa15b5c942271a83b7040ca7259c8ccf92a9e08d44cce0b86fa407ba460",
+    "cri/firecracker-cri": "901f22cbb1ae01943f2959f460a388b64cd000066c0581f21beac74bb09f2a0c",
+    "firecracker-control/cmd/containerd/firecracker-containerd": "87af8721269a9f3a1f243724045310b3580a447079c2066b272c016ec5f44b9c",
+    "firecracker-control/cmd/containerd/firecracker-ctr": "3a4b46087fb6fa1b7ac458d40fc7a8c7fb8b77d41b79d5e61646d4441884a153",
+    "runtime/containerd-shim-aws-firecracker": "00ecbd9c35c0b4f312bdb95a3bbc016f7716d72838e3b4041daa3a081a4e3a5e",
+    "volume/volume-init": "a2c4546961ca406219418f0ad870b7f5d84b9e5e2aeaecac3a46c3e42524381f"
+  },
+  "clean_runtime_source": "9c3ea8e618a46d6d59e64a5812eff4f1bd382cdc",
+  "current_host_artifacts": {
+    "_submodules/runc/runc": {
+      "bytes": 17001128,
+      "sha256": "9cd4a021610365032b0e13fa37e67b751ccc8205c5b14d313af28cbe6e219220"
+    },
+    "_submodules/stargz-snapshotter/out/containerd-stargz-grpc": {
+      "bytes": 55869705,
+      "sha256": "8e5c7aa4afe7068277f76ea58a4b55256455de344f538fa85f5d446dde89efff"
+    },
+    "agent/agent": {
+      "bytes": 18788514,
+      "sha256": "d0ebe2f2c4c43e2a2644efb995cceb2f1007a70c70721af6f5d2ea97cebfae7f"
+    },
+    "bin/firecracker": {
+      "bytes": 3921872,
+      "sha256": "b33f46cd6d88834cf6a4f8d184f08f219809c636236bffd286d233a60602a2ba"
+    },
+    "bin/jailer": {
+      "bytes": 2243040,
+      "sha256": "ddadbaa15b5c942271a83b7040ca7259c8ccf92a9e08d44cce0b86fa407ba460"
+    },
+    "cri/firecracker-cri": {
+      "bytes": 30538100,
+      "sha256": "901f22cbb1ae01943f2959f460a388b64cd000066c0581f21beac74bb09f2a0c"
+    },
+    "default-vmlinux.bin": {
+      "bytes": 27747912,
+      "sha256": "d0f113d6d33ef1f6059048c9abf51cc36718c4ea2544938f9d7e1226d32c6d19"
+    },
+    "firecracker-control/cmd/containerd/firecracker-containerd": {
+      "bytes": 60129592,
+      "sha256": "87af8721269a9f3a1f243724045310b3580a447079c2066b272c016ec5f44b9c"
+    },
+    "firecracker-control/cmd/containerd/firecracker-ctr": {
+      "bytes": 33635523,
+      "sha256": "3a4b46087fb6fa1b7ac458d40fc7a8c7fb8b77d41b79d5e61646d4441884a153"
+    },
+    "runtime/containerd-shim-aws-firecracker": {
+      "bytes": 33236662,
+      "sha256": "00ecbd9c35c0b4f312bdb95a3bbc016f7716d72838e3b4041daa3a081a4e3a5e"
+    },
+    "tools/image-builder/rootfs-dax.img": {
+      "bytes": 536870912,
+      "sha256": "00ad2860cb76771226c052fb7545a6f88b8eb7f0cb811dd4979810b7b87e0440"
+    },
+    "tools/image-builder/rootfs-stargz-dax.img": {
+      "bytes": 536870912,
+      "sha256": "c175f69eeb4ef312f7d1518776601559b9e2849879f0964ba7bbd54ca9733c91"
+    },
+    "tools/image-builder/rootfs-stargz.img": {
+      "bytes": 106127360,
+      "sha256": "1c5f37c2c4f4e511d94ab62aef9ae43f7ce52521a0d5bc79b89ac557591b7447"
+    },
+    "tools/image-builder/rootfs.img": {
+      "bytes": 74100736,
+      "sha256": "c20157f25db801bb5592319b005befbad15a866ca1bb6fe2928779cc3a23fef4"
+    },
+    "volume/volume-init": {
+      "bytes": 19660881,
+      "sha256": "a2c4546961ca406219418f0ad870b7f5d84b9e5e2aeaecac3a46c3e42524381f"
+    }
+  },
+  "scope": "Current post-failed-test-stack host inputs; not an installed-rootfs or completed acceptance receipt."
+}

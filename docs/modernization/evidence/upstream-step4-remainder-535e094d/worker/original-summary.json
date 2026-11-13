@@ -1,0 +1,60 @@
+{
+  "runtime_revision": "9c3ea8e618a46d6d59e64a5812eff4f1bd382cdc",
+  "runtime_tree": "9955efe6cdaf21ba197b2dcc03da891d85ae3ab1",
+  "result": "failed",
+  "phase_exit_codes": {
+    "build": 0,
+    "install": 0,
+    "acceptance": 2
+  },
+  "top_level_pass_count": 55,
+  "failures": [
+    "TestStargzNativeRestore_Isolated (213.47s)",
+    "TestStargzNativeRestore_Isolated/disk (33.74s)",
+    "TestStargzNativeRestore_Isolated/disk/jailed=false (17.31s)",
+    "TestStargzNativeRestore_Isolated/disk/jailed=true (16.43s)",
+    "TestStargzNativeRestore_Isolated/ext4-block (38.43s)",
+    "TestStargzNativeRestore_Isolated/ext4-block/jailed=false (20.95s)",
+    "TestStargzNativeRestore_Isolated/ext4-block/jailed=true (17.49s)",
+    "TestStargzNativeRestore_Isolated/pmem (36.04s)",
+    "TestStargzNativeRestore_Isolated/pmem/jailed=false (18.68s)",
+    "TestStargzNativeRestore_Isolated/pmem/jailed=true (17.36s)",
+    "TestStargzNativeRestore_Isolated/reclaim (34.01s)",
+    "TestStargzNativeRestore_Isolated/reclaim/jailed=false (16.75s)",
+    "TestStargzNativeRestore_Isolated/reclaim/jailed=true (17.25s)",
+    "TestStargzNativeRestore_Isolated/combined (35.58s)",
+    "TestStargzNativeRestore_Isolated/combined/jailed=false (17.85s)",
+    "TestStargzNativeRestore_Isolated/combined/jailed=true (17.73s)",
+    "TestStargzNativeRestore_Isolated/ext4-reclaim (35.56s)",
+    "TestStargzNativeRestore_Isolated/ext4-reclaim/jailed=false (17.41s)",
+    "TestStargzNativeRestore_Isolated/ext4-reclaim/jailed=true (18.15s)"
+  ],
+  "failure_reason": "Stargz native restore fixture expects manifest1; actual mandatory migrated manifest2. All12 leaves stop before restore.",
+  "unique_followups": "Not reached",
+  "files": {
+    "stage4-acceptance-9c3ea8e618a4.log": {
+      "bytes": 699424,
+      "sha256": "aa7b314b5cf99fc614d7f384633c4f0188af0a156ed0d8fa93628bbd04034279"
+    },
+    "stage4-build-9c3ea8e618a4.log": {
+      "bytes": 275930,
+      "sha256": "2d1acd598034836ed642f0875e45ecda5c66b68581d85cca94e12318b5f1997e"
+    },
+    "stage4-command-status-9c3ea8e618a4.tsv": {
+      "bytes": 46,
+      "sha256": "ce6fc30befdbdbbe06afb14faf17c0d9fd92556a281a39ba703f2c920d2ce7df"
+    },
+    "stage4-install-9c3ea8e618a4.log": {
+      "bytes": 9978,
+      "sha256": "98adf9110d22a34c9be6f6114042e1790af38a8f6779381f6e14ae577f180947"
+    },
+    "stage4-submodules-9c3ea8e618a4.txt": {
+      "bytes": 198,
+      "sha256": "3e8aec0aa6326c9582c15809dd86288fe1f2c395a328676ca52cd01a9014df8d"
+    },
+    "stage4-tested-source-9c3ea8e618a4.txt": {
+      "bytes": 82,
+      "sha256": "9acc21ae4016f99a5907a899173bc79312f068e991f3cd2d127ad541c1a1d063"
+    }
+  }
+}

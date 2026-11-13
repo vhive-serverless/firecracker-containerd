@@ -1,0 +1,6 @@
+b33f46cd6d88834cf6a4f8d184f08f219809c636236bffd286d233a60602a2ba  /usr/local/bin/firecracker
+87af8721269a9f3a1f243724045310b3580a447079c2066b272c016ec5f44b9c  /usr/local/bin/firecracker-containerd
+00ecbd9c35c0b4f312bdb95a3bbc016f7716d72838e3b4041daa3a081a4e3a5e  /usr/local/bin/containerd-shim-aws-firecracker
+4c456f2b40bd004fe0b0dd6447042bfeec9559ea2fdce4a19ec13b044a890426  /var/lib/firecracker-containerd/runtime/default-rootfs.img
+d0f113d6d33ef1f6059048c9abf51cc36718c4ea2544938f9d7e1226d32c6d19  /var/lib/firecracker-containerd/runtime/default-vmlinux.bin
+containerd github.com/containerd/containerd/v2 2.3.7+unknown 9c3ea8e618a46d6d59e64a5812eff4f1bd382cdc

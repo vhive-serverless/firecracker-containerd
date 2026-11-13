@@ -1,0 +1,23 @@
+{
+  "scope": "Completed build/install logs only; whole pipeline still running; not final acceptance",
+  "source": "9c3ea8e618a46d6d59e64a5812eff4f1bd382cdc",
+  "remote_sha256_verified": true,
+  "files": {
+    "stage4-build-9c3ea8e618a4.log": {
+      "bytes": 275930,
+      "sha256": "2d1acd598034836ed642f0875e45ecda5c66b68581d85cca94e12318b5f1997e"
+    },
+    "stage4-install-9c3ea8e618a4.log": {
+      "bytes": 9978,
+      "sha256": "98adf9110d22a34c9be6f6114042e1790af38a8f6779381f6e14ae577f180947"
+    },
+    "stage4-tested-source-9c3ea8e618a4.txt": {
+      "bytes": 82,
+      "sha256": "9acc21ae4016f99a5907a899173bc79312f068e991f3cd2d127ad541c1a1d063"
+    },
+    "stage4-submodules-9c3ea8e618a4.txt": {
+      "bytes": 198,
+      "sha256": "3e8aec0aa6326c9582c15809dd86288fe1f2c395a328676ca52cd01a9014df8d"
+    }
+  }
+}

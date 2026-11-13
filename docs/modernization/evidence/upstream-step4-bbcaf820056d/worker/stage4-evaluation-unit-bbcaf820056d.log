@@ -1,0 +1,41 @@
+test_existing_output_is_not_overwritten (test_sample_host.BoundsTests.test_existing_output_is_not_overwritten) ... ok
+test_nonfinite_and_out_of_bounds (test_sample_host.BoundsTests.test_nonfinite_and_out_of_bounds) ... ok
+test_record_timestamps (test_sample_host.BoundsTests.test_record_timestamps) ... ok
+test_cgroup_replacement_discards_metrics (test_sample_host.IdentityTests.test_cgroup_replacement_discards_metrics) ... ok
+test_exit_after_previous_observation (test_sample_host.IdentityTests.test_exit_after_previous_observation) ... ok
+test_reuse_during_collection_discards_metrics (test_sample_host.IdentityTests.test_reuse_during_collection_discards_metrics) ... ok
+test_reuse_is_not_adopted (test_sample_host.IdentityTests.test_reuse_is_not_adopted) ... ok
+test_cgroup_io_multiple_devices_and_empty (test_sample_host.ParsingTests.test_cgroup_io_multiple_devices_and_empty) ... ok
+test_memory_units_and_rollup_header (test_sample_host.ParsingTests.test_memory_units_and_rollup_header) ... ok
+test_permission_is_explicit (test_sample_host.ParsingTests.test_permission_is_explicit) ... ok
+test_stat_with_parenthesis_and_spaces (test_sample_host.ParsingTests.test_stat_with_parenthesis_and_spaces) ... ok
+test_truncated_stat (test_sample_host.ParsingTests.test_truncated_stat) ... ok
+test_layers_not_summed_and_new_layer_not_zero_filled (test_summarize_matrix.IOTests.test_layers_not_summed_and_new_layer_not_zero_filled) ... ok
+test_partition_ascends_to_parent (test_summarize_matrix.IOTests.test_partition_ascends_to_parent) ... ok
+test_physical_io_read_error_does_not_erase_memory_cpu_measurements (test_summarize_matrix.IOTests.test_physical_io_read_error_does_not_erase_memory_cpu_measurements) ... ok
+test_recorded_backing_precedes_current_analyzer_filesystem (test_summarize_matrix.IOTests.test_recorded_backing_precedes_current_analyzer_filesystem) ... ok
+test_counter_reset_rejected (test_summarize_matrix.InterpolationTests.test_counter_reset_rejected) ... ok
+test_exact_trapezoid_and_interpolated_edges (test_summarize_matrix.InterpolationTests.test_exact_trapezoid_and_interpolated_edges) ... ok
+test_missing_interior_value_is_not_filtered_or_zero_filled (test_summarize_matrix.InterpolationTests.test_missing_interior_value_is_not_filtered_or_zero_filled) ... ok
+test_no_extrapolation_or_gap_interpolation (test_summarize_matrix.InterpolationTests.test_no_extrapolation_or_gap_interpolation) ... ok
+test_vm_identity_cannot_change_between_valid_rows (test_summarize_matrix.InterpolationTests.test_vm_identity_cannot_change_between_valid_rows) ... ok
+test_changed_cgroup_inode_rejected (test_summarize_matrix.MatrixTests.test_changed_cgroup_inode_rejected) ... ok
+test_cli_rejection_creates_no_output (test_summarize_matrix.MatrixTests.test_cli_rejection_creates_no_output) ... ok
+test_default_window_and_equal_guest_end_are_rejected (test_summarize_matrix.MatrixTests.test_default_window_and_equal_guest_end_are_rejected) ... ok
+test_different_idle_protocol_is_mixed_even_with_same_source (test_summarize_matrix.MatrixTests.test_different_idle_protocol_is_mixed_even_with_same_source) ... ok
+test_dirty_or_legacy_requires_explicit_development_label (test_summarize_matrix.MatrixTests.test_dirty_or_legacy_requires_explicit_development_label) ... ok
+test_failed_trial_never_accepted_even_in_development (test_summarize_matrix.MatrixTests.test_failed_trial_never_accepted_even_in_development) ... ok
+test_full_and_common_idle_are_distinct_with_exact_metrics (test_summarize_matrix.MatrixTests.test_full_and_common_idle_are_distinct_with_exact_metrics) ... ok
+test_idle_vm_pss_gap_rejected (test_summarize_matrix.MatrixTests.test_idle_vm_pss_gap_rejected) ... ok
+test_manifest_build_receipt_mismatch_rejected (test_summarize_matrix.MatrixTests.test_manifest_build_receipt_mismatch_rejected) ... ok
+test_missing_or_permission_denied_sample_rejected (test_summarize_matrix.MatrixTests.test_missing_or_permission_denied_sample_rejected) ... ok
+test_missing_sample_sequence_rejected (test_summarize_matrix.MatrixTests.test_missing_sample_sequence_rejected) ... ok
+test_mixed_sources_rejected_or_kept_in_separate_development_groups (test_summarize_matrix.MatrixTests.test_mixed_sources_rejected_or_kept_in_separate_development_groups) ... ok
+test_optional_vmm_io_permission_failure_is_explicit_not_zero (test_summarize_matrix.MatrixTests.test_optional_vmm_io_permission_failure_is_explicit_not_zero) ... ok
+test_missing_metrics_do_not_become_zeros_in_arm_statistics (test_summarize_matrix.PairTests.test_missing_metrics_do_not_become_zeros_in_arm_statistics) ... ok
+test_pairs_are_within_block_and_pmem_uses_ext4_controls (test_summarize_matrix.PairTests.test_pairs_are_within_block_and_pmem_uses_ext4_controls) ... ok
+
+----------------------------------------------------------------------
+Ran 36 tests in 0.107s
+
+OK

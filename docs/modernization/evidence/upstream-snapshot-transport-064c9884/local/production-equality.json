@@ -1,0 +1,14 @@
+{
+  "base": "332da2a7065baa0050037250bbf2ff316a1a8519",
+  "target": "064c9884a0a34a52c1e648847a4bb5f336fa2dde",
+  "base_tree": "ca3b1392749b9337479a79c6a7c9c39883ccc507",
+  "target_tree": "5c094243ecaf1d6ea7891d2021d78ff634be513b",
+  "non_test_tracked_entry_count": 433,
+  "non_test_mode_type_blob_path_manifest_sha256": "39bc1700b828d850e62790d1222c6a31c846f8c649f49f76782469eecb6a015d",
+  "non_test_entries_identical": true,
+  "existing_test_entries_unchanged": true,
+  "only_changes": [
+    "A\truntime/native_buffered_stdin_supplement_integ_test.go",
+    "A\truntime/snapshot_admission_supplement_test.go"
+  ]
+}

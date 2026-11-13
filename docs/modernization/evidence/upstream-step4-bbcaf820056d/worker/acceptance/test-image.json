@@ -1,0 +1,72 @@
+[
+    {
+        "Id": "sha256:f6becb18f0df98ffb0d5086b54740328c91a8df697d811abb598a2fc95eeaaa8",
+        "RepoTags": [
+            "localhost/firecracker-containerd-test:bbcaf820056d"
+        ],
+        "RepoDigests": [
+            "localhost/firecracker-containerd-test@sha256:f6becb18f0df98ffb0d5086b54740328c91a8df697d811abb598a2fc95eeaaa8"
+        ],
+        "Comment": "buildkit.dockerfile.v0",
+        "Created": "2026-11-12T16:40:12.572204315-07:00",
+        "Config": {
+            "Env": [
+                "PATH=/bin:/usr/bin:/usr/local/bin:/sbin:/usr/sbin:/usr/local/sbin:/usr/local/go/bin",
+                "GOLANG_VERSION=1.26.11",
+                "GOTOOLCHAIN=local",
+                "GOPATH=/go",
+                "INSTALLROOT=/usr/local",
+                "DEBIAN_FRONTEND=noninteractive",
+                "GOCACHE=/go/build-cache",
+                "FICD_LOG_DIR=/var/log/firecracker-containerd-test",
+                "FICD_CONTAINERD_OUTFILE=/var/log/firecracker-containerd-test/containerd.out",
+                "CTRD_VERSION=2.3.7",
+                "CRITEST_VERSION=1.37.0"
+            ],
+            "Entrypoint": [
+                "/entrypoint"
+            ],
+            "Cmd": [
+                "exec /bin/bash"
+            ],
+            "WorkingDir": "/go",
+            "ArgsEscaped": true
+        },
+        "Architecture": "amd64",
+        "Os": "linux",
+        "Size": 1053481921,
+        "RootFS": {
+            "Type": "layers",
+            "Layers": [
+                "sha256:05f9043663c0a4a3f7a75f1fe7cf08b5a69419f2e31425412598b5443e1887bc",
+                "sha256:74a1cce49db916676932c971e576f97b650bfdb55e355ee56d3b022d4c01ad1f",
+                "sha256:131853779658ab455b50696ca52922ea83febf8922703598ea672657331befbc",
+                "sha256:3b5af6bfa944fb0b89d547110ff58570f406e6d6c7b1d00d89865840f5dac7fb",
+                "sha256:b9757dc9f68b118b80b08e11b4b5b47178d7ba07e555dc4b78ea39dd433a2a3d",
+                "sha256:f1411b3c21558edd45e2f5260540a5a441883787796e8226961aa5149d4fabe7",
+                "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+                "sha256:7fa0fe72d5fd1423b8431fb5f8e6025c7ba0a5de4ce15e1995af773ed447a742",
+                "sha256:795e559326d6796fb74205cecbf67fdbe9a1d24ced5734c3d64000a19bd7c387",
+                "sha256:d1f75bfacbe765bca756465276249d0d0e8ceb6d88bbf1e13cb9ed38b04af0be",
+                "sha256:857253676d060f4ca91fcbff67bcee837334c27aed66e79c0af67de8b961f712",
+                "sha256:906fb47d6f88da68e2977893ce8fb24f8fde83163da85ac2b690f5a127157774",
+                "sha256:e98f8ad013d72b5f8a91d4005a068798de33988d72251ca259ce8b1e4ccfbdf3",
+                "sha256:f6f16ac120ec4038feebb387ab6f68c2feb9c15ed38afe65280d88c43f7c44e7",
+                "sha256:eaabd75495e2551f75e1f16433455ccfbd75072e0b8e0e35cdb8a66850198358",
+                "sha256:6253d7811332798561210ecd1462f9d25616844b066494b4982498fe997b427f",
+                "sha256:4c9edfe92862385e0925d07ba8374385eda386aa7c5b81afde50f88909f5e272",
+                "sha256:330e5775f7709919896564bca1136782759b8b368b84770713c123a264a702e6",
+                "sha256:ad71bd7edba85932f8b939ca7cd490d05915784e1fda6144e9b22c2902b784c5",
+                "sha256:f538dc9537f2d2dd34e2870e56ca6e0778773c6a57a982acd8a0015827e2b271"
+            ]
+        },
+        "Metadata": {
+            "LastTagTime": "2026-11-12T23:40:31.024063822Z"
+        },
+        "Descriptor": {
+            "mediaType": "application/vnd.oci.image.index.v1+json",
+            "digest": "sha256:f6becb18f0df98ffb0d5086b54740328c91a8df697d811abb598a2fc95eeaaa8",
+            "size": 856
+        }
+    }
+]

@@ -1,0 +1,14 @@
+/users/nehalem/fc-ctrd-mod/upstream-migration/stage4-same-id-integrated/tmp/step4-extra.ELiIwHKB/volfs.test: go1.26.11
+	path	github.com/firecracker-microvm/firecracker-containerd/internal/volfs.test
+	mod	github.com/firecracker-microvm/firecracker-containerd	(devel)	
+	build	-buildmode=exe
+	build	-compiler=gc
+	build	-race=true
+	build	CGO_ENABLED=1
+	build	CGO_CFLAGS=
+	build	CGO_CPPFLAGS=
+	build	CGO_CXXFLAGS=
+	build	CGO_LDFLAGS=
+	build	GOARCH=amd64
+	build	GOOS=linux
+	build	GOAMD64=v1

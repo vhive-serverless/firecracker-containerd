@@ -1,0 +1,213 @@
+{
+  "remote_root": "/users/nehalem/fc-ctrd-mod/upstream-migration/evidence/stage4-remainder-535e094d",
+  "terminal_summary": {
+    "runtime_source": "9c3ea8e618a46d6d59e64a5812eff4f1bd382cdc",
+    "test_fixture_source": "535e094d36ff2689d254bdefd2d0452ea37c9ef0",
+    "image_id": "sha256:70b8de8f4d8250a4a7d2919607dae67c8949094268569fadc58ee321cd1c66e6",
+    "result": "failed",
+    "exit_code": 1,
+    "cleanup_exit": 0,
+    "active_step_on_exit": "",
+    "phase_exit_codes": {
+      "source-before": "0",
+      "prior-failure": "0",
+      "original-summary-integrity": "0",
+      "artifacts-before": "0",
+      "image-inspect": "0",
+      "image-identity": "0",
+      "image-artifacts": "0",
+      "sudo-ready": "0",
+      "filesystem": "0",
+      "pool-create": "0",
+      "stargz-native": "1",
+      "cleanup-on-exit": "0"
+    },
+    "original_failed_run": {
+      "result": "failed",
+      "acceptance_exit": 2,
+      "retained_top_level_passes": 55
+    },
+    "scope": "Targeted corrected stargz twelve leaves plus previously-unreached thinpool/SDK and unique followups; no full-stack rebuild/rerun.",
+    "rootfs_scope": "Image ID is frozen. Current host test-rootfs hashes are recorded before/after; no equality to installed rootfs or pre-test build rootfs is claimed."
+  },
+  "owned_named_container_absent": true,
+  "owned_labeled_containers_absent": true,
+  "files": {
+    "artifacts-before.log": {
+      "bytes": 3647,
+      "sha256": "efd2c8179e1a7f2069465764a7a31de19248f730ccbf1c2c1517a833d3ea0958",
+      "mode": "0o600"
+    },
+    "cleanup-on-exit.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": "0o600"
+    },
+    "command-status.tsv": {
+      "bytes": 220,
+      "sha256": "4038f9d45d808b8ef331fc0878c70caa96178d1cb923cce48954124e460be1a8",
+      "mode": "0o600"
+    },
+    "commands/artifacts-before.sh": {
+      "bytes": 19,
+      "sha256": "80a91ef7bbad92ba976cf433e30b00d565e2432419bdda445a2d1de86fb43f17",
+      "mode": "0o600"
+    },
+    "commands/filesystem.sh": {
+      "bytes": 128,
+      "sha256": "b2f127f08d9ad7cfdf6ff305c74baecd5f4f001210c980e875d7fa4457109f7c",
+      "mode": "0o600"
+    },
+    "commands/image-artifacts.sh": {
+      "bytes": 414,
+      "sha256": "c6c30a5a7af225961c2b5233b5da6b7cc1dd78b54c6171ddd00d0c63e8ac8df5",
+      "mode": "0o600"
+    },
+    "commands/image-identity.sh": {
+      "bytes": 115,
+      "sha256": "1953f02400e945e2fea2f79b5418f0e622520033abb9ddf2abe1d4b20668ec0d",
+      "mode": "0o600"
+    },
+    "commands/image-inspect.sh": {
+      "bytes": 94,
+      "sha256": "cf6ebf533d2c5053bd22b42e7b4e073218c22a1c81594aa840c3329be63f98c8",
+      "mode": "0o600"
+    },
+    "commands/original-summary-integrity.sh": {
+      "bytes": 117,
+      "sha256": "c2612c5c6f98a86e2d6151ec658a0dd1f5bae7b530111ab97c80e6021ee9950e",
+      "mode": "0o600"
+    },
+    "commands/pool-create.sh": {
+      "bytes": 153,
+      "sha256": "ae325a71fb428f57b588d43007a9a357395c894500fcc5a15a4679c62ab85ff8",
+      "mode": "0o600"
+    },
+    "commands/prior-failure.sh": {
+      "bytes": 22,
+      "sha256": "c96c2312797785f32aa63e0763fc1b4fb17f4dabbf162ea6df339e816080881e",
+      "mode": "0o600"
+    },
+    "commands/source-before.sh": {
+      "bytes": 16,
+      "sha256": "754a798c5a1dc522c02550633332e122138110e0699ef2d2fcf9e1938d074ffb",
+      "mode": "0o600"
+    },
+    "commands/stargz-native.sh": {
+      "bytes": 1282,
+      "sha256": "273813fc6c26668794383f99adf8c4884a6f8e23735736c799e7684e7003cc90",
+      "mode": "0o600"
+    },
+    "commands/sudo-ready.sh": {
+      "bytes": 14,
+      "sha256": "1e8f14de438b08f8f5f662b03a5b1334081e3e3e37feb6392511d45069b88912",
+      "mode": "0o600"
+    },
+    "docker-wrapper/docker": {
+      "bytes": 169,
+      "sha256": "a7eee35b1ed15ae08932555af5d1b907f30267e32cbf0041c9b7eba655aa1945",
+      "mode": "0o700"
+    },
+    "filesystem.log": {
+      "bytes": 5,
+      "sha256": "0b6dc1ee0fcbb07c66f6d5364dd7c0ba68647b637e99d3955a91bd76ce687206",
+      "mode": "0o600"
+    },
+    "image-artifacts.log": {
+      "bytes": 663,
+      "sha256": "5d39260ea1c934d6a1e93c7cffdf0c87c3d6abf49ddeaddf804a8ade9acde722",
+      "mode": "0o600"
+    },
+    "image-identity.log": {
+      "bytes": 72,
+      "sha256": "d8bbedbaca7ee22747f181a824bb8cc31bc72bc254a74a94979114b359feba27",
+      "mode": "0o600"
+    },
+    "image-inspect.log": {
+      "bytes": 3647,
+      "sha256": "e026011e38ad6b14ffe0cc6f414b5d59d3f8057b3e98704796ee118c31d11f1e",
+      "mode": "0o600"
+    },
+    "launcher.sh": {
+      "bytes": 24695,
+      "sha256": "1aa7450317179849e85cd4b43e3d30b831a697f5108afbb3119a456a79466ee5",
+      "mode": "0o600"
+    },
+    "launcher.sha256": {
+      "bytes": 159,
+      "sha256": "371df61c10cc6a1ce4a02b8e12c8a4b19c3e8af2d7e61b8bb79018ccce49523a",
+      "mode": "0o600"
+    },
+    "original-stage4-acceptance-9c3ea8e618a4.log": {
+      "bytes": 699424,
+      "sha256": "aa7b314b5cf99fc614d7f384633c4f0188af0a156ed0d8fa93628bbd04034279",
+      "mode": "0o600"
+    },
+    "original-stage4-command-status-9c3ea8e618a4.tsv": {
+      "bytes": 46,
+      "sha256": "ce6fc30befdbdbbe06afb14faf17c0d9fd92556a281a39ba703f2c920d2ce7df",
+      "mode": "0o600"
+    },
+    "original-summary-integrity.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": "0o600"
+    },
+    "original-summary.json": {
+      "bytes": 2646,
+      "sha256": "c89afecd45f8a20301920e00c3b560c5d658192b45bd0aed0a07c68dd47869dd",
+      "mode": "0o600"
+    },
+    "pool-create.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": "0o600"
+    },
+    "pool-preflight.txt": {
+      "bytes": 224,
+      "sha256": "2bd62014af1e78d7197610c222710457e166a79879f1e492f910067117b1d354",
+      "mode": "0o600"
+    },
+    "prior-failure.log": {
+      "bytes": 311,
+      "sha256": "768eafac0bcd1e7b764a0bacde50c134d15adbdca8c239a1eb84fa4b0dbad50e",
+      "mode": "0o600"
+    },
+    "runtime-logs/containerd.out": {
+      "bytes": 4969828,
+      "sha256": "192d8e3b9b9691aaaee10cbab9f1605e082c9691c7f2baef7763baf40bf4a2da",
+      "mode": "0o666"
+    },
+    "runtime-logs/demux-snapshotter.out": {
+      "bytes": 36451,
+      "sha256": "e5d9208b667ad8448b1f9d4a6b3d4c0bcce78494fc6dc80be0e3f5b15b2210bd",
+      "mode": "0o644"
+    },
+    "runtime-logs/http-address-resolver.out": {
+      "bytes": 81,
+      "sha256": "42d9d00856d365bf42b30254ff743e00b528b31bb79db8def82d87d8eb45a752",
+      "mode": "0o644"
+    },
+    "source-before.log": {
+      "bytes": 342,
+      "sha256": "a0dfbb5497c6a49f3dea934763010b15a091a1c0f36caa452c0f080cd4a068b4",
+      "mode": "0o600"
+    },
+    "stargz-native.log": {
+      "bytes": 24628,
+      "sha256": "2bba7fbfa85728a37062cb5d6ea962f2af9a9b7fb963752dfb7cd5e1acae7181",
+      "mode": "0o600"
+    },
+    "sudo-ready.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": "0o600"
+    },
+    "summary.json": {
+      "bytes": 1099,
+      "sha256": "ba1107195117d442e4e069c68577461349c641ba801c53433b6a59cfefd7e047",
+      "mode": "0o600"
+    }
+  },
+  "exclusions": []
+}

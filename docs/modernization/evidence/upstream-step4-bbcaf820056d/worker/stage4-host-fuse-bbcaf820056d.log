@@ -1,0 +1,11 @@
+=== RUN   TestGuestFilesystemLifecycleAndHostCoherence
+--- PASS: TestGuestFilesystemLifecycleAndHostCoherence (0.06s)
+=== RUN   TestGuestFilesystemDirectoryCookiesAndReconnect
+--- PASS: TestGuestFilesystemDirectoryCookiesAndReconnect (0.21s)
+=== RUN   TestGuestSingleFileAndReadOnlyMount
+--- PASS: TestGuestSingleFileAndReadOnlyMount (0.02s)
+=== RUN   TestGuestMountCloseDetachesBorrowedFile
+--- PASS: TestGuestMountCloseDetachesBorrowedFile (0.29s)
+=== RUN   TestGuestKernelPermissionsAndOwnership
+--- PASS: TestGuestKernelPermissionsAndOwnership (0.02s)
+PASS

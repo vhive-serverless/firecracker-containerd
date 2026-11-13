@@ -15,7 +15,7 @@ firecracker-v1.18-containerdv2
 | 1 | `firecracker-v1.18-containerdv2` | Modernized OCI runtime, acknowledged events and framed IO; the worker pipeline and separate installed-prefix lifecycle/controller-restart/shim-crash checks passed at `1074bdc8f2b6`, with one explicit SDK skip in the pipeline. [Receipt and scope](evidence/upstream-step1-1074bdc8f2b6/README.md). |
 | 2 | `firecracker-v1.18-containerdv2-vhive-integration` | Exact `2e03843816cf` has complete segmented check coverage: original full run failed on an unfixed existing CNI flake; unchanged five-VM repeats and remaining thinpool/SDK checks passed separately. Three provisional vHive VM cases passed. [Receipt and limits](evidence/upstream-step2-2e03843816cf/README.md). Final published/installed consumer acceptance remains pending. |
 | 3 | `cri-native-snapshot-restore` | Exact `751c03c6f9a9` passed eight jailed/nonjailed native leaves, real-volume continuity and focused CRI checks (4 specs passed, 138 skipped) plus resource/volume integration. [Receipt and scope](evidence/upstream-step3-751c03c6f9a9/README.md). Full CRI remains **WIP**; Kubernetes Pod restore is deferred to 1.38. |
-| 4 | `damon-virtio-pmem` | Adds disk-backed guest storage, pmem/DAX, DAMON/reporting and memory evaluation; historical direct runtime acceptance is revision-specific and does not validate the migrated candidate. Fresh migrated validation and inherited Step 3 gates remain open. |
+| 4 | `damon-virtio-pmem` | Exact `bbcaf820056d` passed build/install, full stack (142 top-level passes) and all unique checks. [Receipt and scope](evidence/upstream-step4-bbcaf820056d/README.md). No new memory trials; full CRI/Kubernetes/installed-consumer gates remain separate. |
 
 Read the milestone document on its own branch: [Step 1](step-1.md),
 [Step 2](https://github.com/vhive-serverless/firecracker-containerd/blob/firecracker-v1.18-containerdv2-vhive-integration/docs/modernization/step-2.md),
@@ -27,6 +27,14 @@ The old names `modernize-runtime` and `vhive-compatible` identify historical
 milestones and archived receipts; use the new names for current builds.
 
 ## Build and evidence
+
+Exact Step 4 source `bbcaf820056d` passed the full launcher with same-ID restore
+corrections and all unique component checks. Its
+[receipt](evidence/upstream-step4-bbcaf820056d/README.md) preserves actual
+artifacts, skips and independent cleanup. This later documentation/assembled
+tip was not separately tested. Earlier stages retain their exact-source scopes:
+Step 3 `751c` passed its bounded native/volume/focused-CRI procedure; Step 2 `2e`
+has segmented coverage with an unfixed CNI flake and an original exit-2 full run.
 
 The migrated stack uses official Firecracker and jailer v1.18.0 release
 archives, verified against checksums in `versions.json`, and the published
@@ -77,13 +85,12 @@ and are not the reproduction procedure for these branches.
 
 ## Propagating maintenance
 
-Land common fixes on the earliest affected branch, validate them there, then
-merge forward one branch at a time. Preserve each branch's extra functionality,
-dependency pins and acceptance scope while resolving conflicts. Do not merge
-Step 4 storage changes backwards into the Step 1 baseline. Prefer forward
-merges to separate cherry-picks so Git records that the earlier fixes are present.
-Historical maintenance was cherry-picked; patch equivalence is different from
-commit ancestry and can explain different hashes for the same fix.
+Land common fixes on the earliest affected branch, validate them there, and
+rebuild the descendant logical cohorts while preserving each stage's additional
+functionality and acceptance scope. These reconstructed candidate histories
+are linear; archived milestone tips and their historical merge graph stay
+separate. Historical maintenance was cherry-picked or merged, so patch
+equivalence and exact ancestry are distinct evidence.
 
 For each adjacent pair, `git merge-base --is-ancestor <lower> <upper>` must
 succeed after propagation. Inspect the resulting source diff, run the checks
@@ -91,3 +98,14 @@ appropriate to that diff and preserve receipts before pushing. Use separate
 checkouts, install prefixes, test storage and thin pools for concurrent builds.
 The branch chain does not make Step 3 complete: Step 4 was started from its WIP
 baseline by explicit exception on 2026-11-11.
+
+## Preserved historical evidence
+
+The [original branch audit](evidence/branch-chain-audit.json) records its old
+tips and source selections; it is not the reconstructed candidate ancestry.
+The [agent footprint audit](agent-footprint.md) retains original artifact sizes
+and DSec comparison limits. The [upstream reference receipt](upstream-migration.md)
+records 20 native VM cases at `fc2a8c2`. At exact `bbcaf`, the selected 24-case
+group passed as 22 native jailed/nonjailed leaves plus two reporting cases;
+twelve additional stargz native leaves passed. Those results do not relabel the
+old reference or historical memory measurements.

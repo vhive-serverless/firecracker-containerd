@@ -1,0 +1,5 @@
+runtime/native_buffered_stdin_supplement_integ_test.go:175:4: redefines-builtin-id: redefinition of the built-in function copy (revive)
+			copy := nativeForkOpen(ctx, t, taskID, "", cio.NewFIFOSet(config, nil))
+			^
+1 issues:
+* revive: 1

@@ -1,0 +1,13 @@
+step	exit_code
+source-before	0
+prior-failure	0
+original-summary-integrity	0
+artifacts-before	0
+image-inspect	0
+image-identity	0
+image-artifacts	0
+sudo-ready	0
+filesystem	0
+pool-create	0
+stargz-native	1
+cleanup-on-exit	0

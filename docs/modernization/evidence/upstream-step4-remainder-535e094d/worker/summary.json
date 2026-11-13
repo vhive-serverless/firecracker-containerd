@@ -1,0 +1,30 @@
+{
+  "runtime_source": "9c3ea8e618a46d6d59e64a5812eff4f1bd382cdc",
+  "test_fixture_source": "535e094d36ff2689d254bdefd2d0452ea37c9ef0",
+  "image_id": "sha256:70b8de8f4d8250a4a7d2919607dae67c8949094268569fadc58ee321cd1c66e6",
+  "result": "failed",
+  "exit_code": 1,
+  "cleanup_exit": 0,
+  "active_step_on_exit": "",
+  "phase_exit_codes": {
+    "source-before": "0",
+    "prior-failure": "0",
+    "original-summary-integrity": "0",
+    "artifacts-before": "0",
+    "image-inspect": "0",
+    "image-identity": "0",
+    "image-artifacts": "0",
+    "sudo-ready": "0",
+    "filesystem": "0",
+    "pool-create": "0",
+    "stargz-native": "1",
+    "cleanup-on-exit": "0"
+  },
+  "original_failed_run": {
+    "result": "failed",
+    "acceptance_exit": 2,
+    "retained_top_level_passes": 55
+  },
+  "scope": "Targeted corrected stargz twelve leaves plus previously-unreached thinpool/SDK and unique followups; no full-stack rebuild/rerun.",
+  "rootfs_scope": "Image ID is frozen. Current host test-rootfs hashes are recorded before/after; no equality to installed rootfs or pre-test build rootfs is claimed."
+}
