@@ -39,7 +39,7 @@ docker run --rm --user "$(id -u):$(id -g)" \
         go test -mod=mod -c -trimpath -o /build/image/vhive-acceptance.test ./ctriface &&
         go list -mod=mod -m -json all > /build/modules.json &&
         go version -m /build/image/vhive-acceptance.test > /build/test-buildinfo.txt'
-printf 'purpose=provisional-local-module-candidate\nruntime=%s\nruntime_tree=%s\nvhive_test_source=%s\nvhive_source_repository=%s\nfunction=%s\nbase_image=%s\n' \
+printf 'purpose=provisional-local-module-candidate\nlegacy_guest_root_mode=ram\nruntime=%s\nruntime_tree=%s\nvhive_test_source=%s\nvhive_source_repository=%s\nfunction=%s\nbase_image=%s\n' \
     "$VHIVE_RUNTIME_REVISION" "$(git rev-parse HEAD^{tree})" "$vhive_revision" "$vhive_remote" "$VHIVE_FUNCTION_IMAGE" "$base_image_id" > "$logs/inputs"
 cp "$build_dir/modules.json" "$build_dir/test-buildinfo.txt" "$logs/"
 sha256sum "$build_dir/image/vhive-acceptance.test" "$build_dir/src/go.mod" "$build_dir/src/go.sum" > "$logs/binaries.sha256"

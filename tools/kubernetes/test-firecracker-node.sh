@@ -13,6 +13,8 @@ if test "$dirty" = true && test -z "${RUNTIMECLASS_BASE_IMAGE:-}"; then
 fi
 image=${RUNTIMECLASS_BASE_IMAGE:-"localhost/firecracker-containerd-test:${revision:0:12}"}
 runtime_revision=${RUNTIMECLASS_RUNTIME_REVISION:-$revision}
+profile=${KUBE_MEMORY_PROFILE:-disk}
+case "$profile" in disk|pmem|reclaim|combined) ;; *) echo 'Unknown KUBE_MEMORY_PROFILE' >&2; exit 2 ;; esac
 k3s="$stack_dir/toolchains/k3s-v1.37.2/k3s"
 k3s_sha=265b3ee6a3198ef14033c63ef46cbb32370d83795199fb6d1b01f21575eddbda
 if ! test -f "$k3s" || ! echo "$k3s_sha  $k3s" | sha256sum --check --status; then
@@ -28,6 +30,7 @@ mkdir -p "$stack_dir/evidence"
 logs=$(mktemp -d "$stack_dir/evidence/k3s-firecracker-${revision:0:12}.XXXXXXXX")
 suffix=${logs##*.}
 name="fcmod-k3s-$suffix"
+storage=''
 export FICD_DM_VOLUME_GROUP=
 export FICD_DM_POOL="fc-kube-$suffix"
 container_owned=0
@@ -42,24 +45,54 @@ cleanup() {
         tools/thinpool.sh remove "$FICD_DM_POOL"
         pool_owned=0
     fi
+    # This unique directory was created by this invocation, outside source.
+    if test -n "$storage"; then sudo -n rm -rf -- "$storage"; fi
 }
 trap cleanup EXIT
+mkdir -p "$stack_dir/.ficd-test-vms"
+storage=$(mktemp -d "$stack_dir/.ficd-test-vms/k3s-$suffix.XXXXXXXX")
+root_mount=()
+root_digest=''
+if test "$profile" = pmem || test "$profile" = combined; then
+    root_image="$repo_dir/tools/image-builder/rootfs-dax.img"
+    test -f "$root_image"
+    root_digest=$(sha256sum "$root_image" | awk '{print $1}')
+    root_mount=(--volume "$root_image:/fc-root-dax.img:ro")
+fi
+python3 - "$repo_dir" "$logs/runtime-config.json" "$profile" "$root_digest" <<'PY'
+import json
+from pathlib import Path
+import sys
+repo, output, profile, digest = sys.argv[1:]
+config = json.loads((Path(repo) / "tools/docker/do_not_edit_for_firecracker-control.config.json").read_text())
+config.update(guest_root_mode="disk", guest_root_size_mib=512,
+              guest_reclamation={"Enabled": profile in ("reclaim", "combined")})
+if digest:
+    config.update(root_drive="/fc-root-dax.img", root_drive_use_pmem=True,
+                  root_drive_sha256=digest)
+Path(output).write_text(json.dumps(config, indent=2) + "\n")
+PY
 printf 'K3S_FIRECRACKER_LOGS=%s\n' "$logs"
 {
-    printf 'script_revision=%s\nruntime_revision=%s\nsource_dirty=%s\n' "$revision" "$runtime_revision" "$dirty"
+    printf 'script_revision=%s\nruntime_revision=%s\nsource_dirty=%s\nmemory_profile=%s\nvm_storage=%s\n' "$revision" "$runtime_revision" "$dirty" "$profile" "$storage"
     docker image inspect "$image" --format 'image={{.Id}}'
     "$k3s" --version
     sha256sum "$k3s" tools/kubernetes/{test-firecracker-node.sh,run-firecracker-node.sh,firecracker-smoke.yaml}
+    sha256sum "$logs/runtime-config.json"
+    findmnt -T "$storage" -o TARGET,SOURCE,FSTYPE
 } > "$logs/inputs.log"
 tools/thinpool.sh create "$FICD_DM_POOL"
 pool_owned=1
 docker create --init --name "$name" --privileged --cgroupns=private --network bridge --ipc=host \
     --volume /dev:/dev --volume /run/udev/control:/run/udev/control \
     --volume "$logs:/var/log/firecracker-containerd-test" \
+    --volume "$storage:/srv/firecracker_containerd_tests" \
+    --volume "$logs/runtime-config.json:/etc/containerd/firecracker-runtime.json:ro" \
+    "${root_mount[@]}" \
     --volume "$k3s:/usr/local/bin/k3s:ro" \
     --volume "$repo_dir/tools/kubernetes/run-firecracker-node.sh:/run-firecracker-node:ro" \
     --volume "$repo_dir/tools/kubernetes/firecracker-smoke.yaml:/firecracker-smoke.yaml:ro" \
-    --env FICD_DM_POOL --env "KUBE_RUNTIME_REVISION=$runtime_revision" \
+    --env FICD_DM_POOL --env "KUBE_RUNTIME_REVISION=$runtime_revision" --env "KUBE_MEMORY_PROFILE=$profile" \
     --entrypoint /bin/bash "$image" /run-firecracker-node > "$logs/container-id"
 container_owned=1
 set +e
@@ -110,6 +143,19 @@ dns = [p for p in read("system-pods.json")["items"] if p["metadata"]["labels"].g
 assert len(dns) == 1
 assert dns[0]["status"]["containerStatuses"][0]["ready"]
 assert dns[0]["spec"]["containers"][0]["image"] == "docker.io/rancher/mirrored-coredns-coredns@sha256:7efd3c635b03efd68c4e8398fc45f0d993d0e9ab016f72c1cefb0fd6d01aa286"
+config = read("runtime-config.json")
+assert config["guest_root_mode"] == "disk"
+size, blocks, inode = map(int, (logs / "guest-upper-stat.log").read_text().split())
+assert size == config["guest_root_size_mib"] * 1024 * 1024
+assert blocks * 512 >= size and inode > 0
+assert (logs / "guest-upper-host-magic.log").read_text().strip() in ("ef53", "58465342", "9123683e")
+assert not (logs / "guest-upper-after.log").read_text().strip()
+enabled = config["guest_reclamation"]["Enabled"]
+assert (logs / "guest-reclamation.log").read_text().strip() == ("Y" if enabled else "N")
+if config.get("root_drive_use_pmem"):
+    mapped = [line.split() for line in (logs / "vmm-maps.log").read_text().splitlines()
+              if config["root_drive_sha256"] + ".img" in line]
+    assert mapped and all("s" in fields[1] and "w" not in fields[1] for fields in mapped)
 print("RuntimeClass Pod UID, one-VM mapping, both live container stats and cleanup verified.")
 PY
 echo K3S_FIRECRACKER_WORKER_TEST_OK
