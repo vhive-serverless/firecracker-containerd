@@ -11,8 +11,10 @@
 # express or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-volume-init: $(shell find ./cmd -name '*.go')
-	go build -o $@ ./cmd/volume-init
+# This helper runs inside arbitrary image roots, which may use an older
+# glibc or a different libc from the guest and build environments.
+volume-init: Makefile ../go.mod ../go.sum $(shell find . -name '*.go')
+	CGO_ENABLED=0 go build -trimpath -o $@ ./cmd/volume-init
 
 test:
 	go test ./...

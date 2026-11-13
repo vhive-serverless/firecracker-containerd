@@ -1,6 +1,9 @@
 imports = ["/etc/containerd/snapshotter/*.toml", "/etc/containerd/cri/*.toml"]
-[grpc]
+version = 4
+[plugins."io.containerd.server.v1.grpc"]
   address = "/run/firecracker-containerd/containerd.sock"
+[plugins."io.containerd.server.v1.ttrpc"]
+  address = "/run/firecracker-containerd/containerd.sock.ttrpc"
 
 [proxy_plugins]
   [proxy_plugins.demux]

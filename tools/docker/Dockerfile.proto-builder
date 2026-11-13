@@ -11,13 +11,13 @@
 # express or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-FROM public.ecr.aws/docker/library/golang:1.25-bookworm
+FROM public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0
 
 RUN apt-get update && apt-get install --yes --no-install-recommends \
 	libprotobuf-dev=3.21.12-3+deb12u1 \
 	protobuf-compiler=3.21.12-3+deb12u1 \
-	&& go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.33 \
-	&& go install github.com/containerd/ttrpc/cmd/protoc-gen-go-ttrpc@v1.2.3 \
+	&& go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.10 \
+	&& go install github.com/containerd/ttrpc/cmd/protoc-gen-go-ttrpc@v1.2.8 \
 	&& mkdir /protobuf
 
 WORKDIR /protobuf
