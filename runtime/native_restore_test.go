@@ -56,6 +56,14 @@ func TestNativeRestoreExecStateIdentity(t *testing.T) {
 
 func nativeCloneFixture(t *testing.T, destination string) (*service, *proto.CreateVMRequest) {
 	t.Helper()
+	return nativeCloneFixtureWithDrives(t, destination, &proto.CreateVMRequest{ContainerCount: 1}, []nativeDrive{
+		{ID: "root_drive", ReadOnly: true, File: snapshotFile{Path: "drives/00000000", Size: 64}},
+		{ID: "container_0", File: snapshotFile{Path: "drives/00000001", Size: 1 << 20}},
+	})
+}
+
+func nativeCloneFixtureWithDrives(t *testing.T, destination string, request *proto.CreateVMRequest, drives []nativeDrive) (*service, *proto.CreateVMRequest) {
+	t.Helper()
 	artifact := t.TempDir()
 	require.NoError(t, os.Mkdir(filepath.Join(artifact, "drives"), 0700))
 	file := func(name string, size int64) snapshotFile {
@@ -68,14 +76,13 @@ func nativeCloneFixture(t *testing.T, destination string) (*service, *proto.Crea
 		require.NoError(t, output.Close())
 		return snapshotFile{Path: name, Size: size, SHA256: hashNativeFile(t, path)}
 	}
-	request := &proto.CreateVMRequest{ContainerCount: 1}
 	encoded, err := json.Marshal(request)
 	require.NoError(t, err)
 	manifest := &nativeCheckpoint{Version: 2, Transport: &checkpointTransportCut{Version: 1}, RuntimeConfig: &config.Config{}, CreateRequest: encoded,
 		Memory: file("memory", 64), State: file("state", 64), VMConfig: &models.FullVMConfiguration{}}
-	manifest.Drives = []nativeDrive{
-		{ID: "root_drive", ReadOnly: true, File: file("drives/00000000", 64)},
-		{ID: "container_0", File: file("drives/00000001", 1<<20)},
+	manifest.Drives = drives
+	for index, drive := range manifest.Drives {
+		manifest.Drives[index].File = file(drive.File.Path, drive.File.Size)
 	}
 	for index, drive := range manifest.Drives {
 		manifest.VMConfig.Drives = append(manifest.VMConfig.Drives, &models.Drive{
