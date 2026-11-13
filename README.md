@@ -1,6 +1,20 @@
 # firecracker-containerd
 
-This Step 2 branch uses official Firecracker/jailer v1.18.0, published vHive SDK
+This branch uses official Firecracker/jailer v1.18.0, published vHive SDK dd9db32
+and containerd 2.3.7. Exact Step 3 source `751c03c6f9a9` passed build/private
+installation, eight native VM leaves in both jail modes, real-volume continuity
+and focused CRI resource/volume checks. See the
+[Step 3 procedure and exact scope](docs/modernization/step-3.md).
+This later documentation/assembled tip was not separately built or VM-tested.
+
+Full CRI remains WIP; Kubernetes Pod restore is deferred to 1.38. The focused
+run does not repair the inherited CNI flake or establish final published-runtime/
+installed-vHive consumer acceptance. Earlier receipts retain exact source/image
+scope.
+
+### Inherited Step 2 coverage and limitation
+
+The inherited Step 2 source uses official Firecracker/jailer v1.18.0, published vHive SDK
 dd9db32 and containerd 2.3.7. Exact source `2e03843816cf` has complete required
 check coverage across a failed full run, unchanged targeted repeats and a
 passing supplemental thinpool/SDK tail. **The full run exited 2 on an existing

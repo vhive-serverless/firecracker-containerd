@@ -1,0 +1,124 @@
+make: Entering directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage3-same-id-runtime-fix/cri'
+CGO_ENABLED=0 GOWORK=off go test -mod=readonly -c -o cri-runtime.test .
+make: Leaving directory '/users/nehalem/fc-ctrd-mod/upstream-migration/stage3-same-id-runtime-fix/cri'
+CRI_LOGS=/users/nehalem/fc-ctrd-mod/evidence/cri-751c03c6f9a9.VuWyFvlj
+Client:
+  Version:  2.3.7+unknown
+  Revision: 751c03c6f9a98b8726bc4d9066efce78db96952d
+  Go version: go1.26.11
+
+Server:
+  Version:  2.3.7+unknown
+  Revision: 751c03c6f9a98b8726bc4d9066efce78db96952d
+  UUID: ac344319-5296-4ba3-8057-ce2fcce552fc
+firecracker-cri 751c03c6f9a98b8726bc4d9066efce78db96952d
+time="2026-11-13T01:10:05Z" level=warning msg="Config \"/etc/crictl.yaml\" does not exist, trying next: \"/crictl.yaml\""
+critest version: v1.37.0
+Running Suite: CRI validation - /go
+===================================
+Random Seed: 1794532205
+
+Will run 4 of 142 specs
+------------------------------
+[BeforeSuite] 
+sigs.k8s.io/cri-tools/pkg/framework/util.go:98
+  Nov 13 01:10:05.264: INFO: Attempting to load YAML file "/tmp/test-images.yaml" into &{DefaultTestContainerImage:registry.k8s.io/e2e-test-images/busybox:1.29-2 WebServerTestImage:}
+  Nov 13 01:10:05.264: INFO: Successfully loaded YAML file "/tmp/test-images.yaml" into &{DefaultTestContainerImage:registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf WebServerTestImage:}
+  Nov 13 01:10:05.264: INFO: Testing context container image list: {DefaultTestContainerImage:registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf WebServerTestImage:}
+  Nov 13 01:10:05.264: INFO: Testing context benchmarking params: {ContainersNumber:0 ContainersNumberParallel:0 ContainerBenchmarkTimeoutSeconds:0 PodsNumber:0 PodsNumberParallel:0 PodBenchmarkTimeoutSeconds:0 ImagesNumber:0 ImagesNumberParallel:0 ImageBenchmarkTimeoutSeconds:0 ImagePullingBenchmarkImage: ImageListingBenchmarkImages:[] PodContainerStartBenchmarkTimeoutSeconds:0}
+[BeforeSuite] PASSED [0.000 seconds]
+------------------------------
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+------------------------------
+[k8s.io] Runtime info runtime should support returning runtime info runtime should return version info [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/runtime_info.go:43
+  Nov 13 01:10:05.274: INFO: Get version info succeed
+• [0.008 seconds]
+------------------------------
+[k8s.io] Runtime info runtime should support returning runtime info runtime should return runtime conditions [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/runtime_info.go:47
+  STEP: test runtime status @ 11/13/26 01:10:05.277
+• [0.004 seconds]
+------------------------------
+SSSSSSSSSSSSSSSSSSSSSSSSSSS
+------------------------------
+[k8s.io] Container runtime should support adding volume and device runtime should support starting container with volume [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/container.go:341
+  STEP: create host path and flag file @ 11/13/26 01:10:11.649
+  STEP: create container with volume @ 11/13/26 01:10:11.649
+  STEP: create a container with volume and name @ 11/13/26 01:10:11.649
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/13/26 01:10:11.649
+  STEP: Pull image : registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/13/26 01:10:11.65
+  STEP: Create container. @ 11/13/26 01:10:15.248
+  Nov 13 01:10:15.298: INFO: Created container "d85bbc2c30018676c33f49cec6250241472b6600d1b246b3d892159ade526974"
+
+  STEP: test start container with volume @ 11/13/26 01:10:15.298
+  STEP: Start container for containerID: d85bbc2c30018676c33f49cec6250241472b6600d1b246b3d892159ade526974 @ 11/13/26 01:10:15.298
+  Nov 13 01:10:15.439: INFO: Started container "d85bbc2c30018676c33f49cec6250241472b6600d1b246b3d892159ade526974"
+
+  STEP: Get container status for containerID: d85bbc2c30018676c33f49cec6250241472b6600d1b246b3d892159ade526974 @ 11/13/26 01:10:15.439
+  STEP: check whether 'hostPath' contains file or dir in container @ 11/13/26 01:10:15.441
+  STEP: execSync for containerID: d85bbc2c30018676c33f49cec6250241472b6600d1b246b3d892159ade526974 @ 11/13/26 01:10:15.441
+  Nov 13 01:10:15.567: INFO: Execsync succeed
+  STEP: stop PodSandbox @ 11/13/26 01:10:15.567
+  STEP: delete PodSandbox @ 11/13/26 01:10:16.066
+• [10.819 seconds]
+------------------------------
+[k8s.io] Container runtime should support adding volume and device runtime should support starting container with volume when host path is a symlink [Conformance]
+sigs.k8s.io/cri-tools/pkg/validate/container.go:361
+  STEP: create host path and flag file @ 11/13/26 01:10:18.592
+  STEP: create symlink @ 11/13/26 01:10:18.593
+  STEP: create volume container with symlink host path @ 11/13/26 01:10:18.593
+  STEP: create a container with volume and name @ 11/13/26 01:10:18.593
+  STEP: Get image status for image: registry.k8s.io/e2e-test-images/busybox:1.29-2@sha256:c318242786b139d18676b1c09a0ad7f15fc17f8f16a5b2e625cd0dc8c9703daf @ 11/13/26 01:10:18.593
+  STEP: Create container. @ 11/13/26 01:10:18.594
+  Nov 13 01:10:18.640: INFO: Created container "1671b523b8a5e5220f1076b1f79c423df083334509aad78e5eda59f3907b0917"
+
+  STEP: test start volume container with symlink host path @ 11/13/26 01:10:18.64
+  STEP: Start container for containerID: 1671b523b8a5e5220f1076b1f79c423df083334509aad78e5eda59f3907b0917 @ 11/13/26 01:10:18.64
+  Nov 13 01:10:18.772: INFO: Started container "1671b523b8a5e5220f1076b1f79c423df083334509aad78e5eda59f3907b0917"
+
+  STEP: Get container status for containerID: 1671b523b8a5e5220f1076b1f79c423df083334509aad78e5eda59f3907b0917 @ 11/13/26 01:10:18.772
+  STEP: check whether 'symlink' contains file or dir in container @ 11/13/26 01:10:18.773
+  STEP: execSync for containerID: 1671b523b8a5e5220f1076b1f79c423df083334509aad78e5eda59f3907b0917 @ 11/13/26 01:10:18.773
+  Nov 13 01:10:18.898: INFO: Execsync succeed
+  STEP: stop PodSandbox @ 11/13/26 01:10:18.898
+  STEP: delete PodSandbox @ 11/13/26 01:10:19.439
+• [3.374 seconds]
+------------------------------
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+------------------------------
+[ReportAfterSuite] Autogenerated ReportAfterSuite for --json-report
+autogenerated by Ginkgo
+[ReportAfterSuite] PASSED [0.006 seconds]
+------------------------------
+
+Ran 4 of 142 Specs in 14.208 seconds
+SUCCESS! -- 4 Passed | 0 Failed | 0 Pending | 138 Skipped
+PASS
+=== RUN   TestPodVMResources
+=== RUN   TestPodVMResources/declared_limits
+    resources_integ_test.go:63: actual VMM capacity: 2 vCPUs, 384 MiB
+    resources_integ_test.go:63: guest reports 2 processors and 363988 KiB MemTotal
+=== RUN   TestPodVMResources/unspecified_CPU_period
+    resources_integ_test.go:63: actual VMM capacity: 2 vCPUs, 256 MiB
+    resources_integ_test.go:63: guest reports 2 processors and 235348 KiB MemTotal
+=== RUN   TestPodVMResources/unbounded_uses_requests_and_fallback
+    resources_integ_test.go:63: actual VMM capacity: 2 vCPUs, 512 MiB
+    resources_integ_test.go:63: guest reports 2 processors and 493012 KiB MemTotal
+--- PASS: TestPodVMResources (12.62s)
+    --- PASS: TestPodVMResources/declared_limits (4.16s)
+    --- PASS: TestPodVMResources/unspecified_CPU_period (4.22s)
+    --- PASS: TestPodVMResources/unbounded_uses_requests_and_fallback (4.25s)
+=== RUN   TestPodVolumes
+    volumes_integ_test.go:106: actual guest FUSE bind mounts:
+        189 182 0:42 / /data rw,relatime - fuse.fcvolume firecracker-volume rw,user_id=0,group_id=0,default_permissions,allow_other,max_read=1048576
+        190 182 0:43 / /readonly ro,relatime - fuse.fcvolume firecracker-volume ro,user_id=0,group_id=0,default_permissions,allow_other,max_read=1048576
+        191 184 0:44 /file /dev/termination-log rw,relatime - fuse.fcvolume firecracker-volume rw,user_id=0,group_id=0,default_permissions,allow_other,max_read=1048576
+--- PASS: TestPodVolumes (6.38s)
+PASS
+CRI_RUNTIME_CLEANUP_OK
+CRI_TESTS_PASSED
+docker_attach_exit=0
+container_exit=0
+CRI_WORKER_TESTS_PASSED

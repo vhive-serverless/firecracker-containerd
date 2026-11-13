@@ -1,12 +1,27 @@
 # Modernization acceptance ledger
 
-> PROVISIONAL STEP 3: Corrected source `751c03c6f9a98b8726bc4d9066efce78db96952d` is being assembled; its acceptance receipt and final documentation integration are pending. Earlier receipts retain their exact source scope.
-
 ## Current migrated Step 3 status
 
-Step 3 remains provisional while the corrected-source receipt is prepared.
-Full CRI remains WIP and Kubernetes Pod restore remains deferred to 1.38.
-The inherited Step 2 coverage and unfixed CNI flake below retain their scope.
+Exact `751c03c6f9a98b8726bc4d9066efce78db96952d` passed build/private install,
+eight native VM leaves, the real-volume VM case and focused CRI/resource/volume
+checks with exit 0. The [receipt](evidence/upstream-step3-751c03c6f9a9/README.md)
+records four focused specs passed, 138 skipped, all three resource subcases,
+actual artifacts, kernel reuse and independent owned cleanup. This later
+documentation/assembled tip was not separately tested. Full CRI remains WIP;
+Kubernetes Pod restore is deferred to 1.38. Inherited Step 2 segmented coverage
+and its unfixed CNI flake retain their exact scope; final published-runtime/
+installed-vHive acceptance remains separate.
+
+## Earlier exact-source Step 3 receipt at 332da
+
+Exact migrated Step 3 source `332da2a7065baa0050037250bbf2ff316a1a8519`
+passed build/private installation, eight jailed/nonjailed native VM leaves, the
+real-volume VM case, four focused CRI specs (138 skipped), and
+`TestPodVMResources` (three subcases) plus `TestPodVolumes`. The
+[historical exact-source receipt](evidence/upstream-step3-332da2a7065b/README.md) records exact
+artifacts, commands, logs and cleanup. This later documentation tip was not
+built or tested. Full CRI remains WIP; Kubernetes Pod restore is deferred to
+1.38. Final published-module/installed-vHive acceptance remains pending.
 
 ## Current corrected Step 2 check coverage
 

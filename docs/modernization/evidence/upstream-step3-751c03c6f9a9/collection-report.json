@@ -1,0 +1,305 @@
+{
+  "status": "COMPLETED exact corrected Step3 native/real-volume/focused-CRI scope",
+  "source": "751c03c6f9a98b8726bc4d9066efce78db96952d",
+  "tree": "18f9c8c905eafa8fb86354b5996f68615e542852",
+  "authoritative_exec_session": 76601,
+  "authoritative_exit": 0,
+  "authoritative_stdout_marker": "STAGE3_SAME_ID_NATIVE_VOLUME_AND_FOCUSED_CRI_OK",
+  "phase_status": {
+    "build": "0",
+    "install": "0",
+    "native": "0",
+    "volumes": "0",
+    "cri-focused": "0"
+  },
+  "raw_worker_file_count": 38,
+  "collector_summary_sha256": "500a66b1da0dcd721c802a5737d292304ae91982936979a4ba141f85440a3527",
+  "frozen_collection": "/home/jyp/project/fc-ctrd-mod/migration-upstream/stage3-751c-terminal-evidence",
+  "all_remote_local_raw_sizes_and_hashes_verified": true,
+  "post_transfer_raw_unchanged": true,
+  "source_clean": true,
+  "native_vm_leaves": [
+    {
+      "name": "TestNativeCheckpoint_Isolated/jailed=false",
+      "seconds": 32.8
+    },
+    {
+      "name": "TestNativeCheckpoint_Isolated/jailed=true",
+      "seconds": 33.01
+    },
+    {
+      "name": "TestNativeForkTransport_Isolated/jailed=false",
+      "seconds": 36.87
+    },
+    {
+      "name": "TestNativeForkTransport_Isolated/jailed=true",
+      "seconds": 37.07
+    },
+    {
+      "name": "TestNativeCheckpointInterrupt_Isolated/jailed=false",
+      "seconds": 18.87
+    },
+    {
+      "name": "TestNativeCheckpointInterrupt_Isolated/jailed=true",
+      "seconds": 19.22
+    },
+    {
+      "name": "TestNativeRestore_Isolated/jailed=false",
+      "seconds": 19.14
+    },
+    {
+      "name": "TestNativeRestore_Isolated/jailed=true",
+      "seconds": 19.32
+    }
+  ],
+  "native_helper_and_vm_outcome": {
+    "present": true,
+    "passes": [
+      "TestCheckpointTransportRejectsInvalidVersionAndThawSet (0.00s)",
+      "TestSealTransportPersistsAcknowledgedEventCursor (0.00s)",
+      "TestNativeRestoreExecStateIdentity (0.00s)",
+      "TestNativeRestoreCopyFailureCleanup (0.15s)",
+      "TestNativeRestoreCopiesPrivateArtifacts (0.02s)",
+      "TestNativeRestoreCreateVMSelectsArtifact (0.00s)",
+      "TestNativeRestoreCreateVMDeadlinePreservesRequestIdentity (0.01s)",
+      "TestNativeRestoreMountPlan (0.00s)",
+      "TestNativeCheckpoint_Isolated (65.81s)",
+      "TestNativeForkTransport_Isolated (73.94s)",
+      "TestNativeCheckpointInterrupt_Isolated (38.10s)",
+      "TestNativeRestore_Isolated (38.45s)"
+    ],
+    "failures": [],
+    "skips": []
+  },
+  "real_volume_outcome": {
+    "present": true,
+    "passes": [
+      "TestVolumeCheckpointRealVM (2.43s)"
+    ],
+    "failures": [],
+    "skips": []
+  },
+  "volume_continuity": {
+    "source_pid": 3210261,
+    "restored_pid": 3210282,
+    "inode": 2,
+    "captured_counter": 41,
+    "restored_counter": 42,
+    "shared": "42",
+    "orphan": "orphan42"
+  },
+  "focused_cri": {
+    "suite_succeeded": true,
+    "counts": {
+      "skipped": 138,
+      "passed": 4
+    },
+    "passed_specs": [
+      "[k8s.io] Runtime info / runtime should support returning runtime info / runtime should return version info [Conformance]",
+      "[k8s.io] Runtime info / runtime should support returning runtime info / runtime should return runtime conditions [Conformance]",
+      "[k8s.io] Container / runtime should support adding volume and device / runtime should support starting container with volume [Conformance]",
+      "[k8s.io] Container / runtime should support adding volume and device / runtime should support starting container with volume when host path is a symlink [Conformance]"
+    ],
+    "pre_run_stats": [
+      {
+        "TotalSpecs": 142,
+        "SpecsThatWillRun": 4
+      }
+    ],
+    "focus_strings": [
+      [
+        "Runtime info|starting container with volume"
+      ]
+    ]
+  },
+  "cri_resource_subcases": [
+    "TestPodVMResources/declared_limits",
+    "TestPodVMResources/unbounded_uses_requests_and_fallback",
+    "TestPodVMResources/unspecified_CPU_period"
+  ],
+  "cri_guest_resource_witnesses": [
+    {
+      "vcpus": 2,
+      "mem_total_kib": 363988
+    },
+    {
+      "vcpus": 2,
+      "mem_total_kib": 235348
+    },
+    {
+      "vcpus": 2,
+      "mem_total_kib": 493012
+    }
+  ],
+  "cri_go_integration": {
+    "present": true,
+    "passes": [
+      "TestPodVMResources (12.62s)",
+      "TestPodVolumes (6.38s)"
+    ],
+    "failures": [],
+    "skips": []
+  },
+  "cri_exit_status": {
+    "docker_attach_exit": "0",
+    "container_exit": "0"
+  },
+  "cri_test_binary_sha256": "8c27ad326cad895c9d3a3203057256079ff6fc71f35e262840ae1e0fbd5ad2c8",
+  "actual_test_image_id": "sha256:e0eef7a87dee88f2385d9b9f4159711b4f6a03e596419818396e76455afa7494",
+  "native_receipt_actual_tag_and_cri_input_image_match": true,
+  "build_and_native_hash_receipts_checked_against_actual_source": {
+    "build/bin/firecracker": {
+      "sha256": "b33f46cd6d88834cf6a4f8d184f08f219809c636236bffd286d233a60602a2ba",
+      "actual_current_source_hash_matches": true
+    },
+    "build/bin/jailer": {
+      "sha256": "ddadbaa15b5c942271a83b7040ca7259c8ccf92a9e08d44cce0b86fa407ba460",
+      "actual_current_source_hash_matches": true
+    },
+    "build/_submodules/runc/runc": {
+      "sha256": "9cd4a021610365032b0e13fa37e67b751ccc8205c5b14d313af28cbe6e219220",
+      "actual_current_source_hash_matches": true
+    },
+    "build/agent/agent": {
+      "sha256": "1f61fd99db893b052e776f189341338aefd6e2149fc5417aa8842a56ced150cb",
+      "actual_current_source_hash_matches": true
+    },
+    "build/runtime/containerd-shim-aws-firecracker": {
+      "sha256": "f7b0d97002ad2041c95f9221799b94e4edeea23716a5dc5a42e9f4ff353dab12",
+      "actual_current_source_hash_matches": true
+    },
+    "build/firecracker-control/cmd/containerd/firecracker-containerd": {
+      "sha256": "e9e8f6cf0557865d9d79a6772df7619ab4c848d17c07d444a6543f60d0b3d809",
+      "actual_current_source_hash_matches": true
+    },
+    "build/cri/firecracker-cri": {
+      "sha256": "1b7374a847ad41dd3583c16bd749ae16bf6e5b7d5fb9f6c861b13fb7c98326c8",
+      "actual_current_source_hash_matches": true
+    },
+    "native-restore/firecracker-control/cmd/containerd/firecracker-containerd": {
+      "sha256": "e9e8f6cf0557865d9d79a6772df7619ab4c848d17c07d444a6543f60d0b3d809",
+      "actual_current_source_hash_matches": true
+    },
+    "native-restore/runtime/containerd-shim-aws-firecracker": {
+      "sha256": "f7b0d97002ad2041c95f9221799b94e4edeea23716a5dc5a42e9f4ff353dab12",
+      "actual_current_source_hash_matches": true
+    },
+    "native-restore/agent/agent": {
+      "sha256": "1f61fd99db893b052e776f189341338aefd6e2149fc5417aa8842a56ced150cb",
+      "actual_current_source_hash_matches": true
+    },
+    "native-restore/bin/firecracker": {
+      "sha256": "b33f46cd6d88834cf6a4f8d184f08f219809c636236bffd286d233a60602a2ba",
+      "actual_current_source_hash_matches": true
+    },
+    "native-restore/default-vmlinux.bin": {
+      "sha256": "59cb04df4feb9696a75a78c0b15e54bf39c0f142649947e8fdb7948160b0a091",
+      "actual_current_source_hash_matches": true
+    },
+    "native-restore/tools/image-builder/rootfs.img": {
+      "sha256": "6e859297fde4781c5efc5a045276ff10c6eaaa0f1f0dc7e58df8545d4b0fb1cd",
+      "actual_current_source_hash_matches": true
+    },
+    "native-restore/runtime/native_restore_integ_test.go": {
+      "sha256": "84b752c471c6f227545e91106275af789d794f5ac5939ff5db56b593c48ea088",
+      "exact_source_git_blob_matches": true
+    },
+    "native-restore/runtime/native_fork_transport_integ_test.go": {
+      "sha256": "48ad0388526aba8b97d58f4814ab67b2bcd63a5d1dbe3a4969fd13eb48a96545",
+      "exact_source_git_blob_matches": true
+    }
+  },
+  "actual_installed_core_hash_matches": {
+    "bin/firecracker-containerd": {
+      "source": "firecracker-control/cmd/containerd/firecracker-containerd",
+      "sha256": "e9e8f6cf0557865d9d79a6772df7619ab4c848d17c07d444a6543f60d0b3d809",
+      "matches": true
+    },
+    "bin/containerd-shim-aws-firecracker": {
+      "source": "runtime/containerd-shim-aws-firecracker",
+      "sha256": "f7b0d97002ad2041c95f9221799b94e4edeea23716a5dc5a42e9f4ff353dab12",
+      "matches": true
+    },
+    "bin/firecracker": {
+      "source": "bin/firecracker",
+      "sha256": "b33f46cd6d88834cf6a4f8d184f08f219809c636236bffd286d233a60602a2ba",
+      "matches": true
+    },
+    "bin/jailer": {
+      "source": "bin/jailer",
+      "sha256": "ddadbaa15b5c942271a83b7040ca7259c8ccf92a9e08d44cce0b86fa407ba460",
+      "matches": true
+    },
+    "bin/runc": {
+      "source": "_submodules/runc/runc",
+      "sha256": "9cd4a021610365032b0e13fa37e67b751ccc8205c5b14d313af28cbe6e219220",
+      "matches": true
+    },
+    "bin/firecracker-cri": {
+      "source": "cri/firecracker-cri",
+      "sha256": "1b7374a847ad41dd3583c16bd749ae16bf6e5b7d5fb9f6c861b13fb7c98326c8",
+      "matches": true
+    },
+    "share/runtime/default-vmlinux.bin": {
+      "source": "default-vmlinux.bin",
+      "sha256": "59cb04df4feb9696a75a78c0b15e54bf39c0f142649947e8fdb7948160b0a091",
+      "matches": true
+    }
+  },
+  "agent_and_gateway_buildinfo_exact_revision_and_clean_vcs": true,
+  "kernel_reuse_verified": true,
+  "kernel_seed_receipt_sha256": "bf7efba9e66c1efb888719ac6744e894a23c942633ca2c3e5813cfa8bdd19952",
+  "installed_rootfs": {
+    "path": "/users/nehalem/fc-ctrd-mod/install/751c03c6f9a9/share/runtime/default-rootfs.img",
+    "sha256": "316db9b14b3bc177aacfde668a9fdee2dd2e6594e7fcd8072f78c307dd419e5d",
+    "error": null
+  },
+  "native_test_rootfs": {
+    "bytes": 72081408,
+    "sha256": "6e859297fde4781c5efc5a045276ff10c6eaaa0f1f0dc7e58df8545d4b0fb1cd"
+  },
+  "rootfs_identity_boundary": "Installed rootfs matches completed install receipt; native test rootfs recorded separately. No equality claim across image rebuilds.",
+  "independent_owned_cleanup_clean": true,
+  "cleanup_observation": {
+    "owned_containers": [],
+    "owned_pool_mappings": [],
+    "owned_loops": [],
+    "owned_backing_files": [],
+    "owned_mounts": [],
+    "sdk_owned_cgroup": {
+      "exists": false,
+      "processes": []
+    },
+    "owned_volume_processes": [],
+    "remaining_volume_fixture_paths": [],
+    "running_containers": [
+      {
+        "Command": "\"/usr/local/bin/entrypoint /sbin/init\"",
+        "CreatedAt": "2026-11-10 19:51:22 -0700 MST",
+        "ID": "1715f4a4061173a6eb936d419fbac8e1055a0a8042a6a9543670ee21f7f710d5",
+        "Image": "localhost/fcmod-kubernetes-node:v1.37.2",
+        "Labels": "io.x-k8s.kind.cluster=fcmod-upstream-137,io.x-k8s.kind.role=control-plane",
+        "LocalVolumes": "1",
+        "Mounts": "/lib/modules,b6eb13a16abaf3c65fa814e43c0940d7605a9c6d27e3dcb377c552423007e801",
+        "Names": "fcmod-upstream-137-control-plane",
+        "Networks": "kind",
+        "Platform": {
+          "architecture": "amd64",
+          "os": "linux"
+        },
+        "Ports": "127.0.0.1:37231->6443/tcp",
+        "RunningFor": "46 hours ago",
+        "Size": "3.93MB (virtual 962MB)",
+        "State": "running",
+        "Status": "Up 46 hours"
+      }
+    ]
+  },
+  "worker_ready": "Launcher absent; no own containers/mappings/loops/backings/mounts/direct source VMM processes/logged volume fixtures; SDK cgroup absent. Only unrelated Kubernetes control-plane container remains.",
+  "limits": [
+    "Installed-prefix rootfs and rebuilt native test rootfs remain distinct.",
+    "No binary/rootfs/backing payloads copied.",
+    "Focused CRI only; complete CRI compliance remains WIP and Kubernetes Pod restore is deferred to1.38. Final published/installed vHive remains separate."
+  ],
+  "actions": "Read-only terminal SSH/Python metadata/hash/tar, local equality checks and report writing only. No new build/tests/VM/cleanup jobs."
+}

@@ -1,29 +1,105 @@
 # Step 3 — WIP
 
-## Migrated upstream candidate
+## Current exact-source native/volume and focused CRI acceptance
 
-This stage inherits the official Firecracker release and published SDK pins in
-[versions.json](versions.json) from Step 2. Its CRI frontend remains WIP. The
-Kubernetes whole-Pod checkpoint/restore endpoint remains deferred to Kubernetes
-1.38; native runtime restore does not establish CRI or Kubernetes ownership.
+Clean source `751c03c6f9a98b8726bc4d9066efce78db96952d`, tree
+`18f9c8c905eafa8fb86354b5996f68615e542852`, passed the native/volume/focused-CRI
+launcher with exit 0 and `STAGE3_SAME_ID_NATIVE_VOLUME_AND_FOCUSED_CRI_OK`.
+The [current receipt](evidence/upstream-step3-751c03c6f9a9/README.md) preserves
+all worker logs, terminal authority, actual image/binary/module provenance,
+source/cleanup checks and kernel reuse disclosure. These results belong to
+exact `751c`, not this later documentation/cumulative-history tip automatically.
 
-The migrated native artifact uses version 2 and a mandatory sealed transport
-cut version 1. Native and legacy capture share `snapshotMu`, task admission,
-FIFO preparation, event acknowledgement sealing, retained source reconnection
-and recovery. Restore creates independent drive/volume copies and maps them at
-the exact captured paths in the new VMM's private mount namespace. Host process
-adoption preserves guest init/exec IDs and PIDs; each clone receives fresh FIFO
-endpoints and transport sessions. There are no Step 4 guest-upper, PMEM/DAX,
-free-page reporting or DAMON APIs in this candidate.
+The unchanged [input lock](versions.json) selects official unmodified
+Firecracker/jailer 1.18.0, published vHive SDK
+`dd9db322432989b96cff7a38a64703d60b6cabf9`, containerd 2.3.7 and runc 1.4.2.
+All eight native leaves passed without failures or skips: checkpoint, fork
+transport, checkpoint interruption and restore, each jailed/nonjailed. The
+real-volume VM case passed in 2.43 s with captured counter 41, restored counter
+advanced to 42, shared/inode/open-orphan continuity and distinct source/clone
+VMM PIDs. These are direct runtime/volume profiles, not Kubernetes Pod restore.
 
-The generic [native acceptance runner](../../tools/modernize/test-native-restore.sh)
-selects capture, source/two-clone streams/events, cancellation recovery and
-restore tests for both jail modes. It uses the ordinary immutable root profile
-and checks private workload storage and volumes. The separate
-[volume runner](../../tools/modernize/test-native-volumes.sh),
-[CRI runner](../../tools/critest/test-cri.sh) and Kubernetes audit scripts retain
-their own scopes. Source compilation and unprivileged tests do not establish
-fresh VM acceptance; exact committed worker runs remain pending.
+Focused `critest` passed four of 142 specs with 138 skipped: runtime version/
+conditions and ordinary/symlink host-volume startup. `TestPodVMResources`
+passed three subcases and `TestPodVolumes` passed. The receipt retains actual
+CPU/memory witnesses and mounted FUSE views. Full CRI compliance remains
+**WIP and incomplete**. Kubernetes Pod checkpoint/restore remains deferred to
+the 1.38 interface work; no released endpoint availability is inferred from
+RPC definitions or this focused run.
+
+## Same-ID native paths and jailed owned stubs
+
+Native artifact v2 and mandatory transport cut v1 retain shared capture
+serialization, admission, FIFO/event sealing, source reconnection and failure
+recovery. Restore copies writable drives/volumes independently, preserves guest
+init/exec identity and creates fresh host streams for each clone. There are no
+Step 4 disk-upper, PMEM/DAX, reporting or DAMON controls in this source.
+
+The inherited [Step 2 path separation](step-2.md) exposes live unjailed shim
+state only at `/.firecracker-restore-shared`; original captured disk targets
+remain private mappings. State/memory inputs are explicitly read-only, logging
+explicitly writable and dynamic disk exposure descriptor-backed. Native
+recapture output API paths below the live host directory are translated to the
+alias; load inputs and captured disk identities keep their original paths.
+
+Jailed native restore may encounter fresh drive slots already created at a
+captured target. Reuse is allowed only for the current launch's creator-pinned
+regular-file inode with matching path/drive identity, mode, size, owner, link
+count and timestamps. Foreign/replaced targets, symlinks and extra hardlinks
+remain rejected without truncation or unlinking. Other targets retain exclusive
+creation. Pins are CLOEXEC and closed in normal or failed-start jail cleanup;
+ordinary and legacy launches do not enable the native ownership exception.
+
+The receipt reports the actual eight native cases; it does not invent an
+additional dedicated same-ID/recapture or unread-input VM case. Earlier
+[332da results](evidence/upstream-step3-332da2a7065b/README.md) and the separate
+`064c` positive unread-input supplement retain their original source/image
+attribution and are not retroactively relabeled as `751c` tests.
+
+## Reproduction and artifact boundaries
+
+Use a clean exact-source checkout on the prepared KVM worker, with pinned Go,
+Docker and passwordless sudo. Preserve fresh logs instead of overwriting the
+archived run. The recorded ordered commands are:
+
+```sh
+test "$(git rev-parse HEAD)" = 751c03c6f9a98b8726bc4d9066efce78db96952d
+test -z "$(git status --porcelain)"
+export STACK_DIR=/users/nehalem/fc-ctrd-mod
+export PATH="$STACK_DIR/toolchains/go1.26.11/bin:$PATH"
+export STATIC_AGENT=on STATIC_DOCKER_CREDENTIAL_MMDS=on
+tools/modernize/build-stack.sh
+tools/modernize/install-stack.sh
+tools/modernize/test-native-restore.sh
+FC_NATIVE_VMM="$PWD/bin/firecracker" FC_NATIVE_KERNEL="$PWD/default-vmlinux.bin" \
+    tools/modernize/test-native-volumes.sh
+CRI_INTEGRATION_TESTS=1 CRI_FOCUS='Runtime info|starting container with volume' \
+    tools/critest/test-cri.sh
+```
+
+The native runner includes lint, its focused race/unit checks and rebuilt test
+images before VM cases. The volume fixture is separate. CRI focus is deliberate
+and records runtime integration enabled, websocket streaming disabled. No full
+CRI suite or installed-vHive consumer run is claimed. Inherited
+[Step 2 coverage](evidence/upstream-step2-2e03843816cf/README.md) remains segmented:
+its original full run exited 2 on the unfixed CNI race, while unchanged fresh
+five-VM repeats and the thinpool/SDK tail passed separately. This focused Step 3
+result does not turn that original run green or fix its dependency race.
+
+Actual native/CRI image ID is
+`sha256:e0eef7a87dee88f2385d9b9f4159711b4f6a03e596419818396e76455afa7494`.
+Installed rootfs SHA-256 is
+`316db9b14b3bc177aacfde668a9fdee2dd2e6594e7fcd8072f78c307dd419e5d`;
+rebuilt native-test rootfs is
+`6e859297fde4781c5efc5a045276ff10c6eaaa0f1f0dc7e58df8545d4b0fb1cd`.
+Their byte identity is not asserted. The receipt records verified reuse of
+accepted `332da` kernel/config after equal pinned-input checks, not fresh kernel
+compilation. Agent/gateway metadata identifies clean `751c`; source and owned
+resources were independently checked after cleanup, with unrelated Kubernetes
+preserved. Final published-runtime/installed-vHive acceptance remains separate;
+no memory or performance measurement follows from these functional results.
+
+## Historical custom-stack implementation and validation
 
 The rest of this document preserves historical implementation and validation
 from the original custom VMM milestone. Every original receipt remains tied to

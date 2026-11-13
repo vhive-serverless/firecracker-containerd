@@ -1,0 +1,127 @@
+{
+  "runtime_revision": "332da2a7065baa0050037250bbf2ff316a1a8519",
+  "runtime_tree": "ca3b1392749b9337479a79c6a7c9c39883ccc507",
+  "pipeline_exit_code": 0,
+  "marker": "STAGE3_NATIVE_VOLUME_AND_FOCUSED_CRI_OK",
+  "native_vm_passes": [
+    "TestNativeCheckpoint_Isolated/jailed=false (32.67s)",
+    "TestNativeCheckpoint_Isolated/jailed=true (32.89s)",
+    "TestNativeForkTransport_Isolated/jailed=false (36.67s)",
+    "TestNativeForkTransport_Isolated/jailed=true (36.99s)",
+    "TestNativeCheckpointInterrupt_Isolated/jailed=false (18.81s)",
+    "TestNativeCheckpointInterrupt_Isolated/jailed=true (19.33s)",
+    "TestNativeRestore_Isolated/jailed=false (18.52s)",
+    "TestNativeRestore_Isolated/jailed=true (19.19s)"
+  ],
+  "volume_vm": "TestVolumeCheckpointRealVM PASS 2.46s; restored counter42 vs captured41, inode/shared/orphan continuity",
+  "focused_cri": {
+    "passed_specs": 4,
+    "failed_specs": 0,
+    "skipped_specs": 138,
+    "scope": "Runtime info|starting container with volume"
+  },
+  "cri_integration_passes": [
+    "TestPodVMResources (3 subcases)",
+    "TestPodVolumes"
+  ],
+  "cleanup": "Worker checkout clean; own native/CRI containers and pool removed; only unrelated existing Kubernetes control-plane container remained. Shared pools preserved.",
+  "limits": [
+    "Focused CRI coverage only; full CRI compliance remains WIP.",
+    "Kubernetes Pod snapshot/restore remains deferred to1.38.",
+    "Step4 and final published/installed vHive acceptance remain separate."
+  ],
+  "files": {
+    "cri-332da2a7065b.q9oGzdxZ/container-id": {
+      "bytes": 65,
+      "sha256": "b44dd38fcf02bc5d979dea3d960b530a86ce1cefcfc99d9c6491b083bb68fc55"
+    },
+    "cri-332da2a7065b.q9oGzdxZ/containerd.out": {
+      "bytes": 777347,
+      "sha256": "16f169e41e708647e898fd6e298ddc5ad08911ba67c386d4cb414f82467a0b9d"
+    },
+    "cri-332da2a7065b.q9oGzdxZ/cri-gateway.out": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "cri-332da2a7065b.q9oGzdxZ/cri-version.log": {
+      "bytes": 57,
+      "sha256": "2c3ebdac28dd54e1282998bfb98f18aaa90caf45b7fcb1a78df9e133d5011077"
+    },
+    "cri-332da2a7065b.q9oGzdxZ/critest.log": {
+      "bytes": 7801,
+      "sha256": "231d3801e3ec6180b66ec8d4984fd89ee3d967e447f98a1db44f5ab537ab95af"
+    },
+    "cri-332da2a7065b.q9oGzdxZ/exit-status": {
+      "bytes": 38,
+      "sha256": "302d82554abaf5133b4d32e7a14a6ece841c79f90c45260c4b8e4979790a3839"
+    },
+    "cri-332da2a7065b.q9oGzdxZ/images.log": {
+      "bytes": 1810,
+      "sha256": "cd1e5f46e665ceb043c8fc372d66e13cd984652d2a926da701dc25cb3ea20b1f"
+    },
+    "cri-332da2a7065b.q9oGzdxZ/inputs.log": {
+      "bytes": 607,
+      "sha256": "fc76a9fe92a552b92a11203884dd1f815481a94716d321772c21a3c40f45a8f0"
+    },
+    "cri-332da2a7065b.q9oGzdxZ/plugins.log": {
+      "bytes": 6603,
+      "sha256": "83a1fbfb495b9d4cc99414626ed6bcc31183c71b14545696a22da424907cedc6"
+    },
+    "cri-332da2a7065b.q9oGzdxZ/report.json": {
+      "bytes": 222435,
+      "sha256": "2c81dbc98a9b5ac6beddd8926ad18f42fafb7bab4ffd9dcdd71790a35471b1b3"
+    },
+    "cri-332da2a7065b.q9oGzdxZ/runtime-version.log": {
+      "bytes": 244,
+      "sha256": "5e07db3671fe955cf07dadecd5d51455205a7644b06aeaed432a7e54cd739b38"
+    },
+    "cri-332da2a7065b.q9oGzdxZ/tasks-at-exit.log": {
+      "bytes": 26,
+      "sha256": "e534c26cb27299b3032819e28e6ad94f42dcd896fffbe8520146779346f9c11e"
+    },
+    "native-restore/binaries.sha256": {
+      "bytes": 786,
+      "sha256": "c4ce082c9b42828ca320fb9be4e67eacaadb339b233fb4e268f1ac036ef95571"
+    },
+    "native-restore/runtime-revision": {
+      "bytes": 41,
+      "sha256": "56c7c17c1f0811ddb4f17dd5d4c1876714e5bb7ac55315189ca99a6ca792f0c2"
+    },
+    "native-restore/submodules": {
+      "bytes": 231,
+      "sha256": "be508e11a4bd2ab77a9b89c3c69e1043e9f3823b9e5474cd4d12e634557e7c80"
+    },
+    "native-restore/test-image.json": {
+      "bytes": 3648,
+      "sha256": "be7619ba8dabdf1606fb5e9dfc08c4779b31241d4a04d9e23ba0762ee5b11312"
+    },
+    "stage3-build-332da2a7065b.log": {
+      "bytes": 226947,
+      "sha256": "8b8ca90d059a2eefa843c60bde490e5c7d3c031cd287ea1077349e903fd42d2f"
+    },
+    "stage3-command-status-332da2a7065b.tsv": {
+      "bytes": 66,
+      "sha256": "62219cafc8561205463be02356e7a8db0000ec70d2612e56be1c1c977c12982e"
+    },
+    "stage3-cri-focused-332da2a7065b.log": {
+      "bytes": 8189,
+      "sha256": "611812fc5a7f0aca5c3e4f37d7055316c6fffaf8233e30d70ed4513cfb4f6c7b"
+    },
+    "stage3-install-332da2a7065b.log": {
+      "bytes": 10098,
+      "sha256": "962aebd93dbd692aa11e3a10c815e681f3d31f8f54b9654747ed7598f22f37b5"
+    },
+    "stage3-native-332da2a7065b.log": {
+      "bytes": 124034,
+      "sha256": "54a675bbb41664a244fb22810f9629046a607394d7b8e0429b5ccd9977ce3cd4"
+    },
+    "stage3-tested-source-332da2a7065b.txt": {
+      "bytes": 82,
+      "sha256": "1cec42a019b7be6c944b170f4d2e9c95aec6b2700847ee7f99838b567f01bcee"
+    },
+    "stage3-volumes-332da2a7065b.log": {
+      "bytes": 852,
+      "sha256": "389d7a675449a1786939a212a5781064cbaa9f3faf0f5226afb19fd94559d8dc"
+    }
+  }
+}
