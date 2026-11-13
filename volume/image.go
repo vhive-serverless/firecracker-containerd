@@ -20,11 +20,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/containerd/containerd"
-	"github.com/containerd/containerd/content"
-	"github.com/containerd/containerd/images"
-	"github.com/containerd/containerd/mount"
-	"github.com/containerd/containerd/snapshots"
+	containerd "github.com/containerd/containerd/v2/client"
+	"github.com/containerd/containerd/v2/core/content"
+	"github.com/containerd/containerd/v2/core/images"
+	"github.com/containerd/containerd/v2/core/mount"
+	"github.com/containerd/containerd/v2/core/snapshots"
+	"github.com/containerd/containerd/v2/defaults"
 	"github.com/containerd/continuity/fs"
 	"github.com/hashicorp/go-multierror"
 	"github.com/opencontainers/image-spec/identity"
@@ -88,7 +89,7 @@ func getV1ImageConfig(ctx context.Context, image containerd.Image) (*v1.Image, e
 func FromImage(client *containerd.Client, image, snapshot string, opts ...ImageOpt) Provider {
 	p := imageVolumeProvider{
 		config: imageProviderConfig{
-			snapshotter: containerd.DefaultSnapshotter,
+			snapshotter: defaults.DefaultSnapshotter,
 		},
 		client:   client,
 		image:    image,

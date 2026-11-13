@@ -34,8 +34,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/containerd/containerd/mount"
-	"github.com/containerd/containerd/oci"
+	"github.com/containerd/containerd/v2/core/mount"
+	"github.com/containerd/containerd/v2/pkg/oci"
 	"github.com/containerd/continuity/fs"
 	"github.com/moby/sys/user"
 	"github.com/opencontainers/runtime-spec/specs-go"

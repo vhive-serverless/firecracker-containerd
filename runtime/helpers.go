@@ -32,10 +32,13 @@ const (
 
 func machineConfigurationFromProto(cfg *config.Config, req *proto.FirecrackerMachineConfiguration) models.MachineConfiguration {
 	config := models.MachineConfiguration{
-		CPUTemplate: models.CPUTemplate(cfg.CPUTemplate),
-		VcpuCount:   firecracker.Int64(defaultCPUCount),
-		MemSizeMib:  firecracker.Int64(defaultMemSizeMb),
-		Smt:         firecracker.Bool(cfg.SmtEnabled),
+		VcpuCount:  firecracker.Int64(defaultCPUCount),
+		MemSizeMib: firecracker.Int64(defaultMemSizeMb),
+		Smt:        firecracker.Bool(cfg.SmtEnabled),
+	}
+	if cfg.CPUTemplate != "" {
+		template := models.CPUTemplate(cfg.CPUTemplate)
+		config.CPUTemplate = &template
 	}
 
 	if req == nil {
@@ -43,7 +46,8 @@ func machineConfigurationFromProto(cfg *config.Config, req *proto.FirecrackerMac
 	}
 
 	if name := req.CPUTemplate; name != "" {
-		config.CPUTemplate = models.CPUTemplate(name)
+		template := models.CPUTemplate(name)
+		config.CPUTemplate = &template
 	}
 
 	if count := req.VcpuCount; count > 0 {

@@ -15,12 +15,14 @@ package vm
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"sort"
 	"sync"
 	"time"
 
-	taskAPI "github.com/containerd/containerd/api/runtime/task/v2"
-	"github.com/containerd/containerd/protobuf/types"
+	taskAPI "github.com/containerd/containerd/api/runtime/task/v3"
+	"github.com/containerd/containerd/v2/pkg/protobuf/types"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -42,19 +44,19 @@ type TaskManager interface {
 	// IOConnectorSet.
 	// If the TaskManager was shutdown by a previous call to ShutdownIfEmpty, an
 	// error will be returned.
-	CreateTask(context.Context, *taskAPI.CreateTaskRequest, taskAPI.TaskService, IOProxy) (*taskAPI.CreateTaskResponse, error)
+	CreateTask(context.Context, *taskAPI.CreateTaskRequest, taskAPI.TTRPCTaskService, IOProxy) (*taskAPI.CreateTaskResponse, error)
 
 	// DeleteProcess removes a task or exec being managed from the TaskManager.
 	// It deletes the process from the provided TaskService using the provided
 	// request. It also blocks until all IO for the task has been flushed or a
 	// hardcoded timeout is hit.
-	DeleteProcess(context.Context, *taskAPI.DeleteRequest, taskAPI.TaskService) (*taskAPI.DeleteResponse, error)
+	DeleteProcess(context.Context, *taskAPI.DeleteRequest, taskAPI.TTRPCTaskService) (*taskAPI.DeleteResponse, error)
 
 	// ExecProcess adds an exec process to be managed. It must be an exec for a
 	// Task already managed by the TaskManager.
 	// If the TaskManager was shutdown by a previous call to ShutdownIfEmpty, an
 	// error will be returned.
-	ExecProcess(context.Context, *taskAPI.ExecProcessRequest, taskAPI.TaskService, IOProxy) (*types.Empty, error)
+	ExecProcess(context.Context, *taskAPI.ExecProcessRequest, taskAPI.TTRPCTaskService, IOProxy) (*types.Empty, error)
 
 	// ShutdownIfEmpty will atomically check if there are no tasks left being managed and, if so,
 	// prevent any new tasks from being added going forward (future attempts will return an error).
@@ -68,6 +70,13 @@ type TaskManager interface {
 	// IsProxyOpen returns true if the given task or exec has an IO proxy
 	// which hasn't been closed.
 	IsProxyOpen(string, string) (bool, error)
+
+	// PrepareIO drains locally owned senders; prepare the peer concurrently.
+	PrepareIO(context.Context) error
+	// DescribeIO returns clean cuts only after both peers completed PrepareIO.
+	DescribeIO() ([]TransportProcessIO, error)
+	// ResumeIO releases prepared reads or aborts a failed preparation.
+	ResumeIO()
 }
 
 // NewTaskManager initializes a new TaskManager
@@ -175,7 +184,7 @@ func (m *taskManager) ShutdownIfEmpty() bool {
 func (m *taskManager) CreateTask(
 	reqCtx context.Context,
 	req *taskAPI.CreateTaskRequest,
-	taskService taskAPI.TaskService,
+	taskService taskAPI.TTRPCTaskService,
 	ioProxy IOProxy,
 ) (_ *taskAPI.CreateTaskResponse, err error) {
 	taskID := req.ID
@@ -189,6 +198,7 @@ func (m *taskManager) CreateTask(
 
 	defer func() {
 		if err != nil {
+			ioProxy.Close()
 			proc.cancel()
 			m.deleteProc(taskID, execID)
 		}
@@ -213,7 +223,7 @@ func (m *taskManager) CreateTask(
 	proc.logger.WithField("pid_in_vm", createResp.Pid).Info("successfully created task")
 
 	go m.monitorExit(proc, taskService)
-	go monitorIO(copyDone, proc)
+	go monitorIO(copyDone, proc, ioProxy)
 
 	return createResp, nil
 }
@@ -221,7 +231,7 @@ func (m *taskManager) CreateTask(
 func (m *taskManager) ExecProcess(
 	reqCtx context.Context,
 	req *taskAPI.ExecProcessRequest,
-	taskService taskAPI.TaskService,
+	taskService taskAPI.TTRPCTaskService,
 	ioProxy IOProxy,
 ) (_ *types.Empty, err error) {
 	taskID := req.ID
@@ -235,6 +245,7 @@ func (m *taskManager) ExecProcess(
 
 	defer func() {
 		if err != nil {
+			ioProxy.Close()
 			proc.cancel()
 			m.deleteProc(taskID, execID)
 		}
@@ -257,7 +268,7 @@ func (m *taskManager) ExecProcess(
 	}
 
 	go m.monitorExit(proc, taskService)
-	go monitorIO(copyDone, proc)
+	go monitorIO(copyDone, proc, ioProxy)
 
 	return execResp, nil
 }
@@ -265,7 +276,7 @@ func (m *taskManager) ExecProcess(
 func (m *taskManager) DeleteProcess(
 	reqCtx context.Context,
 	req *taskAPI.DeleteRequest,
-	taskService taskAPI.TaskService,
+	taskService taskAPI.TTRPCTaskService,
 ) (*taskAPI.DeleteResponse, error) {
 	resp, err := taskService.Delete(reqCtx, req)
 	if err != nil {
@@ -283,11 +294,12 @@ func (m *taskManager) DeleteProcess(
 	// IOProxy implementation being used for this proc. There's no extra timeout here
 	// in order to keep things simpler.
 	<-proc.ioCopyDone
+	proc.proxy.Close()
 
 	return resp, nil
 }
 
-func (m *taskManager) monitorExit(proc *vmProc, taskService taskAPI.TaskService) {
+func (m *taskManager) monitorExit(proc *vmProc, taskService taskAPI.TTRPCTaskService) {
 	waitResp, waitErr := taskService.Wait(proc.ctx, &taskAPI.WaitRequest{
 		ID:     proc.taskID,
 		ExecID: proc.execID,
@@ -342,13 +354,36 @@ func (m *taskManager) findProc(taskID, execID string) (*vmProc, error) {
 	return proc, nil
 }
 
-func (m *taskManager) AttachIO(_ context.Context, taskID, execID string, proxy IOProxy) error {
+func (m *taskManager) AttachIO(ctx context.Context, taskID, execID string, proxy IOProxy) error {
+	if err := ctx.Err(); err != nil {
+		proxy.Close()
+		return err
+	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
 	proc, err := m.findProc(taskID, execID)
 	if err != nil {
 		return err
+	}
+	if current, ok := proc.proxy.(*transportProxy); ok {
+		replacement, framed := proxy.(*transportProxy)
+		if !framed {
+			proxy.Close()
+			return errors.New("cannot replace framed streams with a raw IO proxy")
+		}
+		defer proxy.Close()
+		return current.rebind(ctx, replacement)
+	}
+
+	// Stop the old FIFO readers before installing new ones. Otherwise two
+	// generations can consume the same process output after reconnection.
+	proc.proxy.Close()
+	select {
+	case <-proc.ioCopyDone:
+	case <-ctx.Done():
+		proxy.Close()
+		return ctx.Err()
 	}
 
 	initDone, copyDone := proxy.start(proc)
@@ -363,13 +398,96 @@ func (m *taskManager) AttachIO(_ context.Context, taskID, execID string, proxy I
 			proxy.Close()
 		}
 	}()
-	go monitorIO(copyDone, proc)
+	go monitorIO(copyDone, proc, proxy)
 
 	return nil
 }
 
-func monitorIO(done <-chan error, proc *vmProc) {
+func monitorIO(done <-chan error, proc *vmProc, proxy IOProxy) {
 	<-done
-	proc.proxy.Close()
+	if _, framed := proxy.(CheckpointIOProxy); framed {
+		// Retain network replay/FIN acknowledgements until final Delete/Close.
+		return
+	}
+	proxy.Close()
 	proc.logger.Debug("closed proxy")
+}
+
+type transportProcessProxy struct {
+	taskID string
+	execID string
+	proxy  IOProxy
+}
+
+func (m *taskManager) ioProcesses() []transportProcessProxy {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	processes := make([]transportProcessProxy, 0)
+	for _, task := range m.tasks {
+		for _, proc := range task {
+			processes = append(processes, transportProcessProxy{taskID: proc.taskID, execID: proc.execID, proxy: proc.proxy})
+		}
+	}
+	return processes
+}
+
+func (m *taskManager) PrepareIO(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	processes := m.ioProcesses()
+	errs := make(chan error, len(processes))
+	for _, proc := range processes {
+		proxy := proc.proxy
+		if _, null := proxy.(*nullIOProxy); null {
+			errs <- nil
+			continue
+		}
+		framed, ok := proxy.(CheckpointIOProxy)
+		if !ok {
+			errs <- fmt.Errorf("process %s/%s uses unsupported raw checkpoint IO", proc.taskID, proc.execID)
+			continue
+		}
+		go func() { errs <- framed.PrepareIO(ctx) }()
+	}
+	var combined error
+	for range processes {
+		combined = errors.Join(combined, <-errs)
+	}
+	return combined
+}
+
+func (m *taskManager) DescribeIO() ([]TransportProcessIO, error) {
+	processes := m.ioProcesses()
+	result := make([]TransportProcessIO, 0, len(processes))
+	for _, proc := range processes {
+		entry := TransportProcessIO{TaskID: proc.taskID, ExecID: proc.execID}
+		if _, null := proc.proxy.(*nullIOProxy); !null {
+			framed, ok := proc.proxy.(CheckpointIOProxy)
+			if !ok {
+				return nil, fmt.Errorf("process %s/%s uses unsupported raw checkpoint IO", proc.taskID, proc.execID)
+			}
+			var err error
+			entry.Streams, err = framed.DescribeIO()
+			if err != nil {
+				return nil, err
+			}
+		}
+		result = append(result, entry)
+	}
+	sort.Slice(result, func(i, j int) bool {
+		if result[i].TaskID == result[j].TaskID {
+			return result[i].ExecID < result[j].ExecID
+		}
+		return result[i].TaskID < result[j].TaskID
+	})
+	return result, nil
+}
+
+func (m *taskManager) ResumeIO() {
+	for _, proc := range m.ioProcesses() {
+		if framed, ok := proc.proxy.(CheckpointIOProxy); ok {
+			framed.ResumeIO()
+		}
+	}
 }

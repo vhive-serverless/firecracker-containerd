@@ -11,6 +11,7 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
+// Command taskworkflow demonstrates container creation through the VM control API.
 package main
 
 import (
@@ -24,10 +25,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/containerd/containerd"
-	"github.com/containerd/containerd/cio"
-	"github.com/containerd/containerd/namespaces"
-	"github.com/containerd/containerd/oci"
+	containerd "github.com/containerd/containerd/v2/client"
+	"github.com/containerd/containerd/v2/pkg/cio"
+	"github.com/containerd/containerd/v2/pkg/namespaces"
+	"github.com/containerd/containerd/v2/pkg/oci"
 
 	fcclient "github.com/firecracker-microvm/firecracker-containerd/firecracker-control/client"
 	"github.com/firecracker-microvm/firecracker-containerd/proto"
@@ -193,13 +194,13 @@ func taskWorkflow(containerCIDR, gateway, snapshotter string) (err error) {
 func getResponse(containerIP string) error {
 	response, err := http.Get(fmt.Sprintf("http://%s/", containerIP))
 	if err != nil {
-		return fmt.Errorf("Unable to get response from %s: %w", containerIP, err)
+		return fmt.Errorf("unable to get response from %s: %w", containerIP, err)
 	}
 	defer response.Body.Close()
 
 	contents, err := io.ReadAll(response.Body)
 	if err != nil {
-		return fmt.Errorf("Unable to read response body from %s: %w", containerIP, err)
+		return fmt.Errorf("unable to read response body from %s: %w", containerIP, err)
 	}
 
 	log.Printf("Response from [%s]: \n[%s]\n", containerIP, contents)

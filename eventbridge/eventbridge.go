@@ -20,11 +20,11 @@ import (
 	// We need the typeurl register calls that occur in the init of this package in order to be able to unmarshal events
 	// in the Republish func below
 	_ "github.com/containerd/containerd/api/events"
-	"github.com/containerd/containerd/protobuf"
+	"github.com/containerd/containerd/v2/pkg/protobuf"
 
 	apitypes "github.com/containerd/containerd/api/types"
-	"github.com/containerd/containerd/events"
-	"github.com/containerd/containerd/protobuf/types"
+	"github.com/containerd/containerd/v2/core/events"
+	"github.com/containerd/containerd/v2/pkg/protobuf/types"
 	"github.com/containerd/ttrpc"
 	"github.com/containerd/typeurl/v2"
 )
@@ -70,7 +70,7 @@ func (s *getterService) GetEvent(ctx context.Context) (*apitypes.Envelope, error
 			Timestamp: protobuf.ToTimestamp(receivedEnvelope.Timestamp),
 			Namespace: receivedEnvelope.Namespace,
 			Topic:     receivedEnvelope.Topic,
-			Event:     protobuf.FromAny(receivedEnvelope.Event),
+			Event:     typeurl.MarshalProto(receivedEnvelope.Event),
 		}, nil
 	case err := <-s.errChan:
 		// containerd's eventExchange will return a nil error if context is canceled, so if context is canceled and

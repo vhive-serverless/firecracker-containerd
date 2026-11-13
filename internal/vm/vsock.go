@@ -15,17 +15,52 @@ package vm
 
 import (
 	"context"
+	"net"
+	"sync"
 	"time"
 
 	"github.com/firecracker-microvm/firecracker-go-sdk/vsock"
 	"github.com/sirupsen/logrus"
 )
 
+// VSockTransportAcceptConnector retains its guest listen socket between network
+// generations. The supplied context owns the port; cancelling a connection's
+// Serve must not cancel this listener context. Rebinding to another port cancels
+// that generation context explicitly.
+func VSockTransportAcceptConnector(port uint32) IOConnector {
+	var mu sync.Mutex
+	var listener net.Listener
+	return func(ctx context.Context, logger *logrus.Entry) <-chan IOConnectorResult {
+		result := make(chan IOConnectorResult, 1)
+		mu.Lock()
+		if listener == nil {
+			var err error
+			listener, err = vsock.Listener(ctx, logger, port)
+			if err != nil {
+				mu.Unlock()
+				result <- IOConnectorResult{Err: err}
+				close(result)
+				return result
+			}
+			owned := listener
+			context.AfterFunc(ctx, func() { _ = owned.Close() })
+		}
+		owned := listener
+		mu.Unlock()
+		go func() {
+			defer close(result)
+			conn, err := owned.Accept()
+			result <- IOConnectorResult{ReadWriteCloser: conn, Err: err}
+		}()
+		return result
+	}
+}
+
 // VSockDialConnector returns an IOConnector for establishing vsock connections
 // that are dialed from the host to a guest listener.
 func VSockDialConnector(timeout time.Duration, udsPath string, port uint32) IOConnector {
 	return func(procCtx context.Context, logger *logrus.Entry) <-chan IOConnectorResult {
-		returnCh := make(chan IOConnectorResult)
+		returnCh := make(chan IOConnectorResult, 1)
 
 		go func() {
 			defer close(returnCh)
@@ -47,7 +82,7 @@ func VSockDialConnector(timeout time.Duration, udsPath string, port uint32) IOCo
 // on the provided guest-side vsock port and accepting the first connection that comes in.
 func VSockAcceptConnector(port uint32) IOConnector {
 	return func(procCtx context.Context, logger *logrus.Entry) <-chan IOConnectorResult {
-		returnCh := make(chan IOConnectorResult)
+		returnCh := make(chan IOConnectorResult, 1)
 
 		listener, err := vsock.Listener(procCtx, logger, port)
 		if err != nil {
@@ -57,8 +92,10 @@ func VSockAcceptConnector(port uint32) IOConnector {
 			close(returnCh)
 			return returnCh
 		}
+		stopClose := context.AfterFunc(procCtx, func() { _ = listener.Close() })
 
 		go func() {
+			defer stopClose()
 			defer close(returnCh)
 			defer listener.Close()
 

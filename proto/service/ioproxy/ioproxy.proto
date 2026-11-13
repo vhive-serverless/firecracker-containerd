@@ -7,6 +7,9 @@ option go_package = ".;ioproxy";
 service IOProxy {
      rpc State(StateRequest) returns (StateResponse);
      rpc Attach(AttachRequest) returns (google.protobuf.Empty);
+     rpc Prepare(google.protobuf.Empty) returns (google.protobuf.Empty);
+     rpc Describe(google.protobuf.Empty) returns (DescribeResponse);
+     rpc Resume(google.protobuf.Empty) returns (google.protobuf.Empty);
 }
 
 message StateRequest {
@@ -24,4 +27,28 @@ message AttachRequest {
      uint32 StdinPort = 3;
      uint32 StdoutPort = 4;
      uint32 StderrPort = 5;
+     repeated TransportStream Streams = 6;
+}
+
+message TransportCursor {
+     string StreamID = 1;
+     string SessionID = 2;
+     uint64 Offset = 3;
+     bool FIN = 4;
+}
+
+message TransportStream {
+     string Name = 1;
+     bool Sender = 2;
+     TransportCursor Cursor = 3;
+}
+
+message TransportProcess {
+     string TaskID = 1;
+     string ExecID = 2;
+     repeated TransportStream Streams = 3;
+}
+
+message DescribeResponse {
+     repeated TransportProcess Processes = 1;
 }

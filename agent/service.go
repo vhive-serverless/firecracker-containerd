@@ -22,13 +22,15 @@ import (
 	"strconv"
 	"sync"
 
-	taskAPI "github.com/containerd/containerd/api/runtime/task/v2"
-	"github.com/containerd/containerd/cio"
-	"github.com/containerd/containerd/identifiers"
-	"github.com/containerd/containerd/mount"
-	"github.com/containerd/containerd/protobuf/types"
-	runc "github.com/containerd/containerd/runtime/v2/runc/v2"
-	"github.com/containerd/containerd/runtime/v2/shim"
+	taskAPI "github.com/containerd/containerd/api/runtime/task/v3"
+	"github.com/containerd/containerd/api/types/task"
+	runc "github.com/containerd/containerd/v2/cmd/containerd-shim-runc-v2/task"
+	"github.com/containerd/containerd/v2/core/mount"
+	"github.com/containerd/containerd/v2/pkg/cio"
+	"github.com/containerd/containerd/v2/pkg/identifiers"
+	"github.com/containerd/containerd/v2/pkg/protobuf/types"
+	"github.com/containerd/containerd/v2/pkg/shim"
+	"github.com/containerd/containerd/v2/pkg/shutdown"
 	"github.com/containerd/log"
 	"github.com/hashicorp/go-multierror"
 	"github.com/sirupsen/logrus"
@@ -39,19 +41,26 @@ import (
 	"github.com/firecracker-microvm/firecracker-containerd/proto"
 )
 
+const (
+	logOperation = "name"
+	logTaskID    = "task_id"
+	logExecID    = "exec_id"
+)
+
 // TaskService represents inner shim wrapper over runc in order to:
 // - Add default namespace to ctx as it's not passed by ttrpc over vsock
 // - Add debug logging to simplify debugging
 // - Make place for future extensions as needed
 type TaskService struct {
 	taskManager vm.TaskManager
-	runcService taskAPI.TaskService
+	runcService taskAPI.TTRPCTaskService
 
 	// map of (exec,task id, as returned by taskExecID func) -> (callback for cleaning up state for the exec)
 	execCleanups   map[string][]func() error
 	execCleanupsMu sync.Mutex
 
-	publisher shim.Publisher
+	publisher     shim.Publisher
+	exitPublisher *exitPublisher
 
 	// Normally, it's ill-advised to store a context object in a struct. However,
 	// in this case there appears to be little choice.
@@ -96,7 +105,20 @@ func NewTaskService(
 	// "id" being managed. As noted in the comments of the called code, the "id" arg is only used by
 	// the Cleanup function, so it will never be invoked as part of the task service API, which is all
 	// we need.
-	runcService, err := runc.New(shimCtx, "", publisher, shimCancel)
+	runcCtx, sd := shutdown.WithShutdown(shimCtx)
+	sd.RegisterCallback(func(context.Context) error {
+		shimCancel()
+		return nil
+	})
+	go func() {
+		select {
+		case <-shimCtx.Done():
+			sd.Shutdown()
+		case <-sd.Done():
+		}
+	}()
+	orderedPublisher := &exitPublisher{Publisher: publisher, exits: make(map[string]chan struct{})}
+	runcService, err := runc.NewTaskService(runcCtx, orderedPublisher, sd)
 	if err != nil {
 		return nil, err
 	}
@@ -106,9 +128,10 @@ func NewTaskService(
 		runcService:  runcService,
 		execCleanups: make(map[string][]func() error),
 
-		publisher:  publisher,
-		shimCtx:    shimCtx,
-		shimCancel: shimCancel,
+		publisher:     publisher,
+		exitPublisher: orderedPublisher,
+		shimCtx:       shimCtx,
+		shimCancel:    shimCancel,
 	}, nil
 }
 
@@ -152,9 +175,9 @@ func (ts *TaskService) doCleanup(taskExecID string) error {
 // Create creates a new initial process and container using runc
 func (ts *TaskService) Create(requestCtx context.Context, req *taskAPI.CreateTaskRequest) (_ *taskAPI.CreateTaskResponse, err error) {
 	logger := log.G(requestCtx).WithFields(logrus.Fields{
-		"name":    "Create",
-		"task_id": req.ID,
-		"exec_id": "",
+		logOperation: "Create",
+		logTaskID:    req.ID,
+		logExecID:    "",
 	})
 	defer logPanicAndDie(logger)
 
@@ -200,7 +223,7 @@ func (ts *TaskService) Create(requestCtx context.Context, req *taskAPI.CreateTas
 	// the bundledir was not created. Create it here.
 	if isVMLocalRootFs {
 		if err := os.MkdirAll(bundleDir.RootfsPath(), 0700); err != nil {
-			return nil, fmt.Errorf("Failed to create bundle's rootfs path from inside the vm %q: %w", bundleDir.RootfsPath(), err)
+			return nil, fmt.Errorf("failed to create bundle's rootfs path from inside the vm %q: %w", bundleDir.RootfsPath(), err)
 		}
 	}
 
@@ -260,28 +283,19 @@ func (ts *TaskService) Create(requestCtx context.Context, req *taskAPI.CreateTas
 		var stdinConnectorPair *vm.IOConnectorPair
 		if req.Stdin != "" {
 			req.Stdin = fifoSet.Stdin
-			stdinConnectorPair = &vm.IOConnectorPair{
-				ReadConnector:  vm.VSockAcceptConnector(extraData.StdinPort),
-				WriteConnector: vm.WriteFIFOConnector(fifoSet.Stdin),
-			}
+			stdinConnectorPair = vm.InputPair(extraData.StdinPort, fifoSet.Stdin)
 		}
 
 		var stdoutConnectorPair *vm.IOConnectorPair
 		if req.Stdout != "" {
 			req.Stdout = fifoSet.Stdout
-			stdoutConnectorPair = &vm.IOConnectorPair{
-				ReadConnector:  vm.ReadFIFOConnector(fifoSet.Stdout),
-				WriteConnector: vm.VSockAcceptConnector(extraData.StdoutPort),
-			}
+			stdoutConnectorPair = vm.OutputPair(fifoSet.Stdout, extraData.StdoutPort)
 		}
 
 		var stderrConnectorPair *vm.IOConnectorPair
 		if req.Stderr != "" {
 			req.Stderr = fifoSet.Stderr
-			stderrConnectorPair = &vm.IOConnectorPair{
-				ReadConnector:  vm.ReadFIFOConnector(fifoSet.Stderr),
-				WriteConnector: vm.VSockAcceptConnector(extraData.StderrPort),
-			}
+			stderrConnectorPair = vm.OutputPair(fifoSet.Stderr, extraData.StderrPort)
 		}
 
 		ioConnectorSet = vm.NewIOConnectorProxy(stdinConnectorPair, stdoutConnectorPair, stderrConnectorPair)
@@ -299,9 +313,9 @@ func (ts *TaskService) Create(requestCtx context.Context, req *taskAPI.CreateTas
 // State returns process state information
 func (ts *TaskService) State(requestCtx context.Context, req *taskAPI.StateRequest) (*taskAPI.StateResponse, error) {
 	logger := log.G(requestCtx).WithFields(logrus.Fields{
-		"name":    "State",
-		"task_id": req.ID,
-		"exec_id": req.ExecID,
+		logOperation: "State",
+		logTaskID:    req.ID,
+		logExecID:    req.ExecID,
 	})
 	defer logPanicAndDie(logger)
 	logger.Debug("state")
@@ -323,15 +337,21 @@ func (ts *TaskService) State(requestCtx context.Context, req *taskAPI.StateReque
 // Start starts a process
 func (ts *TaskService) Start(requestCtx context.Context, req *taskAPI.StartRequest) (*taskAPI.StartResponse, error) {
 	logger := log.G(requestCtx).WithFields(logrus.Fields{
-		"name":    "Start",
-		"task_id": req.ID,
-		"exec_id": req.ExecID,
+		logOperation: "Start",
+		logTaskID:    req.ID,
+		logExecID:    req.ExecID,
 	})
 	defer logPanicAndDie(logger)
 	logger.Debug("start")
 
+	if req.ExecID == "" {
+		ts.exitPublisher.begin(req.ID)
+	}
 	resp, err := ts.runcService.Start(requestCtx, req)
 	if err != nil {
+		if req.ExecID == "" {
+			ts.exitPublisher.forget(req.ID)
+		}
 		logger.WithError(err).Error("start failed")
 		return nil, err
 	}
@@ -343,9 +363,9 @@ func (ts *TaskService) Start(requestCtx context.Context, req *taskAPI.StartReque
 // Delete deletes the process with the provided exec ID
 func (ts *TaskService) Delete(requestCtx context.Context, req *taskAPI.DeleteRequest) (*taskAPI.DeleteResponse, error) {
 	logger := log.G(requestCtx).WithFields(logrus.Fields{
-		"name":    "Delete",
-		"task_id": req.ID,
-		"exec_id": req.ExecID,
+		logOperation: "Delete",
+		logTaskID:    req.ID,
+		logExecID:    req.ExecID,
 	})
 	defer logPanicAndDie(logger)
 
@@ -359,11 +379,25 @@ func (ts *TaskService) Delete(requestCtx context.Context, req *taskAPI.DeleteReq
 
 	logger.Debug("delete")
 
+	if req.ExecID == "" {
+		state, err := ts.runcService.State(requestCtx, &taskAPI.StateRequest{ID: req.ID})
+		if err != nil {
+			return nil, err
+		}
+		if state.Status == task.Status_STOPPED {
+			if err := ts.exitPublisher.wait(requestCtx, req.ID); err != nil {
+				return nil, err
+			}
+		}
+	}
 	resp, err := ts.taskManager.DeleteProcess(requestCtx, req, ts.runcService)
 	if err != nil {
 		return nil, err
 	}
 
+	if req.ExecID == "" {
+		ts.exitPublisher.forget(req.ID)
+	}
 	err = ts.doCleanup(taskExecID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to cleanup task %q exec %q: %w", taskID, execID, err)
@@ -379,8 +413,8 @@ func (ts *TaskService) Delete(requestCtx context.Context, req *taskAPI.DeleteReq
 // Pids returns all pids inside the container
 func (ts *TaskService) Pids(requestCtx context.Context, req *taskAPI.PidsRequest) (*taskAPI.PidsResponse, error) {
 	logger := log.G(requestCtx).WithFields(logrus.Fields{
-		"name":    "Pids",
-		"task_id": req.ID,
+		logOperation: "Pids",
+		logTaskID:    req.ID,
 	})
 	defer logPanicAndDie(logger)
 	logger.Debug("pids")
@@ -398,8 +432,8 @@ func (ts *TaskService) Pids(requestCtx context.Context, req *taskAPI.PidsRequest
 // Pause pauses the container
 func (ts *TaskService) Pause(requestCtx context.Context, req *taskAPI.PauseRequest) (*types.Empty, error) {
 	logger := log.G(requestCtx).WithFields(logrus.Fields{
-		"name":    "Pause",
-		"task_id": req.ID,
+		logOperation: "Pause",
+		logTaskID:    req.ID,
 	})
 	defer logPanicAndDie(logger)
 	logger.Debug("pause")
@@ -417,8 +451,8 @@ func (ts *TaskService) Pause(requestCtx context.Context, req *taskAPI.PauseReque
 // Resume resumes the container
 func (ts *TaskService) Resume(requestCtx context.Context, req *taskAPI.ResumeRequest) (*types.Empty, error) {
 	logger := log.G(requestCtx).WithFields(logrus.Fields{
-		"name":    "Resume",
-		"task_id": req.ID,
+		logOperation: "Resume",
+		logTaskID:    req.ID,
 	})
 	defer logPanicAndDie(logger)
 	logger.Debug("resume")
@@ -436,9 +470,9 @@ func (ts *TaskService) Resume(requestCtx context.Context, req *taskAPI.ResumeReq
 // Checkpoint saves the state of the container instance
 func (ts *TaskService) Checkpoint(requestCtx context.Context, req *taskAPI.CheckpointTaskRequest) (*types.Empty, error) {
 	logger := log.G(requestCtx).WithFields(logrus.Fields{
-		"name":    "Checkpoint",
-		"task_id": req.ID,
-		"path":    req.Path,
+		logOperation: "Checkpoint",
+		logTaskID:    req.ID,
+		"path":       req.Path,
 	})
 	defer logPanicAndDie(logger)
 	logger.Debug("checkpoint")
@@ -456,9 +490,9 @@ func (ts *TaskService) Checkpoint(requestCtx context.Context, req *taskAPI.Check
 // Kill kills a process with the provided signal
 func (ts *TaskService) Kill(requestCtx context.Context, req *taskAPI.KillRequest) (*types.Empty, error) {
 	logger := log.G(requestCtx).WithFields(logrus.Fields{
-		"name":    "Kill",
-		"task_id": req.ID,
-		"exec_id": req.ExecID,
+		logOperation: "Kill",
+		logTaskID:    req.ID,
+		logExecID:    req.ExecID,
 	})
 	defer logPanicAndDie(logger)
 	logger.Debug("kill")
@@ -476,9 +510,9 @@ func (ts *TaskService) Kill(requestCtx context.Context, req *taskAPI.KillRequest
 // Exec runs an additional process inside the container
 func (ts *TaskService) Exec(requestCtx context.Context, req *taskAPI.ExecProcessRequest) (_ *types.Empty, err error) {
 	logger := log.G(requestCtx).WithFields(logrus.Fields{
-		"name":    "Exec",
-		"task_id": req.ID,
-		"exec_id": req.ExecID,
+		logOperation: "Exec",
+		logTaskID:    req.ID,
+		logExecID:    req.ExecID,
 	})
 	defer logPanicAndDie(logger)
 
@@ -530,28 +564,19 @@ func (ts *TaskService) Exec(requestCtx context.Context, req *taskAPI.ExecProcess
 		var stdinConnectorPair *vm.IOConnectorPair
 		if req.Stdin != "" {
 			req.Stdin = fifoSet.Stdin
-			stdinConnectorPair = &vm.IOConnectorPair{
-				ReadConnector:  vm.VSockAcceptConnector(extraData.StdinPort),
-				WriteConnector: vm.WriteFIFOConnector(fifoSet.Stdin),
-			}
+			stdinConnectorPair = vm.InputPair(extraData.StdinPort, fifoSet.Stdin)
 		}
 
 		var stdoutConnectorPair *vm.IOConnectorPair
 		if req.Stdout != "" {
 			req.Stdout = fifoSet.Stdout
-			stdoutConnectorPair = &vm.IOConnectorPair{
-				ReadConnector:  vm.ReadFIFOConnector(fifoSet.Stdout),
-				WriteConnector: vm.VSockAcceptConnector(extraData.StdoutPort),
-			}
+			stdoutConnectorPair = vm.OutputPair(fifoSet.Stdout, extraData.StdoutPort)
 		}
 
 		var stderrConnectorPair *vm.IOConnectorPair
 		if req.Stderr != "" {
 			req.Stderr = fifoSet.Stderr
-			stderrConnectorPair = &vm.IOConnectorPair{
-				ReadConnector:  vm.ReadFIFOConnector(fifoSet.Stderr),
-				WriteConnector: vm.VSockAcceptConnector(extraData.StderrPort),
-			}
+			stderrConnectorPair = vm.OutputPair(fifoSet.Stderr, extraData.StderrPort)
 		}
 
 		ioConnectorSet = vm.NewIOConnectorProxy(stdinConnectorPair, stdoutConnectorPair, stderrConnectorPair)
@@ -570,9 +595,9 @@ func (ts *TaskService) Exec(requestCtx context.Context, req *taskAPI.ExecProcess
 // ResizePty resizes pty
 func (ts *TaskService) ResizePty(requestCtx context.Context, req *taskAPI.ResizePtyRequest) (*types.Empty, error) {
 	logger := log.G(requestCtx).WithFields(logrus.Fields{
-		"name":    "ResizePty",
-		"task_id": req.ID,
-		"exec_id": req.ExecID,
+		logOperation: "ResizePty",
+		logTaskID:    req.ID,
+		logExecID:    req.ExecID,
 	})
 	defer logPanicAndDie(logger)
 	logger.Debug("resize_pty")
@@ -590,9 +615,9 @@ func (ts *TaskService) ResizePty(requestCtx context.Context, req *taskAPI.Resize
 // CloseIO closes all IO inside container
 func (ts *TaskService) CloseIO(requestCtx context.Context, req *taskAPI.CloseIORequest) (*types.Empty, error) {
 	logger := log.G(requestCtx).WithFields(logrus.Fields{
-		"name":    "CloseIO",
-		"task_id": req.ID,
-		"exec_id": req.ExecID,
+		logOperation: "CloseIO",
+		logTaskID:    req.ID,
+		logExecID:    req.ExecID,
 	})
 	defer logPanicAndDie(logger)
 	logger.Debug("close io")
@@ -610,8 +635,8 @@ func (ts *TaskService) CloseIO(requestCtx context.Context, req *taskAPI.CloseIOR
 // Update updates running container
 func (ts *TaskService) Update(requestCtx context.Context, req *taskAPI.UpdateTaskRequest) (*types.Empty, error) {
 	logger := log.G(requestCtx).WithFields(logrus.Fields{
-		"name":    "Update",
-		"task_id": req.ID,
+		logOperation: "Update",
+		logTaskID:    req.ID,
 	})
 	defer logPanicAndDie(logger)
 	logger.Debug("update")
@@ -629,9 +654,9 @@ func (ts *TaskService) Update(requestCtx context.Context, req *taskAPI.UpdateTas
 // Wait waits for a process to exit
 func (ts *TaskService) Wait(requestCtx context.Context, req *taskAPI.WaitRequest) (*taskAPI.WaitResponse, error) {
 	logger := log.G(requestCtx).WithFields(logrus.Fields{
-		"name":    "Wait",
-		"task_id": req.ID,
-		"exec_id": req.ExecID,
+		logOperation: "Wait",
+		logTaskID:    req.ID,
+		logExecID:    req.ExecID,
 	})
 	defer logPanicAndDie(logger)
 	logger.Debug("wait")
@@ -649,8 +674,8 @@ func (ts *TaskService) Wait(requestCtx context.Context, req *taskAPI.WaitRequest
 // Stats returns a process stats
 func (ts *TaskService) Stats(requestCtx context.Context, req *taskAPI.StatsRequest) (*taskAPI.StatsResponse, error) {
 	logger := log.G(requestCtx).WithFields(logrus.Fields{
-		"name":    "Stats",
-		"task_id": req.ID,
+		logOperation: "Stats",
+		logTaskID:    req.ID,
 	})
 	defer logPanicAndDie(logger)
 	logger.Debug("stats")
@@ -668,8 +693,8 @@ func (ts *TaskService) Stats(requestCtx context.Context, req *taskAPI.StatsReque
 // Connect returns shim information such as the shim's pid
 func (ts *TaskService) Connect(requestCtx context.Context, req *taskAPI.ConnectRequest) (*taskAPI.ConnectResponse, error) {
 	logger := log.G(requestCtx).WithFields(logrus.Fields{
-		"name":    "Connect",
-		"task_id": req.ID,
+		logOperation: "Connect",
+		logTaskID:    req.ID,
 	})
 	defer logPanicAndDie(logger)
 	logger.Debug("connect")
@@ -691,9 +716,9 @@ func (ts *TaskService) Connect(requestCtx context.Context, req *taskAPI.ConnectR
 // Shutdown cleanups runc resources and gracefully shutdowns ttrpc server
 func (ts *TaskService) Shutdown(requestCtx context.Context, req *taskAPI.ShutdownRequest) (*types.Empty, error) {
 	logger := log.G(requestCtx).WithFields(logrus.Fields{
-		"name":    "Shutdown",
-		"task_id": req.ID,
-		"now":     strconv.FormatBool(req.Now),
+		logOperation: "Shutdown",
+		logTaskID:    req.ID,
+		"now":        strconv.FormatBool(req.Now),
 	})
 	defer logPanicAndDie(logger)
 	logger.Debug("shutdown")

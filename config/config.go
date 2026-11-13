@@ -31,7 +31,7 @@ const (
 	// overwrite the default runtime config path
 	ConfigPathEnvName  = "FIRECRACKER_CONTAINERD_RUNTIME_CONFIG_PATH"
 	defaultConfigPath  = "/etc/containerd/firecracker-runtime.json"
-	defaultKernelArgs  = "console=ttyS0 noapic reboot=k panic=1 pci=off nomodules rw"
+	defaultKernelArgs  = "ro console=ttyS0 reboot=k panic=1 pci=off nomodules systemd.unified_cgroup_hierarchy=1 systemd.unit=firecracker.target init=/sbin/overlay-init"
 	defaultFilesPath   = "/var/lib/firecracker-containerd/runtime/"
 	defaultKernelPath  = defaultFilesPath + "default-vmlinux.bin"
 	defaultRootfsPath  = defaultFilesPath + "default-rootfs.img"
@@ -79,6 +79,7 @@ func LoadConfig(path string) (*Config, error) {
 		path = defaultConfigPath
 	}
 
+	// #nosec G703 -- path is the explicitly selected administrator runtime configuration.
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read config from %q: %w", path, err)
