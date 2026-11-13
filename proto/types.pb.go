@@ -655,7 +655,11 @@ type FirecrackerRootDrive struct {
 	RateLimiter *FirecrackerRateLimiter `protobuf:"bytes,4,opt,name=RateLimiter,proto3" json:"RateLimiter,omitempty"`
 	// (Optional) CacheType specifies the caching strategy for the block device.
 	// The supported caching strategies are: "Unsafe"(default) and "Writeback".
-	CacheType     string `protobuf:"bytes,5,opt,name=CacheType,proto3" json:"CacheType,omitempty"`
+	CacheType string `protobuf:"bytes,5,opt,name=CacheType,proto3" json:"CacheType,omitempty"`
+	// Explicit immutable virtio-pmem root sharing. Requires ImageSha256.
+	UsePmem bool `protobuf:"varint,6,opt,name=UsePmem,proto3" json:"UsePmem,omitempty"`
+	// Expected immutable image content. Also enables the same cache for a block control.
+	ImageSha256   string `protobuf:"bytes,7,opt,name=ImageSha256,proto3" json:"ImageSha256,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -721,6 +725,20 @@ func (x *FirecrackerRootDrive) GetRateLimiter() *FirecrackerRateLimiter {
 func (x *FirecrackerRootDrive) GetCacheType() string {
 	if x != nil {
 		return x.CacheType
+	}
+	return ""
+}
+
+func (x *FirecrackerRootDrive) GetUsePmem() bool {
+	if x != nil {
+		return x.UsePmem
+	}
+	return false
+}
+
+func (x *FirecrackerRootDrive) GetImageSha256() string {
+	if x != nil {
+		return x.ImageSha256
 	}
 	return ""
 }
@@ -953,6 +971,7 @@ type FirecrackerBalloonDevice struct {
 	AmountMib             int64                  `protobuf:"varint,1,opt,name=AmountMib,proto3" json:"AmountMib,omitempty"`                         //Target balloon size in MiB.
 	DeflateOnOom          bool                   `protobuf:"varint,2,opt,name=DeflateOnOom,proto3" json:"DeflateOnOom,omitempty"`                   // Whether the balloon should deflate when the guest has memory pressure.
 	StatsPollingIntervals int64                  `protobuf:"varint,3,opt,name=StatsPollingIntervals,proto3" json:"StatsPollingIntervals,omitempty"` // Interval in seconds between refreshing statistics.
+	FreePageReporting     bool                   `protobuf:"varint,4,opt,name=FreePageReporting,proto3" json:"FreePageReporting,omitempty"`         // Return free guest pages without balloon inflation.
 	unknownFields         protoimpl.UnknownFields
 	sizeCache             protoimpl.SizeCache
 }
@@ -1006,6 +1025,13 @@ func (x *FirecrackerBalloonDevice) GetStatsPollingIntervals() int64 {
 		return x.StatsPollingIntervals
 	}
 	return 0
+}
+
+func (x *FirecrackerBalloonDevice) GetFreePageReporting() bool {
+	if x != nil {
+		return x.FreePageReporting
+	}
+	return false
 }
 
 type MemoryBackend struct {
@@ -1175,7 +1201,7 @@ const file_types_proto_rawDesc = "" +
 	"\n" +
 	"MemSizeMib\x18\x03 \x01(\rR\n" +
 	"MemSizeMib\x12\x1c\n" +
-	"\tVcpuCount\x18\x04 \x01(\rR\tVcpuCount\"\xc7\x01\n" +
+	"\tVcpuCount\x18\x04 \x01(\rR\tVcpuCount\"\x83\x02\n" +
 	"\x14FirecrackerRootDrive\x12\x1a\n" +
 	"\bHostPath\x18\x01 \x01(\tR\bHostPath\x12\x1a\n" +
 	"\bPartuuid\x18\x02 \x01(\tR\bPartuuid\x12\x1e\n" +
@@ -1183,7 +1209,9 @@ const file_types_proto_rawDesc = "" +
 	"IsWritable\x18\x03 \x01(\bR\n" +
 	"IsWritable\x129\n" +
 	"\vRateLimiter\x18\x04 \x01(\v2\x17.FirecrackerRateLimiterR\vRateLimiter\x12\x1c\n" +
-	"\tCacheType\x18\x05 \x01(\tR\tCacheType\"\x86\x02\n" +
+	"\tCacheType\x18\x05 \x01(\tR\tCacheType\x12\x18\n" +
+	"\aUsePmem\x18\x06 \x01(\bR\aUsePmem\x12 \n" +
+	"\vImageSha256\x18\a \x01(\tR\vImageSha256\"\x86\x02\n" +
 	"\x15FirecrackerDriveMount\x12\x1a\n" +
 	"\bHostPath\x18\x01 \x01(\tR\bHostPath\x12\x16\n" +
 	"\x06VMPath\x18\x02 \x01(\tR\x06VMPath\x12&\n" +
@@ -1202,11 +1230,12 @@ const file_types_proto_rawDesc = "" +
 	"\n" +
 	"RefillTime\x18\x02 \x01(\x03R\n" +
 	"RefillTime\x12\x1a\n" +
-	"\bCapacity\x18\x03 \x01(\x03R\bCapacity\"\x92\x01\n" +
+	"\bCapacity\x18\x03 \x01(\x03R\bCapacity\"\xc0\x01\n" +
 	"\x18FirecrackerBalloonDevice\x12\x1c\n" +
 	"\tAmountMib\x18\x01 \x01(\x03R\tAmountMib\x12\"\n" +
 	"\fDeflateOnOom\x18\x02 \x01(\bR\fDeflateOnOom\x124\n" +
-	"\x15StatsPollingIntervals\x18\x03 \x01(\x03R\x15StatsPollingIntervals\"S\n" +
+	"\x15StatsPollingIntervals\x18\x03 \x01(\x03R\x15StatsPollingIntervals\x12,\n" +
+	"\x11FreePageReporting\x18\x04 \x01(\bR\x11FreePageReporting\"S\n" +
 	"\rMemoryBackend\x12 \n" +
 	"\vBackendType\x18\x01 \x01(\tR\vBackendType\x12 \n" +
 	"\vBackendPath\x18\x02 \x01(\tR\vBackendPathB\tZ\a.;protob\x06proto3"
