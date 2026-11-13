@@ -1,0 +1,9 @@
+{
+  "original_run": "9c3ea8e618a46d6d59e64a5812eff4f1bd382cdc",
+  "result": "failed",
+  "acceptance_exit": 2,
+  "retained_top_level_passes": 55,
+  "reason": "stargz fixture manifest1 versus mandatory manifest2",
+  "thinpool_SDK_unique_checks": "not reached",
+  "original_failed_status_is_not_rewritten": true
+}

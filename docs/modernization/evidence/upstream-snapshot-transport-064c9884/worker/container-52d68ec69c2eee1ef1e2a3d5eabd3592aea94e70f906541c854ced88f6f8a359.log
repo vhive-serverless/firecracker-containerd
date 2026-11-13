@@ -1,0 +1,12 @@
+=== RUN   TestNativeBufferedStdinSnapshot_Isolated
+=== RUN   TestNativeBufferedStdinSnapshot_Isolated/jailed=false
+    native_buffered_stdin_supplement_integ_test.go:130: buffered_stdin_precapture guest_receiver_accepted=47 application_held=true
+    native_buffered_stdin_supplement_integ_test.go:200: buffered_stdin_snapshot sentinel_bytes=47 captured_stdin_offset=47 source_once=true clone_once=true captured_counter=0 stdout_stderr_exact=true eof_no_tail=true
+=== RUN   TestNativeBufferedStdinSnapshot_Isolated/jailed=true
+    native_buffered_stdin_supplement_integ_test.go:130: buffered_stdin_precapture guest_receiver_accepted=47 application_held=true
+    native_buffered_stdin_supplement_integ_test.go:200: buffered_stdin_snapshot sentinel_bytes=47 captured_stdin_offset=47 source_once=true clone_once=true captured_counter=0 stdout_stderr_exact=true eof_no_tail=true
+--- PASS: TestNativeBufferedStdinSnapshot_Isolated (28.26s)
+    --- PASS: TestNativeBufferedStdinSnapshot_Isolated/jailed=false (14.04s)
+    --- PASS: TestNativeBufferedStdinSnapshot_Isolated/jailed=true (14.22s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	28.280s

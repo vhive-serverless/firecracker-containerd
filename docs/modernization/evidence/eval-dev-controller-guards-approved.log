@@ -1,0 +1,4 @@
+PASS actual binary matches build receipt and current source digest
+PASS changed source and stale binary receipt rejected
+PASS actual failed Docker start reconciled; mismatched ownership preserved
+PASS two real private loop attachments cleaned without an existing thin pool

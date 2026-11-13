@@ -96,11 +96,21 @@ separate; the inherited CNI flake above remains unfixed.
 
 ## Storage and incremental features
 
-Step 1 preserves an immutable SquashFS guest base with a tmpfs guest overlay
-upper; default devmapper container writable roots are already separate ext4
-block devices backed by host storage. The guest-root overlay, container writable
-root, exported host volumes and temporary mounts are separate storage layers.
-The optional guest stargz path has its own storage and must be assessed separately.
+The Step 1 baseline used an immutable SquashFS guest base with a tmpfs guest
+overlay upper. Step 4 defaults that upper to a private host-disk ext4 image;
+default non-stargz container writable roots remain separate devmapper-backed
+ext4 devices. The guest-root overlay, container writable root, exported host
+volumes and temporary mounts are separate storage layers. The optional guest
+stargz path has its own storage. Its store and container overlay upper/work
+directories bind to the private guest-upper filesystem at
+`/rom/overlay/stargz`; they share that disk's capacity and snapshot lifetime.
+The historical custom-VMM `06b55e3` acceptance run passed four stargz storage profiles under
+both jailer modes and 12 stargz native restore cases. See the
+[Step 4 completeness report](modernization/step-4-completeness.md) and
+[verification receipt](modernization/evidence/step4-stargz/clean-06b55e3/verification.json)
+for results and limits. Stargz workload lower layers remain FUSE-backed; the
+storage tests do not establish cold lazy-fetch behavior. Optional pmem/DAX
+applies to the immutable guest base, not the FUSE lowers.
 
 Step 2 adds vHive-managed snapshot/restore for its documented standalone profile.
 Step 3 adds a CRI frontend, ordinary Kubernetes RuntimeClass support and native
@@ -112,6 +122,10 @@ Exact Step 3 source `751c03c6f9a9` has
 [native/volume VM and focused CRI acceptance](modernization/step-3.md), including
 both native jail modes. Those results do not establish full CRI conformance;
 Kubernetes Pod checkpoint/restore remains deferred to the 1.38 interface work.
+
+Exact Step 4 source `bbcaf820056d` passed the full-stack and unique checks in
+[its receipt](modernization/evidence/upstream-step4-bbcaf820056d/README.md).
+This does not fix the inherited CNI race or establish new memory savings.
 
 The original [design alternatives](design-approaches.md) and
 [shim design](shim-design.md) explain historical decisions. Their proposals and

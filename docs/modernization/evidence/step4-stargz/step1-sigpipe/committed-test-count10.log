@@ -1,0 +1,22 @@
+=== RUN   TestRunIgnoresSIGPIPEAndStopsOnSIGTERM
+--- PASS: TestRunIgnoresSIGPIPEAndStopsOnSIGTERM (0.28s)
+=== RUN   TestRunIgnoresSIGPIPEAndStopsOnSIGTERM
+--- PASS: TestRunIgnoresSIGPIPEAndStopsOnSIGTERM (0.28s)
+=== RUN   TestRunIgnoresSIGPIPEAndStopsOnSIGTERM
+--- PASS: TestRunIgnoresSIGPIPEAndStopsOnSIGTERM (0.27s)
+=== RUN   TestRunIgnoresSIGPIPEAndStopsOnSIGTERM
+--- PASS: TestRunIgnoresSIGPIPEAndStopsOnSIGTERM (0.28s)
+=== RUN   TestRunIgnoresSIGPIPEAndStopsOnSIGTERM
+--- PASS: TestRunIgnoresSIGPIPEAndStopsOnSIGTERM (0.27s)
+=== RUN   TestRunIgnoresSIGPIPEAndStopsOnSIGTERM
+--- PASS: TestRunIgnoresSIGPIPEAndStopsOnSIGTERM (0.28s)
+=== RUN   TestRunIgnoresSIGPIPEAndStopsOnSIGTERM
+--- PASS: TestRunIgnoresSIGPIPEAndStopsOnSIGTERM (0.27s)
+=== RUN   TestRunIgnoresSIGPIPEAndStopsOnSIGTERM
+--- PASS: TestRunIgnoresSIGPIPEAndStopsOnSIGTERM (0.28s)
+=== RUN   TestRunIgnoresSIGPIPEAndStopsOnSIGTERM
+--- PASS: TestRunIgnoresSIGPIPEAndStopsOnSIGTERM (0.28s)
+=== RUN   TestRunIgnoresSIGPIPEAndStopsOnSIGTERM
+--- PASS: TestRunIgnoresSIGPIPEAndStopsOnSIGTERM (0.27s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/snapshotter/app	2.738s

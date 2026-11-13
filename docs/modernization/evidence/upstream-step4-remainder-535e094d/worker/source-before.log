@@ -1,0 +1,7 @@
+{
+  "runtime_source": "9c3ea8e618a46d6d59e64a5812eff4f1bd382cdc",
+  "test_source": "535e094d36ff2689d254bdefd2d0452ea37c9ef0",
+  "sole_changed_path": "snapshotter/stargz_restore_integ_test.go",
+  "all_other_mode_type_oid_entries_exact": 944,
+  "production_entries_sha256": "e5bf1cf43e6aa9cca3dc45c2197c17a2468f3a4d18a8114b5aad1c7453557148"
+}

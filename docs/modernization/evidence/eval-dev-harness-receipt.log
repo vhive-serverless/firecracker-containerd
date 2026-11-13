@@ -1,0 +1,51 @@
+Development evaluation harness checks PASS; no controlled savings acceptance.
+Wed Nov 11 16:40:50 UTC 2026
+worker=nehalem@amd218.utah.cloudlab.us
+checkout=/users/nehalem/fc-ctrd-mod/step4-evaluation-dev
+896752b70b833c584881760a902c21ff06ee9b79
+?? runtime/memory_evaluation_integ_test.go
+?? tools/memory-eval/provenance.py
+?? tools/memory-eval/run_matrix.py
+?? tools/memory-eval/test_controller_worker.py
+?? tools/modernize/build-memory-eval.sh
+?? tools/modernize/evaluate-memory.sh
+{
+  "build_info": {
+    "source_digest": "a6fc9f228afd83a8c1a489c5d810a735d6bf5f79a40d1e925c646c6f762f615b",
+    "source_dirty": true,
+    "source_revision": "896752b70b833c584881760a902c21ff06ee9b79"
+  },
+  "binary_sha256": "3d55930683daf5f6c890f7e892f677d7d4fa8f3db018f7dc20935e6b04be706f",
+  "go_version": "go version go1.26.11 linux/amd64"
+}
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  /users/nehalem/fc-ctrd-mod/evidence/eval-dev-tested-source.patch
+83c459ef26323798d8048d2e42594d2818a6e1b1a24002e419643cbbe2652274  /users/nehalem/fc-ctrd-mod/evidence/eval-dev-tested-untracked.tar
+23ec43ec2310916240a0d8da59d7e145623cef3fa69b023754a285f61d64f614  /users/nehalem/fc-ctrd-mod/evidence/eval-dev-controller-guards-approved.log
+e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47  /users/nehalem/fc-ctrd-mod/evidence/eval-dev-lint-approved.log
+9d3edc5e3b7c0b05aaf7c8e07e0605ee28438e436ba63964f921022e6fde9ebf  /users/nehalem/fc-ctrd-mod/evidence/eval-dev-six-driver.log
+8718374a970c8385abc44c65cd5ef0a47157dde0917b27cf86e5692b5e0c7026  /users/nehalem/fc-ctrd-mod/evidence/eval-dev-reviewed-approved-driver.log
+Pinned tested runtime image/source: localhost/firecracker-containerd-test:438c2cb6ea0c / 438c2cb6ea0c7de719bed8eef08b3ba0db1d31b8.
+Original storage smoke passed, then six other arms passed with10s idle. Final warm-refresh/provenance/cleanup protocol passed original+combined smoke,10s idle.
+Actual guards: changed source/stale receipt rejected; failed Docker start reconciled by unique name+label; mismatched ownership preserved; two real partial loop attachments cleaned without a pool. Lint0issues.
+Default committed mode requires matching clean source/runtime/shim/guest-agent/test-binary identities. Development mode is explicitly non-acceptance. Full randomized21trial30s matrix remains pending.
+Preserved failures: eval-dev-test-compile.log (SDK response return arity), eval-dev-lint.log (artifact permissions/env path taint), eval-dev-controller-guards.log (Docker lowercase not-found), eval-dev-controller-guards-final.log (asynchronous loop detach); corrected before successful guards.
+PASS actual binary matches build receipt and current source digest
+PASS changed source and stale binary receipt rejected
+PASS actual failed Docker start reconciled; mismatched ownership preserved
+PASS two real private loop attachments cleaned without an existing thin pool
+RUN block=0 arm=pmem
+PASS block=0 arm=pmem
+RUN block=0 arm=ext4-reclaim
+PASS block=0 arm=ext4-reclaim
+RUN block=0 arm=reclaim
+PASS block=0 arm=reclaim
+RUN block=0 arm=disk
+PASS block=0 arm=disk
+RUN block=0 arm=ext4-block
+PASS block=0 arm=ext4-block
+RUN block=0 arm=combined
+PASS block=0 arm=combined
+RUN block=0 arm=original
+PASS block=0 arm=original
+RUN block=0 arm=combined
+PASS block=0 arm=combined

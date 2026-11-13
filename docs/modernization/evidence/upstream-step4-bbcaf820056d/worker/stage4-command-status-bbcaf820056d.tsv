@@ -1,0 +1,16 @@
+step	exit_code
+build	0
+install	0
+acceptance	0
+unit-race	0
+overlay-syntax	0
+stargz-syntax	0
+evaluation-unit	0
+runtime-probe-build	0
+volfs-probe-build	0
+namespace-api	0
+namespace-pass-guard	0
+host-enospc	0
+enospc-pass-guard	0
+host-fuse	0
+fuse-pass-guard	0

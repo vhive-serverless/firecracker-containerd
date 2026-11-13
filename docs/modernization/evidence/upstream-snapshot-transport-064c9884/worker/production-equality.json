@@ -1,0 +1,11 @@
+{
+  "base": "332da2a7065baa0050037250bbf2ff316a1a8519",
+  "target": "064c9884a0a34a52c1e648847a4bb5f336fa2dde",
+  "production_entries": 433,
+  "production_manifest_sha256": "39bc1700b828d850e62790d1222c6a31c846f8c649f49f76782469eecb6a015d",
+  "all_accepted_entries_unchanged": true,
+  "added_tests": [
+    "runtime/native_buffered_stdin_supplement_integ_test.go",
+    "runtime/snapshot_admission_supplement_test.go"
+  ]
+}

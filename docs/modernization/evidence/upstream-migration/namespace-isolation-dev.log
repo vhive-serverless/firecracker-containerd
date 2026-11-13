@@ -1,0 +1,3 @@
+=== RUN   TestRestoreNamespaceIsolation
+--- PASS: TestRestoreNamespaceIsolation (0.06s)
+PASS

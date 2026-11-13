@@ -1,0 +1,92 @@
+{
+  "source_revision": "fc2a8c2023c915f98bb8b484902e05de12277b8b",
+  "worker": "amd218.utah.cloudlab.us",
+  "sdk_revision": "dd9db322432989b96cff7a38a64703d60b6cabf9",
+  "firecracker": "official v1.18.0",
+  "result": "passed",
+  "expected_vm_cases": 20,
+  "passed_vm_cases": [
+    {
+      "name": "TestNativeForkTransport_Isolated/jailed=false",
+      "duration_seconds": 40.1
+    },
+    {
+      "name": "TestNativeForkTransport_Isolated/jailed=true",
+      "duration_seconds": 40.24
+    },
+    {
+      "name": "TestNativeCheckpointInterrupt_Isolated/jailed=false",
+      "duration_seconds": 25.44
+    },
+    {
+      "name": "TestNativeCheckpointInterrupt_Isolated/jailed=true",
+      "duration_seconds": 25.38
+    },
+    {
+      "name": "TestNativeRestore_Isolated/jailed=false",
+      "duration_seconds": 25.24
+    },
+    {
+      "name": "TestNativeRestore_Isolated/jailed=true",
+      "duration_seconds": 25.04
+    },
+    {
+      "name": "TestNativeRestoreStorage_Isolated/disk/jailed=false",
+      "duration_seconds": 33.52
+    },
+    {
+      "name": "TestNativeRestoreStorage_Isolated/disk/jailed=true",
+      "duration_seconds": 33.34
+    },
+    {
+      "name": "TestNativeRestoreStorage_Isolated/ext4-block/jailed=false",
+      "duration_seconds": 37.73
+    },
+    {
+      "name": "TestNativeRestoreStorage_Isolated/ext4-block/jailed=true",
+      "duration_seconds": 35.46
+    },
+    {
+      "name": "TestNativeRestoreStorage_Isolated/pmem/jailed=false",
+      "duration_seconds": 36.82
+    },
+    {
+      "name": "TestNativeRestoreStorage_Isolated/pmem/jailed=true",
+      "duration_seconds": 36.75
+    },
+    {
+      "name": "TestNativeRestoreStorage_Isolated/reclaim/jailed=false",
+      "duration_seconds": 35.95
+    },
+    {
+      "name": "TestNativeRestoreStorage_Isolated/reclaim/jailed=true",
+      "duration_seconds": 42.15
+    },
+    {
+      "name": "TestNativeRestoreStorage_Isolated/combined/jailed=false",
+      "duration_seconds": 41.14
+    },
+    {
+      "name": "TestNativeRestoreStorage_Isolated/combined/jailed=true",
+      "duration_seconds": 39.72
+    },
+    {
+      "name": "TestNativeRestoreStorage_Isolated/ext4-reclaim/jailed=false",
+      "duration_seconds": 39.7
+    },
+    {
+      "name": "TestNativeRestoreStorage_Isolated/ext4-reclaim/jailed=true",
+      "duration_seconds": 38.54
+    },
+    {
+      "name": "TestFreePageReporting_Isolated/enabled=false",
+      "duration_seconds": 9.62
+    },
+    {
+      "name": "TestFreePageReporting_Isolated/enabled=true",
+      "duration_seconds": 10.08
+    }
+  ],
+  "scope": "Complete native runtime storage/restore acceptance script; not legacy vHive, CRI compliance, or rewritten milestone acceptance",
+  "log_sha256": "34dcabf1b8716f97c0829d52f8d8e38c28fec881344de786945c29ddebe2abf8"
+}

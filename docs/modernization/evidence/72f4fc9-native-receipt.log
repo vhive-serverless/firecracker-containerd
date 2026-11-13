@@ -1,0 +1,127 @@
+COMMITTED_NATIVE_RUNTIME_STORAGE_RESTORE_OK
+worker=nehalem@amd218.utah.cloudlab.us
+source_clean=true
+private_pool_removed=true
+Wed Nov 11 18:15:13 UTC 2026
+72f4fc9173bef33cc1c981ad285758716f635e02
+ ce86b117d59ca93b1c04b791a251b445ace76703 _submodules/firecracker (v1.18.0-2-gce86b117d)
+ c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e _submodules/runc (v1.4.2)
+ 3070538befb5a6c09f93e99164762b3a76310357 _submodules/stargz-snapshotter (cmd/v0.18.2)
+firecracker: ce86b117d59ca93b1c04b791a251b445ace76703
+runc: c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e
+stargz-snapshotter: 3070538befb5a6c09f93e99164762b3a76310357
+github.com/containerd/containerd/v2: v2.3.7
+github.com/opencontainers/runc: v1.4.2
+SDK: github.com/JooyoungPark73/firecracker-go-sdk@v0.0.0-20261111093432-832b1a5132e0
+VMM/SDK schema sha256: bf73b43daf2124cc4077e2bade1469e893e635efdc230a85b51372c6581613f4
+Guest volume filesystem: github.com/hanwen/go-fuse/v2@v2.10.1 (1d16325e0693e4aeb40b3c899938e028cc8e538e)
+step4-native-final: k8s.io/cri-api@v0.36.3
+cri: k8s.io/cri-api@v0.37.2
+cri: k8s.io/cri-streaming@v0.37.2
+cri: github.com/containerd/containerd/v2@v2.3.7
+CRI frontend: co-versioned parent source and exact pinned SDK verified
+go version go1.26.11 linux/amd64
+STACK_DIR=/users/nehalem/fc-ctrd-mod
+TMPDIR=/tmp/fc-native-72f4fc9
+commands=tools/modernize/build-stack.sh; tools/modernize/install-stack.sh; tools/modernize/test-native-restore.sh
+{
+  "source": "72f4fc9173bef33cc1c981ad285758716f635e02",
+  "worker": "nehalem@amd218.utah.cloudlab.us",
+  "native_base_cases": 2,
+  "native_storage_cases": 12,
+  "post_restore_reporting_cases": 6,
+  "cold_reporting_cases": 2,
+  "actual_dax_cases": 12,
+  "actual_dax_true": 4,
+  "durations_s": {
+    "TestNativeRestore_Isolated": 55.83,
+    "TestNativeRestoreStorage_Isolated": 489.51,
+    "TestFreePageReporting_Isolated": 19.83
+  },
+  "post_restore_reporting_activity": [
+    {
+      "restored_reporting_task": "nr-reclaim-false-0",
+      "vmm_pid": "2108",
+      "baseline_rss_kib": "125860",
+      "filled_rss_kib": "193376",
+      "post_free_rss_kib": "130432",
+      "rss_drop_kib": "62944",
+      "rss_read_errors": "0",
+      "last_rss_read_error": "\"\"",
+      "retained_checksum_verified": "true"
+    },
+    {
+      "restored_reporting_task": "nr-reclaim-true-0",
+      "vmm_pid": "2475",
+      "baseline_rss_kib": "125308",
+      "filled_rss_kib": "193000",
+      "post_free_rss_kib": "128624",
+      "rss_drop_kib": "64376",
+      "rss_read_errors": "0",
+      "last_rss_read_error": "\"\"",
+      "retained_checksum_verified": "true"
+    },
+    {
+      "restored_reporting_task": "nr-combined-false-0",
+      "vmm_pid": "2720",
+      "baseline_rss_kib": "120440",
+      "filled_rss_kib": "187824",
+      "post_free_rss_kib": "123752",
+      "rss_drop_kib": "64072",
+      "rss_read_errors": "0",
+      "last_rss_read_error": "\"\"",
+      "retained_checksum_verified": "true"
+    },
+    {
+      "restored_reporting_task": "nr-combined-true-0",
+      "vmm_pid": "3091",
+      "baseline_rss_kib": "121144",
+      "filled_rss_kib": "188756",
+      "post_free_rss_kib": "123428",
+      "rss_drop_kib": "65328",
+      "rss_read_errors": "0",
+      "last_rss_read_error": "\"\"",
+      "retained_checksum_verified": "true"
+    },
+    {
+      "restored_reporting_task": "nr-ext4-reclaim-false-0",
+      "vmm_pid": "3342",
+      "baseline_rss_kib": "125920",
+      "filled_rss_kib": "193340",
+      "post_free_rss_kib": "130876",
+      "rss_drop_kib": "62464",
+      "rss_read_errors": "0",
+      "last_rss_read_error": "\"\"",
+      "retained_checksum_verified": "true"
+    },
+    {
+      "restored_reporting_task": "nr-ext4-reclaim-true-0",
+      "vmm_pid": "3716",
+      "baseline_rss_kib": "124320",
+      "filled_rss_kib": "191804",
+      "post_free_rss_kib": "129480",
+      "rss_drop_kib": "62324",
+      "rss_read_errors": "0",
+      "last_rss_read_error": "\"\"",
+      "retained_checksum_verified": "true"
+    }
+  ],
+  "qualification": "Direct runtime task API on same host/namespace/cache prefix; no accepted CRI or Kubernetes Pod restore. RSS activity is not net physical savings."
+}
+Scope=direct runtime restore; source VMM terminated and VM directory removed; original memory token/counter, guest upper, workload and FUSE state; private open disk inodes and full upper reservation; log matching, Exec/State/Stats/Kill/Wait/Delete; target/actual balloon zero; post-restore release/data reuse. Step3 Kubernetes/CRI remains WIP.
+Limitations=same host/namespace and pmem cache prefix; no networked restore/cross-host or containerd sandbox ownership reconstruction acceptance; sparse workload copies retain thin provisioning; RSS is a mechanism observation.
+034b9357cc82536c50e75931d5155e638162b5568fadea1ea55d585b169bb751  firecracker-control/cmd/containerd/firecracker-containerd
+faa4467dba8a573f512184b1f58f0dcf7eb9be21a286e88702dcce287ab92c67  runtime/containerd-shim-aws-firecracker
+92eeebb550e0b91741e84ebf59c157c817fdbb46d7ebcb37af3fd2a27e0f5bcf  agent/agent
+ce15b3d35a4811fbf164371b72f57757cce5e846ad5959b547a471fd564a6e89  bin/firecracker
+f7c763775c948bd8b779e432e5f4d418463a96a3e222b959df2d648c5b798dac  default-vmlinux.bin
+4f3818bdacab80626dbf3f57a6b7d86c3a81d21089e0a379580206717128067a  tools/image-builder/rootfs.img
+a341ce971194ce07663e157c31c3a28946cc4962b547270fe6a9ba8db3f3e0f3  tools/image-builder/rootfs-dax.img
+3bf10cef305e511536463987f3d9b06fee827ce3fbda97bd9e0b0c2c4942c1b4  runtime/native_restore_integ_test.go
+f7c763775c948bd8b779e432e5f4d418463a96a3e222b959df2d648c5b798dac  bin/vmlinux-6.18.56-fcmod
+14d7f85447cf18090154b4d85f853e21ecb93f998621025697e6bcf0fdc94914  bin/vmlinux-6.18.56-fcmod.config
+712cea4e7d07e1dbae9c11cf405965aa5c7a7f169f0852d1162c9b812436f59f  /users/nehalem/fc-ctrd-mod/evidence/72f4fc9-native-build.log
+f5519a74847e8a1775873e542daaaf89449338ce132cb17d7fcccf5a5b03f306  /users/nehalem/fc-ctrd-mod/evidence/72f4fc9-native-install.log
+2100d7f9f2814d31e8a6a8f95798c785e7c797f354bb9d2df378aabab3dbfc9f  /users/nehalem/fc-ctrd-mod/evidence/72f4fc9-native-acceptance.log
+f33b6f730fdf8d9731a67272ef4b094a4a5505d3a4bbe161ddb4f8345b171499  /users/nehalem/fc-ctrd-mod/evidence/72f4fc9-native-verification.json
+sha256:0ed23833cf6043e6f2e0fa6ef3e590cfd9626c03e69d66303f9a693b079021b5

@@ -1,0 +1,5 @@
+branch=vhive-compatible
+expected=7c8d2ce1fd562323b447f08a64b0d0f5e557247c
+actual=7c8d2ce1fd562323b447f08a64b0d0f5e557247c
+status=clean
+go version go1.26.11 linux/amd64

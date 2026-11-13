@@ -1,0 +1,38 @@
+source_revision=72f4fc9173bef33cc1c981ad285758716f635e02
+source_status=clean
+go=go version go1.26.11 linux/amd64
+runc_submodule=c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e
+ARTIFACT agent/agent
+bytes=18682018 mode=755
+92eeebb550e0b91741e84ebf59c157c817fdbb46d7ebcb37af3fd2a27e0f5bcf  agent/agent
+agent/agent: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, Go BuildID=0pncepw98-W0dHSLFvVM/tNEXL07Z608O40VJhLWm/wLPfkMV7HfrSdrxqQf-A/C7VC0b3URTx_6_CaEQld, BuildID[sha1]=7e1a8ebb4c6c0bbae42d6e19bff17f3a3ebbb6d3, stripped
+ARTIFACT _submodules/runc/runc
+bytes=17001136 mode=755
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  _submodules/runc/runc
+_submodules/runc/runc: ELF 64-bit LSB pie executable, x86-64, version 1 (GNU/Linux), static-pie linked, BuildID[sha1]=883d5861b570e979fc7f48c7df5f895ba2320852, for GNU/Linux 3.2.0, with debug_info, not stripped
+ARTIFACT tools/image-builder/files_ephemeral/usr/local/bin/agent
+bytes=18682018 mode=755
+92eeebb550e0b91741e84ebf59c157c817fdbb46d7ebcb37af3fd2a27e0f5bcf  tools/image-builder/files_ephemeral/usr/local/bin/agent
+tools/image-builder/files_ephemeral/usr/local/bin/agent: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, Go BuildID=0pncepw98-W0dHSLFvVM/tNEXL07Z608O40VJhLWm/wLPfkMV7HfrSdrxqQf-A/C7VC0b3URTx_6_CaEQld, BuildID[sha1]=7e1a8ebb4c6c0bbae42d6e19bff17f3a3ebbb6d3, stripped
+ARTIFACT tools/image-builder/files_ephemeral/usr/local/bin/runc
+bytes=17001136 mode=755
+bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a  tools/image-builder/files_ephemeral/usr/local/bin/runc
+tools/image-builder/files_ephemeral/usr/local/bin/runc: ELF 64-bit LSB pie executable, x86-64, version 1 (GNU/Linux), static-pie linked, BuildID[sha1]=883d5861b570e979fc7f48c7df5f895ba2320852, for GNU/Linux 3.2.0, with debug_info, not stripped
+   text	   data	    bss	    dec	    hex	filename
+18099929	 570891	33862424	52533244	32197fc	agent/agent
+10938886	1415389	33811464	46165739	2c06eeb	_submodules/runc/runc
+runc_version=runc version 1.4.2
+test_image_id=sha256:0ed23833cf6043e6f2e0fa6ef3e590cfd9626c03e69d66303f9a693b079021b5 created=2026-11-11T11:04:23.484694211-07:00
+image=tools/image-builder/rootfs.img bytes=74063872 sha256=4f3818bdacab80626dbf3f57a6b7d86c3a81d21089e0a379580206717128067a
+image=tools/image-builder/rootfs-debug.img bytes=74063872 sha256=e606b772b39e1fe39089d62176e1e4f8804d396c6954cb11096b4a23d3f5d534
+image=tools/image-builder/rootfs-stargz.img bytes=106090496 sha256=983f72069340d199081872a9c2027a5c6f2026201918975131d28d1476404ada
+squashfs=tools/image-builder/rootfs.img
+usr/local/bin/agent bytes=18682018 sha256=92eeebb550e0b91741e84ebf59c157c817fdbb46d7ebcb37af3fd2a27e0f5bcf
+usr/local/bin/runc bytes=17001136 sha256=bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a
+squashfs=tools/image-builder/rootfs-debug.img
+usr/local/bin/agent bytes=488 sha256=ac48b2d38d0fb3a350a62abd9301baf7222146cb859bbdcab679a9af1854ce9a
+usr/local/bin/agent.real bytes=18682018 sha256=92eeebb550e0b91741e84ebf59c157c817fdbb46d7ebcb37af3fd2a27e0f5bcf
+usr/local/bin/runc bytes=17001136 sha256=bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a
+squashfs=tools/image-builder/rootfs-stargz.img
+usr/local/bin/agent bytes=18682018 sha256=92eeebb550e0b91741e84ebf59c157c817fdbb46d7ebcb37af3fd2a27e0f5bcf
+usr/local/bin/runc bytes=17001136 sha256=bc4911748310abf4f0892f704d9d4d11445ee21ee09b7257b10388b50f17de3a

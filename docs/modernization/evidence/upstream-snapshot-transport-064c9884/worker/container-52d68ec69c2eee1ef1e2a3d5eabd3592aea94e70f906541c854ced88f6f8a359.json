@@ -1,0 +1,245 @@
+[
+    {
+        "Id": "52d68ec69c2eee1ef1e2a3d5eabd3592aea94e70f906541c854ced88f6f8a359",
+        "Created": "2026-11-12T22:55:10.277379741Z",
+        "Path": "/entrypoint",
+        "Args": [
+            "go test -mod=readonly -v -count=1 -timeout=1200s -run \"^TestNativeBufferedStdinSnapshot_Isolated$\""
+        ],
+        "State": {
+            "Status": "exited",
+            "Running": false,
+            "Paused": false,
+            "Restarting": false,
+            "OOMKilled": false,
+            "Dead": false,
+            "Pid": 0,
+            "ExitCode": 0,
+            "Error": "",
+            "StartedAt": "2026-11-12T22:55:10.302667987Z",
+            "FinishedAt": "2026-11-12T22:55:41.125933477Z"
+        },
+        "Image": "sha256:17046a2aeb5c501161f0761094b96b3f5347602888759d56ac8cf9d6c40ab64d",
+        "ResolvConfPath": "/var/lib/docker/containers/52d68ec69c2eee1ef1e2a3d5eabd3592aea94e70f906541c854ced88f6f8a359/resolv.conf",
+        "HostnamePath": "/var/lib/docker/containers/52d68ec69c2eee1ef1e2a3d5eabd3592aea94e70f906541c854ced88f6f8a359/hostname",
+        "HostsPath": "/var/lib/docker/containers/52d68ec69c2eee1ef1e2a3d5eabd3592aea94e70f906541c854ced88f6f8a359/hosts",
+        "LogPath": "/var/lib/docker/containers/52d68ec69c2eee1ef1e2a3d5eabd3592aea94e70f906541c854ced88f6f8a359/52d68ec69c2eee1ef1e2a3d5eabd3592aea94e70f906541c854ced88f6f8a359-json.log",
+        "Name": "/fc-transport-supp-064c9884-f4adc03e949a",
+        "RestartCount": 0,
+        "Driver": "overlayfs",
+        "Platform": "linux",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "unconfined",
+        "ExecIDs": null,
+        "HostConfig": {
+            "Binds": [
+                "gocache:/go",
+                "/dev:/dev",
+                "/run/udev/control:/run/udev/control",
+                "/users/nehalem/fc-ctrd-mod/upstream-migration/evidence/native-buffered-stdin-064c9884/runtime-logs:/var/log/firecracker-containerd-test",
+                "/users/nehalem/fc-ctrd-mod/upstream-migration/stage3-transport-supplement:/src"
+            ],
+            "ContainerIDFile": "/users/nehalem/fc-ctrd-mod/upstream-migration/evidence/native-buffered-stdin-064c9884/test-container-id",
+            "LogConfig": {
+                "Type": "json-file",
+                "Config": {}
+            },
+            "NetworkMode": "none",
+            "PortBindings": {},
+            "RestartPolicy": {
+                "Name": "no",
+                "MaximumRetryCount": 0
+            },
+            "AutoRemove": false,
+            "VolumeDriver": "",
+            "VolumesFrom": null,
+            "ConsoleSize": [
+                0,
+                0
+            ],
+            "CapAdd": null,
+            "CapDrop": null,
+            "CgroupnsMode": "private",
+            "Dns": null,
+            "DnsOptions": [],
+            "DnsSearch": [],
+            "ExtraHosts": null,
+            "GroupAdd": null,
+            "IpcMode": "host",
+            "Cgroup": "",
+            "Links": null,
+            "OomScoreAdj": 0,
+            "PidMode": "",
+            "Privileged": true,
+            "PublishAllPorts": false,
+            "ReadonlyRootfs": false,
+            "SecurityOpt": [
+                "label=disable"
+            ],
+            "UTSMode": "",
+            "UsernsMode": "",
+            "ShmSize": 67108864,
+            "Runtime": "runc",
+            "Isolation": "",
+            "CpuShares": 0,
+            "Memory": 0,
+            "NanoCpus": 0,
+            "CgroupParent": "",
+            "BlkioWeight": 0,
+            "BlkioWeightDevice": [],
+            "BlkioDeviceReadBps": [],
+            "BlkioDeviceWriteBps": [],
+            "BlkioDeviceReadIOps": [],
+            "BlkioDeviceWriteIOps": [],
+            "CpuPeriod": 0,
+            "CpuQuota": 0,
+            "CpuRealtimePeriod": 0,
+            "CpuRealtimeRuntime": 0,
+            "CpusetCpus": "",
+            "CpusetMems": "",
+            "Devices": [],
+            "DeviceCgroupRules": null,
+            "DeviceRequests": null,
+            "MemoryReservation": 0,
+            "MemorySwap": 0,
+            "MemorySwappiness": null,
+            "OomKillDisable": null,
+            "PidsLimit": null,
+            "Ulimits": [],
+            "CpuCount": 0,
+            "CpuPercent": 0,
+            "IOMaximumIOps": 0,
+            "IOMaximumBandwidth": 0,
+            "MaskedPaths": null,
+            "ReadonlyPaths": null,
+            "Init": true
+        },
+        "Storage": {
+            "RootFS": {
+                "Snapshot": {
+                    "Name": "overlayfs"
+                }
+            }
+        },
+        "Mounts": [
+            {
+                "Type": "volume",
+                "Name": "gocache",
+                "Source": "/var/lib/docker/volumes/gocache/_data",
+                "Destination": "/go",
+                "Driver": "local",
+                "Mode": "z",
+                "RW": true,
+                "Propagation": ""
+            },
+            {
+                "Type": "bind",
+                "Source": "/dev",
+                "Destination": "/dev",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/run/udev/control",
+                "Destination": "/run/udev/control",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/users/nehalem/fc-ctrd-mod/upstream-migration/evidence/native-buffered-stdin-064c9884/runtime-logs",
+                "Destination": "/var/log/firecracker-containerd-test",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/users/nehalem/fc-ctrd-mod/upstream-migration/stage3-transport-supplement",
+                "Destination": "/src",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            }
+        ],
+        "Config": {
+            "Hostname": "52d68ec69c2e",
+            "Domainname": "",
+            "User": "",
+            "AttachStdin": false,
+            "AttachStdout": true,
+            "AttachStderr": true,
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": [
+                "FICD_DM_POOL=fc-supp-064c9884-f4adc03e949a",
+                "GOPROXY=direct",
+                "GOSUMDB=off",
+                "GOWORK=off",
+                "ENABLE_ISOLATED_TESTS=1",
+                "FICD_DM_VOLUME_GROUP=",
+                "PATH=/bin:/usr/bin:/usr/local/bin:/sbin:/usr/sbin:/usr/local/sbin:/usr/local/go/bin",
+                "GOLANG_VERSION=1.26.11",
+                "GOTOOLCHAIN=local",
+                "GOPATH=/go",
+                "INSTALLROOT=/usr/local",
+                "DEBIAN_FRONTEND=noninteractive",
+                "GOCACHE=/go/build-cache",
+                "FICD_LOG_DIR=/var/log/firecracker-containerd-test",
+                "FICD_CONTAINERD_OUTFILE=/var/log/firecracker-containerd-test/containerd.out",
+                "CTRD_VERSION=2.3.7",
+                "CRITEST_VERSION=1.37.0"
+            ],
+            "Cmd": [
+                "go test -mod=readonly -v -count=1 -timeout=1200s -run \"^TestNativeBufferedStdinSnapshot_Isolated$\""
+            ],
+            "Image": "localhost/firecracker-containerd-test:332da2a7065b",
+            "Volumes": null,
+            "WorkingDir": "/src/runtime",
+            "Entrypoint": [
+                "/entrypoint"
+            ],
+            "Labels": {
+                "org.firecracker.transport-supplement": "064c9884-f4adc03e949a"
+            }
+        },
+        "NetworkSettings": {
+            "SandboxID": "",
+            "SandboxKey": "",
+            "Ports": {},
+            "Networks": {
+                "none": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": null,
+                    "DriverOpts": null,
+                    "GwPriority": 0,
+                    "NetworkID": "7390e062706e747b1c219e47ba028dc41af3121601ea514d336bb7a52c75ee66",
+                    "EndpointID": "",
+                    "Gateway": "",
+                    "IPAddress": "",
+                    "MacAddress": "",
+                    "IPPrefixLen": 0,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": null
+                }
+            }
+        },
+        "ImageManifestDescriptor": {
+            "mediaType": "application/vnd.oci.image.manifest.v1+json",
+            "digest": "sha256:fc98c5a21569a86c02207186df3290a13a71d4cc37277256560c0c20d6e979ec",
+            "size": 4115,
+            "platform": {
+                "architecture": "amd64",
+                "os": "linux"
+            }
+        }
+    }
+]

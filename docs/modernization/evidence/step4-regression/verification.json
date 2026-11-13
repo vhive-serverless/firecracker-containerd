@@ -1,0 +1,140 @@
+{
+  "evidence_scope": "Completed Step 4 worker regressions only; no full acceptance or CRI compliance claim.",
+  "worker": {
+    "host": "amd218.utah.cloudlab.us",
+    "checkout": "/users/nehalem/fc-ctrd-mod"
+  },
+  "source_runtime_split": {
+    "source_revisions": [
+      {
+        "revision": "72f4fc9173bef33cc1c981ad285758716f635e02",
+        "role": "35-case baseline harness/source"
+      },
+      {
+        "revision": "5fb79f124f1d00867aec673618d387b006be86de",
+        "role": "jailer cache regression fix"
+      },
+      {
+        "revision": "f5b3ba6b84553b4bbcec9d08f5ed79aabf3bc217",
+        "role": "snapshotter regression run"
+      },
+      {
+        "revision": "d5739e5d8cbb0be38c97b64260fc044e4dcddc6c",
+        "role": "per-invocation fixture isolation"
+      },
+      {
+        "revision": "7c69cccae0a1f2d0f25d1a0a0ff649307834a73a",
+        "role": "final regression and lint"
+      }
+    ],
+    "runtime_image": {
+      "tag": "72f4fc9173be",
+      "image_id": "sha256:0ed23833cf6043e6f2e0fa6ef3e590cfd9626c03e69d66303f9a693b079021b5"
+    },
+    "production_source_diff_check": "Final driver ran git diff --exit-code from runtime commit 72f4fc9173bef33cc1c981ad285758716f635e02 to 7c69cccae0a1f2d0f25d1a0a0ff649307834a73a for non-test *.go, go.mod, go.sum, and _submodules; it passed. Source changes in this sequence were harness/tests/docs, not production Go."
+  },
+  "results": [
+    {
+      "run": "72f4fc9 baseline",
+      "top_level_pass": 30,
+      "top_level_fail": 5,
+      "exit_marker": "BASE_RUNTIME_EXIT=2",
+      "failed": [
+        "TestAttachBlockDevice_Isolated",
+        "TestJailerCPUSet_Isolated",
+        "TestJailer_Isolated",
+        "TestShimExitsUponContainerDelete_Isolated",
+        "TestStubBlockDevices_Isolated"
+      ],
+      "failure_summary": "Four failures observed leftover fixture/cache entries; StubBlockDevices expected device output omitted a newly added 512 MiB disk. Preserve these failures as baseline evidence."
+    },
+    {
+      "run": "5fb79f1 jailer regression",
+      "top_level_pass": 2,
+      "top_level_fail": 0,
+      "passed": [
+        "TestAttachBlockDevice_Isolated",
+        "TestJailer_Isolated"
+      ],
+      "details": "All six subcases passed while deliberately retaining the verified real pmem image cache."
+    },
+    {
+      "run": "f5b3ba6 snapshotter regression",
+      "top_level_pass": 5,
+      "top_level_fail": 0,
+      "passed": [
+        "TestSnapshotterMetrics_Isolated",
+        "TestSnapshotterMetricsMultipleVMs_Isolated",
+        "TestLaunchContainerWithRemoteSnapshotter_Isolated",
+        "TestLaunchMultipleContainersWithRemoteSnapshotter_Isolated",
+        "TestGuestVolumeFrom_Isolated"
+      ]
+    },
+    {
+      "run": "d5739e5 fixture regression",
+      "top_level_pass": 7,
+      "top_level_fail": 0,
+      "passed": [
+        "TestDriveMount_Isolated",
+        "TestJailerCPUSet_Isolated",
+        "TestJailer_Isolated",
+        "TestAttachBlockDevice_Isolated",
+        "TestPmemRoot_Isolated",
+        "TestNativeRestore_Isolated",
+        "TestGuestVolumeFrom_Isolated"
+      ],
+      "expected_failure_probe": "exit 37 propagated and storage cleanup marker passed",
+      "interruption_probe": "timeout exit 124 and storage-cleanup marker passed; this earlier probe took about 60 seconds because the script waited on a foreground process."
+    },
+    {
+      "run": "7c69ccc final regression",
+      "top_level_pass": 2,
+      "top_level_fail": 0,
+      "passed": [
+        "TestShimExitsUponContainerDelete_Isolated",
+        "TestStubBlockDevices_Isolated"
+      ],
+      "lint": "make lint completed; golangci-lint reported 0 issues for root and cri",
+      "expected_failure_probe": "exit 37 propagated and storage cleanup marker passed",
+      "interruption_probe": "timeout exit 124 in 5 seconds (<15 second guard); named Docker container and storage directory absent; marker recorded seconds=5"
+    }
+  ],
+  "cleanup_read_only_verification": {
+    "pools_absent": [
+      "fc-step4-base-72f4fc9",
+      "fc-step4-jailer-5fb79f1",
+      "fc-step4-snapshotter-f5b3ba6",
+      "fc-step4-fixtures-d5739e5",
+      "fc-step4-final-7c69ccc"
+    ],
+    "per_run_storage_absent": [
+      "step4-jailer-5fb79f1",
+      "step4-snapshotter-f5b3ba6",
+      "step4-fixtures-d5739e5",
+      "step4-final-7c69ccc"
+    ],
+    "baseline_storage": "step4-native-final exists with only .pmem-images directory and its original image; image hash a341ce971194ce07663e157c31c3a28946cc4962b547270fe6a9ba8db3f3e0f3",
+    "active_containers": "No active container used the named regression storage; unrelated fcmod-upstream-137-control-plane remained active.",
+    "final_interruption_container_absent": true
+  },
+  "raw_sha256": {
+    "72f4fc9-base-regression.log": "92cf2bbd3ea916593e1f2c00b834a2c23dfa2771c587e3b89e1ebf7949d58423",
+    "72f4fc9-base-leftover-fixtures.log": "061d8fcdc57262132a326bc89c0aa84bb8c250801c9769dfd7f79ef1d5224cfb",
+    "step4-base-regression.sh": "ad917a42d9f89315708cd28db81a457d62cc55c7c4b441a11e11b92832211938",
+    "step4-baseline-tests.txt": "5a7db29e56f3a13363842dbc0ce94f0c5cd238241ec7bbd108ef4cd166ac0e45",
+    "5fb79f1-jailer-regression.log": "2689af8ce8c6656d295db9d4aed9c9e17062c62d2ff255bb2dce804bec8f986c",
+    "5fb79f1-lint.log": "0ce020af363a4b754141fa845da51e3e3f2ea17a36dffb0596836ce323ce3313",
+    "step4-jailer-regression.sh": "eb0e6f47fb28742ba27ca86fdcba922e68fcb2f0a81c226563a283647b313b25",
+    "f5b3ba6-snapshotter-regression.log": "ff09050e6b0ff098fd13945f69a8ac0708dbe259d764322299a09d42850f2f5a",
+    "step4-snapshotter-regression.sh": "b43719ee8789f9bb7b279c72310dc764b6332a467a8ee0d1ec56c3df252eb1dc",
+    "d5739e5-fixture-regression.log": "c1db99be4e85dfee07f26aa3756722b41177dab986dcb3f305fe9dbd6ed2cd9e",
+    "step4-fixture-regression.sh": "52b71b9cd6c96ae675b79c26413a4d8aa2702728a101d67cf452a89b6bff39aa",
+    "7c69ccc-final-regression.log": "18d3800e26db6a72f56d48745ef18cd934ac9387a49d5b4e6a3536a529038fd7",
+    "step4-final-regression.sh": "e0092faa5344264e3a0bb2a85cca3075269d80a11cdf61a33fd6add0e166ca19"
+  },
+  "limitations": [
+    "The initial 35-test baseline was not green; its five failures are reported, not erased. Later targeted runs passed these five previously failing top-level tests across the subsequent source revisions.",
+    "This evidence does not establish uninterrupted full-suite acceptance or CRI compliance.",
+    "d5739e5 interruption cleanup passed but its foreground wait lasted about 60 seconds; the final 7c69ccc interruption probe verified return within five seconds."
+  ]
+}

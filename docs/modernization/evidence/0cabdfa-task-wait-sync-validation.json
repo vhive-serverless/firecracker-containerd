@@ -1,0 +1,142 @@
+{
+  "source_revision": "426c7f5340e4f14b5abcce78be6fa7edede0c0c2",
+  "source_clean": true,
+  "source_file_sha256": "813ad0522a259923b32037dd6c3a1d8e7c7db420ef04997002e9c54d6e2f40b2",
+  "main_source_test_file_only": true,
+  "baseline_local_reproduced": false,
+  "baseline_valid_repeats": 300,
+  "baseline_harness_errors": "two initial default-env invocations used env options after assignment, exit127; corrected default runs passed100 each; original error logs retained",
+  "working_patch_checks": [
+    {
+      "privilege": "user",
+      "scheduler": "one",
+      "mode": "plain",
+      "count": 100,
+      "log": "after-user-one-plain.log"
+    },
+    {
+      "privilege": "user",
+      "scheduler": "one",
+      "mode": "race",
+      "count": 100,
+      "log": "after-user-one-race.log"
+    },
+    {
+      "privilege": "user",
+      "scheduler": "normal",
+      "mode": "plain",
+      "count": 100,
+      "log": "after-user-normal-plain.log"
+    },
+    {
+      "privilege": "user",
+      "scheduler": "normal",
+      "mode": "race",
+      "count": 100,
+      "log": "after-user-normal-race.log"
+    },
+    {
+      "privilege": "root",
+      "scheduler": "one",
+      "mode": "plain",
+      "count": 100,
+      "log": "after-root-one-plain.log"
+    },
+    {
+      "privilege": "root",
+      "scheduler": "one",
+      "mode": "race",
+      "count": 100,
+      "log": "after-root-one-race.log"
+    },
+    {
+      "privilege": "root",
+      "scheduler": "normal",
+      "mode": "plain",
+      "count": 100,
+      "log": "after-root-normal-plain.log"
+    },
+    {
+      "privilege": "root",
+      "scheduler": "normal",
+      "mode": "race",
+      "count": 100,
+      "log": "after-root-normal-race.log"
+    }
+  ],
+  "package_race": {
+    "user": {
+      "top_level_passes": 22,
+      "skips": 0
+    },
+    "root": {
+      "top_level_passes": 22,
+      "skips": 0
+    }
+  },
+  "committed_spot_checks": [
+    {
+      "privilege": "user",
+      "scheduler": "one",
+      "mode": "race",
+      "count": 10,
+      "log": "committed-user-one-race.log"
+    },
+    {
+      "privilege": "user",
+      "scheduler": "normal",
+      "mode": "race",
+      "count": 10,
+      "log": "committed-user-normal-race.log"
+    },
+    {
+      "privilege": "root",
+      "scheduler": "one",
+      "mode": "race",
+      "count": 10,
+      "log": "committed-root-one-race.log"
+    },
+    {
+      "privilege": "root",
+      "scheduler": "normal",
+      "mode": "race",
+      "count": 10,
+      "log": "committed-root-normal-race.log"
+    }
+  ],
+  "log_sha256": {
+    "after-root-normal-plain.log": "c239c6087c18a9572b6643dcdf770b2cb9d2fb9a06f78292869840527e2058ca",
+    "after-root-normal-race.log": "a3ac55b8e54e6113f69c1c263a391f1af4761e82b52b3a44421ad903e16cae28",
+    "after-root-one-plain.log": "0a33b98404da31379025f32abaa85ca9279158df8698cd2140f7dd5265791e33",
+    "after-root-one-race.log": "518e5e8659a0627ec1f34b41f8f229303c75fd405e8791ca31ffe3ebbadd63f0",
+    "after-root-package-race.log": "44fa3f82f875ac8daf02aeb965d1e97126f29ddbd7d440f0eacc12c0446da736",
+    "after-status.log": "41858d9377025adcf5048c4de08a7161df137eca69635940f7ce9eb6f12935e1",
+    "after-user-normal-plain.log": "818e83b8621ac7764455cb2ecb4499b9db022733e9f7a193b4d40ae7da7b4771",
+    "after-user-normal-race.log": "0df72607839311d259f62f7c97bebc17188685d1cac833f8c917d8a216bbbdfb",
+    "after-user-one-plain.log": "1fba227e5345598fae089c8a404dddae41b63f29ff460b88b82e07d122b652d9",
+    "after-user-one-race.log": "a209e4d3d37884770d37043a20a96781ade83428507b23687d42a11b22d6196c",
+    "after-user-package-race.log": "cf8bdef74ce07773f3894fef2acc7bae40b1e86086c98368826bd8d914b2bec9",
+    "baseline-build.log": "3bd71b6513349929532f628e53b9daece8fe61e55c908be78df18a15308e1508",
+    "before-corrected-status.log": "7438cfb90112d15eb36b3942b115f6865e62806fb46c3aa1327eb4061a9e18eb",
+    "before-root-normal-correct-env.log": "34faee8ee171cd3339c6718e0651370e5f8145b9956096f1cdb51d1b8e53adcf",
+    "before-root-normal.log": "73cf56472d9d199f10bd9d86b2657bfdcfbf24baed358f829cabade03325cc11",
+    "before-root-one.log": "4d124d37cae16b1b42eef1b6b9c95933d2be7cdabcad6f9640a1f6bc784ba2bf",
+    "before-status.log": "95c9dc3a62aa4971cc044a191e488474ecb727603c95d71fe58c3eedb76fa764",
+    "before-user-normal-race-correct-env.log": "62cf44e4d9dacf80cdfafce9b10ce8816bf52a6b9359ac71452a6b6d8fe69a77",
+    "before-user-normal-race.log": "73cf56472d9d199f10bd9d86b2657bfdcfbf24baed358f829cabade03325cc11",
+    "before-user-one-race.log": "59b23d90951fb1c0a66e2cb64580e4c087229a1ca26d8879e0cfdd107b6e5c75",
+    "committed-build.log": "403483bb800e546d779aa43f1d821194bb4184cdf4f3e5339d28f248aef1f204",
+    "committed-root-normal-race.log": "0b306843b08891ebd36e8ef74ab10c51a3f13ca4b7e1d232cc76a3cfd896ed1c",
+    "committed-root-one-race.log": "647b3a1bb0f2b2856c4050300cc571c4531c1b5b7497b2b1625e57634d3ffc59",
+    "committed-user-normal-race.log": "a5c98881f3044322e87e8adef208867a341a87215610a37ccf2119e567f90cda",
+    "committed-user-one-race.log": "3efaa43b6ec6e8602c186f290fbb9f621b9c5e3e3a85ad55f8b1239c66cb4129",
+    "patch-build-checks.log": "4e8e96672701f6b0c24af30f5057f9ab7d512068090200f16f570a6dbef6705d"
+  },
+  "binary_sha256": {
+    "vm-after-race.test": "7a7bf115bb54bda66a6807c9b4fdaf27d9cfc202327a75e181d175ecd5b37be0",
+    "vm-after.test": "bca6cc6d897f7bb91c5b22130fae43128b4e1401b51c7f616e802705ae5551b1",
+    "vm-before-race.test": "4572fb799cb8f5ddddeb26b05677fcaa6fd847a269609d8f844f91f8b66f44a7",
+    "vm-before.test": "527609f39fe2a6d57479474fb18b2c1ba89d36612c2da0ce82e7db2e5ad78c2e",
+    "vm-committed-race.test": "7a7bf115bb54bda66a6807c9b4fdaf27d9cfc202327a75e181d175ecd5b37be0"
+  }
+}

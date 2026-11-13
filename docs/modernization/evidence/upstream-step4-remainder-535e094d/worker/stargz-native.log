@@ -1,0 +1,318 @@
+=== RUN   TestStargzNativeRestore_Isolated
+    stargz_restore_integ_test.go:112: isolated stargz network bridge=fc-sgz0 subnet=198.18.42.0/24 uplink=eth0 nameservers=[128.110.156.4]
+=== RUN   TestStargzNativeRestore_Isolated/disk
+=== RUN   TestStargzNativeRestore_Isolated/disk/jailed=false
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC before checkpoint: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: guest routing and DNS configuration:
+        guest route:
+        Iface	Destination	Gateway 	Flags	RefCnt	Use	Metric	Mask		MTU	Window	IRTT                                                       
+        eth0	00000000	012A12C6	0003	0	0	0	00000000	0	0	0                                                                               
+        eth0	002A12C6	00000000	0001	0	0	0	00FFFFFF	0	0	0                                                                               
+        guest resolv.conf:
+        #MANUAL
+        nameserver 128.110.156.4
+        guest ARP cache:
+        IP address       HW type     Flags       HW address            Mask     Device
+        198.18.42.1      0x1         0x2         02:fc:42:ff:ff:01     *        eth0
+        guest ghcr.io DNS:
+        140.82.114.33   STREAM ghcr.io
+    stargz_restore_integ_test.go:125: stargz_native_transport manifest_version=2 cut_version=1 task=sgzR-0-0-task pid=1074 event_cursor=12 outputs_open=true
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC after source TAP removal: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC after restored TAP creation: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: 
+        	Error Trace:	/src/snapshotter/stargz_restore_integ_test.go:402
+        	            				/src/snapshotter/stargz_restore_integ_test.go:125
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Unknown desc = failed to create VM: prepare private restore disk mappings: restore device target overlaps another mount or live shim files: /srv/firecracker_containerd_tests/sgzR-0-0#sgzR-0-0/ctrstub0
+        	Test:       	TestStargzNativeRestore_Isolated/disk/jailed=false
+=== RUN   TestStargzNativeRestore_Isolated/disk/jailed=true
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC before checkpoint: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: guest routing and DNS configuration:
+        guest route:
+        Iface	Destination	Gateway 	Flags	RefCnt	Use	Metric	Mask		MTU	Window	IRTT                                                       
+        eth0	00000000	012A12C6	0003	0	0	0	00000000	0	0	0                                                                               
+        eth0	002A12C6	00000000	0001	0	0	0	00FFFFFF	0	0	0                                                                               
+        guest resolv.conf:
+        #MANUAL
+        nameserver 128.110.156.4
+        guest ARP cache:
+        IP address       HW type     Flags       HW address            Mask     Device
+        198.18.42.1      0x1         0x2         02:fc:42:ff:ff:01     *        eth0
+        guest ghcr.io DNS:
+        140.82.114.33   STREAM ghcr.io
+    stargz_restore_integ_test.go:125: stargz_native_transport manifest_version=2 cut_version=1 task=sgzR-0-1-task pid=1076 event_cursor=12 outputs_open=true
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC after source TAP removal: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC after restored TAP creation: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: 
+        	Error Trace:	/src/snapshotter/stargz_restore_integ_test.go:402
+        	            				/src/snapshotter/stargz_restore_integ_test.go:125
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Unknown desc = failed to create VM: failed to start the VM: openat ctrstub0: file exists
+        	Test:       	TestStargzNativeRestore_Isolated/disk/jailed=true
+=== RUN   TestStargzNativeRestore_Isolated/ext4-block
+=== RUN   TestStargzNativeRestore_Isolated/ext4-block/jailed=false
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC before checkpoint: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: guest routing and DNS configuration:
+        guest route:
+        Iface	Destination	Gateway 	Flags	RefCnt	Use	Metric	Mask		MTU	Window	IRTT                                                       
+        eth0	00000000	012A12C6	0003	0	0	0	00000000	0	0	0                                                                               
+        eth0	002A12C6	00000000	0001	0	0	0	00FFFFFF	0	0	0                                                                               
+        guest resolv.conf:
+        #MANUAL
+        nameserver 128.110.156.4
+        guest ARP cache:
+        IP address       HW type     Flags       HW address            Mask     Device
+        198.18.42.1      0x1         0x2         02:fc:42:ff:ff:01     *        eth0
+        guest ghcr.io DNS:
+        140.82.114.33   STREAM ghcr.io
+    stargz_restore_integ_test.go:125: stargz_native_transport manifest_version=2 cut_version=1 task=sgzR-1-0-task pid=1074 event_cursor=12 outputs_open=true
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC after source TAP removal: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC after restored TAP creation: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: 
+        	Error Trace:	/src/snapshotter/stargz_restore_integ_test.go:402
+        	            				/src/snapshotter/stargz_restore_integ_test.go:125
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Unknown desc = failed to create VM: prepare private restore disk mappings: restore device target overlaps another mount or live shim files: /srv/firecracker_containerd_tests/sgzR-1-0#sgzR-1-0/ctrstub0
+        	Test:       	TestStargzNativeRestore_Isolated/ext4-block/jailed=false
+=== RUN   TestStargzNativeRestore_Isolated/ext4-block/jailed=true
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC before checkpoint: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: guest routing and DNS configuration:
+        guest route:
+        Iface	Destination	Gateway 	Flags	RefCnt	Use	Metric	Mask		MTU	Window	IRTT                                                       
+        eth0	00000000	012A12C6	0003	0	0	0	00000000	0	0	0                                                                               
+        eth0	002A12C6	00000000	0001	0	0	0	00FFFFFF	0	0	0                                                                               
+        guest resolv.conf:
+        #MANUAL
+        nameserver 128.110.156.4
+        guest ARP cache:
+        IP address       HW type     Flags       HW address            Mask     Device
+        198.18.42.1      0x1         0x2         02:fc:42:ff:ff:01     *        eth0
+        guest ghcr.io DNS:
+        140.82.114.33   STREAM ghcr.io
+    stargz_restore_integ_test.go:125: stargz_native_transport manifest_version=2 cut_version=1 task=sgzR-1-1-task pid=1072 event_cursor=12 outputs_open=true
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC after source TAP removal: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC after restored TAP creation: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: 
+        	Error Trace:	/src/snapshotter/stargz_restore_integ_test.go:402
+        	            				/src/snapshotter/stargz_restore_integ_test.go:125
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Unknown desc = failed to create VM: failed to start the VM: openat ctrstub0: file exists
+        	Test:       	TestStargzNativeRestore_Isolated/ext4-block/jailed=true
+=== RUN   TestStargzNativeRestore_Isolated/pmem
+=== RUN   TestStargzNativeRestore_Isolated/pmem/jailed=false
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC before checkpoint: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: guest routing and DNS configuration:
+        guest route:
+        Iface	Destination	Gateway 	Flags	RefCnt	Use	Metric	Mask		MTU	Window	IRTT                                                       
+        eth0	00000000	012A12C6	0003	0	0	0	00000000	0	0	0                                                                               
+        eth0	002A12C6	00000000	0001	0	0	0	00FFFFFF	0	0	0                                                                               
+        guest resolv.conf:
+        #MANUAL
+        nameserver 128.110.156.4
+        guest ARP cache:
+        IP address       HW type     Flags       HW address            Mask     Device
+        198.18.42.1      0x1         0x2         02:fc:42:ff:ff:01     *        eth0
+        guest ghcr.io DNS:
+        140.82.114.33   STREAM ghcr.io
+    stargz_restore_integ_test.go:125: stargz_native_transport manifest_version=2 cut_version=1 task=sgzR-2-0-task pid=1093 event_cursor=12 outputs_open=true
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC after source TAP removal: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC after restored TAP creation: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: 
+        	Error Trace:	/src/snapshotter/stargz_restore_integ_test.go:402
+        	            				/src/snapshotter/stargz_restore_integ_test.go:125
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Unknown desc = failed to create VM: prepare private restore disk mappings: restore device target overlaps another mount or live shim files: /srv/firecracker_containerd_tests/sgzR-2-0#sgzR-2-0/ctrstub0
+        	Test:       	TestStargzNativeRestore_Isolated/pmem/jailed=false
+=== RUN   TestStargzNativeRestore_Isolated/pmem/jailed=true
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC before checkpoint: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: guest routing and DNS configuration:
+        guest route:
+        Iface	Destination	Gateway 	Flags	RefCnt	Use	Metric	Mask		MTU	Window	IRTT                                                       
+        eth0	00000000	012A12C6	0003	0	0	0	00000000	0	0	0                                                                               
+        eth0	002A12C6	00000000	0001	0	0	0	00FFFFFF	0	0	0                                                                               
+        guest resolv.conf:
+        #MANUAL
+        nameserver 128.110.156.4
+        guest ARP cache:
+        IP address       HW type     Flags       HW address            Mask     Device
+        198.18.42.1      0x1         0x2         02:fc:42:ff:ff:01     *        eth0
+        guest ghcr.io DNS:
+        140.82.114.33   STREAM ghcr.io
+    stargz_restore_integ_test.go:125: stargz_native_transport manifest_version=2 cut_version=1 task=sgzR-2-1-task pid=1091 event_cursor=12 outputs_open=true
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC after source TAP removal: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC after restored TAP creation: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: 
+        	Error Trace:	/src/snapshotter/stargz_restore_integ_test.go:402
+        	            				/src/snapshotter/stargz_restore_integ_test.go:125
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Unknown desc = failed to create VM: failed to start the VM: openat ctrstub0: file exists
+        	Test:       	TestStargzNativeRestore_Isolated/pmem/jailed=true
+=== RUN   TestStargzNativeRestore_Isolated/reclaim
+=== RUN   TestStargzNativeRestore_Isolated/reclaim/jailed=false
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC before checkpoint: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: guest routing and DNS configuration:
+        guest route:
+        Iface	Destination	Gateway 	Flags	RefCnt	Use	Metric	Mask		MTU	Window	IRTT                                                       
+        eth0	00000000	012A12C6	0003	0	0	0	00000000	0	0	0                                                                               
+        eth0	002A12C6	00000000	0001	0	0	0	00FFFFFF	0	0	0                                                                               
+        guest resolv.conf:
+        #MANUAL
+        nameserver 128.110.156.4
+        guest ARP cache:
+        IP address       HW type     Flags       HW address            Mask     Device
+        198.18.42.1      0x1         0x2         02:fc:42:ff:ff:01     *        eth0
+        guest ghcr.io DNS:
+        140.82.114.34   STREAM ghcr.io
+    stargz_restore_integ_test.go:125: stargz_native_transport manifest_version=2 cut_version=1 task=sgzR-3-0-task pid=1086 event_cursor=12 outputs_open=true
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC after source TAP removal: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC after restored TAP creation: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: 
+        	Error Trace:	/src/snapshotter/stargz_restore_integ_test.go:402
+        	            				/src/snapshotter/stargz_restore_integ_test.go:125
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Unknown desc = failed to create VM: prepare private restore disk mappings: restore device target overlaps another mount or live shim files: /srv/firecracker_containerd_tests/sgzR-3-0#sgzR-3-0/guest-overlay.ext4
+        	Test:       	TestStargzNativeRestore_Isolated/reclaim/jailed=false
+=== RUN   TestStargzNativeRestore_Isolated/reclaim/jailed=true
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC before checkpoint: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: guest routing and DNS configuration:
+        guest route:
+        Iface	Destination	Gateway 	Flags	RefCnt	Use	Metric	Mask		MTU	Window	IRTT                                                       
+        eth0	00000000	012A12C6	0003	0	0	0	00000000	0	0	0                                                                               
+        eth0	002A12C6	00000000	0001	0	0	0	00FFFFFF	0	0	0                                                                               
+        guest resolv.conf:
+        #MANUAL
+        nameserver 128.110.156.4
+        guest ARP cache:
+        IP address       HW type     Flags       HW address            Mask     Device
+        198.18.42.1      0x1         0x2         02:fc:42:ff:ff:01     *        eth0
+        guest ghcr.io DNS:
+        140.82.114.34   STREAM ghcr.io
+    stargz_restore_integ_test.go:125: stargz_native_transport manifest_version=2 cut_version=1 task=sgzR-3-1-task pid=1083 event_cursor=12 outputs_open=true
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC after source TAP removal: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC after restored TAP creation: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: 
+        	Error Trace:	/src/snapshotter/stargz_restore_integ_test.go:402
+        	            				/src/snapshotter/stargz_restore_integ_test.go:125
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Unknown desc = failed to create VM: failed to start the VM: openat ctrstub0: file exists
+        	Test:       	TestStargzNativeRestore_Isolated/reclaim/jailed=true
+=== RUN   TestStargzNativeRestore_Isolated/combined
+=== RUN   TestStargzNativeRestore_Isolated/combined/jailed=false
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC before checkpoint: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: guest routing and DNS configuration:
+        guest route:
+        Iface	Destination	Gateway 	Flags	RefCnt	Use	Metric	Mask		MTU	Window	IRTT                                                       
+        eth0	00000000	012A12C6	0003	0	0	0	00000000	0	0	0                                                                               
+        eth0	002A12C6	00000000	0001	0	0	0	00FFFFFF	0	0	0                                                                               
+        guest resolv.conf:
+        #MANUAL
+        nameserver 128.110.156.4
+        guest ARP cache:
+        IP address       HW type     Flags       HW address            Mask     Device
+        198.18.42.1      0x1         0x2         02:fc:42:ff:ff:01     *        eth0
+        guest ghcr.io DNS:
+        140.82.114.34   STREAM ghcr.io
+    stargz_restore_integ_test.go:125: stargz_native_transport manifest_version=2 cut_version=1 task=sgzR-4-0-task pid=1103 event_cursor=12 outputs_open=true
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC after source TAP removal: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC after restored TAP creation: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: 
+        	Error Trace:	/src/snapshotter/stargz_restore_integ_test.go:402
+        	            				/src/snapshotter/stargz_restore_integ_test.go:125
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Unknown desc = failed to create VM: prepare private restore disk mappings: restore device target overlaps another mount or live shim files: /srv/firecracker_containerd_tests/sgzR-4-0#sgzR-4-0/guest-overlay.ext4
+        	Test:       	TestStargzNativeRestore_Isolated/combined/jailed=false
+=== RUN   TestStargzNativeRestore_Isolated/combined/jailed=true
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC before checkpoint: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: guest routing and DNS configuration:
+        guest route:
+        Iface	Destination	Gateway 	Flags	RefCnt	Use	Metric	Mask		MTU	Window	IRTT                                                       
+        eth0	00000000	012A12C6	0003	0	0	0	00000000	0	0	0                                                                               
+        eth0	002A12C6	00000000	0001	0	0	0	00FFFFFF	0	0	0                                                                               
+        guest resolv.conf:
+        #MANUAL
+        nameserver 128.110.156.4
+        guest ARP cache:
+        IP address       HW type     Flags       HW address            Mask     Device
+        198.18.42.1      0x1         0x2         02:fc:42:ff:ff:01     *        eth0
+        guest ghcr.io DNS:
+        140.82.112.33   STREAM ghcr.io
+    stargz_restore_integ_test.go:125: stargz_native_transport manifest_version=2 cut_version=1 task=sgzR-4-1-task pid=1104 event_cursor=12 outputs_open=true
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC after source TAP removal: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC after restored TAP creation: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: 
+        	Error Trace:	/src/snapshotter/stargz_restore_integ_test.go:402
+        	            				/src/snapshotter/stargz_restore_integ_test.go:125
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Unknown desc = failed to create VM: failed to start the VM: openat ctrstub0: file exists
+        	Test:       	TestStargzNativeRestore_Isolated/combined/jailed=true
+=== RUN   TestStargzNativeRestore_Isolated/ext4-reclaim
+=== RUN   TestStargzNativeRestore_Isolated/ext4-reclaim/jailed=false
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC before checkpoint: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: guest routing and DNS configuration:
+        guest route:
+        Iface	Destination	Gateway 	Flags	RefCnt	Use	Metric	Mask		MTU	Window	IRTT                                                       
+        eth0	00000000	012A12C6	0003	0	0	0	00000000	0	0	0                                                                               
+        eth0	002A12C6	00000000	0001	0	0	0	00FFFFFF	0	0	0                                                                               
+        guest resolv.conf:
+        #MANUAL
+        nameserver 128.110.156.4
+        guest ARP cache:
+        IP address       HW type     Flags       HW address            Mask     Device
+        198.18.42.1      0x1         0x2         02:fc:42:ff:ff:01     *        eth0
+        guest ghcr.io DNS:
+        140.82.112.33   STREAM ghcr.io
+    stargz_restore_integ_test.go:125: stargz_native_transport manifest_version=2 cut_version=1 task=sgzR-5-0-task pid=1084 event_cursor=12 outputs_open=true
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC after source TAP removal: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC after restored TAP creation: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: 
+        	Error Trace:	/src/snapshotter/stargz_restore_integ_test.go:402
+        	            				/src/snapshotter/stargz_restore_integ_test.go:125
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Unknown desc = failed to create VM: prepare private restore disk mappings: restore device target overlaps another mount or live shim files: /srv/firecracker_containerd_tests/sgzR-5-0#sgzR-5-0/guest-overlay.ext4
+        	Test:       	TestStargzNativeRestore_Isolated/ext4-reclaim/jailed=false
+=== RUN   TestStargzNativeRestore_Isolated/ext4-reclaim/jailed=true
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC before checkpoint: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: guest routing and DNS configuration:
+        guest route:
+        Iface	Destination	Gateway 	Flags	RefCnt	Use	Metric	Mask		MTU	Window	IRTT                                                       
+        eth0	00000000	012A12C6	0003	0	0	0	00000000	0	0	0                                                                               
+        eth0	002A12C6	00000000	0001	0	0	0	00FFFFFF	0	0	0                                                                               
+        guest resolv.conf:
+        #MANUAL
+        nameserver 128.110.156.4
+        guest ARP cache:
+        IP address       HW type     Flags       HW address            Mask     Device
+        198.18.42.1      0x1         0x2         02:fc:42:ff:ff:01     *        eth0
+        guest ghcr.io DNS:
+        140.82.112.33   STREAM ghcr.io
+    stargz_restore_integ_test.go:125: stargz_native_transport manifest_version=2 cut_version=1 task=sgzR-5-1-task pid=1085 event_cursor=12 outputs_open=true
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC after source TAP removal: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: isolated guest gateway MAC after restored TAP creation: 02:fc:42:ff:ff:01
+    stargz_restore_integ_test.go:125: 
+        	Error Trace:	/src/snapshotter/stargz_restore_integ_test.go:402
+        	            				/src/snapshotter/stargz_restore_integ_test.go:125
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Unknown desc = failed to create VM: failed to start the VM: openat ctrstub0: file exists
+        	Test:       	TestStargzNativeRestore_Isolated/ext4-reclaim/jailed=true
+--- FAIL: TestStargzNativeRestore_Isolated (276.33s)
+    --- FAIL: TestStargzNativeRestore_Isolated/disk (42.80s)
+        --- FAIL: TestStargzNativeRestore_Isolated/disk/jailed=false (21.69s)
+        --- FAIL: TestStargzNativeRestore_Isolated/disk/jailed=true (21.11s)
+    --- FAIL: TestStargzNativeRestore_Isolated/ext4-block (49.46s)
+        --- FAIL: TestStargzNativeRestore_Isolated/ext4-block/jailed=false (25.69s)
+        --- FAIL: TestStargzNativeRestore_Isolated/ext4-block/jailed=true (23.78s)
+    --- FAIL: TestStargzNativeRestore_Isolated/pmem (46.36s)
+        --- FAIL: TestStargzNativeRestore_Isolated/pmem/jailed=false (23.37s)
+        --- FAIL: TestStargzNativeRestore_Isolated/pmem/jailed=true (22.99s)
+    --- FAIL: TestStargzNativeRestore_Isolated/reclaim (41.45s)
+        --- FAIL: TestStargzNativeRestore_Isolated/reclaim/jailed=false (20.42s)
+        --- FAIL: TestStargzNativeRestore_Isolated/reclaim/jailed=true (21.04s)
+    --- FAIL: TestStargzNativeRestore_Isolated/combined (48.77s)
+        --- FAIL: TestStargzNativeRestore_Isolated/combined/jailed=false (23.71s)
+        --- FAIL: TestStargzNativeRestore_Isolated/combined/jailed=true (25.05s)
+    --- FAIL: TestStargzNativeRestore_Isolated/ext4-reclaim (47.41s)
+        --- FAIL: TestStargzNativeRestore_Isolated/ext4-reclaim/jailed=false (23.79s)
+        --- FAIL: TestStargzNativeRestore_Isolated/ext4-reclaim/jailed=true (23.61s)
+FAIL
+exit status 1
+FAIL	github.com/firecracker-microvm/firecracker-containerd/snapshotter	276.350s

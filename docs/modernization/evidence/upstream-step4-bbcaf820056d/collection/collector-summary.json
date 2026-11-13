@@ -1,0 +1,468 @@
+{
+  "runtime_source": "bbcaf820056d78e33887059465504c6647f3d983",
+  "runtime_tree": "9dcfa565a91171b00af8bd5fb271dfc47fd4c388",
+  "authoritative_launcher_exit": 0,
+  "authoritative_stdout_marker": "STAGE4_STACK_AND_UNIQUE_COMPONENT_CHECKS_OK",
+  "marker_source": "Lead-owned exec54045 terminal result; not inferred from a live log",
+  "phases": {
+    "build": "0",
+    "install": "0",
+    "acceptance": "0",
+    "unit-race": "0",
+    "overlay-syntax": "0",
+    "stargz-syntax": "0",
+    "evaluation-unit": "0",
+    "runtime-probe-build": "0",
+    "volfs-probe-build": "0",
+    "namespace-api": "0",
+    "namespace-pass-guard": "0",
+    "host-enospc": "0",
+    "enospc-pass-guard": "0",
+    "host-fuse": "0",
+    "fuse-pass-guard": "0"
+  },
+  "raw_file_count": 41,
+  "top_level_pass_count": 142,
+  "top_level_passes": [
+    "TestCNISupport_Isolated (14.38s)",
+    "TestAutomaticCNISupport_Isolated (10.04s)",
+    "TestGuestReclamation_Isolated (30.05s)",
+    "TestGuestDiskStorage_Isolated (11.29s)",
+    "TestJailer_Isolated (23.64s)",
+    "TestAttachBlockDevice_Isolated (23.84s)",
+    "TestJailerCPUSet_Isolated (8.51s)",
+    "TestJailerTelemetryCrossFilesystem_Isolated (5.70s)",
+    "TestNewJailer_Isolated (0.00s)",
+    "TestDiskLimit_Isolated (11.50s)",
+    "TestFreePageReporting_Isolated (19.81s)",
+    "TestNativeCheckpoint_Isolated (83.90s)",
+    "TestPmemNativeCheckpoint_Isolated (114.61s)",
+    "TestPmemBlockNativeCheckpoint_Isolated (95.60s)",
+    "TestNativeCheckpointInterrupt_Isolated (50.85s)",
+    "TestNativeForkTransport_Isolated (74.33s)",
+    "TestNativeForkTransportStorage_Isolated (79.51s)",
+    "TestNativeRestore_Isolated (38.48s)",
+    "TestNativeRestoreStorage_Isolated (452.85s)",
+    "TestPmemRoot_Isolated (52.20s)",
+    "TestForceStopDefaultFirecracker_Isolated (4.70s)",
+    "TestCrashRecovery_Isolated (16.39s)",
+    "TestCNIGracefulCleanup_Isolated (23.76s)",
+    "TestResourceAccounting_Isolated (6.39s)",
+    "TestBinaryOutput_Isolated (5.76s)",
+    "TestShimExitsUponContainerDelete_Isolated (7.20s)",
+    "TestMultipleVMs_Isolated (20.67s)",
+    "TestLongUnixSocketPath_Isolated (10.72s)",
+    "TestStubBlockDevices_Isolated (7.21s)",
+    "TestCreateContainerWithSameName_Isolated (19.30s)",
+    "TestStubDriveReserveAndReleaseByContainers_Isolated (9.55s)",
+    "TestDriveMount_Isolated (7.82s)",
+    "TestDriveMountFails_Isolated (4.71s)",
+    "TestUpdateVMMetadata_Isolated (9.62s)",
+    "TestMemoryBalloon_Isolated (9.27s)",
+    "TestRandomness_Isolated (5.81s)",
+    "TestStopVM_Isolated (43.88s)",
+    "TestStopVMFailFast_Isolated (6.20s)",
+    "TestExec_Isolated (10.75s)",
+    "TestEvents_Isolated (7.99s)",
+    "TestOOM_Isolated (5.28s)",
+    "TestCreateVM_Isolated (133.75s)",
+    "TestPauseResume_Isolated (106.37s)",
+    "TestAttach_Isolated (10.72s)",
+    "TestBrokenPipe_Isolated (25.71s)",
+    "TestStorageBaseline_Isolated (7.52s)",
+    "TestFailedCreateReleasesDrive_Isolated (18.97s)",
+    "TestVolumes_Isolated (12.44s)",
+    "TestVolumeFrom_Isolated (20.10s)",
+    "TestSnapshotterMetrics_Isolated (8.65s)",
+    "TestSnapshotterMetricsMultipleVMs_Isolated (12.36s)",
+    "TestLaunchContainerWithRemoteSnapshotter_Isolated (9.73s)",
+    "TestLaunchMultipleContainersWithRemoteSnapshotter_Isolated (16.40s)",
+    "TestStargzNativeRestore_Isolated (315.75s)",
+    "TestStargzGuestDiskStorage_Isolated (91.74s)",
+    "TestGuestVolumeFrom_Isolated (20.86s)",
+    "TestNewBalloonDevice (0.00s)",
+    "TestUpdateAmountMiB (0.00s)",
+    "TestUpdateStatsPollingIntervals (0.00s)",
+    "TestNewUnixSocketTransport (0.00s)",
+    "TestVMCommandBuilder (0.00s)",
+    "TestDrivesBuilder (0.00s)",
+    "TestDrivesBuilderWithRootDrive (0.00s)",
+    "TestDrivesBuilderWithCacheType (0.00s)",
+    "TestDrivesBuilderAddDrive (0.00s)",
+    "TestDrivesBuilderWithIoEngine (0.00s)",
+    "TestClient (0.01s)",
+    "TestGetFirecrackerVersion (0.01s)",
+    "TestHandlerListAppend (0.00s)",
+    "TestHandlerListPrepend (0.00s)",
+    "TestHandlerListRemove (0.00s)",
+    "TestHandlerListClear (0.00s)",
+    "TestHandlerListRun (0.00s)",
+    "TestHandlerListHas (0.00s)",
+    "TestHandlerListSwappend (0.00s)",
+    "TestHandlerListReplace (0.00s)",
+    "TestHandlerListAppendAfter (0.00s)",
+    "TestHandlers (0.00s)",
+    "TestJailerBuilder (0.00s)",
+    "TestJail (0.00s)",
+    "TestKernelArgsSerder (0.00s)",
+    "TestNewMachine (0.00s)",
+    "TestJailerMicroVMExecution (0.21s)",
+    "TestMicroVMExecution (5.07s)",
+    "TestStartVMM (0.25s)",
+    "TestStartVMMOnce (0.27s)",
+    "TestStopVMMCleanup (0.12s)",
+    "TestWaitForSocket (0.70s)",
+    "TestMicroVMExecutionWithMmdsV2 (0.03s)",
+    "TestLogFiles (0.00s)",
+    "TestCaptureFifoToFile (0.00s)",
+    "TestCaptureFifoToFile_nonblock (0.25s)",
+    "TestSocketPathSet (0.00s)",
+    "TestConfigureBuilderAddsFlags (0.00s)",
+    "TestPID (0.20s)",
+    "TestCaptureFifoToFile_leak (0.00s)",
+    "TestWait (2.20s)",
+    "TestWaitWithInvalidBinary (0.00s)",
+    "TestWaitWithNoSocket (3.00s)",
+    "TestSignalForwarding (1.01s)",
+    "TestPauseResume (0.29s)",
+    "TestCreateSnapshot (1.26s)",
+    "TestLoadSnapshot (14.46s)",
+    "TestNetworkStaticValidation (0.00s)",
+    "TestNetworkStaticValidationFails_HostDevName (0.00s)",
+    "TestNetworkStaticValidationFails_TooManyNameservers (0.00s)",
+    "TestNetworkStaticValidationFails_IPConfiguration (0.00s)",
+    "TestNetworkCNIValidation (0.00s)",
+    "TestNetworkCNIValidationFails_NetworkName (0.00s)",
+    "TestNetworkInterfacesValidation_None (0.00s)",
+    "TestNetworkInterfacesValidation_Static (0.00s)",
+    "TestNetworkInterfacesValidation_CNI (0.00s)",
+    "TestNetworkInterfacesValidation_MultipleStatic (0.00s)",
+    "TestNetworkInterfacesValidationFails_MultipleCNI (0.00s)",
+    "TestNetworkInterfacesValidationFails_IPWithMultiple (0.00s)",
+    "TestNetworkInterfacesValidationFails_IPWithKernelArg (0.00s)",
+    "TestNetworkInterfacesValidationFails_CNIWithMultiple (0.00s)",
+    "TestNetworkInterfacesValidationFails_CNIWithKernelArg (0.00s)",
+    "TestNetworkInterfacesValidationFails_NeitherSpecified (0.00s)",
+    "TestNetworkInterfacesValidationFails_BothSpecified (0.00s)",
+    "TestNetworkMachineCNIWithConfFile (4.10s)",
+    "TestNetworkMachineCNIWithParsedConfig (4.26s)",
+    "TestReleaseAPI (0.01s)",
+    "TestSnapshotRestoreOverrides (0.00s)",
+    "TestSnapshotRestoreSkipsDeviceCreation (0.00s)",
+    "TestEnvValueOrDefaultInt (0.00s)",
+    "TestRateLimiter (0.00s)",
+    "TestRateLimiter_RefillTime (0.00s)",
+    "TestInterfaceIPs (0.00s)",
+    "TestFilterBySandbox (0.00s)",
+    "TestIfacesWithName (0.00s)",
+    "TestGetVMTapPair (0.00s)",
+    "TestMTUOf (0.00s)",
+    "TestIPBootParams (0.00s)",
+    "TestLoggingPanic (0.00s)",
+    "TestFindFirstVendorID (0.00s)",
+    "TestTemporaryNetErr (0.00s)",
+    "TestTryConnReadUntilPreservesFollowingBytes (0.00s)",
+    "TestDialContextPreservesFollowingBytes (0.01s)",
+    "TestTryConnReadUntilBoundsACK (0.00s)",
+    "TestTryConnReadUntilTimeoutClearsDeadline (0.02s)",
+    "TestTryConnReadUntilIncompleteACK (0.00s)"
+  ],
+  "failures": [],
+  "skips": [
+    "TestMemoryEvaluation_Isolated (0.00s)",
+    "TestStopVM_Isolated/SIGKILLFirecracker (0.00s)",
+    "TestStopVM_Isolated/SIGKILLFirecracker/Jailer (0.00s)",
+    "TestStopVM_Isolated/ErrorExit (0.00s)",
+    "TestStopVM_Isolated/ErrorExit/Jailer (0.00s)",
+    "TestStopVM_Isolated/PauseStop (0.00s)",
+    "TestStopVM_Isolated/PauseStop/Jailer (0.00s)",
+    "TestStopVM_Isolated/Suspend (0.00s)",
+    "TestStopVM_Isolated/Suspend/Jailer (0.00s)",
+    "TestLogAndMetrics (0.00s)"
+  ],
+  "top_level_skips": [
+    "TestMemoryEvaluation_Isolated (0.00s)",
+    "TestLogAndMetrics (0.00s)"
+  ],
+  "unique_checks": {
+    "namespace-api": {
+      "passes": [
+        "TestRestoreNamespaceIsolation (0.07s)",
+        "TestRestoreNamespaceReleaseAPI (0.02s)"
+      ],
+      "failures": [],
+      "python_count": []
+    },
+    "host-enospc": {
+      "passes": [
+        "TestGuestOverlayHostENOSPC (0.01s)"
+      ],
+      "failures": [],
+      "python_count": []
+    },
+    "host-fuse": {
+      "passes": [
+        "TestGuestFilesystemLifecycleAndHostCoherence (0.06s)",
+        "TestGuestFilesystemDirectoryCookiesAndReconnect (0.21s)",
+        "TestGuestSingleFileAndReadOnlyMount (0.02s)",
+        "TestGuestMountCloseDetachesBorrowedFile (0.29s)",
+        "TestGuestKernelPermissionsAndOwnership (0.02s)"
+      ],
+      "failures": [],
+      "python_count": []
+    },
+    "evaluation-unit": {
+      "passes": [],
+      "failures": [],
+      "python_count": [
+        "36"
+      ]
+    }
+  },
+  "test_image_receipt_id": "sha256:f6becb18f0df98ffb0d5086b54740328c91a8df697d811abb598a2fc95eeaaa8",
+  "actual_test_image_id": "sha256:f6becb18f0df98ffb0d5086b54740328c91a8df697d811abb598a2fc95eeaaa8",
+  "image_receipt_matches_current_tag": true,
+  "source_clean": true,
+  "independent_owned_cleanup_clean": true,
+  "cleanup_observations": {
+    "owned_containers": [],
+    "owned_pool_mappings": [],
+    "owned_loops": [],
+    "private_fixture_paths": [],
+    "private_fixture_mounts": [],
+    "sdk_owned_cgroup": {
+      "exists": false,
+      "processes": []
+    },
+    "running_containers": [
+      {
+        "Command": "\"/usr/local/bin/entrypoint /sbin/init\"",
+        "CreatedAt": "2026-11-10 19:51:22 -0700 MST",
+        "ID": "1715f4a4061173a6eb936d419fbac8e1055a0a8042a6a9543670ee21f7f710d5",
+        "Image": "localhost/fcmod-kubernetes-node:v1.37.2",
+        "Labels": "io.x-k8s.kind.cluster=fcmod-upstream-137,io.x-k8s.kind.role=control-plane",
+        "LocalVolumes": "1",
+        "Mounts": "/lib/modules,b6eb13a16abaf3c65fa814e43c0940d7605a9c6d27e3dcb377c552423007e801",
+        "Names": "fcmod-upstream-137-control-plane",
+        "Networks": "kind",
+        "Platform": {
+          "architecture": "amd64",
+          "os": "linux"
+        },
+        "Ports": "127.0.0.1:37231->6443/tcp",
+        "RunningFor": "46 hours ago",
+        "Size": "3.93MB (virtual 962MB)",
+        "State": "running",
+        "Status": "Up 46 hours"
+      }
+    ]
+  },
+  "installed_artifacts": {
+    "bin/firecracker": {
+      "path": "/users/nehalem/fc-ctrd-mod/install/bbcaf820056d/bin/firecracker",
+      "sha256": "b33f46cd6d88834cf6a4f8d184f08f219809c636236bffd286d233a60602a2ba"
+    },
+    "bin/jailer": {
+      "path": "/users/nehalem/fc-ctrd-mod/install/bbcaf820056d/bin/jailer",
+      "sha256": "ddadbaa15b5c942271a83b7040ca7259c8ccf92a9e08d44cce0b86fa407ba460"
+    },
+    "share/runtime/default-vmlinux.bin": {
+      "path": "/users/nehalem/fc-ctrd-mod/install/bbcaf820056d/share/runtime/default-vmlinux.bin",
+      "sha256": "90e485eae8d8a0f5172fa8aa639c983baa81b3f4c40a41e2bc138b323045e713"
+    },
+    "share/runtime/default-rootfs.img": {
+      "path": "/users/nehalem/fc-ctrd-mod/install/bbcaf820056d/share/runtime/default-rootfs.img",
+      "sha256": "8ed46c277f6fa36e4a822ffee857a4e603d8871add1fd883d853f701fd36217d"
+    }
+  },
+  "original_build_collection_entries_unchanged": {
+    "stage4-build-bbcaf820056d.log": true,
+    "stage4-install-bbcaf820056d.log": true,
+    "stage4-tested-source-bbcaf820056d.txt": true,
+    "stage4-submodules-bbcaf820056d.txt": true,
+    "stage4-launcher-bbcaf820056d.sh": true,
+    "stage4-launcher-bbcaf820056d.sha256": true,
+    "build/agent-build-info": true,
+    "build/binaries.sha256": true,
+    "build/cri-build-info": true,
+    "build/cri-go-modules.json": true,
+    "build/firecracker-release.txt": true,
+    "build/go-modules.json": true,
+    "build/runtime-revision": true,
+    "build/submodules": true,
+    "provenance/versions.json": true,
+    "provenance/kernel.config": true
+  },
+  "remote_local_raw_hashes_match": true,
+  "files": {
+    "stage4-acceptance-bbcaf820056d.log": {
+      "bytes": 793557,
+      "sha256": "80455d1d271045c79384942d21cb3dde7c112250d2ad311b8d2eef007962e7d4"
+    },
+    "stage4-build-bbcaf820056d.log": {
+      "bytes": 276913,
+      "sha256": "9aa90d1325b10dfef08e1be95d7ce175af7d3813d4b9d6acfb2ad55f58343236"
+    },
+    "stage4-command-status-bbcaf820056d.tsv": {
+      "bytes": 254,
+      "sha256": "906a377439f1f5e5d3fd1d9e2f9aae10ab5903a79b9145a00589fefcad66ddec"
+    },
+    "stage4-enospc-fixture-bbcaf820056d.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stage4-enospc-pass-guard-bbcaf820056d.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stage4-evaluation-unit-bbcaf820056d.log": {
+      "bytes": 4827,
+      "sha256": "5856b98cbf209bc67345e93aa954bef381997a620893a6f910c770e218d02025"
+    },
+    "stage4-extra-binaries-bbcaf820056d.sha256": {
+      "bytes": 432,
+      "sha256": "3ea37d15b45baa452f5cfb30a556dc30e20f657443c252df997d4a97636956fc"
+    },
+    "stage4-fuse-pass-guard-bbcaf820056d.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stage4-host-enospc-bbcaf820056d.log": {
+      "bytes": 87,
+      "sha256": "5267768293a933f7aa8d92d7598ed6b12435fc226784f0c911d54ec6ee70f46e"
+    },
+    "stage4-host-fuse-bbcaf820056d.log": {
+      "bytes": 561,
+      "sha256": "aa091c067a985ee722aaaaf3c7f3d53a0fe8c389150983f8be9ab2ea663e7f73"
+    },
+    "stage4-install-bbcaf820056d.log": {
+      "bytes": 10218,
+      "sha256": "2811fe76bb9fb81a4991c0b1b21a92f5adae6ebc49eb5ec428f49b468217485c"
+    },
+    "stage4-launcher-bbcaf820056d.sh": {
+      "bytes": 6687,
+      "sha256": "3cc1553b939b0f9d12af5025e7331a2cb5a7bb59a8565796e45798e26c8c8737"
+    },
+    "stage4-launcher-bbcaf820056d.sha256": {
+      "bytes": 153,
+      "sha256": "5f084e22cc0313f157209faa325c71227d4690455d78494f69e1c986866241c7"
+    },
+    "stage4-namespace-api-bbcaf820056d.log": {
+      "bytes": 183,
+      "sha256": "5d2418a628e0ab75a6cc127066c6e1c83999b4104ffa41f4f52063c34557a81e"
+    },
+    "stage4-namespace-pass-guard-bbcaf820056d.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stage4-overlay-syntax-bbcaf820056d.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stage4-runtime-probe-build-bbcaf820056d.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stage4-runtime-probe-buildinfo-bbcaf820056d.txt": {
+      "bytes": 7587,
+      "sha256": "f96be3e07e24ca547d316e570ca2d599977c2931ccac6eccfd8b9d35b1790ef9"
+    },
+    "stage4-stargz-syntax-bbcaf820056d.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stage4-submodules-bbcaf820056d.txt": {
+      "bytes": 198,
+      "sha256": "3e8aec0aa6326c9582c15809dd86288fe1f2c395a328676ca52cd01a9014df8d"
+    },
+    "stage4-tested-source-bbcaf820056d.txt": {
+      "bytes": 82,
+      "sha256": "9955ecd741ac20ab4d431c65cf7e43ef66dbecd6bac7485ae095f1474f5991e3"
+    },
+    "stage4-unit-race-bbcaf820056d.log": {
+      "bytes": 3997,
+      "sha256": "bf0a6095d7e27cf311e8156a191ba1ce451f788c7de74015694ce07d122827b4"
+    },
+    "stage4-volfs-probe-build-bbcaf820056d.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stage4-volfs-probe-buildinfo-bbcaf820056d.txt": {
+      "bytes": 485,
+      "sha256": "e0afa4c189802d81249815523ede5d58c0f65dd1576ec776ffca508584977b06"
+    },
+    "build/agent-build-info": {
+      "bytes": 6259,
+      "sha256": "11f36dd6662c2427acc3e98673f1b4b13ca7e053d980455a7a4d89e9468297c4"
+    },
+    "build/binaries.sha256": {
+      "bytes": 967,
+      "sha256": "396ab7222531fab4e591975f7e5069b775e179bd5b1d4a24d7f6a6f0cc43b5fb"
+    },
+    "build/cri-build-info": {
+      "bytes": 7655,
+      "sha256": "f4c8398c347cb89aed99c2fe1ef6cda0bad0ed6d75e50d2b228db8a462d72770"
+    },
+    "build/cri-go-modules.json": {
+      "bytes": 73593,
+      "sha256": "f0158d3e84fd82c7008a4c122411a5ba30e83ea7ce7ed04ffd1900bbd473a605"
+    },
+    "build/firecracker-release.txt": {
+      "bytes": 634,
+      "sha256": "00404f8195e2074daf59f9b2702bbe5491e8a55508be5983c77b05301b9773a3"
+    },
+    "build/go-modules.json": {
+      "bytes": 120917,
+      "sha256": "2ed5a8abd33cf396dd686fee2964d7278b6474381b6c5438d3f0b37649f86669"
+    },
+    "build/runtime-revision": {
+      "bytes": 41,
+      "sha256": "e8a7a07c365796bd312bf6505387253c6011300dfccfcc36cb8204592e4264e1"
+    },
+    "build/submodules": {
+      "bytes": 231,
+      "sha256": "be508e11a4bd2ab77a9b89c3c69e1043e9f3823b9e5474cd4d12e634557e7c80"
+    },
+    "acceptance/agent-build-info": {
+      "bytes": 6259,
+      "sha256": "11f36dd6662c2427acc3e98673f1b4b13ca7e053d980455a7a4d89e9468297c4"
+    },
+    "acceptance/binaries.sha256": {
+      "bytes": 1177,
+      "sha256": "615fc194b15a19b0dd444bfd749cd30a629dfaddf6f6c7a829d16f3bbda5a933"
+    },
+    "acceptance/cri-build-info": {
+      "bytes": 7655,
+      "sha256": "f4c8398c347cb89aed99c2fe1ef6cda0bad0ed6d75e50d2b228db8a462d72770"
+    },
+    "acceptance/cri-go-modules.json": {
+      "bytes": 73593,
+      "sha256": "f0158d3e84fd82c7008a4c122411a5ba30e83ea7ce7ed04ffd1900bbd473a605"
+    },
+    "acceptance/go-modules.json": {
+      "bytes": 120917,
+      "sha256": "2ed5a8abd33cf396dd686fee2964d7278b6474381b6c5438d3f0b37649f86669"
+    },
+    "acceptance/runtime-revision": {
+      "bytes": 41,
+      "sha256": "e8a7a07c365796bd312bf6505387253c6011300dfccfcc36cb8204592e4264e1"
+    },
+    "acceptance/test-image.json": {
+      "bytes": 3648,
+      "sha256": "1e048ea596166911de2da96655328cd218378806f745f29e508bb5f99175f5e2"
+    },
+    "provenance/versions.json": {
+      "bytes": 38272,
+      "sha256": "cefee9232d7cc3fa5209ac74424c869c60a752df3a5c487599ef7cb4a6ce8d2e"
+    },
+    "provenance/kernel.config": {
+      "bytes": 98292,
+      "sha256": "99d0950a178b92a1db3d5ee233dc6a320c8892334b99ba6fea11bd7be3745067"
+    }
+  },
+  "limits": [
+    "Installed-prefix and rebuilt test-rootfs artifacts remain distinct.",
+    "Full CRI is WIP; Kubernetes Pod restore deferred to1.38.",
+    "Final published/installed vHive acceptance remains separate."
+  ]
+}

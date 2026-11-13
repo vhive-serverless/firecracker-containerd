@@ -1,0 +1,9 @@
+{
+  "frozen_runtime_revision": "332da2a7065baa0050037250bbf2ff316a1a8519",
+  "verified": {
+    "/usr/local/bin/firecracker-containerd": "47a157ebf66d55921ea81b937957ba6e91dbe63372f474cd33e166490f7a5c74",
+    "/usr/local/bin/containerd-shim-aws-firecracker": "4c0c5e1dc13e130bdec45e9115f207a5105e9ed93ffe49ee8a4b1ac8058eafad",
+    "/usr/local/bin/firecracker": "b33f46cd6d88834cf6a4f8d184f08f219809c636236bffd286d233a60602a2ba",
+    "/var/lib/firecracker-containerd/runtime/default-rootfs.img": "b8455888c02d3eab83d9ea7ca1000d9978f46830eefbdb7b09d9d67166f56c72"
+  }
+}

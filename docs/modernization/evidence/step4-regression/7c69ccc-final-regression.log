@@ -1,0 +1,108 @@
+From https://github.com/vhive-serverless/firecracker-containerd
+ * branch              damon-virtio-pmem -> FETCH_HEAD
+   d5739e5d..7c69ccca  damon-virtio-pmem -> origin/damon-virtio-pmem
+Updating d5739e5d..7c69ccca
+Fast-forward
+ runtime/service_integ_test.go           | 4 +++-
+ tools/modernize/run-isolated-vm-test.sh | 5 ++++-
+ 2 files changed, 7 insertions(+), 2 deletions(-)
+EXPECTED_FAILURE_STATUS_AND_CLEANUP_OK
+INTERRUPTED_CONTAINER_AND_STORAGE_CLEANUP_OK seconds=5
+/users/nehalem/fc-ctrd-mod/step4-regression-fix/bin/ltag -t ./.headers -excludes "tools _submodules tmp bin" -check -v
+No template file for Dockerfile, shall skip all Dockerfile
+No template file for bash scripts, shall skip all bash scripts
+/users/nehalem/fc-ctrd-mod/step4-regression-fix/bin/git-validation -run DCO,short-subject -range HEAD~1..HEAD
+ * 7c69ccca "Include the disk-backed guest upper in block-device expectations" ... PASS
+/users/nehalem/fc-ctrd-mod/step4-regression-fix/bin/golangci-lint run
+0 issues.
+cd cri && /users/nehalem/fc-ctrd-mod/step4-regression-fix/bin/golangci-lint run --config ../.golangci.yml
+0 issues.
+make: Entering directory '/users/nehalem/fc-ctrd-mod/step4-regression-fix/runtime'
+make -C .. test-deps-in-docker
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/step4-regression-fix'
+docker run --rm \
+	--volume /users/nehalem/fc-ctrd-mod/step4-regression-fix:/src \
+	--volume gocache:/go \
+	--workdir /src \
+	public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 go mod download
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/step4-regression-fix'
+/users/nehalem/fc-ctrd-mod/step4-regression-fix/runtime/../tools/thinpool.sh reset "fc-step4-final-7c69ccc"
+Name:              fc-step4-final-7c69ccc
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        0
+Event number:      0
+Major, minor:      252, 6
+Number of targets: 1
+
+/users/nehalem/fc-ctrd-mod/step4-regression-fix/runtime/../tools/modernize/run-isolated-vm-test.sh "/users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-final-7c69ccc" --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-regression-fix/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-regression-fix/runtime/..:/src \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-final-7c69ccc \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestShimExitsUponContainerDelete_Isolated$'"
+=== RUN   TestShimExitsUponContainerDelete_Isolated
+--- PASS: TestShimExitsUponContainerDelete_Isolated (7.63s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	7.653s
+make: Leaving directory '/users/nehalem/fc-ctrd-mod/step4-regression-fix/runtime'
+PER_INVOCATION_STORAGE_REMOVED ShimExitsUponContainerDelete
+make: Entering directory '/users/nehalem/fc-ctrd-mod/step4-regression-fix/runtime'
+make -C .. test-deps-in-docker
+make[1]: Entering directory '/users/nehalem/fc-ctrd-mod/step4-regression-fix'
+docker run --rm \
+	--volume /users/nehalem/fc-ctrd-mod/step4-regression-fix:/src \
+	--volume gocache:/go \
+	--workdir /src \
+	public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0 go mod download
+make[1]: Leaving directory '/users/nehalem/fc-ctrd-mod/step4-regression-fix'
+/users/nehalem/fc-ctrd-mod/step4-regression-fix/runtime/../tools/thinpool.sh reset "fc-step4-final-7c69ccc"
+Name:              fc-step4-final-7c69ccc
+State:             ACTIVE
+Read Ahead:        256
+Tables present:    LIVE
+Open count:        1
+Event number:      0
+Major, minor:      252, 6
+Number of targets: 1
+
+/users/nehalem/fc-ctrd-mod/step4-regression-fix/runtime/../tools/modernize/run-isolated-vm-test.sh "/users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-final-7c69ccc" --rm \
+	--privileged \
+	--ipc=host \
+	--network=none \
+	--volume /dev:/dev \
+	--volume /run/udev/control:/run/udev/control \
+	--volume /users/nehalem/fc-ctrd-mod/step4-regression-fix/runtime/logs:/var/log/firecracker-containerd-test \
+	--volume /users/nehalem/fc-ctrd-mod/step4-regression-fix/runtime/..:/src \
+	--volume gocache:/go \
+	--env ENABLE_ISOLATED_TESTS=1 \
+	--env FICD_DM_VOLUME_GROUP= \
+	--env FICD_DM_POOL=fc-step4-final-7c69ccc \
+	--env GOPROXY=direct \
+	--env GOSUMDB=off \
+	--env NUMBER_OF_VMS= \
+	--workdir="/src/runtime" \
+	--init \
+	localhost/firecracker-containerd-test:72f4fc9173be \
+	"go test -v -count=1 -timeout=1200s -run '^TestStubBlockDevices_Isolated$'"
+=== RUN   TestStubBlockDevices_Isolated
+--- PASS: TestStubBlockDevices_Isolated (6.90s)
+PASS
+ok  	github.com/firecracker-microvm/firecracker-containerd/runtime	6.920s
+make: Leaving directory '/users/nehalem/fc-ctrd-mod/step4-regression-fix/runtime'
+PER_INVOCATION_STORAGE_REMOVED StubBlockDevices
+COMMITTED_FINAL_FIXTURE_REGRESSION_OK

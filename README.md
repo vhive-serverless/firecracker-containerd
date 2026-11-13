@@ -1,30 +1,23 @@
 # firecracker-containerd
 
-This branch uses official Firecracker/jailer v1.18.0, published vHive SDK dd9db32
-and containerd 2.3.7. Exact Step 3 source `751c03c6f9a9` passed build/private
-installation, eight native VM leaves in both jail modes, real-volume continuity
-and focused CRI resource/volume checks. See the
-[Step 3 procedure and exact scope](docs/modernization/step-3.md).
+This Step 4 branch uses official unmodified Firecracker/jailer v1.18.0,
+published vHive SDK dd9db32 and containerd 2.3.7. Exact source `bbcaf820056d`
+passed build/private installation, full-stack acceptance and all agreed unique
+component checks. See the [Step 4 procedure and exact scope](docs/modernization/step-4.md).
 This later documentation/assembled tip was not separately built or VM-tested.
 
-Full CRI remains WIP; Kubernetes Pod restore is deferred to 1.38. The focused
-run does not repair the inherited CNI flake or establish final published-runtime/
-installed-vHive consumer acceptance. Earlier receipts retain exact source/image
-scope.
+Corrected Step 3 `751c03c6f9a9` passed its eight native leaves, real-volume VM
+and focused CRI/resource/volume checks. Inherited Step 2 `2e03843816cf` has
+complete segmented coverage: its full run remains exit 2 on an **unfixed CNI
+chain race**, while unchanged five-VM repeats and the remaining thinpool/SDK
+tail passed separately. This is not a clean uninterrupted Step 2 full-run claim.
+The [branch guide](docs/modernization/README.md) links each exact-source receipt.
 
-### Inherited Step 2 coverage and limitation
-
-The inherited Step 2 source uses official Firecracker/jailer v1.18.0, published vHive SDK
-dd9db32 and containerd 2.3.7. Exact source `2e03843816cf` has complete required
-check coverage across a failed full run, unchanged targeted repeats and a
-passing supplemental thinpool/SDK tail. **The full run exited 2 on an existing
-CNI chain race, which remains unfixed; this is not a clean uninterrupted pass.**
-The three provisional vHive VM cases passed at the same exact source.
-
-See the [Step 2 receipt and scope](docs/modernization/step-2.md). Final published
-runtime module and installed-vHive consumer acceptance remain pending. This later
-documentation/assembled tip was not tested; earlier receipts retain exact source
-scope. Full CRI is WIP and Kubernetes Pod restore is deferred to 1.38.
+Full CRI remains WIP, Kubernetes Pod restore is deferred to the 1.38 interface
+work, and final published-runtime/installed-vHive consumer acceptance remains
+open. The historical 21-trial memory evaluation supplies no new savings claim
+for these sources. The upstream overview below is historical; use the branch
+guide for current reproduction and evidence.
 
 [![BuildKite](https://badge.buildkite.com/aab4ae547d5e5079a5915522e8cdb18492349aef67aae5a8c5.svg?branch=main)](https://buildkite.com/firecracker-microvm/firecracker-containerd)
 [![GitHub Actions](https://github.com/firecracker-microvm/firecracker-containerd/actions/workflows/build.yaml/badge.svg)](https://github.com/firecracker-microvm/firecracker-containerd/actions)

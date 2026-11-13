@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "status": "PASS: clean committed-source lint and real-VM native-capture interruption regression",
+  "acceptance_scope": "This validates the new runtime-level regression on a clean committed checkout. It does not change Step 3 WIP status or establish CRI/Kubernetes checkpoint/restore acceptance.",
+  "checkout": {
+    "commit": "5186d40578d58b23c432e6c5af15789654d548c1",
+    "parent": "c7645136090833ebb8e4a6041b182a2935313355",
+    "status_before_lint": "clean",
+    "status_after_lint": "clean",
+    "status_after_test": "clean",
+    "test_source_sha256": "51216214faf538e616b763fadb8f294e87cfc3a4759dea6c6ffcfacf8f2b359d",
+    "commit_delta": [
+      "runtime/native_checkpoint_interrupt_integ_test.go"
+    ]
+  },
+  "comparison_to_tested_runtime": {
+    "runtime_commit": "72f4fc9173bef33cc1c981ad285758716f635e02",
+    "non_test_go_sources_identical": true,
+    "go_mod_and_go_sum_identical": true,
+    "cri_module_manifests_identical": true,
+    "submodule_gitlinks_identical": true,
+    "submodules": {
+      "firecracker": "ce86b117d59ca93b1c04b791a251b445ace76703",
+      "runc": "c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e",
+      "stargz_snapshotter": "3070538befb5a6c09f93e99164762b3a76310357"
+    }
+  },
+  "worker": {
+    "ssh": "nehalem@amd218.utah.cloudlab.us",
+    "hostname": "node-005.cluster.ntu-cloud-pg0.utah.cloudlab.us",
+    "go": "1.26.11",
+    "ttrpc": "v1.2.8",
+    "vm_storage_filesystem": "ext3 on /dev/sda3"
+  },
+  "runtime_image": {
+    "source_commit": "72f4fc9173bef33cc1c981ad285758716f635e02",
+    "tag": "localhost/firecracker-containerd-test:72f4fc9173be",
+    "image_id": "sha256:0ed23833cf6043e6f2e0fa6ef3e590cfd9626c03e69d66303f9a693b079021b5"
+  },
+  "commands": {
+    "lint": "PATH=/users/nehalem/fc-ctrd-mod/toolchains/go1.26.11/bin:$PATH make lint",
+    "isolated_test": "PATH=/users/nehalem/fc-ctrd-mod/toolchains/go1.26.11/bin:$PATH STACK_DIR=/users/nehalem/fc-ctrd-mod DOCKER_IMAGE_TAG=72f4fc9173be FIRECRACKER_CONTAINERD_TEST_IMAGE=localhost/firecracker-containerd-test FICD_DM_POOL=fc-step4-capture-interrupt-clean-5186d40 FICD_VM_STORAGE=/users/nehalem/fc-ctrd-mod/.ficd-test-vms/step4-capture-interrupt-clean-5186d40 EXTRAGOARGS='-v -count=1 -timeout=1200s' make -C runtime integ-test-TestNativeCheckpointInterrupt_Isolated"
+  },
+  "results": {
+    "lint_exit_code": 0,
+    "lint_modules": [
+      "runtime",
+      "cri"
+    ],
+    "test_exit_code": 0,
+    "go_test_duration_seconds": 31.54,
+    "subtests": {
+      "jailed=false": {
+        "result": "PASS",
+        "seconds": 15.45
+      },
+      "jailed=true": {
+        "result": "PASS",
+        "seconds": 16.08
+      }
+    },
+    "asserted": [
+      "staged memory snapshot observed after VM quiescing",
+      "caller transport disconnect made the in-flight request fail",
+      "staged and published artifact paths absent after interruption",
+      "source task running and guest exec usable after thaw",
+      "subsequent checkpoint published a manifest"
+    ]
+  },
+  "cleanup": {
+    "private_pool_removed": true,
+    "private_vm_storage_removed": true,
+    "unrelated_control_plane_container_preserved": true
+  },
+  "prior_observer_design_failures": [
+    {
+      "evidence": "../attempt1 and ../attempt2",
+      "reason": "Transient Firecracker REST state polling did not observe the paused interval before the successful capture completed; no interruption was triggered."
+    },
+    {
+      "evidence": "../attempt3",
+      "reason": "REST socket observation worked for the unjailed case but the jailed host socket was unavailable; this did not exercise jailed transport interruption."
+    }
+  ],
+  "dirty_development_runs": {
+    "evidence": "../attempt4 and ../attempt5",
+    "status": "Both jailer modes passed before clean committed validation; retained as development history, not the acceptance result."
+  },
+  "artifacts": {
+    "source_comparison": "source-comparison.txt",
+    "source_verification": "source-verification.txt",
+    "lint_log": "lint.log",
+    "test_driver_log": "test-driver.log",
+    "inputs_and_results": "inputs-and-results.txt",
+    "sha256_manifest": "SHA256SUMS"
+  }
+}

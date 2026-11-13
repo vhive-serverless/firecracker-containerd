@@ -1,0 +1,4 @@
+TARGET SOURCE    FSTYPE OPTIONS
+/      /dev/sda3 ext3   rw,relatime
+TARGET SOURCE    FSTYPE OPTIONS
+/      /dev/sda3 ext3   rw,relatime
