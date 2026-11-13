@@ -1,0 +1,107 @@
+Unfiltered CRI baseline: FAILED. Step 3 is incomplete.
+Tested runtime commit: 9d60ca4adf9a911eee2f18c667465c6c7ec4633e
+Worker checkout: /users/nehalem/fc-ctrd-mod/cri-committed
+Worker source status after suite: clean
+script_revision=9d60ca4adf9a911eee2f18c667465c6c7ec4633e
+runtime_revision=9d60ca4adf9a911eee2f18c667465c6c7ec4633e
+image=sha256:855164619b45ddd7ff15a3b16b7954798571e41e002ef9bd1af17c93ee22a430
+focus=all
+source_dirty=false
+image_override=
+b8616e076891131396e38072ec03ca5961d37f9bd7c2c28b5a7b3b19f27d383e  tools/critest/test-cri.sh
+6c73f5150c8f7206c5f501b600ee17a9e8ed6fb235b27ac03e87127f72cf6183  tools/critest/run-in-container.sh
+
+Ran 113 of 142 Specs in 473.297 seconds
+FAIL! -- 89 Passed | 24 Failed | 0 Pending | 29 Skipped
+docker_attach_exit=1
+container_exit=1
+
+Failed test names:
+[k8s.io] Container | runtime should support adding volume and device | runtime should support starting container with volume [Conformance]
+[k8s.io] Container | runtime should support adding volume and device | runtime should support starting container with volume when host path is a symlink [Conformance]
+[k8s.io] Image Volume [Feature:ImageVolume] | should correctly mount image and enforce read-only
+[k8s.io] Image Volume [Feature:ImageVolume] | subPath | should succeed when using a valid subPath
+[k8s.io] Security Context | NamespaceOption | runtime should support HostPID
+[k8s.io] Security Context | NamespaceOption | runtime should support HostIpc is true
+[k8s.io] Security Context | NamespaceOption | runtime should support HostNetwork is true
+[k8s.io] Security Context | bucket | runtime should support dropping capability
+[k8s.io] Security Context | bucket | runtime should support MaskedPaths
+[k8s.io] AppArmor | runtime should support deprecated apparmor_profile field | should fail with an unloaded apparmor_profile
+[k8s.io] AppArmor | runtime should support deprecated apparmor_profile field | should enforce a apparmor_profile blocking writes
+[k8s.io] AppArmor | runtime should support deprecated apparmor_profile field | should enforce a permissive deprecated profile
+[k8s.io] AppArmor | runtime should support apparmor field | should fail with an unloaded apparmor_profile
+[k8s.io] AppArmor | runtime should support apparmor field | should enforce a apparmor_profile blocking writes
+[k8s.io] AppArmor | runtime should support apparmor field | should enforce a permissive deprecated profile
+[k8s.io] AppArmor | runtime should prefer new apparmor field | should fail with an unloaded apparmor_profile
+[k8s.io] AppArmor | runtime should prefer new apparmor field | should enforce a apparmor_profile blocking writes
+[k8s.io] AppArmor | runtime should prefer new apparmor field | should work with apparmor profile
+[k8s.io] Container Mount Readonly | runtime should support readonly mounts | should support non-recursive readonly mounts
+[k8s.io] Streaming | runtime should support streaming interfaces | runtime should support portforward [Conformance]
+[k8s.io] Streaming | runtime should support streaming interfaces | runtime should support portforward in host network
+[k8s.io] Container Mount Propagation | runtime should support mount propagation | mount with 'rprivate' should not support propagation
+[k8s.io] Container Mount Propagation | runtime should support mount propagation | mount with 'rshared' should support propagation from host to container and vice versa
+[k8s.io] Container Mount Propagation | runtime should support mount propagation | mount with 'rslave' should support propagation from host to container
+
+Skipped test names and reported reasons:
+[k8s.io] PodSandbox | benchmark about operations on PodSandbox | benchmark about lifecycle of PodSandbox
+  see upstream test configuration
+[k8s.io] NRI | pod sandbox lifecycle | should receive RunPodSandbox, StopPodSandbox, and RemovePodSandbox in strict order with correct metadata
+  NRI socket not configured (use -nri-socket flag)
+[k8s.io] NRI | container lifecycle | should receive CreateContainer, StartContainer, StopContainer, and RemoveContainer in strict order with correct metadata
+  NRI socket not configured (use -nri-socket flag)
+[k8s.io] NRI | container lifecycle (failed container) | should receive CreateContainer, StartContainer, StopContainer, and RemoveContainer for a container that exits with a non-zero code
+  NRI socket not configured (use -nri-socket flag)
+[k8s.io] NRI | RunPodSandbox contract | should not expose sandbox while RunPodSandbox hook is in progress
+  NRI socket not configured (use -nri-socket flag)
+[k8s.io] NRI | RunPodSandbox contract | should not start workload containers until RunPodSandbox hook completes
+  NRI socket not configured (use -nri-socket flag)
+[k8s.io] NRI | RunPodSandbox contract | should fail RunPodSandbox and clean up when the NRI hook errors, then allow retry
+  NRI socket not configured (use -nri-socket flag)
+[k8s.io] NRI | StopPodSandbox contract | should stop all workload containers and keep sandbox accessible while StopPodSandbox hook is in progress
+  NRI socket not configured (use -nri-socket flag)
+[k8s.io] NRI | StopPodSandbox contract | should handle StopPodSandbox idempotently and never reuse sandbox
+  NRI socket not configured (use -nri-socket flag)
+[k8s.io] NRI | CreateContainer contract | should not expose container while CreateContainer hook is in progress
+  NRI socket not configured (use -nri-socket flag)
+[k8s.io] NRI | CreateContainer contract | should fail CreateContainer when the NRI hook errors, leak nothing, and allow retry
+  NRI socket not configured (use -nri-socket flag)
+[k8s.io] NRI | plugin synchronization | should synchronize a newly connected plugin with existing pods and containers
+  NRI socket not configured (use -nri-socket flag)
+[k8s.io] NRI | plugin synchronization | should receive a callback for container created during the Synchronize call
+  NRI socket not configured (use -nri-socket flag)
+[k8s.io] NRI | plugin synchronization | should receive information about all containers without the race condition during initialization
+  NRI socket not configured (use -nri-socket flag)
+[k8s.io] Image Volume [Feature:ImageVolume] | should return image digest in ContainerStatus mounts
+  Image Volume digest reporting (ImageSpec.image_ref tag 20) is not yet supported by the runtime.
+[k8s.io] Security Context | UserNamespaces | when Host idmap mount support is needed | runtime should support NamespaceMode_POD
+  no runtime handler found which supports user namespaces
+[k8s.io] Security Context | UserNamespaces | when Host idmap mount support is not needed | runtime should support NamespaceMode_NODE
+  no runtime handler found which supports user namespaces
+[k8s.io] Security Context | UserNamespaces | when Host idmap mount support is not needed | runtime should fail if more than one mapping provided
+  no runtime handler found which supports user namespaces
+[k8s.io] Security Context | UserNamespaces | when Host idmap mount support is not needed | runtime should fail if container ID 0 is not mapped
+  no runtime handler found which supports user namespaces
+[k8s.io] Security Context | UserNamespaces | when Host idmap mount support is not needed | runtime should fail with NamespaceMode_CONTAINER
+  no runtime handler found which supports user namespaces
+[k8s.io] Security Context | UserNamespaces | when Host idmap mount support is not needed | runtime should fail with NamespaceMode_TARGET
+  no runtime handler found which supports user namespaces
+[k8s.io] Container Mount Readonly | runtime should support readonly mounts | should support recursive readonly mounts
+  runtime does not implement recursive readonly mounts
+[k8s.io] Container Mount Readonly | runtime should support readonly mounts | should reject a recursive readonly mount with PROPAGATION_HOST_TO_CONTAINER
+  runtime does not implement recursive readonly mounts
+[k8s.io] Container Mount Readonly | runtime should support readonly mounts | should reject a recursive readonly mount with PROPAGATION_BIDIRECTIONAL
+  runtime does not implement recursive readonly mounts
+[k8s.io] Container Mount Readonly | runtime should support readonly mounts | should reject a recursive readonly mount with ReadOnly: false
+  runtime does not implement recursive readonly mounts
+[k8s.io] PodSandbox | benchmark about start a container from scratch | benchmark about start a container from scratch
+  see upstream test configuration
+[k8s.io] Container | benchmark about operations on Container | benchmark about basic operations on Container
+  see upstream test configuration
+[k8s.io] Image | benchmark about operations on Image | benchmark about basic operations on Image
+  see upstream test configuration
+[k8s.io] Image | benchmark about operations on Image | benchmark about listing Image
+  see upstream test configuration
+
+Raw log and report hashes:
+7ddb1555570956571b26351241c541ff047d3abaa01f2ae494d223f2556eee5a /users/nehalem/fc-ctrd-mod/evidence/9d60ca4-cri-full.log
+477d3087bc282788fb9ae4cc694344e1616f952f7ff2122ce8313c0ccfe22a47 /users/nehalem/fc-ctrd-mod/evidence/cri-9d60ca4adf9a.0sq6mUUy/report.json
