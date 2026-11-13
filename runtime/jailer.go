@@ -105,5 +105,15 @@ func newJailer(
 		CgroupPath:        request.JailerConfig.CgroupPath,
 		DriveExposePolicy: request.JailerConfig.DriveExposePolicy,
 	}
-	return newRuncJailer(ctx, l, service.vmID, config, request.DriveMounts)
+	mounts := request.DriveMounts
+	if request.NativeCheckpointDirectory != "" {
+		// Captured host paths may have disappeared with the source VM. Clone
+		// preparation installs private mappings from the checkpoint manifest.
+		mounts = nil
+	}
+	jailed, err := newRuncJailer(ctx, l, service.vmID, config, mounts)
+	if err == nil {
+		jailed.trackRestoreStubs = request.NativeCheckpointDirectory != ""
+	}
+	return jailed, err
 }

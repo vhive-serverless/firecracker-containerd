@@ -27,6 +27,11 @@ import (
 )
 
 const (
+	// DefaultCRIMemoryMiB is the total guest capacity when no Pod memory limit is supplied.
+	DefaultCRIMemoryMiB uint32 = 512
+	// DefaultCRIMemoryOverheadMiB reserves guest capacity for its kernel and agent.
+	DefaultCRIMemoryOverheadMiB uint32 = 128
+
 	// ConfigPathEnvName is the name of the environment variable used to
 	// overwrite the default runtime config path
 	ConfigPathEnvName  = "FIRECRACKER_CONTAINERD_RUNTIME_CONFIG_PATH"
@@ -53,6 +58,12 @@ type Config struct {
 	// the VM will default to using the network interfaces as specified here. This is especially
 	// useful when a CNI-based network interface is provided in DefaultNetworkInterfaces.
 	DefaultNetworkInterfaces []proto.FirecrackerNetworkInterface `json:"default_network_interfaces"`
+	// CRI uses containerd's completed CNI allocation and its tc-redirect-tap result.
+	CRICNIConfDir        string `json:"cri_cni_conf_dir"`
+	CRICNICacheDir       string `json:"cri_cni_cache_dir"`
+	CRIContainerCount    int32  `json:"cri_container_count"`
+	CRIDefaultMemoryMiB  uint32 `json:"cri_default_memory_mib"`
+	CRIMemoryOverheadMiB uint32 `json:"cri_memory_overhead_mib"`
 	// ShimBaseDir is the base directory which shim dirs will be created for each
 	// VM. In addition to this if jailing is enabled the jail will also use this
 	// directory.
@@ -86,10 +97,15 @@ func LoadConfig(path string) (*Config, error) {
 	}
 
 	cfg := &Config{
-		KernelArgs:      defaultKernelArgs,
-		KernelImagePath: defaultKernelPath,
-		RootDrive:       defaultRootfsPath,
-		ShimBaseDir:     defaultShimBaseDir,
+		CRICNIConfDir:        "/etc/cni/net.d",
+		CRICNICacheDir:       "/var/lib/cni",
+		CRIContainerCount:    8,
+		CRIDefaultMemoryMiB:  DefaultCRIMemoryMiB,
+		CRIMemoryOverheadMiB: DefaultCRIMemoryOverheadMiB,
+		KernelArgs:           defaultKernelArgs,
+		KernelImagePath:      defaultKernelPath,
+		RootDrive:            defaultRootfsPath,
+		ShimBaseDir:          defaultShimBaseDir,
 		JailerConfig: JailerConfig{
 			RuncConfigPath: runcConfigPath,
 		},
