@@ -73,8 +73,8 @@ type runcJailer struct {
 	configSpec        specs.Spec
 	runcClient        runc.Runc
 	started           bool
-	restoreMounts     []restoreMount
 	preparedFifos     map[string]string
+	restoreMounts     []restoreMount
 	trackRestoreStubs bool
 	restoreStubMu     sync.Mutex
 	restoreStubs      map[string]ownedRestoreStub
@@ -266,7 +266,13 @@ func (j *runcJailer) BuildJailedRootHandler(cfg *config.Config, machineConfig *f
 					// call close down below.
 					defer f.Close()
 
-					if !internal.IsStubDrive(f) {
+					// Runtime-owned writable disks are allocated inside the jail and
+					// already have its ownership. Copying a file onto itself destroys it.
+					if d.IsReadOnly && filepath.Dir(drivePath) == filepath.Join(cfg.ShimBaseDir, ".pmem-images") {
+						if err := j.bindImmutableImageToJail(drivePath, newDrivePath); err != nil {
+							return err
+						}
+					} else if filepath.Clean(drivePath) != filepath.Clean(newDrivePath) && !internal.IsStubDrive(f) {
 						mode := 0600
 						if d.IsReadOnly {
 							mode = 0400
@@ -282,6 +288,19 @@ func (j *runcJailer) BuildJailedRootHandler(cfg *config.Config, machineConfig *f
 
 					j.logger.WithField("drive", newDrivePath).Debug("Adding drive")
 					m.Cfg.Drives[i].PathOnHost = fileName
+				}
+
+				// Immutable pmem images share a verified inode across jails. Copying
+				// or chowning this backing would defeat explicit read-only sharing.
+				for i, device := range m.Cfg.PmemDevices {
+					if !device.ReadOnly || device.PathOnHost == nil {
+						return fmt.Errorf("jailed pmem requires immutable read-only backing")
+					}
+					name := filepath.Base(*device.PathOnHost)
+					if err := j.bindImmutableImageToJail(*device.PathOnHost, filepath.Join(rootPath, name)); err != nil {
+						return err
+					}
+					m.Cfg.PmemDevices[i].PathOnHost = firecracker.String(name)
 				}
 
 			} else if err := j.prepareRestoreMounts(); err != nil {
@@ -507,9 +526,28 @@ func (j *runcJailer) bindMountFileToJail(src, dst string) error {
 		Destination: "/" + rel,
 		Source:      src,
 		Type:        "none",
-		Options:     []string{"bind"},
+		Options:     []string{bindMountType},
 	})
 
+	return nil
+}
+
+func (j *runcJailer) bindImmutableImageToJail(src, dst string) error {
+	info, err := os.Stat(src)
+	if err != nil {
+		return err
+	}
+	if j.started || !info.Mode().IsRegular() || info.Mode().Perm()&0222 != 0 {
+		return fmt.Errorf("immutable image binding requires read-only regular backing before jail startup")
+	}
+	if _, err := os.Lstat(dst); !os.IsNotExist(err) {
+		return fmt.Errorf("immutable image jail destination already exists: %s", dst)
+	}
+	if err := j.bindMountFileToJail(src, dst); err != nil {
+		return err
+	}
+	mount := &j.configSpec.Mounts[len(j.configSpec.Mounts)-1]
+	mount.Options = append(mount.Options, "ro")
 	return nil
 }
 
@@ -545,8 +583,8 @@ func (j *runcJailer) jailerCommand(containerName string, isDebug bool) *exec.Cmd
 	cmd.Dir = j.OCIBundlePath()
 
 	if isDebug {
-		cmd.Stdout = j.logger.WithField("vmm_stream", "stdout").WriterLevel(logrus.DebugLevel)
-		cmd.Stderr = j.logger.WithField("vmm_stream", "stderr").WriterLevel(logrus.DebugLevel)
+		cmd.Stdout = j.logger.WithField("vmm_stream", transportStdout).WriterLevel(logrus.DebugLevel)
+		cmd.Stderr = j.logger.WithField("vmm_stream", transportStderr).WriterLevel(logrus.DebugLevel)
 	}
 
 	return cmd
@@ -621,7 +659,7 @@ func (j *runcJailer) setDefaultConfigValues(socketPath string, spec specs.Spec) 
 	cmd := firecracker.VMCommandBuilder{}.
 		WithBin("/" + firecrackerFileName).
 		WithSocketPath(socketPath).
-		WithArgs([]string{"--id", j.vmID}).
+		WithArgs([]string{vmmIDArg, j.vmID}).
 		// Don't need to pass in an actual context here as we are only building
 		// the command arguments and not actually building a command
 		Build(context.Background())
