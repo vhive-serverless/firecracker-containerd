@@ -138,6 +138,32 @@ func TestLegacyRestoreMountPlan(t *testing.T) {
 	require.NotContains(t, string(data), "drive_overrides")
 }
 
+func TestNativeRestoreMountPlan(t *testing.T) {
+	for _, jailed := range []bool{false, true} {
+		t.Run(fmt.Sprintf("jailed=%v", jailed), func(t *testing.T) {
+			shared := t.TempDir()
+			clone := filepath.Join(shared, "private-clone")
+			require.NoError(t, os.WriteFile(clone, []byte("independent"), 0600))
+			captured := "/deleted-source/disks/workload"
+			if jailed {
+				captured = "workload"
+			}
+			restore := &nativeRestore{manifest: &nativeCheckpoint{
+				VMConfig: &models.FullVMConfiguration{Drives: []*models.Drive{{DriveID: fc.String("workload"), PathOnHost: captured}}},
+				Drives:   []nativeDrive{{ID: "workload", File: snapshotFile{Path: "drives/0"}}},
+			}, files: map[string]string{"drives/0": clone, "memory": filepath.Join(shared, "memory"), "state": filepath.Join(shared, "state")}}
+			svc := &service{nativeRestore: restore, jailer: &noopJailer{shimDir: vm.Dir(shared), logger: logrus.NewEntry(logrus.New())}}
+			if jailed {
+				svc.jailer = &runcJailer{Config: runcJailerConfig{OCIBundlePath: shared}}
+			}
+			require.NoError(t, svc.prepareSnapshotMounts(&proto.CreateVMRequest{}))
+			path, ok := restoreBackingPath(svc.jailer, captured)
+			require.True(t, ok)
+			require.Equal(t, clone, path)
+		})
+	}
+}
+
 func TestRestoreBackingRejectsFileAliasesAndSpecialFiles(t *testing.T) {
 	directory := t.TempDir()
 	regular := filepath.Join(directory, "regular")
