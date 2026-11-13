@@ -17,13 +17,14 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/containerd/containerd/mount"
+	"github.com/containerd/containerd/v2/core/mount"
 )
 
 func assertEqual(actual, expected []mount.Mount) error {
 	if len(actual) != len(expected) {
 		return fmt.Errorf("expected %s actual %s", expected, actual)
 	}
+	// #nosec G602 -- equal slice lengths are checked above before indexing.
 	for k, v := range actual {
 		if v.Type != expected[k].Type && v.Source != expected[k].Source {
 			return fmt.Errorf("expected %s actual %s at index %d", expected[k], v, k)

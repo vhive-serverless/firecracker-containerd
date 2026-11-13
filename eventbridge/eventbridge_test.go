@@ -20,10 +20,10 @@ import (
 	"time"
 
 	"github.com/containerd/containerd/api/events"
-	eventtypes "github.com/containerd/containerd/events"
-	"github.com/containerd/containerd/events/exchange"
-	"github.com/containerd/containerd/namespaces"
-	"github.com/containerd/containerd/protobuf"
+	eventtypes "github.com/containerd/containerd/v2/core/events"
+	"github.com/containerd/containerd/v2/core/events/exchange"
+	"github.com/containerd/containerd/v2/pkg/namespaces"
+	"github.com/containerd/containerd/v2/pkg/protobuf"
 	"github.com/containerd/typeurl/v2"
 	"github.com/stretchr/testify/require"
 )

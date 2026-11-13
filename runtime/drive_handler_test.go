@@ -20,7 +20,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/containerd/containerd/protobuf/types"
+	"github.com/containerd/containerd/v2/pkg/protobuf/types"
 	"github.com/containerd/log"
 	"github.com/firecracker-microvm/firecracker-containerd/internal/vm"
 	"github.com/firecracker-microvm/firecracker-containerd/proto"
@@ -79,7 +79,7 @@ func TestContainerStubs(t *testing.T) {
 
 	for i := 0; i < containerCount; i++ {
 		fcDrive := machineCfg.Drives[i]
-		assert.False(t, firecracker.BoolValue(fcDrive.IsReadOnly))
+		assert.False(t, fcDrive.IsReadOnly)
 		assert.Nil(t, fcDrive.RateLimiter)
 
 		id := strconv.Itoa(i)
@@ -91,7 +91,7 @@ func TestContainerStubs(t *testing.T) {
 		mockMachine, err := firecracker.NewMachine(ctx, firecracker.Config{}, firecracker.WithClient(
 			firecracker.NewClient("/path/to/socket", nil, false, firecracker.WithOpsClient(&fctesting.MockClient{
 				PatchGuestDriveByIDFn: func(params *ops.PatchGuestDriveByIDParams) (*ops.PatchGuestDriveByIDNoContent, error) {
-					assert.Equal(t, hostPath, firecracker.StringValue(&params.Body.PathOnHost))
+					assert.Equal(t, hostPath, params.Body.PathOnHost)
 					return nil, nil
 				},
 			}))))
@@ -239,7 +239,7 @@ func TestDriveMountStubs(t *testing.T) {
 		}
 
 		fcDrive := machineCfg.Drives[i]
-		assert.Equal(t, !isWritable, firecracker.BoolValue(fcDrive.IsReadOnly))
+		assert.Equal(t, !isWritable, fcDrive.IsReadOnly)
 		assert.Equal(t, rateLimiterFromProto(rateLimiter), fcDrive.RateLimiter)
 
 		stub := mountableStubDrive.(stubDrive)
@@ -254,7 +254,7 @@ func TestDriveMountStubs(t *testing.T) {
 		mockMachine, err := firecracker.NewMachine(ctx, firecracker.Config{}, firecracker.WithClient(
 			firecracker.NewClient("/path/to/socket", nil, false, firecracker.WithOpsClient(&fctesting.MockClient{
 				PatchGuestDriveByIDFn: func(params *ops.PatchGuestDriveByIDParams) (*ops.PatchGuestDriveByIDNoContent, error) {
-					assert.Equal(t, hostPath, firecracker.StringValue(&params.Body.PathOnHost))
+					assert.Equal(t, hostPath, params.Body.PathOnHost)
 					return nil, nil
 				},
 			}))))

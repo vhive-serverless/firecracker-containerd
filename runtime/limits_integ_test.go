@@ -14,11 +14,13 @@ package main
 
 import (
 	"context"
+	"strconv"
+	"strings"
 	"testing"
 
-	"github.com/containerd/containerd"
-	"github.com/containerd/containerd/namespaces"
-	"github.com/containerd/containerd/oci"
+	containerd "github.com/containerd/containerd/v2/client"
+	"github.com/containerd/containerd/v2/pkg/namespaces"
+	"github.com/containerd/containerd/v2/pkg/oci"
 	"github.com/firecracker-microvm/firecracker-containerd/internal/integtest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -39,7 +41,9 @@ func TestDiskLimit_Isolated(t *testing.T) {
 	// Right now, both naive snapshotter and devmapper snapshotter are configured to have 1024MB image size.
 	// The former is hard-coded since the snapshotter is not for production. The latter is configured in tools/docker/entrypoint.sh.
 	sh := containerd.WithNewSpec(
-		oci.WithProcessArgs("dd", "if=/dev/zero", "of=/tmp/fill", "bs=1M", "count=2000"),
+		oci.WithProcessArgs("/bin/sh", "-c", `dd if=/dev/zero of=/tmp/fill bs=1M count=2000; rc=$?
+stat -c %s /tmp/fill || exit
+exit "$rc"`),
 		oci.WithDefaultPathEnv,
 	)
 
@@ -58,7 +62,8 @@ func TestDiskLimit_Isolated(t *testing.T) {
 	require.NoError(t, err, "failed to create a container")
 
 	assert.Equal(t, uint32(1), result.ExitCode, "writing 2GB must fail")
-	assert.Equal(t, `952+0 records in
-951+0 records out
-`, result.Stderr, "but it must be able to write ~1024MB")
+	written, err := strconv.ParseUint(strings.TrimSpace(result.Stdout), 10, 64)
+	require.NoError(t, err, "expected the size of the filled file; dd: %s", result.Stderr)
+	assert.GreaterOrEqual(t, written, uint64(900<<20), "root filesystem filled too early")
+	assert.Less(t, written, uint64(1<<30), "file must fit within the 1GiB disk")
 }

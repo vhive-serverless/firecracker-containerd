@@ -17,9 +17,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
+	"sync/atomic"
 	"testing"
+	"time"
 
-	"github.com/containerd/containerd/snapshots"
+	"github.com/stretchr/testify/require"
+
+	"github.com/containerd/containerd/v2/core/snapshots"
 	"github.com/hashicorp/go-multierror"
 
 	"github.com/firecracker-microvm/firecracker-containerd/snapshotter/demux/internal"
@@ -303,5 +308,38 @@ func TestListSnapshotters(t *testing.T) {
 				t.Fatalf("%s: %s", test.name, err.Error())
 			}
 		})
+	}
+}
+
+func TestConcurrentGetOwnsOneSnapshotter(t *testing.T) {
+	var calls atomic.Int32
+	uut := NewRemoteSnapshotterCache(func(context.Context, string) (*proxy.RemoteSnapshotter, error) {
+		calls.Add(1)
+		time.Sleep(50 * time.Millisecond) // simulate address resolution and connection setup
+		return &proxy.RemoteSnapshotter{Snapshotter: &internal.SuccessfulSnapshotter{}}, nil
+	})
+	var workers sync.WaitGroup
+	results := make(chan *proxy.RemoteSnapshotter, 20)
+	for range 20 {
+		workers.Add(1)
+		go func() {
+			defer workers.Done()
+			result, err := uut.Get(context.Background(), "shared")
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			results <- result
+		}()
+	}
+	workers.Wait()
+	close(results)
+	require.EqualValues(t, 1, calls.Load(), "duplicate providers leak connections and metrics listeners")
+	var first *proxy.RemoteSnapshotter
+	for result := range results {
+		if first == nil {
+			first = result
+		}
+		require.Same(t, first, result)
 	}
 }

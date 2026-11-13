@@ -18,7 +18,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/containerd/containerd/mount"
+	"github.com/containerd/containerd/v2/core/mount"
 	"github.com/stretchr/testify/require"
 )
 
