@@ -860,6 +860,58 @@ func (x *FirecrackerBalloonDevice) GetStatsPollingIntervals() int64 {
 	return 0
 }
 
+type MemoryBackend struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	BackendType   string                 `protobuf:"bytes,1,opt,name=BackendType,proto3" json:"BackendType,omitempty"` // File or Uffd.
+	BackendPath   string                 `protobuf:"bytes,2,opt,name=BackendPath,proto3" json:"BackendPath,omitempty"` // Memory file or userfaultfd server socket.
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MemoryBackend) Reset() {
+	*x = MemoryBackend{}
+	mi := &file_types_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MemoryBackend) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MemoryBackend) ProtoMessage() {}
+
+func (x *MemoryBackend) ProtoReflect() protoreflect.Message {
+	mi := &file_types_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MemoryBackend.ProtoReflect.Descriptor instead.
+func (*MemoryBackend) Descriptor() ([]byte, []int) {
+	return file_types_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *MemoryBackend) GetBackendType() string {
+	if x != nil {
+		return x.BackendType
+	}
+	return ""
+}
+
+func (x *MemoryBackend) GetBackendPath() string {
+	if x != nil {
+		return x.BackendPath
+	}
+	return ""
+}
+
 type CNIConfiguration_CNIArg struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Key           string                 `protobuf:"bytes,1,opt,name=Key,proto3" json:"Key,omitempty"`
@@ -870,7 +922,7 @@ type CNIConfiguration_CNIArg struct {
 
 func (x *CNIConfiguration_CNIArg) Reset() {
 	*x = CNIConfiguration_CNIArg{}
-	mi := &file_types_proto_msgTypes[11]
+	mi := &file_types_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -882,7 +934,7 @@ func (x *CNIConfiguration_CNIArg) String() string {
 func (*CNIConfiguration_CNIArg) ProtoMessage() {}
 
 func (x *CNIConfiguration_CNIArg) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[11]
+	mi := &file_types_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -990,7 +1042,10 @@ const file_types_proto_rawDesc = "" +
 	"\x18FirecrackerBalloonDevice\x12\x1c\n" +
 	"\tAmountMib\x18\x01 \x01(\x03R\tAmountMib\x12\"\n" +
 	"\fDeflateOnOom\x18\x02 \x01(\bR\fDeflateOnOom\x124\n" +
-	"\x15StatsPollingIntervals\x18\x03 \x01(\x03R\x15StatsPollingIntervalsB\tZ\a.;protob\x06proto3"
+	"\x15StatsPollingIntervals\x18\x03 \x01(\x03R\x15StatsPollingIntervals\"S\n" +
+	"\rMemoryBackend\x12 \n" +
+	"\vBackendType\x18\x01 \x01(\tR\vBackendType\x12 \n" +
+	"\vBackendPath\x18\x02 \x01(\tR\vBackendPathB\tZ\a.;protob\x06proto3"
 
 var (
 	file_types_proto_rawDescOnce sync.Once
@@ -1004,7 +1059,7 @@ func file_types_proto_rawDescGZIP() []byte {
 	return file_types_proto_rawDescData
 }
 
-var file_types_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_types_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_types_proto_goTypes = []any{
 	(*ExtraData)(nil),                       // 0: ExtraData
 	(*FirecrackerNetworkInterface)(nil),     // 1: FirecrackerNetworkInterface
@@ -1017,16 +1072,17 @@ var file_types_proto_goTypes = []any{
 	(*FirecrackerRateLimiter)(nil),          // 8: FirecrackerRateLimiter
 	(*FirecrackerTokenBucket)(nil),          // 9: FirecrackerTokenBucket
 	(*FirecrackerBalloonDevice)(nil),        // 10: FirecrackerBalloonDevice
-	(*CNIConfiguration_CNIArg)(nil),         // 11: CNIConfiguration.CNIArg
-	(*anypb.Any)(nil),                       // 12: google.protobuf.Any
+	(*MemoryBackend)(nil),                   // 11: MemoryBackend
+	(*CNIConfiguration_CNIArg)(nil),         // 12: CNIConfiguration.CNIArg
+	(*anypb.Any)(nil),                       // 13: google.protobuf.Any
 }
 var file_types_proto_depIdxs = []int32{
-	12, // 0: ExtraData.RuncOptions:type_name -> google.protobuf.Any
+	13, // 0: ExtraData.RuncOptions:type_name -> google.protobuf.Any
 	8,  // 1: FirecrackerNetworkInterface.InRateLimiter:type_name -> FirecrackerRateLimiter
 	8,  // 2: FirecrackerNetworkInterface.OutRateLimiter:type_name -> FirecrackerRateLimiter
 	2,  // 3: FirecrackerNetworkInterface.CNIConfig:type_name -> CNIConfiguration
 	3,  // 4: FirecrackerNetworkInterface.StaticConfig:type_name -> StaticNetworkConfiguration
-	11, // 5: CNIConfiguration.Args:type_name -> CNIConfiguration.CNIArg
+	12, // 5: CNIConfiguration.Args:type_name -> CNIConfiguration.CNIArg
 	4,  // 6: StaticNetworkConfiguration.IPConfig:type_name -> IPConfiguration
 	8,  // 7: FirecrackerRootDrive.RateLimiter:type_name -> FirecrackerRateLimiter
 	8,  // 8: FirecrackerDriveMount.RateLimiter:type_name -> FirecrackerRateLimiter
@@ -1050,7 +1106,7 @@ func file_types_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_types_proto_rawDesc), len(file_types_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

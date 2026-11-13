@@ -9,6 +9,7 @@ require (
 	github.com/containerd/containerd/v2 v2.3.7
 	github.com/containerd/continuity v0.5.0
 	github.com/containerd/errdefs v1.0.0
+	github.com/containerd/errdefs/pkg v0.3.0
 	github.com/containerd/fifo v1.1.0
 	github.com/containerd/go-runc v1.1.0
 	github.com/containerd/log v0.1.0
@@ -52,7 +53,6 @@ require (
 	github.com/cilium/ebpf v0.17.3 // indirect
 	github.com/containerd/btrfs/v2 v2.0.0 // indirect
 	github.com/containerd/console v1.0.5 // indirect
-	github.com/containerd/errdefs/pkg v0.3.0 // indirect
 	github.com/containerd/go-cni v1.1.13 // indirect
 	github.com/containerd/go-dmverity v0.1.0 // indirect
 	github.com/containerd/imgcrypt/v2 v2.0.2 // indirect

@@ -46,6 +46,9 @@ type TaskManager interface {
 	// error will be returned.
 	CreateTask(context.Context, *taskAPI.CreateTaskRequest, taskAPI.TTRPCTaskService, IOProxy) (*taskAPI.CreateTaskResponse, error)
 
+	// AdoptProcess registers an already running guest process and owns its proxy.
+	AdoptProcess(context.Context, RestoredProcess, taskAPI.TTRPCTaskService, IOProxy) (*taskAPI.StateResponse, error)
+
 	// DeleteProcess removes a task or exec being managed from the TaskManager.
 	// It deletes the process from the provided TaskService using the provided
 	// request. It also blocks until all IO for the task has been flushed or a
@@ -63,6 +66,14 @@ type TaskManager interface {
 	// If any tasks are still in the TaskManager's map, no change will be made.
 	// It returns a bool indicating whether TaskManager shut down as a result of the call.
 	ShutdownIfEmpty() bool
+
+	// Shutdown closes admission, waits for admitted creation to finish, kills
+	// each task's entire process group, then waits for exits and output copy completion.
+	// It leaves proxies and event publication alive for the final agent drain.
+	Shutdown(context.Context, taskAPI.TTRPCTaskService) error
+
+	// StartProcess admits Start together with task creation and final shutdown.
+	StartProcess(context.Context, *taskAPI.StartRequest, taskAPI.TTRPCTaskService) (*taskAPI.StartResponse, error)
 
 	// AttachIO attaches the given IO proxy to a task or exec.
 	AttachIO(context.Context, string, string, IOProxy) error
@@ -83,6 +94,8 @@ type TaskManager interface {
 func NewTaskManager(shimCtx context.Context, logger *logrus.Entry) TaskManager {
 	return &taskManager{
 		tasks:   make(map[string]map[string]*vmProc),
+		starts:  make(map[chan struct{}]struct{}),
+		deletes: make(map[chan struct{}]struct{}),
 		shimCtx: shimCtx,
 		logger:  logger,
 	}
@@ -91,17 +104,21 @@ func NewTaskManager(shimCtx context.Context, logger *logrus.Entry) TaskManager {
 type taskManager struct {
 	mu sync.Mutex
 	// tasks is a map of taskID to a map of execID->vmProc for that task
-	tasks      map[string]map[string]*vmProc
-	isShutdown bool
+	tasks             map[string]map[string]*vmProc
+	isShutdown        bool
+	starts            map[chan struct{}]struct{}
+	deletes           map[chan struct{}]struct{}
+	shutdownProcesses []*vmProc
 
 	shimCtx context.Context
 	logger  *logrus.Entry
 }
 
 type vmProc struct {
-	taskID string
-	execID string
-	logger *logrus.Entry
+	taskID        string
+	execID        string
+	admissionDone chan struct{}
+	logger        *logrus.Entry
 
 	// ctx and cancel are tied to the exec.
 	ctx    context.Context
@@ -137,7 +154,7 @@ func (m *taskManager) newProc(taskID, execID string) (*vmProc, error) {
 		return nil, status.Errorf(codes.AlreadyExists, "exec %q already exists", execID)
 	}
 
-	proc := &vmProc{}
+	proc := &vmProc{admissionDone: make(chan struct{})}
 	proc.taskID = taskID
 	proc.execID = execID
 	proc.logger = m.logger.WithField("TaskID", taskID).WithField("ExecID", execID)
@@ -192,8 +209,10 @@ func (m *taskManager) CreateTask(
 
 	proc, err := m.newProc(taskID, execID)
 	if err != nil {
+		ioProxy.Close()
 		return nil, err
 	}
+	defer close(proc.admissionDone)
 	proc.proxy = ioProxy
 
 	defer func() {
@@ -239,8 +258,10 @@ func (m *taskManager) ExecProcess(
 
 	proc, err := m.newProc(taskID, execID)
 	if err != nil {
+		ioProxy.Close()
 		return nil, err
 	}
+	defer close(proc.admissionDone)
 	proc.proxy = ioProxy
 
 	defer func() {
@@ -278,6 +299,13 @@ func (m *taskManager) DeleteProcess(
 	req *taskAPI.DeleteRequest,
 	taskService taskAPI.TTRPCTaskService,
 ) (*taskAPI.DeleteResponse, error) {
+	// A concurrent final shutdown must wait for deletion's output drain even
+	// after this process has been removed from the task registry.
+	done := make(chan struct{})
+	m.mu.Lock()
+	m.deletes[done] = struct{}{}
+	m.mu.Unlock()
+	defer func() { m.mu.Lock(); delete(m.deletes, done); close(done); m.mu.Unlock() }()
 	resp, err := taskService.Delete(reqCtx, req)
 	if err != nil {
 		return nil, err
@@ -361,6 +389,10 @@ func (m *taskManager) AttachIO(ctx context.Context, taskID, execID string, proxy
 	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
+	if m.isShutdown {
+		proxy.Close()
+		return status.Error(codes.FailedPrecondition, "cannot attach IO after task manager shutdown")
+	}
 
 	proc, err := m.findProc(taskID, execID)
 	if err != nil {
