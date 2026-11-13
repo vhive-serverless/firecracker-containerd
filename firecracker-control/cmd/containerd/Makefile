@@ -18,7 +18,7 @@ SOURCES := $(shell find ../../../config ../../../internal ../../../proto ../../ 
 GOMOD := $(shell go env GOMOD)
 GOSUM := $(GOMOD:.mod=.sum)
 REVISION=$(shell git rev-parse HEAD)
-VERSION_LDFLAGS="-X github.com/containerd/containerd/version.Revision=$(REVISION)"
+VERSION_LDFLAGS="-X github.com/containerd/containerd/v2/version.Revision=$(REVISION)"
 
 all: build
 
@@ -30,7 +30,7 @@ firecracker-containerd: $(SOURCES) $(GOMOD) $(GOSUM)
 
 firecracker-ctr: $(GOMOD) $(GOSUM)
 	GOBIN=$(CURDIR) go install $(EXTRAGOARGS) \
-		-ldflags $(VERSION_LDFLAGS) github.com/containerd/containerd/cmd/ctr
+		-ldflags $(VERSION_LDFLAGS) github.com/containerd/containerd/v2/cmd/ctr
 	mv ctr firecracker-ctr
 
 install: firecracker-containerd firecracker-ctr

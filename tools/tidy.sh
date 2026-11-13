@@ -15,7 +15,8 @@
 
 set -euo pipefail
 
-for path in $(find . -name 'go.mod' | grep -v '^\./_submodules/')
-do
-    (cd $(dirname $path) && pwd && go mod tidy)
-done
+# Only manifests owned by this repository belong to its tidy check. Dependency
+# checkouts and test fixtures under tmp/ must retain their pinned source trees.
+while IFS= read -r -d '' path; do
+    (cd "$(dirname "$path")" && pwd && go mod tidy)
+done < <(git ls-files -z -- 'go.mod' '**/go.mod')

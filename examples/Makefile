@@ -36,7 +36,7 @@ test:
 integ-test:
 	mkdir -p $(CURDIR)/logs
 	$(CURDIR)/../tools/thinpool.sh reset "$(TEST_POOL)"
-	docker run --rm -it \
+	docker run --rm \
 		--privileged \
 		--ipc=host \
 		--volume /dev:/dev \

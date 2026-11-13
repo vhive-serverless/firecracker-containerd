@@ -1,0 +1,202 @@
+{
+  "schema_version": 1,
+  "status": "Migrated Step 1 candidate; historical Step 1 receipts below do not validate this upstream stack. Fresh VM acceptance pending.",
+  "step_1_validation": {
+    "runtime_branch": "modernize-runtime",
+    "completion_commit": "06bd2058ba7938ad31eec9e17ac4d2e4c33a958f",
+    "tested_runtime_commit": "06bd2058ba7938ad31eec9e17ac4d2e4c33a958f",
+    "worker_checkout": "/users/nehalem/fc-ctrd-mod/step1-io-committed",
+    "install_prefix": "/users/nehalem/fc-ctrd-mod/install/06bd2058ba79",
+    "acceptance_receipt": "evidence/06bd205-telemetry-acceptance-receipt.log",
+    "previous_completion_commit": "3adc9f64ebc0fd623f8072b53084c8b8eebcdef4",
+    "initial_tested_runtime_commit": "e666612819bc1efa71c645434bc36385f92e6423",
+    "worker_toolchains": "evidence/e666612819bc-worker-toolchains.log",
+    "result": "120 top-level acceptance cases passed (36 runtime, 5 snapshotter, 79 SDK); one existing SDK metrics skip; 3 targeted jailer race tests passed"
+  },
+  "worker": {
+    "ssh": "nehalem@amd218.utah.cloudlab.us",
+    "hostname": "node-005.cluster.ntu-cloud-pg0.utah.cloudlab.us",
+    "os": "Ubuntu 24.04.5 LTS",
+    "kernel": "6.8.0-147-generic",
+    "architecture": "x86_64",
+    "cpu": "AMD EPYC 7302P 16-Core Processor",
+    "logical_cpus": 32,
+    "memory_gib_approx": 125,
+    "cgroup_filesystem": "cgroup2",
+    "workspace": "/users/nehalem/fc-ctrd-mod",
+    "host_backing": {
+      "source": "/dev/sda3",
+      "filesystem": "ext3"
+    }
+  },
+  "existing": {
+    "runtime": {
+      "remote": "git@github.com:vhive-serverless/firecracker-containerd.git",
+      "branch": "master",
+      "commit": "be68640a5d2237f5b427c37c1f5809ec154126c5"
+    },
+    "sdk_checkout": {
+      "remote": "git@github.com:JooyoungPark73/firecracker-go-sdk.git",
+      "branch": "main",
+      "commit": "6fb280e993d4516ee6d5d20238572fe8752bc7ca"
+    },
+    "sdk_previous_modernization": {
+      "branch": "feat/update-firecracker-1.14",
+      "commit": "5368ef7c727702672d4942a8f8b344134f41ef82"
+    },
+    "vmm_checkout": {
+      "remote": "git@github.com:JooyoungPark73/firecracker.git",
+      "branch": "main",
+      "commit": "a19ea431b4f0eb6ac7ecd8a5c4508b54824bcb82"
+    },
+    "runtime_modules": {
+      "go": "1.25.0",
+      "containerd": "v1.7.33",
+      "containerd_api": "v1.8.0",
+      "sdk": "v1.0.1-0.20250818195323-ed6ff32aa924",
+      "runc": "v1.2.8",
+      "cni": "v1.3.0",
+      "cni_plugins": "v1.7.1",
+      "tc_redirect_tap": "v0.0.0-20250516183331-34bf829e9a5c",
+      "ttrpc": "v1.2.7",
+      "protobuf": "v1.36.10"
+    },
+    "runtime_submodules": {
+      "firecracker": "77cfb9ceaa6a54e22a8259f50fb621ad1e39292b",
+      "runc": "eeb7e6024f9ee43876301b1d23c353384fa6dcdd",
+      "stargz_snapshotter": "639461966645e6904838b914bf6eda0177bd4b25"
+    },
+    "build_inputs": {
+      "go_builder": "golang:1.25-bookworm",
+      "runc_builder": "public.ecr.aws/docker/library/golang:1.25-bookworm",
+      "rootfs_builder": "public.ecr.aws/docker/library/debian:bookworm-slim",
+      "guest_distribution": "Debian bullseye via unpinned deb.debian.org",
+      "guest_rootfs": "read-only squashfs plus overlay-init; upperdir defaults to tmpfs",
+      "guest_kernel_default": "mutable S3 quickstart artifact with fixed checksum",
+      "guest_kernel_source_build_default": "4.14 (5.10 also configured)",
+      "cni_makefile_download": "v1.1.0",
+      "sdk_makefile_firecracker_download": "v1.4.1",
+      "protobuf_compiler_builder": "3.21.12-3+deb12u1",
+      "protoc_gen_go_builder": "v1.33",
+      "protoc_gen_go_ttrpc_builder": "v1.2.3"
+    },
+    "vhive_branches": {
+      "vhive-v1.8.3": "bb007a1ef5692c0e30d8343b20d17b93ab7596f5",
+      "firecracker-v1.13.1-vhive-integration": "d65c452e6bcd9491bc3fb13a0c26ec7cc83a5442"
+    }
+  },
+  "selected_inputs": {
+    "firecracker": {
+      "upstream": "https://github.com/firecracker-microvm/firecracker.git",
+      "base_tag": "v1.18.0",
+      "base_tag_object": "07a7c2e20a8f4f661702551d02fc3eca679842a5",
+      "base_commit": "eaf83bb718a559d324613d566eaf776b31a62340",
+      "branch": "v1.18.0",
+      "commit": "eaf83bb718a559d324613d566eaf776b31a62340",
+      "target": "x86_64-unknown-linux-musl",
+      "binary_source": "official GitHub release",
+      "release_archive_sha256": {
+        "x86_64": "1ac8eec866dd5eea14efecf6323e22b23eea24054545338a5b34bc5bca6623cd",
+        "aarch64": "2a6130ff0338901ff9d7fbd73ce046c6b1c6123889dc84a34d678aa53bd0c0c2"
+      }
+    },
+    "go": {
+      "version": "1.26.11",
+      "archive": "go1.26.11.linux-amd64.tar.gz",
+      "sha256": "9849f4e04ee35303714e34fbc3ac8ab44ea3e448a95aa182f91e3b9b79c710ec"
+    },
+    "k3s_required": "v1.37.2+k3s1",
+    "k3s_release_reported_containerd": "v2.3.7-k3s1",
+    "k3s_release_reported_runc": "v1.4.2",
+    "swagger_generator_previous_work": "v0.33.1",
+    "sdk": {
+      "remote": "https://github.com/vhive-serverless/firecracker-go-sdk.git",
+      "branch": "firecracker-v1.18.0",
+      "commit": "dd9db322432989b96cff7a38a64703d60b6cabf9",
+      "module_replacement": "github.com/vhive-serverless/firecracker-go-sdk v0.0.0-20261112180021-dd9db3224329"
+    },
+    "containerd": {
+      "version": "v2.3.7",
+      "commit": "6f589cf13dc01a5b493911355427e05b2ff005d7",
+      "api": "v1.11.1"
+    },
+    "runc": {
+      "version": "v1.4.2",
+      "commit": "c241c0bb5e60a8e8c1b2e53d4eca8d0068d8d57e"
+    },
+    "stargz_snapshotter": {
+      "version": "v0.18.2",
+      "commit": "3070538befb5a6c09f93e99164762b3a76310357"
+    },
+    "guest_kernel": {
+      "source": "https://github.com/amazonlinux/linux.git",
+      "tag": "kernel6.18-6.18.56-126.188.amzn2023",
+      "commit": "7483450dec64b4f923037de31d8c28298a7c3359",
+      "config_source_firecracker_commit": "eaf83bb718a559d324613d566eaf776b31a62340",
+      "local_version": "-fcmod"
+    },
+    "guest_distribution": {
+      "name": "Debian trixie",
+      "mirror": "https://snapshot.debian.org/archive/debian/20261110T000000Z/"
+    },
+    "go_builder": "public.ecr.aws/docker/library/golang:1.26.11-bookworm@sha256:dc40a13b61304647ed7e5d581d246b86413dfc29d63c6d018310feb93cd98fc0",
+    "rootfs_builder": "public.ecr.aws/docker/library/debian:trixie-slim@sha256:a72b4433de1cf7d6bae0c4cee74d0547f58601a643b3375f070c51600d63b6b2",
+    "networking": {
+      "cni_library": "v1.3.0",
+      "cni_plugins": "v1.9.1",
+      "tc_redirect_tap": "v0.0.0-20250516183331-34bf829e9a5c",
+      "tc_redirect_tap_upstream_head_verified": "34bf829e9a5c99df47318c7feeb637576df239fc"
+    },
+    "generators": {
+      "go_swagger": "v0.33.1",
+      "protoc": "3.21.12-3+deb12u1 (pinned Go builder distribution)",
+      "protoc_gen_go": "v1.36.10",
+      "protoc_gen_go_ttrpc": "v1.2.8"
+    },
+    "stargz_test_image": "ghcr.io/firecracker-microvm/firecracker-containerd/amazonlinux@sha256:3df2da42bfeb79cd5ef93bb7eff5630a2634b3688659e8bef83e981ed8083ccb",
+    "workload_images": {
+      "alpine_3_10_1": "sha256:6a92cd1fcdc8d8cdec60f33dda4db2cb1fcdcacf3410a8e05b3741f44a9b5998",
+      "iperf3_3_6_r0": "sha256:1ae7855531c64f83144c3a4ba68f02b17d1588f3470a183688e877e8eb3cceac",
+      "postgres_14_3": "sha256:2d1e636f07781d4799b3f2edbff78a0a5494f24c4512cb56a83ebfd0e04ec074",
+      "alpine_3_23_0": "sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212314c5dc7375"
+    }
+  },
+  "step_1_previous_validation": {
+    "runtime_branch": "modernize-runtime",
+    "completion_commit": "3adc9f64ebc0fd623f8072b53084c8b8eebcdef4",
+    "tested_runtime_commit": "3adc9f64ebc0fd623f8072b53084c8b8eebcdef4",
+    "worker_checkout": "/users/nehalem/fc-ctrd-mod/step1-metrics-committed",
+    "install_prefix": "/users/nehalem/fc-ctrd-mod/install/3adc9f64ebc0",
+    "acceptance_receipt": "evidence/3adc9f6-metrics-acceptance-receipt.log",
+    "previous_completion_commit": "e7395acb2c88cfe8c5d32ba61ff65c17e031858c",
+    "initial_tested_runtime_commit": "e666612819bc1efa71c645434bc36385f92e6423",
+    "worker_toolchains": "evidence/e666612819bc-worker-toolchains.log",
+    "result": "119 top-level acceptance cases passed; one existing SDK metrics skip"
+  },
+  "step_1_validation_history": [
+    {
+      "runtime_branch": "modernize-runtime",
+      "completion_commit": "6585eba92db4f8c55f6567cf8d2c8d695adcba05",
+      "tested_runtime_commit": "6585eba92db4f8c55f6567cf8d2c8d695adcba05",
+      "worker_checkout": "/users/nehalem/fc-ctrd-mod/step1-failed-create-committed",
+      "install_prefix": "/users/nehalem/fc-ctrd-mod/install/6585eba92db4",
+      "acceptance_receipt": "evidence/6585eba-acceptance-receipt.log",
+      "completion_log_sha256": "9b5310e6e36b5e893ba49a987d9c9d5f003aecb366d9df95c39db4086b3b2dd1",
+      "previous_completion_commit": "e7395acb2c88cfe8c5d32ba61ff65c17e031858c",
+      "initial_tested_runtime_commit": "e666612819bc1efa71c645434bc36385f92e6423",
+      "worker_toolchains": "evidence/e666612819bc-worker-toolchains.log"
+    }
+  ],
+  "cache_eviction_test_maintenance": {
+    "tested_revision": "1a56f6ade94cca1b36aa7d7170d0ee60b765473c",
+    "evidence": "evidence/step4-cache-test/verification.json",
+    "evidence_sha256": "666d90dbfd00ac03f609876f25164cc8ec3a2cc6f4e712f544c3ea4d13e47ca6",
+    "validation": "200 targeted repetitions with GOMAXPROCS=1, 50 targeted race repetitions, whole cache package race; all passed on designated worker with Go 1.26.11",
+    "scope": "Test-only synchronization fix; production code unchanged; no new VM acceptance or Step 3 completion claim."
+  },
+  "upstream_sdk_validation": {
+    "commit": "dd9db322432989b96cff7a38a64703d60b6cabf9",
+    "evidence": "evidence/upstream-migration/sdk-dd9db32-worker.json",
+    "scope": "SDK privileged suite only; not migrated runtime acceptance"
+  }
+}

@@ -48,12 +48,13 @@ install: containerd-shim-aws-firecracker
 test:
 	go test ./... $(EXTRAGOARGS)
 
-integ-test:
+integ-test: test-deps
+	test -n "$(INTEG_TESTNAMES)"
 	$(MAKE) $(addprefix integ-test-,$(INTEG_TESTNAMES))
 
-integ-test-%: logs
+integ-test-%: logs test-deps
 	$(CURDIR)/../tools/thinpool.sh reset "$(FICD_DM_POOL)"
-	docker run --rm -it \
+	docker run --rm \
 		--privileged \
 		--ipc=host \
 		--network=none \
@@ -75,7 +76,7 @@ integ-test-%: logs
 
 benchmark-%: logs
 	$(CURDIR)/../tools/thinpool.sh reset "$(FICD_DM_POOL)"
-	docker run --rm -it \
+	docker run --rm \
 		--privileged \
 		--ipc=host \
 		--network=none \
@@ -98,6 +99,10 @@ benchmark-%: logs
 logs:
 	mkdir logs
 
+.PHONY: test-deps
+test-deps:
+	$(MAKE) -C .. test-deps-in-docker
+
 PERF_TESTNAME?=TestCNIPlugin_Performance
 PERF_VMCOUNT?=25
 PERF_RUNTIME_SECONDS?=600
@@ -117,7 +122,7 @@ perf-test:
 	$(if $(PERF_PLUGIN_NAME),true,$(error PERF_PLUGIN_NAME must be set for perf-test target))
 	mkdir -p $(CURDIR)/logs
 
-	docker run --rm -it \
+	docker run --rm \
 		--privileged \
 		--ipc=host \
 		--network=none \
@@ -144,7 +149,7 @@ perf-test:
 .PHONY: critest
 critest:
 	$(CURDIR)/../tools/thinpool.sh reset "$(FICD_DM_POOL)"
-	docker run --rm -it \
+	docker run --rm \
 		--privileged \
 		--ipc=host \
 		--volume /dev:/dev \
