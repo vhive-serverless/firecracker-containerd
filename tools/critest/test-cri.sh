@@ -29,6 +29,7 @@ export FICD_DM_VOLUME_GROUP=
 export FICD_DM_POOL="fc-$suffix"
 container_owned=0
 pool_owned=0
+storage=''
 cleanup() {
     if test "$container_owned" = 1; then
         docker rm --force "$name" >/dev/null
@@ -38,8 +39,12 @@ cleanup() {
         tools/thinpool.sh remove "$FICD_DM_POOL"
         pool_owned=0
     fi
+    # Only remove the unique directory allocated by this invocation.
+    if test -n "$storage"; then sudo -n rm -rf -- "$storage"; fi
 }
 trap cleanup EXIT
+mkdir -p "$stack_dir/.ficd-test-vms"
+storage=$(mktemp -d "$stack_dir/.ficd-test-vms/cri-$suffix.XXXXXXXX")
 printf 'CRI_LOGS=%s\n' "$logs"
 {
     printf 'script_revision=%s\nruntime_revision=%s\nimage=%s\nfocus=%s\n' \
@@ -47,6 +52,8 @@ printf 'CRI_LOGS=%s\n' "$logs"
     printf 'source_dirty=%s\nimage_override=%s\n' "$dirty" "${CRI_BASE_IMAGE:+true}"
     printf 'websocket_streaming=%s\n' "${CRI_WEBSOCKETS:-0}"
     printf 'runtime_integration_tests=%s\n' "${CRI_INTEGRATION_TESTS:-0}"
+    printf 'vm_storage=%s\n' "$storage"
+    findmnt -T "$storage" -o TARGET,SOURCE,FSTYPE
     if test "${CRI_INTEGRATION_TESTS:-0}" = 1; then sha256sum cri/cri-runtime.test; fi
     sha256sum tools/critest/test-cri.sh tools/critest/run-in-container.sh
 } > "$logs/inputs.log"
@@ -56,6 +63,7 @@ docker create --init --name "$name" --privileged --network bridge --ipc=host \
     --volume /dev:/dev --volume /run/udev/control:/run/udev/control \
     --volume "$repo_dir/tools/critest/run-in-container.sh:/run-cri:ro" \
     --volume "$logs:/var/log/firecracker-containerd-test" \
+    --volume "$storage:/srv/firecracker_containerd_tests" \
     --env FICD_DM_POOL --env "CRI_RUNTIME_REVISION=$runtime_revision" \
     --env "CRI_FOCUS=${CRI_FOCUS:-}" --entrypoint /bin/bash \
     --env "CRI_WEBSOCKETS=${CRI_WEBSOCKETS:-0}" \
