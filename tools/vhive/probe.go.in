@@ -1,0 +1,70 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+	"strconv"
+	"time"
+
+	hello "github.com/vhive-serverless/vhive/examples/protobuf/helloworld"
+	"github.com/vhive-serverless/vhive/proto"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+)
+
+func main() {
+	if len(os.Args) < 3 {
+		log.Fatal("usage: vhive-probe start ID IMAGE | invoke ID IMAGE PAYLOAD COLD | stop ID")
+	}
+	action, id := os.Args[1], os.Args[2]
+	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+	defer cancel()
+	port := "3333"
+	if action == "invoke" {
+		port = "3334"
+	}
+	conn, err := grpc.NewClient("127.0.0.1:"+port, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+	control := proto.NewOrchestratorClient(conn)
+	switch action {
+	case "start":
+		if len(os.Args) != 4 {
+			log.Fatal("start requires an image")
+		}
+		result, err := control.StartVM(ctx, &proto.StartVMReq{Id: id, Image: os.Args[3]}, grpc.WaitForReady(true))
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(result.GetMessage())
+	case "invoke":
+		if len(os.Args) != 6 {
+			log.Fatal("invoke requires image, payload, and expected cold flag")
+		}
+		cold, err := strconv.ParseBool(os.Args[5])
+		if err != nil {
+			log.Fatal(err)
+		}
+		result, err := hello.NewFwdGreeterClient(conn).FwdHello(ctx,
+			&hello.FwdHelloReq{Id: id, Image: os.Args[3], Payload: os.Args[4]}, grpc.WaitForReady(true))
+		if err != nil {
+			log.Fatal(err)
+		}
+		if result.GetPayload() != "Hello, "+os.Args[4]+"!" || result.GetIsColdStart() != cold {
+			log.Fatalf("unexpected function response: %s", result)
+		}
+		fmt.Printf("reply=%q cold=%t\n", result.GetPayload(), result.GetIsColdStart())
+	case "stop":
+		result, err := control.StopSingleVM(ctx, &proto.StopSingleVMReq{Id: id}, grpc.WaitForReady(true))
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(result.GetMessage())
+	default:
+		log.Fatalf("unknown action %q", action)
+	}
+}
