@@ -1,11 +1,59 @@
 # Step 2: vHive compatibility
 
-## Migrated upstream candidate
+## Current exact-source coverage and unfixed CNI flake
 
-This candidate inherits the official Firecracker v1.18.0 and published SDK pins
-from Step 1. The exact input lock is [versions.json](versions.json). Historical
-acceptance below remains tied to the original custom VMM revisions and does not
-validate this candidate.
+The maintained branch is `firecracker-v1.18-containerdv2-vhive-integration`.
+Exact source `2e03843816cf95d184ad4ad429adf6ea2ccc1412`, tree
+`76c862aa60162a0b510d7626d523f047709e48d9`, has complete required check coverage
+across separately recorded runs. **Its original full-stack invocation exited 2,
+not 0; the observed existing CNI chain-creation flake remains unfixed.** The
+[combined receipt](evidence/upstream-step2-2e03843816cf/README.md) preserves the
+failed transcript, all diagnostic repeats, passing tail and exact provenance.
+This later documentation/cumulative-history tip was not itself tested.
+
+Build/private install, test-image preparation and three unchanged provisional
+vHive cases passed: `TestPauseSnapResume` 16.29 s,
+`TestSnapshotConcurrentClones` 28.34 s, and
+`TestSnapshotSourceMemoryAndDiskIsolation` 21.30 s. The full-stack attempt
+completed input/lint/package/tidy/proto/clean-diff checks, all 36 runtime tests
+and four snapshotter tests (40 top-level passes), but the fifth snapshotter
+case failed on CNI firewall ADD: iptables `nf_tables` exit 4, `CNI-FORWARD`
+chain already exists. The subsequent case passed because the snapshotter
+Makefile deliberately uses `-k`; it was not silently omitted.
+
+That exact multi-VM case passed in three fresh-container diagnostics at
+7.93/7.45/7.76 s, retaining default five concurrent VMs and unchanged source,
+image and assertions. The separately run original thinpool/SDK tail passed
+with 86 SDK top-level passes and the existing `TestLogAndMetrics` skip. Eight
+nested StopVM skips remain in the original log. All original required check
+identities and the provenance/cleanup epilogue are covered; no check was
+removed or weakened. **Do not report these segments as one green full run or
+claim `COMMITTED_STACK_ACCEPTANCE_OK` for the failed invocation.** The tail's
+own marker is `STAGE2_REMAINING_THINPOOL_AND_SDK_CHECKS_OK`.
+
+The CNI configuration, plugin pins and five-VM test are byte-identical to
+accepted earlier sources. Pinned firewall v1.9.1 performs a non-atomic chain
+existence check/create and tolerates existing-chain exit 1 but not the observed
+nftables exit 4. The source diagnosis supports an existing dependency race;
+concurrent fresh VM networking can still fail. No runtime fix, warm chain,
+reduced concurrency, skipped test or silent retry was used to obtain coverage.
+
+The unchanged [input lock](versions.json) selects official unmodified
+Firecracker/jailer 1.18.0, published SDK
+`dd9db322432989b96cff7a38a64703d60b6cabf9`, containerd 2.3.7 and runc 1.4.2.
+The tail verifies clean exact source, byte-identical module graph, clean agent
+VCS metadata, all 12 unchanged artifact hashes and exact existing image ID.
+Owned resources were independently verified cleaned; unrelated worker resources
+were preserved. Earlier [7386 clean acceptance](evidence/upstream-step2-worker-attempts/README.md)
+and every failed attempt retain their original scope.
+
+**Final published-runtime-module and installed-vHive consumer acceptance remain
+pending.** The provisional harness still uses explicit local runtime replacement.
+Publish the actual functional Step 2 tip before finalizing the consumer module
+and ready installation manifest. Native/CRI gates belong to later milestones;
+full CRI remains WIP and Kubernetes Pod restore is deferred to 1.38.
+
+## Migrated legacy profile
 
 The legacy wire fields retain numbers 15–21. CreateVMResponse adds generic
 restored FIFO endpoints at field 6. PauseVM freezes running workload tasks,
@@ -18,23 +66,72 @@ namespace and adopts the existing guest task and exec processes. The supported
 legacy profile remains unjailed, read-only guest root, one writable workload
 drive, and File memory; Uffd is schema-supported but has no acceptance here.
 
+For same-ID unjailed restore, the live shim directory is exposed only at
+`/.firecracker-restore-shared`, used as the VMM working directory for short
+API/vsock names. Captured disk paths remain independent private mappings at
+original addresses. State/memory inputs have explicit read-only binds and
+logging has explicit writable binds. Additional disks require validated
+private mounts. Later legacy snapshot output paths below the live shim directory
+use the alias; captured reset slots retain original absolute paths and only a
+verified pristine generated stub is reusable. Generic overlap rejection remains.
+Native recapture/jailed ownership rules first belong to Step 3.
+
 [tools/vhive/test-vhive.sh](../../tools/vhive/test-vhive.sh) uses the exact clean
 vHive test-source revision in the input lock. Its disposable build binds this
 clean runtime archive as a local Go module and records that substitution; this
 is provisional candidate coverage, not published-consumer acceptance. The
 selected tests exercise source control/stdio after capture, independent live
-clones, guest process memory continuity and disk isolation. The test source
-revision is currently unpublished. Set `VHIVE_SOURCE_REPOSITORY` to a local Git
+clones, guest process memory continuity and disk isolation. The recorded worker
+test source is `89593103ac667cc096f89770c94a77b2b93c3a7d`, supplied through a local Git
 repository or bundle containing that exact commit; the harness still verifies
 the pinned revision and records the source repository. The default organization
-URL requires that source revision to be published first. They must run on a
-separate privileged KVM worker after the exact runtime stack is built. No new VM
-acceptance is claimed by construction or compilation. The final vHive runtime
+URL requires that exact source revision to be available there. Run on a separate
+privileged KVM worker after building the exact runtime stack. Compilation alone
+does not establish this acceptance. The final vHive runtime
 module pin and ready installation manifest follow publication of the accepted
 Step 2 commit, avoiding a circular pin.
 
 The old `modern-stack.patch` and probe are retained as historical reproduction
 artifacts; the migrated harness does not apply that obsolete client patch.
+
+## Reproduction and artifact boundaries
+
+Use an exact clean checkout and prepared KVM worker with pinned Go, Docker and
+passwordless sudo. Preserve new evidence outside the checkout. The scripts and
+criteria remain unchanged:
+
+```sh
+test "$(git rev-parse HEAD)" = 2e03843816cf95d184ad4ad429adf6ea2ccc1412
+test -z "$(git status --porcelain)"
+export STACK_DIR=/users/nehalem/fc-ctrd-mod
+export PATH="$STACK_DIR/toolchains/go1.26.11/bin:$PATH"
+export STATIC_AGENT=on STATIC_DOCKER_CREDENTIAL_MMDS=on
+export DOCKER_IMAGE_TAG=$(git rev-parse --short=12 HEAD)
+: "${VHIVE_SOURCE_REPOSITORY:?Set the local pinned vHive test-source repository}"
+export VHIVE_SOURCE_REPOSITORY
+tools/modernize/build-stack.sh
+tools/modernize/install-stack.sh
+make test-images
+tools/vhive/test-vhive.sh
+tools/modernize/test-stack.sh
+```
+
+If the known CNI error recurs, preserve the failed outcome and diagnose with
+unchanged concurrency. The recorded supplemental launchers and results are in
+the receipt; they are separate observations, not an automatic retry policy or
+permission to relabel a failed run. Fresh isolated containers/pools keep those
+checks away from unrelated host/Kubernetes networks.
+
+Installed rootfs SHA-256 is
+`e4ab2bd242a1d3ce5157c99d3c9c1cf38228263c0b8c35a37a6081ffa17d6ca4`;
+rebuilt full-stack test rootfs is
+`5454922651a3fd2507f15b7e079e5d34288141189cf9a43ab70c3896cfebe4d1`.
+The provisional vHive image is separate again; no rootfs byte identity is
+asserted. The receipt explicitly documents validated reuse of the earlier
+accepted kernel/config rather than claiming fresh kernel compilation. Tail
+artifacts/modules/image/cleanup are recorded separately because the original
+full-run receipt epilogue was not reached. No final installed-vHive consumer
+result or new performance claim follows.
 
 ## Historical accepted custom stack
 

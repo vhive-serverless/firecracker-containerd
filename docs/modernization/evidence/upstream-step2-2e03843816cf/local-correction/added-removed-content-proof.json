@@ -1,0 +1,1519 @@
+{
+  "original": "53d6c9b09adf8f9f1642b3c8ec6c8230b93f1c15",
+  "candidate": "2e03843816cf95d184ad4ad429adf6ea2ccc1412",
+  "equal": true,
+  "records": [
+    [
+      "runtime/drive_handler.go",
+      "-\terr = machine.UpdateGuestDrive(requestCtx, drive.driveID, filepath.Base(drive.stubPath))"
+    ],
+    [
+      "runtime/drive_handler.go",
+      "+\tpath := filepath.Base(drive.stubPath)"
+    ],
+    [
+      "runtime/drive_handler.go",
+      "+\tif j, unjailed := drive.jail.(*noopJailer); unjailed {"
+    ],
+    [
+      "runtime/drive_handler.go",
+      "+\t\t// Keep exported unjailed disk paths absolute and outside the reserved"
+    ],
+    [
+      "runtime/drive_handler.go",
+      "+\t\t// live-directory alias, so a subsequent checkpoint is restorable."
+    ],
+    [
+      "runtime/drive_handler.go",
+      "+\t\tif err := j.exposeStubDrive(drive.stubPath, drive.driveID); err != nil {"
+    ],
+    [
+      "runtime/drive_handler.go",
+      "+\t\t\treturn fmt.Errorf(\"failed to expose reset stub: %w\", err)"
+    ],
+    [
+      "runtime/drive_handler.go",
+      "+\t\t}"
+    ],
+    [
+      "runtime/drive_handler.go",
+      "+\t\tpath = drive.stubPath"
+    ],
+    [
+      "runtime/drive_handler.go",
+      "+\t}"
+    ],
+    [
+      "runtime/drive_handler.go",
+      "+\terr = machine.UpdateGuestDrive(requestCtx, drive.driveID, path)"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t\"bytes\""
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t\"io\""
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t\"github.com/firecracker-microvm/firecracker-containerd/internal\""
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "-\t\t// private cwd at the shared VM directory, so short names also retain"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t\t// private cwd at the live shared-directory alias, so short names also retain"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t\tvar writableInputs []string"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "-\t\t\t\tinputs = append(inputs, *path)"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t\t\t\twritableInputs = append(writableInputs, *path)"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "-\t\tcmd, err = restoreNamespaceCommand(j.ctx, j.shimDir.RootPath(), binary, args, j.restoreMounts, inputs)"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t\tcmd, err = restoreNamespaceCommand(j.ctx, j.shimDir.RootPath(), binary, args, j.restoreMounts, inputs, writableInputs...)"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "-\tif pathWithin(path, shared) {"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "-\t\treturn nil"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "-\t}"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "-\tif err := validateRestoreMounts(mounts, shared); err != nil {"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\tif err := validateRestoreMounts(mounts, restoreSharedDirectory); err != nil {"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+// exposeStubDrive may reuse an already captured private stub, but only after"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+// checking the entire generated slot marker (including its zero padding)."
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+// Generic disk exposure still rejects replacement of a captured mount."
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+func (j *noopJailer) exposeStubDrive(path, driveID string) error {"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\tif !filepath.IsAbs(path) || filepath.Clean(path) != path || stubPathToDriveID(path) != driveID {"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t\treturn fmt.Errorf(\"invalid reset stub identity\")"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t}"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\tj.restoreMu.RLock()"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\tfor _, mount := range j.restoreMounts {"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t\tif mount.Target != path {"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t\t\tcontinue"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t\t}"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t\terr := validatePristineStub(mount, driveID)"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t\tj.restoreMu.RUnlock()"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t\treturn err"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t}"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\tj.restoreMu.RUnlock()"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\treturn j.ExposeFileToJail(path)"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+}"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+func validatePristineStub(mount restoreMount, driveID string) error {"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\tif mount.ReadOnly {"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t\treturn fmt.Errorf(\"reset stub must be writable\")"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t}"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\tcontent, err := internal.GenerateStubContent(driveID)"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\tif err != nil {"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t\treturn err"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t}"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\tsize := (len(content) + fcSectorSize - 1) / fcSectorSize * fcSectorSize"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\texpected := make([]byte, size)"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\tcopy(expected, content)"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\tfile, _, err := openRestoreBacking(mount.Source)"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\tif err != nil {"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t\treturn err"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t}"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\tdefer file.Close()"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\tinfo, err := file.Stat()"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\tif err != nil {"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t\treturn err"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t}"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\tif !info.Mode().IsRegular() || info.Size() != int64(size) {"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t\treturn fmt.Errorf(\"captured reset stub has invalid type or size\")"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t}"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\tactual, err := io.ReadAll(io.LimitReader(file, int64(size)+1))"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\tif err != nil {"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t\treturn err"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t}"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\tif !bytes.Equal(actual, expected) {"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t\treturn fmt.Errorf(\"captured reset stub does not match drive slot %s\", driveID)"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\t}"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+\treturn nil"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+}"
+    ],
+    [
+      "runtime/noop_jailer.go",
+      "+"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "-\tfor _, reserved := range []string{restoreKVMDevice, restoreTunDevice, restoreNullDevice, restoreZeroDevice, restoreRandomDevice, restoreURandomDevice, restoreProcDirectory, \"/sys\", restoreExecutable, \"/firecracker\", \"/api.socket\", \"/fc-vsock.sock\"} {"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+\tfor _, reserved := range []string{restoreKVMDevice, restoreTunDevice, restoreNullDevice, restoreZeroDevice, restoreRandomDevice, restoreURandomDevice, restoreProcDirectory, \"/sys\", restoreExecutable, restoreSharedDirectory, \"/firecracker\", \"/api.socket\", \"/fc-vsock.sock\"} {"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "-\tif err := validateRestoreMounts(mounts, s.jailer.JailPath().RootPath()); err != nil {"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+\tprotected := s.jailer.JailPath().RootPath()"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+\tif _, unjailed := s.jailer.(*noopJailer); unjailed {"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+\t\tprotected = restoreSharedDirectory"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+\t}"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+\tif err := validateRestoreMounts(mounts, protected); err != nil {"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+// restoreAPIPath translates host-created output paths to the live directory"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+// exposed inside an unjailed restored VMM. Captured disk targets never use this"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+// translation: their original paths identify private backing mounts."
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+func restoreAPIPath(jail jailer, path string) string {"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+\tj, ok := jail.(*noopJailer)"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+\tif !ok || !filepath.IsAbs(path) || filepath.Clean(path) != path {"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+\t\treturn path"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+\t}"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+\tj.restoreMu.RLock()"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+\tdefer j.restoreMu.RUnlock()"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+\tif len(j.restoreMounts) == 0 {"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+\t\treturn path"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+\t}"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+\tshared := j.shimDir.RootPath()"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+\tif !pathWithin(path, shared) {"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+\t\treturn path"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+\t}"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+\trelative, err := filepath.Rel(shared, path)"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+\tif err != nil {"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+\t\treturn path"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+\t}"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+\treturn filepath.Join(restoreSharedDirectory, relative)"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+}"
+    ],
+    [
+      "runtime/restore_mounts.go",
+      "+"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+func TestSameIDRestoreMountPlan(t *testing.T) {"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+\tshared := t.TempDir()"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+\tbacking := filepath.Join(shared, \"private-clone\")"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+\trequire.NoError(t, os.WriteFile(backing, []byte(\"private\"), 0600))"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+\tmounts := []restoreMount{{Source: backing, Target: filepath.Join(shared, \"ctrstub0\")}}"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+\t// The old absolute path belongs to tmpfs, while live shim files are at"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+\t// the reserved alias. Same-ID capture paths must remain unchanged."
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+\trequire.NoError(t, validateRestoreMounts(mounts, restoreSharedDirectory))"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+\trequire.Equal(t, filepath.Join(shared, \"ctrstub0\"), mounts[0].Target)"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+\tfor _, target := range []string{restoreSharedDirectory, restoreSharedDirectory + \"/ctrstub0\", \"/\"} {"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+\t\trequire.Error(t, validateRestoreMounts([]restoreMount{{Source: backing, Target: target}}, restoreSharedDirectory))"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+\t}"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+\tfor _, input := range []string{restoreSharedDirectory + \"/state\", mounts[0].Target, shared, mounts[0].Target + \"/state\"} {"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+\t\trequire.Error(t, validateRestoreInputs([]string{input}, mounts))"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+\t}"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+\trequire.NoError(t, validateRestoreInputs([]string{filepath.Join(shared, \"state\"), filepath.Join(shared, \"memory\")}, mounts))"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+}"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+func TestRestoreAPIPath(t *testing.T) {"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+\tshared := t.TempDir()"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+\tj := &noopJailer{shimDir: vm.Dir(shared)}"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+\tstage := filepath.Join(shared, \".state-stage\", \"memory\")"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+\trequire.Equal(t, stage, restoreAPIPath(j, stage), \"ordinary unjailed VM has its original cwd\")"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+\tj.restoreMounts = []restoreMount{{Target: \"/old/disk\"}}"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+\trequire.Equal(t, restoreSharedDirectory+\"/.state-stage/memory\", restoreAPIPath(j, stage))"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+\trequire.Equal(t, \"/outside/state\", restoreAPIPath(j, \"/outside/state\"))"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+\trequire.Equal(t, shared+\"-sibling/state\", restoreAPIPath(j, shared+\"-sibling/state\"))"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+\trequire.Equal(t, stage, restoreAPIPath(&runcJailer{}, stage), \"jailed API translation remains separate\")"
+    ],
+    [
+      "runtime/restore_mounts_test.go",
+      "+}"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+// The live host directory is visible only here. Captured disk paths, including"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+// paths below a former same-ID shim directory, remain on the private tmpfs."
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+const restoreSharedDirectory = \"/.firecracker-restore-shared\""
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\tWritableInputs  []string       `json:\"writable_inputs,omitempty\"`"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "-func restoreNamespaceCommand(ctx context.Context, shared, binary string, args []string, mounts []restoreMount, inputs []string) (*exec.Cmd, error) {"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+func restoreNamespaceCommand(ctx context.Context, shared, binary string, args []string, mounts []restoreMount, inputs []string, writableInputs ...string) (*exec.Cmd, error) {"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "-\tif err := validateRestoreMounts(mounts, shared); err != nil {"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\tif err := validateRestoreMounts(mounts, restoreSharedDirectory); err != nil {"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\t\treturn nil, err"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\t}"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\tif err := validateRestoreInputs(append(append([]string(nil), inputs...), writableInputs...), mounts); err != nil {"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "-\tplan := restoreNamespacePlan{Root: root, SharedDirectory: shared, Binary: binary, Args: args, Mounts: mounts, Inputs: inputs}"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\tplan := restoreNamespacePlan{Root: root, SharedDirectory: shared, Binary: binary, Args: args, Mounts: mounts, Inputs: inputs, WritableInputs: writableInputs}"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+// validateRestoreInputs keeps input file binds from hiding captured disks or"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+// live control files. It runs both before writing the plan and in the helper."
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+func validateRestoreInputs(inputs []string, mounts []restoreMount) error {"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\ttargets := make([]string, 0, len(mounts)+len(inputs))"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\tfor _, mount := range mounts {"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\t\ttargets = append(targets, mount.Target)"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\t}"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\tfor _, input := range inputs {"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\t\tif _, err := capturedDevicePath(input, false); err != nil {"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\t\t\treturn fmt.Errorf(\"invalid restore input: %w\", err)"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\t\t}"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\t\tfor _, target := range targets {"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\t\t\tif pathWithin(input, target) || pathWithin(target, input) {"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\t\t\t\treturn fmt.Errorf(\"restore input overlaps another private target: %s\", input)"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\t\t\t}"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\t\t}"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\t\ttargets = append(targets, input)"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\t}"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\treturn nil"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+}"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "-\tif err := validateRestoreMounts(plan.Mounts, plan.SharedDirectory); err != nil {"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\tif err := validateRestoreMounts(plan.Mounts, restoreSharedDirectory); err != nil {"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\t\treturn err"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\t}"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\tif err := validateRestoreInputs(append(append([]string(nil), plan.Inputs...), plan.WritableInputs...), plan.Mounts); err != nil {"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "-\tbindings := []binding{{restoreProcDirectory, restoreProcDirectory, true, true}, {plan.SharedDirectory, plan.SharedDirectory, true, false}, {plan.Binary, restoreExecutable, false, true}}"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\tbindings := []binding{{restoreProcDirectory, restoreProcDirectory, true, true}, {plan.SharedDirectory, restoreSharedDirectory, true, false}, {plan.Binary, restoreExecutable, false, true}}"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "-\tseen := map[string]bool{restoreExecutable: true}"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "-\tfor _, mount := range plan.Mounts {"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "-\t\tseen[mount.Target] = true"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "-\t}"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "-\t\tif !filepath.IsAbs(input) || filepath.Clean(input) != input {"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "-\t\t\treturn fmt.Errorf(\"invalid restore input path\")"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "-\t\t}"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "-\t\tif pathWithin(input, plan.SharedDirectory) {"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "-\t\t\tcontinue"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "-\t\t}"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "-\t\tif seen[input] {"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "-\t\t\treturn fmt.Errorf(\"restore input overlaps device or executable\")"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "-\t\t}"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "-\t\tfor _, reserved := range []string{restoreKVMDevice, restoreTunDevice, restoreNullDevice, restoreZeroDevice, restoreRandomDevice, restoreURandomDevice, restoreProcDirectory} {"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "-\t\t\tif pathWithin(input, reserved) || pathWithin(reserved, input) {"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "-\t\t\t\treturn fmt.Errorf(\"restore input overlaps system mount\")"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "-\t\t\t}"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "-\t\t}"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "-\t\tseen[input] = true"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\t\t// Even inputs below the host shared directory need their own binding:"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\t\t// that directory is exposed at the alias, not at its captured path."
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\tfor _, input := range plan.WritableInputs {"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\t\tbindings = append(bindings, binding{input, input, false, false})"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\t}"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "-\tif err := unix.Chdir(plan.SharedDirectory); err != nil {"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\tif err := unix.Chdir(restoreSharedDirectory); err != nil {"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "-\tif err := validateRestoreMounts(mounts, plan.SharedDirectory); err != nil {"
+    ],
+    [
+      "runtime/restore_namespace.go",
+      "+\tif err := validateRestoreMounts(mounts, restoreSharedDirectory); err != nil {"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\"encoding/json\""
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "-\tdynamicTarget := filepath.Join(formerSource, \"new-directory\", \"future-disk\")"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "-\t\tshared, clone, root, dynamic, content string"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "-\t\tcmd                                   *exec.Cmd"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "-\t\toutput                                *bytes.Buffer"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\tshared, clone, root, dynamic, content, target string"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\tcmd                                           *exec.Cmd"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\toutput                                        *bytes.Buffer"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "-\t\tfuture := filepath.Join(t.TempDir(), \"future-backing\")"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\tfuture := filepath.Join(shared, \"new-directory\", \"future-disk\")"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\trequire.NoError(t, os.MkdirAll(filepath.Dir(future), 0700))"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\ttarget := writableTarget"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\tif index == 0 {"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\t\ttarget = filepath.Join(shared, \"ctrstub0\")"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\t\trequire.NoError(t, os.WriteFile(target, []byte(\"host-placeholder\"), 0600))"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\t}"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\tinput := filepath.Join(shared, \"state-input\")"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\trequire.NoError(t, os.WriteFile(input, []byte(\"state-input\"), 0600))"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\tlog := filepath.Join(shared, \"log-output\")"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\trequire.NoError(t, os.WriteFile(log, nil, 0600))"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\trequire.NoError(t, os.Mkdir(filepath.Join(shared, \"snapshot-output\"), 0700))"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "-\t\tcmd, err := restoreNamespaceCommand(context.Background(), shared, executable, []string{\"-test.run=^TestRestoreNamespaceProbe$\", \"-test.v\"}, []restoreMount{{Source: clone, Target: writableTarget}, {Source: root, Target: readonlyTarget, ReadOnly: true}}, nil)"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\tcmd, err := restoreNamespaceCommand(context.Background(), shared, executable, []string{\"-test.run=^TestRestoreNamespaceProbe$\", \"-test.v\"}, []restoreMount{{Source: clone, Target: target}, {Source: root, Target: readonlyTarget, ReadOnly: true}}, []string{input}, log)"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "-\t\tcmd.Env = append(os.Environ(), \"FC_RESTORE_NAMESPACE_PROBE=1\", \"FC_RESTORE_PROBE_SHARED=\"+shared, \"FC_RESTORE_PROBE_WRITABLE=\"+writableTarget, \"FC_RESTORE_PROBE_READONLY=\"+readonlyTarget, \"FC_RESTORE_PROBE_DYNAMIC=\"+dynamicTarget, \"FC_RESTORE_PROBE_CONTENT=\"+content)"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\tcmd.Env = append(os.Environ(), \"FC_RESTORE_NAMESPACE_PROBE=1\", \"FC_RESTORE_PROBE_SHARED=\"+restoreSharedDirectory, \"FC_RESTORE_PROBE_WRITABLE=\"+target, \"FC_RESTORE_PROBE_READONLY=\"+readonlyTarget, \"FC_RESTORE_PROBE_DYNAMIC=\"+future, \"FC_RESTORE_PROBE_CONTENT=\"+content, \"FC_RESTORE_PROBE_INPUT=\"+input, \"FC_RESTORE_PROBE_LOG=\"+log)"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "-\t\tinstances = append(instances, instance{shared, clone, root, future, content, cmd, output})"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\tinstances = append(instances, instance{shared, clone, root, future, content, target, cmd, output})"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "-\t\trequire.NoError(t, addRestoreMount(context.Background(), process, instance.shared, restoreMount{Source: instance.dynamic, Target: dynamicTarget}))"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\tjail := &noopJailer{ctx: context.Background(), shimDir: vm.Dir(instance.shared), process: process,"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\t\trestoreMounts: []restoreMount{{Source: instance.clone, Target: instance.target}, {Source: instance.root, Target: readonlyTarget, ReadOnly: true}}}"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\trequire.NoError(t, jail.ExposeFileToJail(instance.dynamic), \"host-shared disks must be explicitly exposed below their original absolute path\")"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\tif instance.target != writableTarget {"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\t\thost, err := os.ReadFile(instance.target)"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\t\trequire.NoError(t, err)"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\t\trequire.Equal(t, \"host-placeholder\", string(host), \"same-ID private disk must not modify the live host leaf\")"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\t}"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\tfor _, output := range []string{\"log-output\", \"snapshot-output/state\"} {"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\t\tdata, err := os.ReadFile(filepath.Join(instance.shared, output))"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\t\trequire.NoError(t, err)"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\t\trequire.Equal(t, instance.content, string(data))"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\t}"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "-\tlistener, err := net.Listen(\"unix\", filepath.Join(shared, \"probe.sock\"))"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t// #nosec G703 -- The parent supplies this private-namespace fixture input."
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\tdata, err = os.ReadFile(os.Getenv(\"FC_RESTORE_PROBE_INPUT\"))"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\trequire.NoError(t, err)"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\trequire.Equal(t, \"state-input\", string(data), \"load input below the old shared path must remain visible\")"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\tlistener, err := net.Listen(\"unix\", \"probe.sock\")"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\tfor _, output := range []string{os.Getenv(\"FC_RESTORE_PROBE_LOG\"), filepath.Join(shared, \"snapshot-output\", \"state\")} {"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\t// #nosec G703 -- The parent supplies private-namespace fixture output paths."
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t\trequire.NoError(t, os.WriteFile(output, []byte(content), 0600), \"logger writes and alias-translated snapshot outputs must remain writable\")"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\t}"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+func TestRestoreNamespaceSharedInputs(t *testing.T) {"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\tshared := t.TempDir()"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\tbacking := filepath.Join(shared, \"clone\")"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\trequire.NoError(t, os.WriteFile(backing, []byte(\"clone\"), 0600))"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\tinputs := []string{filepath.Join(shared, \"state\"), filepath.Join(shared, \"memory\")}"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\toutputs := []string{filepath.Join(shared, \"log\"), filepath.Join(shared, \"metrics\")}"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\tcmd, err := restoreNamespaceCommand(context.Background(), shared, os.Args[0], nil, []restoreMount{{Source: backing, Target: filepath.Join(shared, \"ctrstub0\")}}, inputs, outputs...)"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\trequire.NoError(t, err)"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\tdata, err := os.ReadFile(cmd.Args[2])"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\trequire.NoError(t, err)"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\tvar plan restoreNamespacePlan"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\trequire.NoError(t, json.Unmarshal(data, &plan))"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\trequire.Equal(t, inputs, plan.Inputs, \"shared input paths must get explicit readonly binds\")"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\trequire.Equal(t, outputs, plan.WritableInputs, \"logging output must retain writable bind semantics\")"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+\trequire.Error(t, validateRestoreInputs([]string{inputs[0], inputs[1], outputs[0], outputs[0]}, nil))"
+    ],
+    [
+      "runtime/restore_namespace_test.go",
+      "+}"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved."
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+//"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+// Licensed under the Apache License, Version 2.0 (the \"License\"). You may"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+// not use this file except in compliance with the License. A copy of the"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+// License is located at"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+//"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+//\thttp://aws.amazon.com/apache2.0/"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+//"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+// or in the \"license\" file accompanying this file. This file is distributed"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+// on an \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+// express or implied. See the License for the specific language governing"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+// permissions and limitations under the License."
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+package main"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+import ("
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\"context\""
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\"os\""
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\"path/filepath\""
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\"testing\""
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\"github.com/containerd/containerd/v2/pkg/protobuf/types\""
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\"github.com/containerd/log\""
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\"github.com/firecracker-microvm/firecracker-containerd/internal/vm\""
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\tdrivemount \"github.com/firecracker-microvm/firecracker-containerd/proto/service/drivemount/ttrpc\""
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\tfc \"github.com/firecracker-microvm/firecracker-go-sdk\""
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\"github.com/firecracker-microvm/firecracker-go-sdk/client/models\""
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\tops \"github.com/firecracker-microvm/firecracker-go-sdk/client/operations\""
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\"github.com/firecracker-microvm/firecracker-go-sdk/fctesting\""
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\"github.com/stretchr/testify/require\""
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+)"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+type resetDriveMounter struct{ drivemount.DriveMounterService }"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+func (resetDriveMounter) UnmountDrive(context.Context, *drivemount.UnmountDriveRequest) (*types.Empty, error) {"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\treturn &types.Empty{}, nil"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+}"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+func TestNoopResetStubRecapture(t *testing.T) {"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\tfor _, restored := range []bool{false, true} {"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\tt.Run(map[bool]string{false: \"ordinary\", true: \"same-ID-restored\"}[restored], func(t *testing.T) {"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\tctx := context.Background()"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\tshared := t.TempDir()"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\tj := &noopJailer{shimDir: vm.Dir(shared), ctx: ctx, logger: log.G(ctx)}"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\tcfg := &fc.Config{}"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\thandler, err := CreateContainerStubs(cfg, j, 1, log.G(ctx))"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\trequire.NoError(t, err)"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\tstub := handler.freeDrives[0]"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\tif restored {"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\t// An unused stub in a same-ID snapshot has this exact captured"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\t// target, backed by the new restore's independent copy."
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\tdata, err := os.ReadFile(stub.stubPath)"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\trequire.NoError(t, err)"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\tclone := filepath.Join(shared, \"captured-stub\")"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\t// #nosec G703 -- clone is the test-owned captured stub in t.TempDir."
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\trequire.NoError(t, os.WriteFile(clone, data, 0600))"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\tj.restoreMounts = []restoreMount{{Source: clone, Target: stub.stubPath}}"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t}"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\tvar exportedPath string"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\tmachine, err := fc.NewMachine(ctx, fc.Config{}, fc.WithClient(fc.NewClient(\"/not-used\", nil, false, fc.WithOpsClient(&fctesting.MockClient{"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\tPatchGuestDriveByIDFn: func(params *ops.PatchGuestDriveByIDParams) (*ops.PatchGuestDriveByIDNoContent, error) {"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\t\texportedPath = params.Body.PathOnHost"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\t\treturn nil, nil"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\t},"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t}))))"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\trequire.NoError(t, err)"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\tfor attempt := 0; attempt < 2; attempt++ {"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\t// Reserve's external-drive patch does not replace the captured"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\t// stub mapping. Exercise repeated reset of that same slot."
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\thandler.usedDrives[\"task\"] = stub"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\thandler.freeDrives = nil"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\trequire.NoError(t, handler.Release(ctx, \"task\", resetDriveMounter{}, machine))"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\trequire.Equal(t, stub.stubPath, exportedPath)"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\trequire.True(t, filepath.IsAbs(exportedPath))"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\tmetadata, err := snapshotDrivePaths(&models.FullVMConfiguration{Drives: []*models.Drive{{DriveID: fc.String(stub.driveID), PathOnHost: exportedPath}}}, false)"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\trequire.NoError(t, err, \"release must leave a capturable absolute unjailed path\")"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\trequire.Equal(t, stub.stubPath, metadata.Drives[0].Path)"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\tif restored {"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\t\tbacking, ok := restoreBackingPath(j, exportedPath)"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\t\trequire.True(t, ok)"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\t\trequire.Equal(t, filepath.Join(shared, \"captured-stub\"), backing)"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\t}"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t}"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\tif restored {"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\tclone := j.restoreMounts[0].Source"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\tdata, err := os.ReadFile(clone)"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\trequire.NoError(t, err)"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\tdata[len(data)-1] = 1 // Keep the header; corrupt only padding."
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\t// #nosec G703 -- clone is the test-owned captured stub in t.TempDir."
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\trequire.NoError(t, os.WriteFile(clone, data, 0600))"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\trequire.ErrorContains(t, j.exposeStubDrive(stub.stubPath, stub.driveID), \"does not match\")"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\trequire.Error(t, j.exposeStubDrive(stub.stubPath, \"wrong-slot\"))"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t\trequire.ErrorContains(t, j.ExposeFileToJail(stub.stubPath), \"overlaps captured backing\", \"generic exposure must not acquire the stub exception\")"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t\t}"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t\t})"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+\t}"
+    ],
+    [
+      "runtime/restore_stub_release_test.go",
+      "+}"
+    ],
+    [
+      "runtime/snapshot.go",
+      "-\tif err := s.machine.CreateSnapshot(ctx, filepath.Join(stage, \"memory\"), filepath.Join(stage, \"state\")); err != nil {"
+    ],
+    [
+      "runtime/snapshot.go",
+      "+\tif err := s.machine.CreateSnapshot(ctx, restoreAPIPath(s.jailer, filepath.Join(stage, \"memory\")), restoreAPIPath(s.jailer, filepath.Join(stage, \"state\"))); err != nil {"
+    ]
+  ]
+}

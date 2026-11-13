@@ -1,0 +1,40 @@
+{
+  "purpose": "Exactly three diagnostic observations, unchanged source/image/test/defaultfiveVMconcurrency; no production fix or full-stack pass claim",
+  "results": [
+    {
+      "run": 1,
+      "test_exit": 0,
+      "cleanup_exit": 0,
+      "passes": [
+        "TestLaunchMultipleContainersWithRemoteSnapshotter_Isolated (7.93s)"
+      ],
+      "failures": [],
+      "skips": [],
+      "nft_chain_eexist": false
+    },
+    {
+      "run": 2,
+      "test_exit": 0,
+      "cleanup_exit": 0,
+      "passes": [
+        "TestLaunchMultipleContainersWithRemoteSnapshotter_Isolated (7.45s)"
+      ],
+      "failures": [],
+      "skips": [],
+      "nft_chain_eexist": false
+    },
+    {
+      "run": 3,
+      "test_exit": 0,
+      "cleanup_exit": 0,
+      "passes": [
+        "TestLaunchMultipleContainersWithRemoteSnapshotter_Isolated (7.76s)"
+      ],
+      "failures": [],
+      "skips": [],
+      "nft_chain_eexist": false
+    }
+  ],
+  "independent_owned_cleanup_clean": true,
+  "original_snapshotter_logs_unchanged": true
+}

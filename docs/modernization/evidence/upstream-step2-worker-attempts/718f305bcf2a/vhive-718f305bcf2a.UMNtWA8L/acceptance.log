@@ -1,0 +1,61 @@
+Client:
+  Version:  2.3.7+unknown
+  Revision: 718f305bcf2a481e98e854ca5960cda5880ce362
+  Go version: go1.26.11
+
+Server:
+  Version:  2.3.7+unknown
+  Revision: 718f305bcf2a481e98e854ca5960cda5880ce362
+  UUID: d1c90fe6-999c-42fb-964a-95437b43f399
+=== RUN   TestPauseSnapResume
+time="2026-11-12T20:02:20.495983525Z" level=warning msg="Failed to Fetch k8s dns clusterIP exec: \"kubectl\": executable file not found in $PATH\n\n"
+time="2026-11-12T20:02:20.496067053Z" level=warning msg="Using google dns 8.8.8.8\n"
+time="2026-11-12T20:02:20.659723558Z" level=info msg="Creating containerd client"
+time="2026-11-12T20:02:20.659836691Z" level=info msg="Created containerd client"
+time="2026-11-12T20:02:20.659843193Z" level=info msg="Creating firecracker client"
+time="2026-11-12T20:02:20.659951336Z" level=info msg="Created firecracker client"
+time="2026-11-12T20:02:20.659971344Z" level=info msg="Creating image manager"
+time="2026-11-12T20:02:36.855060414Z" level=info msg="Cleaning up network manager"
+--- PASS: TestPauseSnapResume (16.59s)
+=== RUN   TestSnapshotConcurrentClones
+time="2026-11-12T20:02:37.087680126Z" level=warning msg="Failed to Fetch k8s dns clusterIP exec: \"kubectl\": executable file not found in $PATH\n\n"
+time="2026-11-12T20:02:37.087699853Z" level=warning msg="Using google dns 8.8.8.8\n"
+time="2026-11-12T20:02:37.822867257Z" level=info msg="Creating containerd client"
+time="2026-11-12T20:02:37.822963218Z" level=info msg="Created containerd client"
+time="2026-11-12T20:02:37.822971594Z" level=info msg="Creating firecracker client"
+time="2026-11-12T20:02:37.823068216Z" level=info msg="Created firecracker client"
+time="2026-11-12T20:02:37.823077423Z" level=info msg="Creating image manager"
+time="2026-11-12T20:02:54.447867157Z" level=error msg="failed to load snapshot of the VM" containerSnapshotPath=/dev/mapper/fc-vhive-718f305bcf2a-1692161-snap-11 error="rpc error: code = Unknown desc = failed to create VM: prepare private restore disk mappings: open /dev/mapper/fc-vhive-718f305bcf2a-1692161-snap-11: too many levels of symbolic links" memFilePath=/fccd/snapshots/concurrent-clones/mem_file memoryBackendPath=/fccd/snapshots/concurrent-clones/mem_file memoryBackendType=File snapFilePath=/fccd/snapshots/concurrent-clones/snap_file vmID=concurrent-clone-one
+    snapshot_clones_test.go:65: 
+        	Error Trace:	github.com/vhive-serverless/vhive/ctriface/snapshot_clones_test.go:65
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Unknown desc = failed to create VM: prepare private restore disk mappings: open /dev/mapper/fc-vhive-718f305bcf2a-1692161-snap-11: too many levels of symbolic links
+        	Test:       	TestSnapshotConcurrentClones
+time="2026-11-12T20:02:54.449554354Z" level=info msg="waiting for goroutines"
+time="2026-11-12T20:02:56.959579170Z" level=info msg="waiting done"
+time="2026-11-12T20:02:56.959600180Z" level=info msg="Closing fcClient"
+time="2026-11-12T20:02:56.959605840Z" level=info msg="Closing containerd client"
+time="2026-11-12T20:02:56.959776191Z" level=info msg="Cleaning up network manager"
+--- FAIL: TestSnapshotConcurrentClones (20.33s)
+=== RUN   TestSnapshotSourceMemoryAndDiskIsolation
+time="2026-11-12T20:02:57.419275848Z" level=warning msg="Failed to Fetch k8s dns clusterIP exec: \"kubectl\": executable file not found in $PATH\n\n"
+time="2026-11-12T20:02:57.419294242Z" level=warning msg="Using google dns 8.8.8.8\n"
+time="2026-11-12T20:02:57.608628611Z" level=info msg="Creating containerd client"
+time="2026-11-12T20:02:57.608737626Z" level=info msg="Created containerd client"
+time="2026-11-12T20:02:57.608745862Z" level=info msg="Creating firecracker client"
+time="2026-11-12T20:02:57.608824049Z" level=info msg="Created firecracker client"
+time="2026-11-12T20:02:57.608833036Z" level=info msg="Creating image manager"
+    snapshot_continuity_test.go:77: function_image=ghcr.io/ease-lab/helloworld@sha256:12dc6715ed1a8306f246ceaf7742c09e38a52a79d17421e4a50d7e0e09fdbc25 digest=sha256:12dc6715ed1a8306f246ceaf7742c09e38a52a79d17421e4a50d7e0e09fdbc25
+time="2026-11-12T20:03:14.702185232Z" level=error msg="failed to load snapshot of the VM" containerSnapshotPath=/dev/mapper/fc-vhive-718f305bcf2a-1692161-snap-13 error="rpc error: code = Unknown desc = failed to create VM: prepare private restore disk mappings: open /dev/mapper/fc-vhive-718f305bcf2a-1692161-snap-13: too many levels of symbolic links" memFilePath=/fccd/continuity-dmti1kjaor1x/continuity/mem_file memoryBackendPath=/fccd/continuity-dmti1kjaor1x/continuity/mem_file memoryBackendType=File snapFilePath=/fccd/continuity-dmti1kjaor1x/continuity/snap_file vmID=continuity-clone
+    snapshot_continuity_test.go:125: 
+        	Error Trace:	github.com/vhive-serverless/vhive/ctriface/snapshot_continuity_test.go:125
+        	Error:      	Received unexpected error:
+        	            	rpc error: code = Unknown desc = failed to create VM: prepare private restore disk mappings: open /dev/mapper/fc-vhive-718f305bcf2a-1692161-snap-13: too many levels of symbolic links
+        	Test:       	TestSnapshotSourceMemoryAndDiskIsolation
+time="2026-11-12T20:03:14.703489678Z" level=info msg="waiting for goroutines"
+time="2026-11-12T20:03:17.068628486Z" level=info msg="waiting done"
+time="2026-11-12T20:03:17.068648904Z" level=info msg="Closing fcClient"
+time="2026-11-12T20:03:17.068653112Z" level=info msg="Closing containerd client"
+time="2026-11-12T20:03:17.068825737Z" level=info msg="Cleaning up network manager"
+--- FAIL: TestSnapshotSourceMemoryAndDiskIsolation (20.13s)
+FAIL

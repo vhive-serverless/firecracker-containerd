@@ -1,0 +1,146 @@
+{
+  "baseline-containers.jsonl": {
+    "bytes": 666,
+    "sha256": "9d61c6a078e6d100b577a8d2303bbf6e2f56409217b8c7356fccb2b680f727d1"
+  },
+  "containers-after.jsonl": {
+    "bytes": 666,
+    "sha256": "9d61c6a078e6d100b577a8d2303bbf6e2f56409217b8c7356fccb2b680f727d1"
+  },
+  "image.json": {
+    "bytes": 3648,
+    "sha256": "caa330927f6e353fde1bd97a29485cdbb6b1c55dc43954c91c1f9f4ca25c3791"
+  },
+  "launcher.sh": {
+    "bytes": 7870,
+    "sha256": "164c7f0390cd7297a7cf2c4390800c94689aa9efe3829c7015abb1708bf6ffb8"
+  },
+  "launcher.sha256": {
+    "bytes": 146,
+    "sha256": "c3c8c540e0c516d3e0a5330cfb157a1b53fafdb2f835a945f83eb8497945e434"
+  },
+  "loops-after.json": {
+    "bytes": 2365,
+    "sha256": "3b7662e0b49aab5bbf79f4a8bcd03b79b311bc92ad65301284f232de08d6dd16"
+  },
+  "mappings-after.txt": {
+    "bytes": 224,
+    "sha256": "2bd62014af1e78d7197610c222710457e166a79879f1e492f910067117b1d354"
+  },
+  "original-snapshotter-logs-after.json": {
+    "bytes": 285,
+    "sha256": "30190101ddd4da4449e55f5d490a6a08b3438333efafca162b082cac2fea4726"
+  },
+  "original-snapshotter-logs-before.json": {
+    "bytes": 285,
+    "sha256": "30190101ddd4da4449e55f5d490a6a08b3438333efafca162b082cac2fea4726"
+  },
+  "run-1/cleanup.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "run-1/command.sh": {
+    "bytes": 949,
+    "sha256": "e7d24b279ff3871de3dcbd9cb9a7d1ce0d3868a30301f6554919949dcd6cf86b"
+  },
+  "run-1/container-id": {
+    "bytes": 64,
+    "sha256": "3a3b0ab73af55d08ca499868085c5a9ac3f550a754177a89b332f999b88b4708"
+  },
+  "run-1/logs/containerd.out": {
+    "bytes": 186087,
+    "sha256": "e3636ebc25968b9e617d65dbc98b17b00397020c47add242ee14552846be0699"
+  },
+  "run-1/logs/demux-snapshotter.out": {
+    "bytes": 560,
+    "sha256": "9223e198b3b87838b8d4a462e9a728609df1e602ee44032aa02943587e8051b2"
+  },
+  "run-1/logs/http-address-resolver.out": {
+    "bytes": 81,
+    "sha256": "72810517b35448e6b28d9ff72c447cc0c43c9eceacbf96208e9cdc0c723a32ab"
+  },
+  "run-1/pool-create.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "run-1/test.log": {
+    "bytes": 8844,
+    "sha256": "53bd09458c5444acf65cff77afb0d024b3667269d19f809c3efb519a8725e204"
+  },
+  "run-2/cleanup.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "run-2/command.sh": {
+    "bytes": 949,
+    "sha256": "c024bc5d055f1ffb39e0949ebd4950f0e30b198f3538acc5f5d50231b99cdebc"
+  },
+  "run-2/container-id": {
+    "bytes": 64,
+    "sha256": "1ef86673f112e2661e18c5d8f810e8714c4c52e7de0d960dccfb416753def48e"
+  },
+  "run-2/logs/containerd.out": {
+    "bytes": 184969,
+    "sha256": "5807194c82fbe1a9e5f17f254fc3d85b1fa61fd63c5e371c57de6d2c19885c17"
+  },
+  "run-2/logs/demux-snapshotter.out": {
+    "bytes": 568,
+    "sha256": "db40fc064e945c5b639bc6e10a669b2f2c863de24d896449c4fbb3e43f5b9410"
+  },
+  "run-2/logs/http-address-resolver.out": {
+    "bytes": 81,
+    "sha256": "017b8c6c2e7f4362de4cc7b3379e03a440e0a73940fa6437e378307f6c5a1346"
+  },
+  "run-2/pool-create.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "run-2/test.log": {
+    "bytes": 8844,
+    "sha256": "204339a2a47f37e402f1dffa5d7c707f05807b3fd77d30588c21434420dc953e"
+  },
+  "run-3/cleanup.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "run-3/command.sh": {
+    "bytes": 949,
+    "sha256": "27d0b5f0db22dc74455a64d5250a0593ed68909d490ffd2e89f87a8f8a7ce95a"
+  },
+  "run-3/container-id": {
+    "bytes": 64,
+    "sha256": "705a8054bd814415aef9f00577762725d7b90d7765fb13c13d9bba66deb33bb6"
+  },
+  "run-3/logs/containerd.out": {
+    "bytes": 185991,
+    "sha256": "c0b046876d39cc2b4ac7de222cf477d04412d889a4174e775d06380bbff7ef79"
+  },
+  "run-3/logs/demux-snapshotter.out": {
+    "bytes": 567,
+    "sha256": "790db2319637078d0d08948036a509bb8df823ff3553f0d8457b8eecf261475b"
+  },
+  "run-3/logs/http-address-resolver.out": {
+    "bytes": 81,
+    "sha256": "3312184ab5597f1a7a37b0efe7b0baad8608df20c3f14c9a5f3bf1dda87cdaa9"
+  },
+  "run-3/pool-create.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "run-3/test.log": {
+    "bytes": 8844,
+    "sha256": "fde7044bb9c0d3e230872bceb35b9e834a05a9690b24bd2f685ae73c6d0c8834"
+  },
+  "source-inputs.json": {
+    "bytes": 2065,
+    "sha256": "b78fb5386115b82142508324dcc9d3fb324380429e8477af76ba928578d9eea5"
+  },
+  "status.tsv": {
+    "bytes": 45,
+    "sha256": "11f8cf2d2a1e1d7a768469d945be84b6709bd09b3df542e4f82d09aebb90886c"
+  },
+  "summary.json": {
+    "bytes": 1023,
+    "sha256": "470d691085f949b4337088b8a57f3791977888c7dedb456225f74a329586bb01"
+  }
+}

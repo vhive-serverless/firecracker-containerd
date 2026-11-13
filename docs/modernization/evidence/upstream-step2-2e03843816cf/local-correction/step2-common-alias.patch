@@ -1,0 +1,679 @@
+From 2e03843816cf95d184ad4ad429adf6ea2ccc1412 Mon Sep 17 00:00:00 2001
+From: Migration Candidate <migration@example.invalid>
+Date: Fri, 13 Nov 2026 07:22:38 +0800
+Subject: [PATCH] fix(runtime): isolate same-ID restore disks from live shim
+ paths
+
+A destroyed source may be restored with the same namespace and VM ID. Its captured disk filenames then overlap the recreated live shim directory. Bind that directory only at a reserved private alias, retain exact captured disk targets on tmpfs, and keep short API/vsock names through the alias cwd and standard vsock override.
+
+Bind snapshot inputs explicitly, preserve writable log and metrics outputs, expose later shared-directory disks explicitly, and route legacy snapshot output stages to the live alias. Keep reset drive paths absolute; reuse a captured stub only after checking its entire generated slot marker and padding. Generic disk replacement remains rejected.
+
+Extend the existing namespace probe with same-ID host-leaf preservation, dynamic disk exposure, input/output paths and host-reachable sockets. Add unit regressions for alias confinement, writable inputs and release/recapture paths. Worker namespace and VM acceptance remain required.
+
+Signed-off-by: Migration Candidate <migration@example.invalid>
+(cherry picked from commit 53d6c9b09adf8f9f1642b3c8ec6c8230b93f1c15)
+---
+ runtime/drive_handler.go             | 11 +++-
+ runtime/noop_jailer.go               | 68 +++++++++++++++++--
+ runtime/restore_mounts.go            | 32 ++++++++-
+ runtime/restore_mounts_test.go       | 30 +++++++++
+ runtime/restore_namespace.go         | 70 ++++++++++++--------
+ runtime/restore_namespace_test.go    | 68 ++++++++++++++++---
+ runtime/restore_stub_release_test.go | 97 ++++++++++++++++++++++++++++
+ runtime/snapshot.go                  |  2 +-
+ 8 files changed, 331 insertions(+), 47 deletions(-)
+ create mode 100644 runtime/restore_stub_release_test.go
+
+diff --git a/runtime/drive_handler.go b/runtime/drive_handler.go
+index feffaae9..223a1062 100644
+--- a/runtime/drive_handler.go
++++ b/runtime/drive_handler.go
+@@ -161,7 +161,16 @@ func (h *StubDriveHandler) Release(
+ 		return fmt.Errorf("failed to unmount drive: %w", err)
+ 	}
+ 
+-	err = machine.UpdateGuestDrive(requestCtx, drive.driveID, filepath.Base(drive.stubPath))
++	path := filepath.Base(drive.stubPath)
++	if j, unjailed := drive.jail.(*noopJailer); unjailed {
++		// Keep exported unjailed disk paths absolute and outside the reserved
++		// live-directory alias, so a subsequent checkpoint is restorable.
++		if err := j.exposeStubDrive(drive.stubPath, drive.driveID); err != nil {
++			return fmt.Errorf("failed to expose reset stub: %w", err)
++		}
++		path = drive.stubPath
++	}
++	err = machine.UpdateGuestDrive(requestCtx, drive.driveID, path)
+ 	if err != nil {
+ 		return fmt.Errorf("failed to patch drive: %w", err)
+ 	}
+diff --git a/runtime/noop_jailer.go b/runtime/noop_jailer.go
+index f3d23982..b168af91 100644
+--- a/runtime/noop_jailer.go
++++ b/runtime/noop_jailer.go
+@@ -14,8 +14,10 @@
+ package main
+ 
+ import (
++	"bytes"
+ 	"context"
+ 	"fmt"
++	"io"
+ 	"os"
+ 	"path/filepath"
+ 	"sync"
+@@ -25,6 +27,7 @@ import (
+ 	"github.com/sirupsen/logrus"
+ 
+ 	"github.com/firecracker-microvm/firecracker-containerd/config"
++	"github.com/firecracker-microvm/firecracker-containerd/internal"
+ 	"github.com/firecracker-microvm/firecracker-containerd/internal/vm"
+ )
+ 
+@@ -84,23 +87,24 @@ func (j *noopJailer) BuildJailedMachine(cfg *config.Config, machineConfig *firec
+ 			binary = "firecracker"
+ 		}
+ 		// Keep the SDK's host-side socket path. The VMM starts with its
+-		// private cwd at the shared VM directory, so short names also retain
++		// private cwd at the live shared-directory alias, so short names also retain
+ 		// support for host VM directories longer than sockaddr_un.sun_path.
+ 		for index := range machineConfig.VsockDevices {
+ 			machineConfig.VsockDevices[index].Path = filepath.Base(j.shimDir.FirecrackerVSockPath())
+ 		}
+ 		inputs := append([]string(nil), j.restoreInputs...)
++		var writableInputs []string
+ 		for _, path := range []*string{&machineConfig.LogPath, &machineConfig.MetricsPath} {
+ 			if *path != "" {
+ 				*path, err = filepath.Abs(*path)
+ 				if err != nil {
+ 					return nil, err
+ 				}
+-				inputs = append(inputs, *path)
++				writableInputs = append(writableInputs, *path)
+ 			}
+ 		}
+ 		args := []string{"--api-sock", filepath.Base(j.shimDir.FirecrackerSockPath()), vmmIDArg, vmID}
+-		cmd, err = restoreNamespaceCommand(j.ctx, j.shimDir.RootPath(), binary, args, j.restoreMounts, inputs)
++		cmd, err = restoreNamespaceCommand(j.ctx, j.shimDir.RootPath(), binary, args, j.restoreMounts, inputs, writableInputs...)
+ 		if err != nil {
+ 			return nil, fmt.Errorf("build restore namespace: %w", err)
+ 		}
+@@ -132,9 +136,6 @@ func (j *noopJailer) ExposeFileToJail(path string) error {
+ 	if err != nil {
+ 		return err
+ 	}
+-	if pathWithin(path, shared) {
+-		return nil
+-	}
+ 	mount := restoreMount{Source: path, Target: path}
+ 	source, _, err := resolveRestoreBacking(path)
+ 	if err != nil {
+@@ -149,7 +150,7 @@ func (j *noopJailer) ExposeFileToJail(path string) error {
+ 		}
+ 	}
+ 	mounts := []restoreMount{mount}
+-	if err := validateRestoreMounts(mounts, shared); err != nil {
++	if err := validateRestoreMounts(mounts, restoreSharedDirectory); err != nil {
+ 		return err
+ 	}
+ 	mount = mounts[0]
+@@ -160,6 +161,59 @@ func (j *noopJailer) ExposeFileToJail(path string) error {
+ 	return nil
+ }
+ 
++// exposeStubDrive may reuse an already captured private stub, but only after
++// checking the entire generated slot marker (including its zero padding).
++// Generic disk exposure still rejects replacement of a captured mount.
++func (j *noopJailer) exposeStubDrive(path, driveID string) error {
++	if !filepath.IsAbs(path) || filepath.Clean(path) != path || stubPathToDriveID(path) != driveID {
++		return fmt.Errorf("invalid reset stub identity")
++	}
++	j.restoreMu.RLock()
++	for _, mount := range j.restoreMounts {
++		if mount.Target != path {
++			continue
++		}
++		err := validatePristineStub(mount, driveID)
++		j.restoreMu.RUnlock()
++		return err
++	}
++	j.restoreMu.RUnlock()
++	return j.ExposeFileToJail(path)
++}
++
++func validatePristineStub(mount restoreMount, driveID string) error {
++	if mount.ReadOnly {
++		return fmt.Errorf("reset stub must be writable")
++	}
++	content, err := internal.GenerateStubContent(driveID)
++	if err != nil {
++		return err
++	}
++	size := (len(content) + fcSectorSize - 1) / fcSectorSize * fcSectorSize
++	expected := make([]byte, size)
++	copy(expected, content)
++	file, _, err := openRestoreBacking(mount.Source)
++	if err != nil {
++		return err
++	}
++	defer file.Close()
++	info, err := file.Stat()
++	if err != nil {
++		return err
++	}
++	if !info.Mode().IsRegular() || info.Size() != int64(size) {
++		return fmt.Errorf("captured reset stub has invalid type or size")
++	}
++	actual, err := io.ReadAll(io.LimitReader(file, int64(size)+1))
++	if err != nil {
++		return err
++	}
++	if !bytes.Equal(actual, expected) {
++		return fmt.Errorf("captured reset stub does not match drive slot %s", driveID)
++	}
++	return nil
++}
++
+ func (j *noopJailer) StubDrivesOptions() []FileOpt {
+ 	j.logger.Debug("noop operation for StubDrivesOptions")
+ 	return []FileOpt{}
+diff --git a/runtime/restore_mounts.go b/runtime/restore_mounts.go
+index e3b0cdc3..b7b3e786 100644
+--- a/runtime/restore_mounts.go
++++ b/runtime/restore_mounts.go
+@@ -61,7 +61,7 @@ func capturedDevicePath(path string, jailed bool) (string, error) {
+ 		}
+ 		path = "/" + path
+ 	}
+-	for _, reserved := range []string{restoreKVMDevice, restoreTunDevice, restoreNullDevice, restoreZeroDevice, restoreRandomDevice, restoreURandomDevice, restoreProcDirectory, "/sys", restoreExecutable, "/firecracker", "/api.socket", "/fc-vsock.sock"} {
++	for _, reserved := range []string{restoreKVMDevice, restoreTunDevice, restoreNullDevice, restoreZeroDevice, restoreRandomDevice, restoreURandomDevice, restoreProcDirectory, "/sys", restoreExecutable, restoreSharedDirectory, "/firecracker", "/api.socket", "/fc-vsock.sock"} {
+ 		if pathWithin(path, reserved) || pathWithin(reserved, path) {
+ 			return "", fmt.Errorf("captured device path overlaps reserved VMM path %q", path)
+ 		}
+@@ -178,7 +178,11 @@ func (s *service) prepareSnapshotMounts(request *proto.CreateVMRequest) error {
+ 	} else {
+ 		inputs = append(inputs, request.MemFilePath)
+ 	}
+-	if err := validateRestoreMounts(mounts, s.jailer.JailPath().RootPath()); err != nil {
++	protected := s.jailer.JailPath().RootPath()
++	if _, unjailed := s.jailer.(*noopJailer); unjailed {
++		protected = restoreSharedDirectory
++	}
++	if err := validateRestoreMounts(mounts, protected); err != nil {
+ 		return err
+ 	}
+ 	switch jailer := s.jailer.(type) {
+@@ -289,6 +293,30 @@ func pathWithin(path, parent string) bool {
+ 	return path == parent || strings.HasPrefix(path, parent+"/")
+ }
+ 
++// restoreAPIPath translates host-created output paths to the live directory
++// exposed inside an unjailed restored VMM. Captured disk targets never use this
++// translation: their original paths identify private backing mounts.
++func restoreAPIPath(jail jailer, path string) string {
++	j, ok := jail.(*noopJailer)
++	if !ok || !filepath.IsAbs(path) || filepath.Clean(path) != path {
++		return path
++	}
++	j.restoreMu.RLock()
++	defer j.restoreMu.RUnlock()
++	if len(j.restoreMounts) == 0 {
++		return path
++	}
++	shared := j.shimDir.RootPath()
++	if !pathWithin(path, shared) {
++		return path
++	}
++	relative, err := filepath.Rel(shared, path)
++	if err != nil {
++		return path
++	}
++	return filepath.Join(restoreSharedDirectory, relative)
++}
++
+ // restoreBackingPath resolves exported VMM paths to their actual host clone for
+ // a later checkpoint. Bind mount placeholders must never be copied as disks.
+ func restoreBackingPath(jailer jailer, path string) (string, bool) {
+diff --git a/runtime/restore_mounts_test.go b/runtime/restore_mounts_test.go
+index 0eb95b9b..d7e2de76 100644
+--- a/runtime/restore_mounts_test.go
++++ b/runtime/restore_mounts_test.go
+@@ -276,3 +276,33 @@ func TestRestoreBackingDescriptorSurvivesSourceReplacement(t *testing.T) {
+ 	_, _, err = openRestoreBacking(path)
+ 	require.Error(t, err, "a later character-device replacement must not become a new backing")
+ }
++
++func TestSameIDRestoreMountPlan(t *testing.T) {
++	shared := t.TempDir()
++	backing := filepath.Join(shared, "private-clone")
++	require.NoError(t, os.WriteFile(backing, []byte("private"), 0600))
++	mounts := []restoreMount{{Source: backing, Target: filepath.Join(shared, "ctrstub0")}}
++	// The old absolute path belongs to tmpfs, while live shim files are at
++	// the reserved alias. Same-ID capture paths must remain unchanged.
++	require.NoError(t, validateRestoreMounts(mounts, restoreSharedDirectory))
++	require.Equal(t, filepath.Join(shared, "ctrstub0"), mounts[0].Target)
++	for _, target := range []string{restoreSharedDirectory, restoreSharedDirectory + "/ctrstub0", "/"} {
++		require.Error(t, validateRestoreMounts([]restoreMount{{Source: backing, Target: target}}, restoreSharedDirectory))
++	}
++	for _, input := range []string{restoreSharedDirectory + "/state", mounts[0].Target, shared, mounts[0].Target + "/state"} {
++		require.Error(t, validateRestoreInputs([]string{input}, mounts))
++	}
++	require.NoError(t, validateRestoreInputs([]string{filepath.Join(shared, "state"), filepath.Join(shared, "memory")}, mounts))
++}
++
++func TestRestoreAPIPath(t *testing.T) {
++	shared := t.TempDir()
++	j := &noopJailer{shimDir: vm.Dir(shared)}
++	stage := filepath.Join(shared, ".state-stage", "memory")
++	require.Equal(t, stage, restoreAPIPath(j, stage), "ordinary unjailed VM has its original cwd")
++	j.restoreMounts = []restoreMount{{Target: "/old/disk"}}
++	require.Equal(t, restoreSharedDirectory+"/.state-stage/memory", restoreAPIPath(j, stage))
++	require.Equal(t, "/outside/state", restoreAPIPath(j, "/outside/state"))
++	require.Equal(t, shared+"-sibling/state", restoreAPIPath(j, shared+"-sibling/state"))
++	require.Equal(t, stage, restoreAPIPath(&runcJailer{}, stage), "jailed API translation remains separate")
++}
+diff --git a/runtime/restore_namespace.go b/runtime/restore_namespace.go
+index 02813c52..07634a69 100644
+--- a/runtime/restore_namespace.go
++++ b/runtime/restore_namespace.go
+@@ -31,6 +31,10 @@ import (
+ const restoreNamespaceArg = "__firecracker_restore_namespace"
+ const restoreNamespaceMountArg = "__firecracker_restore_mount"
+ const restoreExecutable = "/.firecracker-restore-vmm"
++
++// The live host directory is visible only here. Captured disk paths, including
++// paths below a former same-ID shim directory, remain on the private tmpfs.
++const restoreSharedDirectory = "/.firecracker-restore-shared"
+ const (
+ 	restoreKVMDevice     = "/dev/kvm"
+ 	restoreTunDevice     = "/dev/net/tun"
+@@ -48,6 +52,7 @@ type restoreNamespacePlan struct {
+ 	Args            []string       `json:"args"`
+ 	Mounts          []restoreMount `json:"mounts"`
+ 	Inputs          []string       `json:"inputs"`
++	WritableInputs  []string       `json:"writable_inputs,omitempty"`
+ }
+ 
+ // The helper execs the VMM in-place: the PID and process start time observed by
+@@ -72,7 +77,7 @@ func init() {
+ 	os.Exit(0)
+ }
+ 
+-func restoreNamespaceCommand(ctx context.Context, shared, binary string, args []string, mounts []restoreMount, inputs []string) (*exec.Cmd, error) {
++func restoreNamespaceCommand(ctx context.Context, shared, binary string, args []string, mounts []restoreMount, inputs []string, writableInputs ...string) (*exec.Cmd, error) {
+ 	shared, err := filepath.Abs(shared)
+ 	if err != nil {
+ 		return nil, err
+@@ -85,14 +90,17 @@ func restoreNamespaceCommand(ctx context.Context, shared, binary string, args []
+ 	if err != nil {
+ 		return nil, err
+ 	}
+-	if err := validateRestoreMounts(mounts, shared); err != nil {
++	if err := validateRestoreMounts(mounts, restoreSharedDirectory); err != nil {
++		return nil, err
++	}
++	if err := validateRestoreInputs(append(append([]string(nil), inputs...), writableInputs...), mounts); err != nil {
+ 		return nil, err
+ 	}
+ 	root, err := os.MkdirTemp(shared, ".restore-root-")
+ 	if err != nil {
+ 		return nil, err
+ 	}
+-	plan := restoreNamespacePlan{Root: root, SharedDirectory: shared, Binary: binary, Args: args, Mounts: mounts, Inputs: inputs}
++	plan := restoreNamespacePlan{Root: root, SharedDirectory: shared, Binary: binary, Args: args, Mounts: mounts, Inputs: inputs, WritableInputs: writableInputs}
+ 	file, err := os.CreateTemp(shared, ".restore-namespace-")
+ 	if err != nil {
+ 		_ = os.Remove(root)
+@@ -116,6 +124,27 @@ func restoreNamespaceCommand(ctx context.Context, shared, binary string, args []
+ 	return cmd, nil
+ }
+ 
++// validateRestoreInputs keeps input file binds from hiding captured disks or
++// live control files. It runs both before writing the plan and in the helper.
++func validateRestoreInputs(inputs []string, mounts []restoreMount) error {
++	targets := make([]string, 0, len(mounts)+len(inputs))
++	for _, mount := range mounts {
++		targets = append(targets, mount.Target)
++	}
++	for _, input := range inputs {
++		if _, err := capturedDevicePath(input, false); err != nil {
++			return fmt.Errorf("invalid restore input: %w", err)
++		}
++		for _, target := range targets {
++			if pathWithin(input, target) || pathWithin(target, input) {
++				return fmt.Errorf("restore input overlaps another private target: %s", input)
++			}
++		}
++		targets = append(targets, input)
++	}
++	return nil
++}
++
+ func enterRestoreNamespace(configPath string) error {
+ 	runtime.LockOSThread()
+ 	// A direct invocation of this private helper must never operate in the
+@@ -142,7 +171,10 @@ func enterRestoreNamespace(configPath string) error {
+ 	if !filepath.IsAbs(plan.Root) || filepath.Dir(plan.Root) != plan.SharedDirectory || filepath.Clean(plan.Root) != plan.Root {
+ 		return fmt.Errorf("invalid private restore root")
+ 	}
+-	if err := validateRestoreMounts(plan.Mounts, plan.SharedDirectory); err != nil {
++	if err := validateRestoreMounts(plan.Mounts, restoreSharedDirectory); err != nil {
++		return err
++	}
++	if err := validateRestoreInputs(append(append([]string(nil), plan.Inputs...), plan.WritableInputs...), plan.Mounts); err != nil {
+ 		return err
+ 	}
+ 	if err := unix.Mount("", "/", "", unix.MS_REC|unix.MS_PRIVATE, ""); err != nil {
+@@ -157,7 +189,7 @@ func enterRestoreNamespace(configPath string) error {
+ 		source, target      string
+ 		directory, readOnly bool
+ 	}
+-	bindings := []binding{{restoreProcDirectory, restoreProcDirectory, true, true}, {plan.SharedDirectory, plan.SharedDirectory, true, false}, {plan.Binary, restoreExecutable, false, true}}
++	bindings := []binding{{restoreProcDirectory, restoreProcDirectory, true, true}, {plan.SharedDirectory, restoreSharedDirectory, true, false}, {plan.Binary, restoreExecutable, false, true}}
+ 	for _, device := range []string{restoreKVMDevice, restoreTunDevice, restoreNullDevice, restoreZeroDevice, restoreRandomDevice, restoreURandomDevice} {
+ 		if _, err := os.Stat(device); err == nil {
+ 			bindings = append(bindings, binding{device, device, false, false})
+@@ -179,28 +211,14 @@ func enterRestoreNamespace(configPath string) error {
+ 		// between validation and mount. This helper has not changed root yet.
+ 		bindings = append(bindings, binding{fmt.Sprintf("/proc/self/fd/%d", backing.Fd()), mount.Target, false, mount.ReadOnly})
+ 	}
+-	seen := map[string]bool{restoreExecutable: true}
+-	for _, mount := range plan.Mounts {
+-		seen[mount.Target] = true
+-	}
+ 	for _, input := range plan.Inputs {
+-		if !filepath.IsAbs(input) || filepath.Clean(input) != input {
+-			return fmt.Errorf("invalid restore input path")
+-		}
+-		if pathWithin(input, plan.SharedDirectory) {
+-			continue
+-		}
+-		if seen[input] {
+-			return fmt.Errorf("restore input overlaps device or executable")
+-		}
+-		for _, reserved := range []string{restoreKVMDevice, restoreTunDevice, restoreNullDevice, restoreZeroDevice, restoreRandomDevice, restoreURandomDevice, restoreProcDirectory} {
+-			if pathWithin(input, reserved) || pathWithin(reserved, input) {
+-				return fmt.Errorf("restore input overlaps system mount")
+-			}
+-		}
+-		seen[input] = true
++		// Even inputs below the host shared directory need their own binding:
++		// that directory is exposed at the alias, not at its captured path.
+ 		bindings = append(bindings, binding{input, input, false, true})
+ 	}
++	for _, input := range plan.WritableInputs {
++		bindings = append(bindings, binding{input, input, false, false})
++	}
+ 	root, err := os.OpenRoot(plan.Root)
+ 	if err != nil {
+ 		return err
+@@ -239,7 +257,7 @@ func enterRestoreNamespace(configPath string) error {
+ 	if err := unix.Chroot(plan.Root); err != nil {
+ 		return err
+ 	}
+-	if err := unix.Chdir(plan.SharedDirectory); err != nil {
++	if err := unix.Chdir(restoreSharedDirectory); err != nil {
+ 		return err
+ 	}
+ 	return unix.Exec(restoreExecutable, append([]string{restoreExecutable}, plan.Args...), os.Environ())
+@@ -295,7 +313,7 @@ func installRestoreMount(path string) (retErr error) {
+ 		return closeErr
+ 	}
+ 	mounts := []restoreMount{plan.Mount}
+-	if err := validateRestoreMounts(mounts, plan.SharedDirectory); err != nil {
++	if err := validateRestoreMounts(mounts, restoreSharedDirectory); err != nil {
+ 		return err
+ 	}
+ 	plan.Mount = mounts[0]
+diff --git a/runtime/restore_namespace_test.go b/runtime/restore_namespace_test.go
+index 328c7c16..465dc3b7 100644
+--- a/runtime/restore_namespace_test.go
++++ b/runtime/restore_namespace_test.go
+@@ -17,6 +17,7 @@ import (
+ 	"bytes"
+ 	"context"
+ 	"debug/elf"
++	"encoding/json"
+ 	"fmt"
+ 	"io"
+ 	"net"
+@@ -49,24 +50,34 @@ func TestRestoreNamespaceIsolation(t *testing.T) {
+ 	}
+ 	formerSource := filepath.Join(t.TempDir(), "deleted-source")
+ 	writableTarget, readonlyTarget := filepath.Join(formerSource, "disk"), filepath.Join(formerSource, "root")
+-	dynamicTarget := filepath.Join(formerSource, "new-directory", "future-disk")
+ 	type instance struct {
+-		shared, clone, root, dynamic, content string
+-		cmd                                   *exec.Cmd
+-		output                                *bytes.Buffer
++		shared, clone, root, dynamic, content, target string
++		cmd                                           *exec.Cmd
++		output                                        *bytes.Buffer
+ 	}
+ 	instances := make([]instance, 0, 2)
+ 	for index := 0; index < 2; index++ {
+ 		shared := t.TempDir()
+ 		clone, root := filepath.Join(shared, "clone"), filepath.Join(shared, "readonly")
+-		future := filepath.Join(t.TempDir(), "future-backing")
++		future := filepath.Join(shared, "new-directory", "future-disk")
++		require.NoError(t, os.MkdirAll(filepath.Dir(future), 0700))
++		target := writableTarget
++		if index == 0 {
++			target = filepath.Join(shared, "ctrstub0")
++			require.NoError(t, os.WriteFile(target, []byte("host-placeholder"), 0600))
++		}
++		input := filepath.Join(shared, "state-input")
++		require.NoError(t, os.WriteFile(input, []byte("state-input"), 0600))
++		log := filepath.Join(shared, "log-output")
++		require.NoError(t, os.WriteFile(log, nil, 0600))
++		require.NoError(t, os.Mkdir(filepath.Join(shared, "snapshot-output"), 0700))
+ 		require.NoError(t, os.WriteFile(clone, []byte("captured"), 0600))
+ 		require.NoError(t, os.WriteFile(root, []byte("immutable-root"), 0600))
+ 		require.NoError(t, os.WriteFile(future, []byte("future-content"), 0600))
+-		cmd, err := restoreNamespaceCommand(context.Background(), shared, executable, []string{"-test.run=^TestRestoreNamespaceProbe$", "-test.v"}, []restoreMount{{Source: clone, Target: writableTarget}, {Source: root, Target: readonlyTarget, ReadOnly: true}}, nil)
++		cmd, err := restoreNamespaceCommand(context.Background(), shared, executable, []string{"-test.run=^TestRestoreNamespaceProbe$", "-test.v"}, []restoreMount{{Source: clone, Target: target}, {Source: root, Target: readonlyTarget, ReadOnly: true}}, []string{input}, log)
+ 		require.NoError(t, err)
+ 		content := fmt.Sprintf("restore-%d", index)
+-		cmd.Env = append(os.Environ(), "FC_RESTORE_NAMESPACE_PROBE=1", "FC_RESTORE_PROBE_SHARED="+shared, "FC_RESTORE_PROBE_WRITABLE="+writableTarget, "FC_RESTORE_PROBE_READONLY="+readonlyTarget, "FC_RESTORE_PROBE_DYNAMIC="+dynamicTarget, "FC_RESTORE_PROBE_CONTENT="+content)
++		cmd.Env = append(os.Environ(), "FC_RESTORE_NAMESPACE_PROBE=1", "FC_RESTORE_PROBE_SHARED="+restoreSharedDirectory, "FC_RESTORE_PROBE_WRITABLE="+target, "FC_RESTORE_PROBE_READONLY="+readonlyTarget, "FC_RESTORE_PROBE_DYNAMIC="+future, "FC_RESTORE_PROBE_CONTENT="+content, "FC_RESTORE_PROBE_INPUT="+input, "FC_RESTORE_PROBE_LOG="+log)
+ 		output := &bytes.Buffer{}
+ 		cmd.Stdout, cmd.Stderr = output, output
+ 		require.NoError(t, cmd.Start())
+@@ -76,13 +87,15 @@ func TestRestoreNamespaceIsolation(t *testing.T) {
+ 				_ = cmd.Wait()
+ 			}
+ 		})
+-		instances = append(instances, instance{shared, clone, root, future, content, cmd, output})
++		instances = append(instances, instance{shared, clone, root, future, content, target, cmd, output})
+ 	}
+ 	for _, instance := range instances {
+ 		require.Eventually(t, func() bool { _, err := os.Stat(filepath.Join(instance.shared, "probe.sock")); return err == nil }, 10*time.Second, 10*time.Millisecond)
+ 		process, err := vm.ReadProcessIdentity(instance.cmd.Process.Pid)
+ 		require.NoError(t, err)
+-		require.NoError(t, addRestoreMount(context.Background(), process, instance.shared, restoreMount{Source: instance.dynamic, Target: dynamicTarget}))
++		jail := &noopJailer{ctx: context.Background(), shimDir: vm.Dir(instance.shared), process: process,
++			restoreMounts: []restoreMount{{Source: instance.clone, Target: instance.target}, {Source: instance.root, Target: readonlyTarget, ReadOnly: true}}}
++		require.NoError(t, jail.ExposeFileToJail(instance.dynamic), "host-shared disks must be explicitly exposed below their original absolute path")
+ 		conn, err := net.DialTimeout("unix", filepath.Join(instance.shared, "probe.sock"), time.Second)
+ 		require.NoError(t, err, "API sockets in the shared directory must be reachable from the host")
+ 		_, err = conn.Write([]byte("continue"))
+@@ -97,6 +110,16 @@ func TestRestoreNamespaceIsolation(t *testing.T) {
+ 		data, err = os.ReadFile(instance.root)
+ 		require.NoError(t, err)
+ 		require.Equal(t, "immutable-root", string(data))
++		if instance.target != writableTarget {
++			host, err := os.ReadFile(instance.target)
++			require.NoError(t, err)
++			require.Equal(t, "host-placeholder", string(host), "same-ID private disk must not modify the live host leaf")
++		}
++		for _, output := range []string{"log-output", "snapshot-output/state"} {
++			data, err := os.ReadFile(filepath.Join(instance.shared, output))
++			require.NoError(t, err)
++			require.Equal(t, instance.content, string(data))
++		}
+ 		data, err = os.ReadFile(instance.dynamic)
+ 		require.NoError(t, err)
+ 		require.Equal(t, "updated-"+instance.content, string(data))
+@@ -121,7 +144,11 @@ func TestRestoreNamespaceProbe(t *testing.T) {
+ 	}
+ 	require.Error(t, err, "read-only bind must reject writes even as root")
+ 	shared := os.Getenv("FC_RESTORE_PROBE_SHARED")
+-	listener, err := net.Listen("unix", filepath.Join(shared, "probe.sock"))
++	// #nosec G703 -- The parent supplies this private-namespace fixture input.
++	data, err = os.ReadFile(os.Getenv("FC_RESTORE_PROBE_INPUT"))
++	require.NoError(t, err)
++	require.Equal(t, "state-input", string(data), "load input below the old shared path must remain visible")
++	listener, err := net.Listen("unix", "probe.sock")
+ 	require.NoError(t, err)
+ 	defer listener.Close()
+ 	require.NoError(t, listener.(*net.UnixListener).SetDeadline(time.Now().Add(20*time.Second)))
+@@ -137,6 +164,10 @@ func TestRestoreNamespaceProbe(t *testing.T) {
+ 	require.NoError(t, err)
+ 	require.Equal(t, "future-content", string(data))
+ 	content := os.Getenv("FC_RESTORE_PROBE_CONTENT")
++	for _, output := range []string{os.Getenv("FC_RESTORE_PROBE_LOG"), filepath.Join(shared, "snapshot-output", "state")} {
++		// #nosec G703 -- The parent supplies private-namespace fixture output paths.
++		require.NoError(t, os.WriteFile(output, []byte(content), 0600), "logger writes and alias-translated snapshot outputs must remain writable")
++	}
+ 	// #nosec G703 -- The parent test supplies this fixture path to the private namespace probe.
+ 	require.NoError(t, os.WriteFile(writable, []byte(content), 0600))
+ 	// #nosec G703 -- The parent test supplies this fixture path to the private namespace probe.
+@@ -183,3 +214,20 @@ func TestRestoreNamespaceReleaseAPI(t *testing.T) {
+ 	_, err = os.Stat(target)
+ 	require.True(t, os.IsNotExist(err), "official VMM device path must remain absent on host")
+ }
++
++func TestRestoreNamespaceSharedInputs(t *testing.T) {
++	shared := t.TempDir()
++	backing := filepath.Join(shared, "clone")
++	require.NoError(t, os.WriteFile(backing, []byte("clone"), 0600))
++	inputs := []string{filepath.Join(shared, "state"), filepath.Join(shared, "memory")}
++	outputs := []string{filepath.Join(shared, "log"), filepath.Join(shared, "metrics")}
++	cmd, err := restoreNamespaceCommand(context.Background(), shared, os.Args[0], nil, []restoreMount{{Source: backing, Target: filepath.Join(shared, "ctrstub0")}}, inputs, outputs...)
++	require.NoError(t, err)
++	data, err := os.ReadFile(cmd.Args[2])
++	require.NoError(t, err)
++	var plan restoreNamespacePlan
++	require.NoError(t, json.Unmarshal(data, &plan))
++	require.Equal(t, inputs, plan.Inputs, "shared input paths must get explicit readonly binds")
++	require.Equal(t, outputs, plan.WritableInputs, "logging output must retain writable bind semantics")
++	require.Error(t, validateRestoreInputs([]string{inputs[0], inputs[1], outputs[0], outputs[0]}, nil))
++}
+diff --git a/runtime/restore_stub_release_test.go b/runtime/restore_stub_release_test.go
+new file mode 100644
+index 00000000..f23966e1
+--- /dev/null
++++ b/runtime/restore_stub_release_test.go
+@@ -0,0 +1,97 @@
++// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
++//
++// Licensed under the Apache License, Version 2.0 (the "License"). You may
++// not use this file except in compliance with the License. A copy of the
++// License is located at
++//
++//	http://aws.amazon.com/apache2.0/
++//
++// or in the "license" file accompanying this file. This file is distributed
++// on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
++// express or implied. See the License for the specific language governing
++// permissions and limitations under the License.
++
++package main
++
++import (
++	"context"
++	"os"
++	"path/filepath"
++	"testing"
++
++	"github.com/containerd/containerd/v2/pkg/protobuf/types"
++	"github.com/containerd/log"
++	"github.com/firecracker-microvm/firecracker-containerd/internal/vm"
++	drivemount "github.com/firecracker-microvm/firecracker-containerd/proto/service/drivemount/ttrpc"
++	fc "github.com/firecracker-microvm/firecracker-go-sdk"
++	"github.com/firecracker-microvm/firecracker-go-sdk/client/models"
++	ops "github.com/firecracker-microvm/firecracker-go-sdk/client/operations"
++	"github.com/firecracker-microvm/firecracker-go-sdk/fctesting"
++	"github.com/stretchr/testify/require"
++)
++
++type resetDriveMounter struct{ drivemount.DriveMounterService }
++
++func (resetDriveMounter) UnmountDrive(context.Context, *drivemount.UnmountDriveRequest) (*types.Empty, error) {
++	return &types.Empty{}, nil
++}
++
++func TestNoopResetStubRecapture(t *testing.T) {
++	for _, restored := range []bool{false, true} {
++		t.Run(map[bool]string{false: "ordinary", true: "same-ID-restored"}[restored], func(t *testing.T) {
++			ctx := context.Background()
++			shared := t.TempDir()
++			j := &noopJailer{shimDir: vm.Dir(shared), ctx: ctx, logger: log.G(ctx)}
++			cfg := &fc.Config{}
++			handler, err := CreateContainerStubs(cfg, j, 1, log.G(ctx))
++			require.NoError(t, err)
++			stub := handler.freeDrives[0]
++			if restored {
++				// An unused stub in a same-ID snapshot has this exact captured
++				// target, backed by the new restore's independent copy.
++				data, err := os.ReadFile(stub.stubPath)
++				require.NoError(t, err)
++				clone := filepath.Join(shared, "captured-stub")
++				// #nosec G703 -- clone is the test-owned captured stub in t.TempDir.
++				require.NoError(t, os.WriteFile(clone, data, 0600))
++				j.restoreMounts = []restoreMount{{Source: clone, Target: stub.stubPath}}
++			}
++			var exportedPath string
++			machine, err := fc.NewMachine(ctx, fc.Config{}, fc.WithClient(fc.NewClient("/not-used", nil, false, fc.WithOpsClient(&fctesting.MockClient{
++				PatchGuestDriveByIDFn: func(params *ops.PatchGuestDriveByIDParams) (*ops.PatchGuestDriveByIDNoContent, error) {
++					exportedPath = params.Body.PathOnHost
++					return nil, nil
++				},
++			}))))
++			require.NoError(t, err)
++			for attempt := 0; attempt < 2; attempt++ {
++				// Reserve's external-drive patch does not replace the captured
++				// stub mapping. Exercise repeated reset of that same slot.
++				handler.usedDrives["task"] = stub
++				handler.freeDrives = nil
++				require.NoError(t, handler.Release(ctx, "task", resetDriveMounter{}, machine))
++				require.Equal(t, stub.stubPath, exportedPath)
++				require.True(t, filepath.IsAbs(exportedPath))
++				metadata, err := snapshotDrivePaths(&models.FullVMConfiguration{Drives: []*models.Drive{{DriveID: fc.String(stub.driveID), PathOnHost: exportedPath}}}, false)
++				require.NoError(t, err, "release must leave a capturable absolute unjailed path")
++				require.Equal(t, stub.stubPath, metadata.Drives[0].Path)
++				if restored {
++					backing, ok := restoreBackingPath(j, exportedPath)
++					require.True(t, ok)
++					require.Equal(t, filepath.Join(shared, "captured-stub"), backing)
++				}
++			}
++			if restored {
++				clone := j.restoreMounts[0].Source
++				data, err := os.ReadFile(clone)
++				require.NoError(t, err)
++				data[len(data)-1] = 1 // Keep the header; corrupt only padding.
++				// #nosec G703 -- clone is the test-owned captured stub in t.TempDir.
++				require.NoError(t, os.WriteFile(clone, data, 0600))
++				require.ErrorContains(t, j.exposeStubDrive(stub.stubPath, stub.driveID), "does not match")
++				require.Error(t, j.exposeStubDrive(stub.stubPath, "wrong-slot"))
++				require.ErrorContains(t, j.ExposeFileToJail(stub.stubPath), "overlaps captured backing", "generic exposure must not acquire the stub exception")
++			}
++		})
++	}
++}
+diff --git a/runtime/snapshot.go b/runtime/snapshot.go
+index e9af6289..77d4b382 100644
+--- a/runtime/snapshot.go
++++ b/runtime/snapshot.go
+@@ -155,7 +155,7 @@ func (s *service) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotR
+ 	}
+ 	defer os.RemoveAll(stage)
+ 	s.pendingPause.MayReset = true
+-	if err := s.machine.CreateSnapshot(ctx, filepath.Join(stage, "memory"), filepath.Join(stage, "state")); err != nil {
++	if err := s.machine.CreateSnapshot(ctx, restoreAPIPath(s.jailer, filepath.Join(stage, "memory")), restoreAPIPath(s.jailer, filepath.Join(stage, "state"))); err != nil {
+ 		return nil, err
+ 	}
+ 	// Invalidate any old publication marker before replacing either payload.
+-- 
+2.43.0
+

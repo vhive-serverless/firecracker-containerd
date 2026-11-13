@@ -1,0 +1,52 @@
+{
+  "revision": "2e03843816cf95d184ad4ad429adf6ea2ccc1412",
+  "tree": "76c862aa60162a0b510d7626d523f047709e48d9",
+  "default_concurrent_vms": 5,
+  "test_command": "go test -v -count=1 -timeout=300s -run '^TestLaunchMultipleContainersWithRemoteSnapshotter_Isolated$'",
+  "inputs": {
+    "snapshotter/service_integ_test.go": {
+      "equal_to_accepted7386": true,
+      "sha256": "d4c1dc36db136e2c4adbd764257ec88e6739194296f6198419de4ef157faa31d"
+    },
+    "snapshotter/Makefile": {
+      "equal_to_accepted7386": true,
+      "sha256": "cffb4ffbb29b43efd9556182182dd05d733841a80d7dcc36a5f0fc8b1be8deef"
+    },
+    "internal/integtest/runtime.go": {
+      "equal_to_accepted7386": true,
+      "sha256": "3b69e53d4d14b96f1f25c21c8e45d74f4e5352460f2a015fc03b0b4125e1dac3"
+    },
+    "tools/demo/fcnet.conflist": {
+      "equal_to_accepted7386": true,
+      "sha256": "3e31e66f022b30002087c3880d63e2598d9a895d02ddeae80cc85e76aa19fdf8"
+    },
+    "tools/docker/Dockerfile.integ-test": {
+      "equal_to_accepted7386": true,
+      "sha256": "1617b554e5eeddde08f8650ccebb9c55c86b3dd490c22a77a9a82d9ff41489d8"
+    },
+    "tools/docker/entrypoint.sh": {
+      "equal_to_accepted7386": true,
+      "sha256": "87bbfe1480af3204235822c1a5e987aa39a56f7acfeccaf5808e964e5a9980ee"
+    },
+    "tools/docker/config.toml": {
+      "equal_to_accepted7386": true,
+      "sha256": "7e3a0fcb4dc52a4bae48697c687de7de8e62f4fc5026ce10b08953e95ed9ff6e"
+    },
+    "tools/docker/do_not_edit_for_firecracker-control.config.json": {
+      "equal_to_accepted7386": true,
+      "sha256": "6ac94d9606f3b395e58b2e789d654c5392553440e8f33d12bbbb5f778637e642"
+    },
+    "Makefile": {
+      "equal_to_accepted7386": true,
+      "sha256": "b22eca5ed9417c68e245e57875f786641f3a65ea01346a47660c5ff33a6263bb"
+    },
+    "go.mod": {
+      "equal_to_accepted7386": true,
+      "sha256": "f207d3de8f3e720f1625494049646e7441129cd92ba5fe8070ce39bc50bd706d"
+    },
+    "go.sum": {
+      "equal_to_accepted7386": true,
+      "sha256": "ad171b6bd53ee50413173655333f6d217054ac18591aee7f56faea66cd0d0005"
+    }
+  }
+}
