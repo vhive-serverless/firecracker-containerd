@@ -1,5 +1,20 @@
 # Read-only host sampler
 
+## Primary overhead metric (revised 2026-11-15)
+
+Exclude host disk-backed filesystem page cache from memory overhead:
+`memory.current - memory.stat.file + memory.stat.shmem`.
+Retain anonymous/guest RAM, tmpfs/shared memory, and kernel charges. Guest cache
+inside guest RAM remains counted. Total cgroup charge is a secondary diagnostic,
+not the primary overhead metric. The analyzer emits this measurement as
+`memory_excluding_host_file_cache` alongside historical total-charge fields.
+
+[Revised historical results](results/0a268c5589c3-cache-excluded/REPORT.md):
+combined saves 119.41 MiB versus disk/SquashFS across two VMs in common idle.
+Older tables/figures below and in the frozen report include host file cache;
+the linked reanalysis supersedes their overhead interpretation.
+
+
 Run `sample_host.py` with the explicit host PIDs to observe. It reads `/proc`
 and, optionally, an explicitly selected cgroup v2 directory. It does not change
 cgroups, drop caches, request reclaim, signal sampled processes, or launch a

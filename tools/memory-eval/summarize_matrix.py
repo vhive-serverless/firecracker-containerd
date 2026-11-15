@@ -224,6 +224,14 @@ def cgroup_window(samples, start, end, gap, selected):
               'memory_fault_deltas': {key: counter(samples, start, end,
                    lambda r, key=key: metric(r, 'memory.stat').get(key), gap)
                    for key in ('pgfault', 'pgmajfault')}}
+    # Exclude disk-backed host cache, retaining RAM-backed tmpfs/shared memory.
+    def cache_excluded(row):
+        stat = metric(row, 'memory.stat')
+        file_bytes = number(stat.get('file'), 'file bytes')
+        shmem_bytes = number(stat.get('shmem'), 'shmem bytes')
+        check(shmem_bytes <= file_bytes, 'shmem exceeds file accounting')
+        return number(metric(row, 'memory.current'), 'current bytes') - file_bytes + shmem_bytes
+    result['memory_excluding_host_file_cache'] = gauge(samples, start, end, cache_excluded, gap)
     memory_endpoints = {}
     for label, point in (('start', points[0][0]), ('end', points[-1][0])):
         memory_endpoints[label] = {}
