@@ -89,3 +89,6 @@ details can be found in its FAQ](https://issihosts.com/haveged/faq.html).
 Users of the image created by this utility are encouraged to evaluate 
 `haveged` against their security requirements before running any
 cryptographically-sensitive workloads inside their microVMs and containers.
+
+For the optional disk-backed writable OS upper and its snapshot lifecycle, see
+[the disk overlay baseline guide](../../docs/guest-disk-overlay.md).

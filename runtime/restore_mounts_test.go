@@ -21,6 +21,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/firecracker-microvm/firecracker-containerd/internal/vm"
@@ -305,4 +306,20 @@ func TestRestoreAPIPath(t *testing.T) {
 	require.Equal(t, "/outside/state", restoreAPIPath(j, "/outside/state"))
 	require.Equal(t, shared+"-sibling/state", restoreAPIPath(j, shared+"-sibling/state"))
 	require.Equal(t, stage, restoreAPIPath(&runcJailer{}, stage), "jailed API translation remains separate")
+}
+
+func TestSnapshotGuestUpperMetadata(t *testing.T) {
+	state := filepath.Join(t.TempDir(), "state")
+	metadata := snapshotDriveMetadata{Version: 3, Transport: &checkpointTransportCut{Version: 1},
+		GuestOverlay: &snapshotFile{Path: guestOverlayFile, Size: 64 << 20, SHA256: strings.Repeat("a", 64)},
+		Drives: []snapshotDrivePath{{ID: "root", Path: "/source/root", Root: true, ReadOnly: true},
+			{ID: "workload", Path: "/source/workload"}, {ID: guestOverlayDrive, Path: "/source/upper"}}}
+	require.NoError(t, publishSnapshotDriveMetadata(state, &metadata))
+	actual, err := readSnapshotDriveMetadata(state)
+	require.NoError(t, err)
+	require.Equal(t, metadata, *actual)
+	metadata.GuestOverlay = nil
+	require.NoError(t, publishSnapshotDriveMetadata(state, &metadata))
+	_, err = readSnapshotDriveMetadata(state)
+	require.Error(t, err, "a disk layout cannot silently restore without its captured upper")
 }

@@ -122,13 +122,13 @@ func (s *service) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotR
 	}()
 	if !filepath.IsAbs(req.MemFilePath) || !filepath.IsAbs(req.SnapshotPath) ||
 		filepath.Clean(req.MemFilePath) != req.MemFilePath || filepath.Clean(req.SnapshotPath) != req.SnapshotPath ||
-		req.MemFilePath == req.SnapshotPath || req.MemFilePath == req.SnapshotPath+snapshotDriveMetadataSuffix {
+		req.MemFilePath == req.SnapshotPath || req.MemFilePath == req.SnapshotPath+snapshotDriveMetadataSuffix || req.MemFilePath == req.SnapshotPath+"."+guestOverlayFile {
 		return nil, status.Error(codes.InvalidArgument, "memory and snapshot paths must be distinct absolute paths")
 	}
 	if err := s.waitVMReady(); err != nil {
 		return nil, err
 	}
-	if _, ok := s.jailer.(*noopJailer); !ok || len(s.machineConfig.Drives) != 2 || !s.machineConfig.Drives[0].IsReadOnly {
+	if _, ok := s.jailer.(*noopJailer); !ok || (len(s.machineConfig.Drives) != 2 && len(s.machineConfig.Drives) != 3) || !s.machineConfig.Drives[0].IsReadOnly {
 		return nil, status.Error(codes.FailedPrecondition, "snapshot requires an unjailed VM with a read-only root and one workload drive")
 	}
 	if s.pendingPause == nil || s.pendingPause.Cut == nil || !s.pendingPause.VMPaused {
@@ -144,8 +144,8 @@ func (s *service) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotR
 		return nil, err
 	}
 	metadata.Transport = s.pendingPause.Cut
-	if len(metadata.Drives) != 2 {
-		return nil, status.Error(codes.FailedPrecondition, "legacy snapshot requires exactly two captured drives")
+	if len(metadata.Drives) != 2 && len(metadata.Drives) != 3 {
+		return nil, status.Error(codes.FailedPrecondition, "legacy snapshot requires root, workload and optional guest-upper drives")
 	}
 	// Stage inside the per-VM directory, which remains writable and visible
 	// even when this VMM was itself restored into a private filesystem root.
@@ -171,6 +171,28 @@ func (s *service) CreateSnapshot(ctx context.Context, req *proto.CreateSnapshotR
 	}
 	if err := publishSnapshotFile(ctx, filepath.Join(stage, "state"), req.SnapshotPath); err != nil {
 		return nil, err
+	}
+	for _, drive := range metadata.Drives {
+		if drive.ID != guestOverlayDrive {
+			continue
+		}
+		// The paused VM's OS upper is independent of the workload disk that
+		// vHive captures. Publish its bytes before the metadata commit marker.
+		source, remapped := restoreBackingPath(s.jailer, drive.Path)
+		if !remapped {
+			source = drive.Path
+		}
+		upper, err := copySnapshotFile(ctx, source, stage, guestOverlayFile)
+		if err != nil {
+			return nil, err
+		}
+		if err := publishSnapshotFile(ctx, filepath.Join(stage, guestOverlayFile), req.SnapshotPath+"."+guestOverlayFile); err != nil {
+			return nil, err
+		}
+		metadata.Version, metadata.GuestOverlay = 3, &upper
+	}
+	if len(metadata.Drives) == 3 && metadata.GuestOverlay == nil {
+		return nil, fmt.Errorf("third snapshot drive must be the guest writable upper")
 	}
 	if err := publishSnapshotDriveMetadata(req.SnapshotPath, metadata); err != nil {
 		return nil, err

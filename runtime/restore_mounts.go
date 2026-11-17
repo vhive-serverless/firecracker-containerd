@@ -31,9 +31,10 @@ import (
 const snapshotDriveMetadataSuffix = ".drives.json"
 
 type snapshotDriveMetadata struct {
-	Transport *checkpointTransportCut `json:"transport"`
-	Version   int                     `json:"version"`
-	Drives    []snapshotDrivePath     `json:"drives"`
+	GuestOverlay *snapshotFile           `json:"guest_overlay,omitempty"`
+	Transport    *checkpointTransportCut `json:"transport"`
+	Version      int                     `json:"version"`
+	Drives       []snapshotDrivePath     `json:"drives"`
 }
 
 type snapshotDrivePath struct {
@@ -113,14 +114,14 @@ func readSnapshotDriveMetadata(state string) (*snapshotDriveMetadata, error) {
 		return nil, err
 	}
 	var extra any
-	if decoder.Decode(&extra) != io.EOF || metadata.Version != 2 || len(metadata.Drives) != 2 {
+	if decoder.Decode(&extra) != io.EOF || !((metadata.Version == 2 && metadata.GuestOverlay == nil && len(metadata.Drives) == 2) || (metadata.Version == 3 && metadata.GuestOverlay != nil && len(metadata.Drives) == 3)) {
 		return nil, fmt.Errorf("unsupported snapshot drive metadata")
 	}
 	if err := validateCheckpointTransport(metadata.Transport); err != nil {
 		return nil, err
 	}
 	ids, paths := make(map[string]bool), make(map[string]bool)
-	roots, workloads := 0, 0
+	roots, workloads, uppers := 0, 0, 0
 	for _, drive := range metadata.Drives {
 		path, err := capturedDevicePath(drive.Path, false)
 		if err != nil {
@@ -133,6 +134,8 @@ func readSnapshotDriveMetadata(state string) (*snapshotDriveMetadata, error) {
 		switch {
 		case drive.Root && drive.ReadOnly:
 			roots++
+		case drive.ID == guestOverlayDrive && !drive.Root && !drive.ReadOnly:
+			uppers++
 		case !drive.Root && !drive.ReadOnly:
 			workloads++
 		default:
@@ -141,6 +144,14 @@ func readSnapshotDriveMetadata(state string) (*snapshotDriveMetadata, error) {
 	}
 	if roots != 1 || workloads != 1 {
 		return nil, fmt.Errorf("legacy snapshot requires exactly one root and workload drive")
+	}
+	if metadata.Version == 3 {
+		upper := metadata.GuestOverlay
+		if uppers != 1 || upper.Path != guestOverlayFile || upper.Size < 64<<20 || upper.Size > 65536<<20 || len(upper.SHA256) != 64 {
+			return nil, fmt.Errorf("invalid guest upper snapshot metadata")
+		}
+	} else if uppers != 0 {
+		return nil, fmt.Errorf("unexpected guest upper")
 	}
 	return metadata, nil
 }
@@ -166,6 +177,16 @@ func (s *service) prepareSnapshotMounts(request *proto.CreateVMRequest) error {
 				return fmt.Errorf("missing restore root drive")
 			}
 			source, expectedID = s.machineConfig.Drives[0].PathOnHost, *s.machineConfig.Drives[0].DriveID
+		}
+		if drive.ID == guestOverlayDrive {
+			source, err = s.restoreGuestOverlay(request.SnapshotPath, metadata.GuestOverlay)
+			if err != nil {
+				return err
+			}
+			expectedID = guestOverlayDrive
+			s.machineConfig.Drives = append(s.machineConfig.Drives, models.Drive{
+				DriveID: &expectedID, PathOnHost: source, IsRootDevice: new(bool),
+			})
 		}
 		if drive.ID != expectedID {
 			return fmt.Errorf("captured drive ID %q differs from restore device %q", drive.ID, expectedID)

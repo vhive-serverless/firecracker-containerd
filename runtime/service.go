@@ -564,12 +564,17 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 			if e := s.jailer.Stop(true); e != nil {
 				s.logger.WithError(e).Debug("failed to stop firecracker")
 			}
+			_ = os.Remove(filepath.Join(s.jailer.JailPath().RootPath(), guestOverlayFile))
 		}
 	}()
 
 	s.machineConfig, err = s.buildVMConfiguration(request)
 	if err != nil {
 		return fmt.Errorf("failed to build VM configuration: %w", err)
+	}
+
+	if err = s.configureGuestRoot(requestCtx, request); err != nil {
+		return fmt.Errorf("configure guest writable root: %w", err)
 	}
 
 	opts := []firecracker.Opt{}

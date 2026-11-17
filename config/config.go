@@ -46,6 +46,8 @@ type Config struct {
 	KernelImagePath       string   `json:"kernel_image_path"`
 	KernelArgs            string   `json:"kernel_args"`
 	RootDrive             string   `json:"root_drive"`
+	GuestRootMode         string   `json:"guest_root_mode"`
+	GuestRootSizeMiB      uint32   `json:"guest_root_size_mib"`
 	CPUTemplate           string   `json:"cpu_template"`
 	LogLevels             []string `json:"log_levels"`
 	SmtEnabled            bool     `json:"smt_enabled"`
