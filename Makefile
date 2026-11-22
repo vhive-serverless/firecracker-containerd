@@ -160,6 +160,9 @@ image: files_ephemeral
 image-stargz: files_ephemeral files_ephemeral_stargz
 	$(MAKE) -C tools/image-builder stargz-in-docker
 
+image-dax: files_ephemeral
+	$(MAKE) -C tools/image-builder dax-in-docker
+
 test: $(TEST_SUBDIRS)
 	go test ./... $(EXTRAGOARGS)
 

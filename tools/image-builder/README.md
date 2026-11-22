@@ -92,3 +92,74 @@ cryptographically-sensitive workloads inside their microVMs and containers.
 
 For the optional disk-backed writable OS upper and its snapshot lifecycle, see
 [the disk overlay baseline guide](../../docs/guest-disk-overlay.md).
+
+## Common image and kernel for the disk baseline
+
+The [disk-baseline runtime example](../../config/disk-baseline.json.example)
+selects a read-only ext4 root through ordinary virtio-blk, a private 512 MiB
+disk-backed writable OS upper, an empty CPU template, and explicit
+`damon_reclaim.enabled=N`. This branch has no pmem-root or guest-reclamation
+configuration fields and does not create a balloon by default. Do not supply
+a per-VM balloon for the baseline. The generic runtime defaults do not select
+this comparison: an omitted guest-root mode retains the original RAM upper,
+and `default-rootfs.img` can remain SquashFS. Select the example explicitly.
+
+For the comparison with `damon-virtio-pmem`, build **one common ext4 guest image
+on the DSec branch** and reuse its exact bytes on both branches. This includes
+the DSec-built guest agent, runc, `/sbin/overlay-init`, packages and all other
+image contents. Independently building one image per branch does not satisfy
+this requirement, even with matching package versions. On the DSec checkout,
+use its pinned worker build and `make image-dax`; the conversion produces
+`tools/image-builder/rootfs-dax.img`. Record the source revision, image digest
+and embedded agent/runc identities, then install that same file for both arms:
+
+```bash
+sudo install -m 0444 "$common_ext4_image" \
+  /var/lib/firecracker-containerd/runtime/common-rootfs.ext4
+sudo install -m 0444 "$common_kernel_binary" \
+  /var/lib/firecracker-containerd/runtime/common-vmlinux.bin
+sha256sum /var/lib/firecracker-containerd/runtime/common-rootfs.ext4 \
+  /var/lib/firecracker-containerd/runtime/common-vmlinux.bin \
+  /usr/local/bin/firecracker
+```
+
+`common_ext4_image` must name the DSec-built image and `common_kernel_binary`
+the one selected guest kernel binary. Reuse that kernel file verbatim, with the
+same kernel configuration, across both arms; equal version strings alone are
+insufficient. Both branches retain the official Firecracker/jailer v1.18.0
+release and existing SDK pin. No VMM modification is needed for this baseline.
+Pass this example's path through `FIRECRACKER_CONTAINERD_RUNTIME_CONFIG_PATH`
+in the runtime shim environment, or install it as the dedicated runtime's
+`/etc/containerd/firecracker-runtime.json`. Adjust common paths together when
+using private install prefixes.
+
+Match vCPU count, guest memory, empty CPU template, SMT, upper capacity,
+snapshotter, workload image, host backing, jailer choice and observation
+settings. The baseline keeps DAMON disabled and has no balloon/free-page
+reporting. The DSec configuration separately selects pmem and DAMON/reporting;
+the common ext4 image is not mounted through DAX in the baseline. Verify actual
+guest mounts, lower-file DAX state, guest kernel and device state, writable
+readback and cleanup on both stacks before collecting results. The shared guest
+agent must pass native compatibility checks with each branch's host runtime.
+
+Branch histories and nonoptimization runtime code remain separate. In
+particular, the baseline's vHive snapshot/restore path and DSec's native
+restore/CRI changes are not made equivalent by sharing the image and kernel.
+Those residual runtime and restore differences remain comparison confounds;
+do not attribute every difference to pmem or reclamation. This is an ext4
+comparison, not a full reproduction of DSec's EROFS design.
+
+### Optional ext4 conversion on this branch
+
+`make image-dax` adds an optional local conversion without changing ordinary
+`make image`. The helper is copied verbatim from DSec source
+`c15164a93e75f5a5a1435ecca634cf4e291aa2ad`; its builder uses the same Debian
+snapshot and e2fsprogs tools. It converts the exact SquashFS tree to a clean,
+read-only 512 MiB ext4 image with 4 KiB blocks and no journal, recording image,
+source-image, normalized tree hashes and superblock details in sidecars.
+Conversion preserves the guest tree; it does not make a baseline-built guest
+agent identical to the DSec-built agent. The matched comparison above therefore
+uses the one shared DSec-built image rather than separate conversions of the
+two branches' independently built images. Build and native validation remain
+worker tasks; a successful image conversion alone does not prove guest boot,
+DAX, restore compatibility or memory savings.

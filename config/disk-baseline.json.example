@@ -1,0 +1,10 @@
+{
+  "firecracker_binary_path": "/usr/local/bin/firecracker",
+  "kernel_image_path": "/var/lib/firecracker-containerd/runtime/common-vmlinux.bin",
+  "kernel_args": "ro console=ttyS0 reboot=k panic=1 pci=off nomodules systemd.unified_cgroup_hierarchy=1 systemd.unit=firecracker.target damon_reclaim.enabled=N init=/sbin/overlay-init",
+  "root_drive": "/var/lib/firecracker-containerd/runtime/common-rootfs.ext4",
+  "guest_root_mode": "disk",
+  "guest_root_size_mib": 512,
+  "cpu_template": "",
+  "smt_enabled": false
+}
