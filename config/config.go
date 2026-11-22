@@ -42,6 +42,8 @@ const (
 
 // Config represents runtime configuration parameters
 type Config struct {
+	// FreePageReporting enables a zero-target reporting balloon on fresh VMs.
+	FreePageReporting     bool     `json:"free_page_reporting"`
 	FirecrackerBinaryPath string   `json:"firecracker_binary_path"`
 	KernelImagePath       string   `json:"kernel_image_path"`
 	KernelArgs            string   `json:"kernel_args"`

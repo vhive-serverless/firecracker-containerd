@@ -50,6 +50,7 @@ import (
 	"github.com/containerd/typeurl/v2"
 	"github.com/firecracker-microvm/firecracker-go-sdk"
 	"github.com/firecracker-microvm/firecracker-go-sdk/client/models"
+	ops "github.com/firecracker-microvm/firecracker-go-sdk/client/operations"
 	"github.com/gofrs/uuid"
 	"github.com/hashicorp/go-multierror"
 	"github.com/sirupsen/logrus"
@@ -594,11 +595,15 @@ func (s *service) createVM(requestCtx context.Context, request *proto.CreateVMRe
 	}
 
 	s.apiSocketPath = s.machineConfig.SocketPath
-	if request.BalloonDevice == nil {
+	device := request.BalloonDevice
+	if device == nil && s.config.FreePageReporting && !request.LoadSnapshot {
+		device = &proto.FirecrackerBalloonDevice{}
+	}
+	if device == nil {
 		s.logger.Debug("No balloon device is setup")
 	} else {
 		// Creates a new balloon device if one does not already exist, otherwise updates it, before machine startup.
-		balloon, err := s.createBalloon(requestCtx, request)
+		balloon, err := s.createBalloon(device)
 		if err != nil {
 			return fmt.Errorf("failed to create balloon device: %w", err)
 		}
@@ -846,10 +851,10 @@ func (s *service) GetVMMetadata(requestCtx context.Context, _ *proto.GetVMMetada
 	return &proto.GetVMMetadataResponse{Metadata: string(metadata)}, nil
 }
 
-func (s *service) createBalloon(_ context.Context, request *proto.CreateVMRequest) (models.Balloon, error) {
-	amountMiB := request.BalloonDevice.AmountMib
-	deflateOnOom := request.BalloonDevice.DeflateOnOom
-	statsPollingIntervals := request.BalloonDevice.StatsPollingIntervals
+func (s *service) createBalloon(device *proto.FirecrackerBalloonDevice) (models.Balloon, error) {
+	amountMiB := device.AmountMib
+	deflateOnOom := device.DeflateOnOom
+	statsPollingIntervals := device.StatsPollingIntervals
 
 	balloonDevice := firecracker.NewBalloonDevice(amountMiB, deflateOnOom, firecracker.WithStatsPollingIntervals(statsPollingIntervals))
 	balloon := balloonDevice.Build()
@@ -862,6 +867,15 @@ func (s *service) createBalloon(_ context.Context, request *proto.CreateVMReques
 
 func (s *service) buildBalloonDeviceOpt(balloon models.Balloon) ([]firecracker.Opt, error) {
 	handler := firecracker.NewCreateBalloonHandler(*balloon.AmountMib, *balloon.DeflateOnOom, balloon.StatsPollingIntervals)
+	if s.config.FreePageReporting {
+		handler = firecracker.Handler{Name: firecracker.CreateBalloonHandlerName,
+			Fn: func(ctx context.Context, m *firecracker.Machine) error {
+				return m.CreateBalloon(ctx, *balloon.AmountMib, *balloon.DeflateOnOom, balloon.StatsPollingIntervals,
+					func(params *ops.PutBalloonParams) { params.Body.FreePageReporting = true })
+			},
+		}
+	}
+
 	opt := []firecracker.Opt{
 		func(m *firecracker.Machine) {
 			m.Handlers.FcInit = m.Handlers.FcInit.AppendAfter(firecracker.CreateMachineHandlerName, handler)
