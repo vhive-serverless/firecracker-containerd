@@ -133,3 +133,28 @@ of the same SquashFS produced identical ext4 bytes; the mounted image matched
 the source tree digest and rejected writes. Image SHA256:
 `fddd6a51d06feeaf41f65d879b52f81062e5b92f027f7f5e0e197d78d2882b3c`.
 This run allocated 214065152 host disk bytes for the 536870912-byte sparse image.
+
+### Comparable baseline and optimized configurations
+
+Select `config/dsec-optimized.json.example` explicitly for the optimized arm.
+It enables the PMEM/DAX lower and DAMON with zero-target balloon free-page
+reporting. Branch membership alone does not activate those options. Replace
+`REPLACE_WITH_COMMON_ROOTFS_SHA256` with the measured SHA-256 of the installed
+`common-rootfs.ext4`.
+
+For comparison with `baseline-disk-overlay-v1.18`, build the guest root once
+from this DSec branch, including its guest agent, convert it using
+`build-dax-rootfs.sh`, and install those exact ext4 bytes in both arms. Copy
+one kernel binary and one unmodified Firecracker binary to both deployments;
+do not independently rebuild nominally matching inputs. Both arms use a
+512 MiB disk-backed writable upper; keep VM RAM, vCPUs, workload, snapshotter,
+and tracing settings equal. The baseline attaches the common root as ordinary
+virtio-block, disables DAMON, and has no balloon/free-page reporting. The
+optimized arm uses PMEM/DAX and DAMON plus reporting, without balloon inflation.
+
+The two branch histories are deliberately retained. Native-restore/CRI runtime
+differences remain and are not eliminated by matching these inputs. Fresh-boot
+validation does not validate interchangeable snapshots: each branch retains
+its own restore implementation. This is a comparison of these two configured
+runtimes, not proof that all observed differences are caused solely by the
+memory optimizations.
