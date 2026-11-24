@@ -59,6 +59,9 @@ type Config struct {
 	CPUTemplate           string                  `json:"cpu_template"`
 	LogLevels             []string                `json:"log_levels"`
 	SmtEnabled            bool                    `json:"smt_enabled"`
+
+	GuestReclamationProfile string `json:"guest_reclamation_profile,omitempty"`
+
 	// If a CreateVM call specifies no network interfaces and DefaultNetworkInterfaces is non-empty,
 	// the VM will default to using the network interfaces as specified here. This is especially
 	// useful when a CNI-based network interface is provided in DefaultNetworkInterfaces.

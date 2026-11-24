@@ -15,6 +15,7 @@ package main
 
 import (
 	"fmt"
+	"runtime"
 	"strings"
 
 	"github.com/firecracker-microvm/firecracker-containerd/proto"
@@ -31,6 +32,40 @@ func (s *service) configureGuestReclamation(request *proto.CreateVMRequest) erro
 	}
 	if selected == nil || !selected.Enabled {
 		return nil
+	}
+	for _, argument := range strings.Fields(s.machineConfig.KernelArgs) {
+		if strings.HasPrefix(argument, "damon_reclaim.") || strings.HasPrefix(argument, "page_reporting.") {
+			return fmt.Errorf("conflicting reclamation kernel arguments; use Reclamation options")
+		}
+	}
+	switch s.config.GuestReclamationProfile {
+	case "agentenv":
+		if selected.MinAgeSeconds != 0 || selected.QuotaMibPerSecond != 0 || selected.QuotaTimeMs != 0 || selected.ReportingOrder != nil {
+			return fmt.Errorf("agentenv reclaim profile conflicts with individual reclamation options")
+		}
+		if b := request.BalloonDevice; b != nil && (b.AmountMib != 0 || b.StatsPollingIntervals != 0) {
+			return fmt.Errorf("agentenv reclaim profile requires zero balloon target and stats polling interval")
+		}
+		start, end, err := agentENVMonitorRegion(runtime.GOARCH, *s.machineConfig.MachineCfg.MemSizeMib)
+		if err != nil {
+			return err
+		}
+		s.machineConfig.KernelArgs += fmt.Sprintf(" damon_reclaim.monitor_region_start=%d damon_reclaim.monitor_region_end=%d", start, end) +
+			" damon_reclaim.enabled=Y damon_reclaim.skip_anon=Y damon_reclaim.min_age=100000" +
+			" damon_reclaim.quota_ms=20 damon_reclaim.quota_sz=1073741824 damon_reclaim.quota_reset_interval_ms=500" +
+			" damon_reclaim.wmarks_high=990 damon_reclaim.wmarks_mid=990 damon_reclaim.wmarks_low=200" +
+			" damon_reclaim.wmarks_interval=1000000 page_reporting.page_reporting_order=6"
+		if request.BalloonDevice == nil {
+			request.BalloonDevice = &proto.FirecrackerBalloonDevice{}
+		}
+		request.BalloonDevice.FreePageReporting = true
+		request.BalloonDevice.DeflateOnOom = true
+		request.Reclamation = selected
+		return nil
+	case "":
+		// Use the original reclaim policy.
+	default:
+		return fmt.Errorf("unknown guest reclamation profile %q", s.config.GuestReclamationProfile)
 	}
 	options := gproto.Clone(selected).(*proto.GuestReclamation)
 	if options.MinAgeSeconds == 0 {
@@ -49,11 +84,6 @@ func (s *service) configureGuestReclamation(request *proto.CreateVMRequest) erro
 	if options.MinAgeSeconds > 3600 || options.QuotaMibPerSecond > 1024 || options.QuotaTimeMs > 100 || *options.ReportingOrder > 9 {
 		return fmt.Errorf("reclamation requires age 1..3600 s, quota 1..1024 MiB/s, action time 1..100 ms/s, reporting order 0..9")
 	}
-	for _, argument := range strings.Fields(s.machineConfig.KernelArgs) {
-		if strings.HasPrefix(argument, "damon_reclaim.") || strings.HasPrefix(argument, "page_reporting.") {
-			return fmt.Errorf("conflicting reclamation kernel arguments; use Reclamation options")
-		}
-	}
 	if request.BalloonDevice == nil {
 		request.BalloonDevice = &proto.FirecrackerBalloonDevice{StatsPollingIntervals: 1}
 	}
@@ -70,4 +100,28 @@ func (s *service) configureGuestReclamation(request *proto.CreateVMRequest) erro
 			" page_reporting.page_reporting_order=%d",
 		uint64(options.MinAgeSeconds)*1000000, options.QuotaTimeMs, uint64(options.QuotaMibPerSecond)<<20, *options.ReportingOrder)
 	return nil
+}
+
+// AgentENV 2b981b3 accounts for the holes in Firecracker's guest physical address space.
+func agentENVMonitorRegion(arch string, memoryMiB int64) (int64, int64, error) {
+	const gib = 1 << 30
+	size := memoryMiB << 20
+	switch arch {
+	case "amd64":
+		switch {
+		case size > 255*gib:
+			return 4096, size + 257*gib, nil
+		case size > 3*gib:
+			return 4096, size + gib, nil
+		default:
+			return 4096, size, nil
+		}
+	case "arm64":
+		if size > 254*gib {
+			return 2 * gib, size + 258*gib, nil
+		}
+		return 2 * gib, size + 2*gib, nil
+	default:
+		return 0, 0, fmt.Errorf("unsupported AgentENV guest architecture %s", arch)
+	}
 }
